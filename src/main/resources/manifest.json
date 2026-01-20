@@ -1,0 +1,22 @@
+{
+    "Group": "pixelbays",
+    "Name": "RPG Mod Test",
+    "Version": "0.0.3",
+    "Description": "RPG mod Test",
+    "Authors": [
+        {
+            "Name": "It's you!"
+        }
+    ],
+    "Website": "",
+    "ServerVersion": "*",
+    "Dependencies": {
+        
+    },
+    "OptionalDependencies": {
+        
+    },
+    "DisabledByDefault": false,
+    "Main": "org.pixelbays.plugin.ExamplePlugin",
+    "IncludesAssetPack": true
+}

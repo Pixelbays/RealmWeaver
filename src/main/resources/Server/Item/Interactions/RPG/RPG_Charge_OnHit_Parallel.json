@@ -1,0 +1,7 @@
+{
+  "Type": "Parallel",
+  "Interactions": [
+    "RPG_Charge_Damage_Root",
+    "RPG_Charge_Taunt_Root"
+  ]
+}

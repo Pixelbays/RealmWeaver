@@ -1,0 +1,54 @@
+{
+    "raceId": "human",
+    "displayName": "Human",
+    "description": "Versatile and adaptable.",
+    "iconId": "Icon_Race_Human",
+    "enabled": true,
+    "visible": true,
+    "isHybrid": false,
+    "parentRaces": [
+        "base_race"
+    ],
+    "compatibleHybridRaces": [
+        "elf"
+    ],
+    "incompatibleHybridRaces": [],
+    "minSize": 0.95,
+    "maxSize": 1.05,
+    "startingStats": {
+        "Health": 100,
+        "Stamina": 50
+    },
+    "statModifiers": {
+        "additiveModifiers": {
+            "Health": 5
+        },
+        "multiplicativeModifiers": {}
+    },
+    "abilityUnlocks": [
+        {
+            "abilityId": "race_human_adaptability",
+            "abilityType": "Race",
+            "unlockType": "Starting",
+            "requiredLevel": 1
+        }
+    ],
+    "abilityIds": [
+        "race_human_adaptability"
+    ],
+    "allowedCosmeticCategories": [
+        "Hair",
+        "Face",
+        "Body"
+    ],
+    "allowedCosmeticIds": [],
+    "notAllowedCosmeticCategories": [],
+    "notAllowedCosmeticIds": [],
+    "inheritanceRules": {
+        "statBlendMode": "Average",
+        "abilityMerge": "Union",
+        "cosmeticMerge": "WhiteList_Union",
+        "weightA": 0.5,
+        "weightB": 0.5
+    }
+}

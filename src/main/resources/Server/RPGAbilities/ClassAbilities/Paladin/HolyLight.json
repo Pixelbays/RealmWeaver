@@ -1,0 +1,38 @@
+{
+    "abilityId": "paladin_holy_light",
+    "displayName": "Holy Light",
+    "description": "Heal an ally you are looking at, or yourself if no target.",
+    "iconId": "Icon_Ability_HolyLight",
+    "classId": "paladin",
+    "abilityType": "Active",
+    "targetingType": "Target",
+    "resourceCosts": {
+        "Mana": 20.0
+    },
+    "cooldown": 8.0,
+    "globalCooldown": 1.5,
+    "cooldownCategories": [],
+    "castTime": 0.0,
+    "channelDuration": 0.0,
+    "interruptible": true,
+    "range": 20.0,
+    "aoeRadius": 0.0,
+    "coneAngle": 0.0,
+    "prerequisiteAbilities": [],
+    "statRequirements": {},
+    "hasRanks": false,
+    "maxRank": 1,
+    "rankModifiers": [],
+    "interactionChainId": "RPG_Holy_Light",
+    "interactionParams": {},
+    "inputBinding": "Ability2",
+    "hotbarKeyOverrides": [
+        2
+    ],
+    "castAnimation": "Anim_Paladin_HolyLight",
+    "castSound": "SFX_Paladin_HolyLight",
+    "impactSound": "SFX_Heal_Impact",
+    "particleEffect": "",
+    "enabled": true,
+    "tooltip": "Heals a targeted ally or yourself for a moderate amount. Costs 20 Mana. 8 second cooldown."
+}

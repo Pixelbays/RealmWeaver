@@ -1,0 +1,8 @@
+{
+  "name": "Fast Leveling Curve",
+  "description": "Quick progression for casual players",
+  "type": "exponential",
+  "baseExp": 50,
+  "growthRate": 25,
+  "exponent": 1.5
+}

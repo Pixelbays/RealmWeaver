@@ -1,0 +1,38 @@
+{
+    "abilityId": "base_fireball",
+    "displayName": "Fireball",
+    "description": "Launch a fireball at your cursor.",
+    "iconId": "Icon_Ability_Fireball",
+    "classId": "base",
+    "abilityType": "Active",
+    "targetingType": "Ground",
+    "resourceCosts": {
+        "Mana": 15.0
+    },
+    "cooldown": 4.0,
+    "globalCooldown": 1.5,
+    "cooldownCategories": [],
+    "castTime": 0.0,
+    "channelDuration": 0.0,
+    "interruptible": true,
+    "range": 30.0,
+    "aoeRadius": 2.5,
+    "coneAngle": 0.0,
+    "prerequisiteAbilities": [],
+    "statRequirements": {},
+    "hasRanks": false,
+    "maxRank": 1,
+    "rankModifiers": [],
+    "interactionChainId": "RPG_Fireball",
+    "interactionParams": {},
+    "inputBinding": "Ability3",
+    "hotbarKeyOverrides": [
+        3
+    ],
+    "castAnimation": "Anim_Mage_Fireball",
+    "castSound": "SFX_Mage_Fireball_Cast",
+    "impactSound": "SFX_Fire_Impact",
+    "particleEffect": "",
+    "enabled": true,
+    "tooltip": "Launch a fireball at your cursor. Costs 15 Mana. 4 second cooldown."
+}

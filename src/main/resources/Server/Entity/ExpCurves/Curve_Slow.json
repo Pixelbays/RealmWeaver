@@ -1,0 +1,8 @@
+{
+  "name": "Slow Leveling Curve",
+  "description": "Challenging progression for hardcore players",
+  "type": "exponential",
+  "baseExp": 200,
+  "growthRate": 100,
+  "exponent": 2.2
+}

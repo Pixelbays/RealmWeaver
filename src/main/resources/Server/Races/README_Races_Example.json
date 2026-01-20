@@ -1,0 +1,35 @@
+{
+    "_note": "Example race format. Copy and customize.",
+    "raceId": "race_id",
+    "displayName": "Race Name",
+    "description": "Description.",
+    "iconId": "Icon_Race_Example",
+    "enabled": true,
+    "visible": true,
+    "isHybrid": false,
+    "parentRaces": [
+        "base_race"
+    ],
+    "compatibleHybridRaces": [],
+    "incompatibleHybridRaces": [],
+    "minSize": 1.0,
+    "maxSize": 1.0,
+    "startingStats": {},
+    "statModifiers": {
+        "additiveModifiers": {},
+        "multiplicativeModifiers": {}
+    },
+    "abilityUnlocks": [],
+    "abilityIds": [],
+    "allowedCosmeticCategories": [],
+    "allowedCosmeticIds": [],
+    "notAllowedCosmeticCategories": [],
+    "notAllowedCosmeticIds": [],
+    "inheritanceRules": {
+        "statBlendMode": "Average",
+        "abilityMerge": "Union",
+        "cosmeticMerge": "WhiteList_Union",
+        "weightA": 0.5,
+        "weightB": 0.5
+    }
+}

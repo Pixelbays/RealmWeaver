@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Holy_Light_Select"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Holy_Light",
+    "Cooldown": 8.0
+  }
+}

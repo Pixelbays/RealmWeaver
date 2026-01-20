@@ -1,0 +1,12 @@
+{
+  "resource": "hytale:oak_log",
+  "displayName": "Oak Log",
+  
+  "exp_rewards": {
+    "profession_woodcutting": 15,
+    "character_level": 2
+  },
+  
+  "exp_per_gather": 15,
+  "scales_with_amount": true
+}

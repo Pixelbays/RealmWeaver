@@ -1,0 +1,57 @@
+{
+    "raceId": "elf",
+    "displayName": "Elf",
+    "description": "Graceful and attuned to magic.",
+    "iconId": "Icon_Race_Elf",
+    "enabled": true,
+    "visible": true,
+    "isHybrid": false,
+    "parentRaces": [
+        "base_race"
+    ],
+    "compatibleHybridRaces": [
+        "human"
+    ],
+    "incompatibleHybridRaces": [],
+    "minSize": 0.9,
+    "maxSize": 1.0,
+    "startingStats": {
+        "Health": 90,
+        "Mana": 60
+    },
+    "statModifiers": {
+        "additiveModifiers": {
+            "Mana": 5
+        },
+        "multiplicativeModifiers": {
+            "Agility": 0.05
+        }
+    },
+    "abilityUnlocks": [
+        {
+            "abilityId": "race_elf_trance",
+            "abilityType": "Race",
+            "unlockType": "Starting",
+            "requiredLevel": 1
+        }
+    ],
+    "abilityIds": [
+        "race_elf_trance"
+    ],
+    "allowedCosmeticCategories": [
+        "Hair",
+        "Face",
+        "Body",
+        "Ears"
+    ],
+    "allowedCosmeticIds": [],
+    "notAllowedCosmeticCategories": [],
+    "notAllowedCosmeticIds": [],
+    "inheritanceRules": {
+        "statBlendMode": "Average",
+        "abilityMerge": "Union",
+        "cosmeticMerge": "WhiteList_Union",
+        "weightA": 0.5,
+        "weightB": 0.5
+    }
+}

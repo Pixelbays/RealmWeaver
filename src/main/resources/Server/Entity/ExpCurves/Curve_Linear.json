@@ -1,0 +1,8 @@
+{
+  "name": "Linear Curve",
+  "description": "Constant exp requirement per level",
+  "type": "linear",
+  "baseExp": 100,
+  "growthRate": 100,
+  "exponent": 1.0
+}

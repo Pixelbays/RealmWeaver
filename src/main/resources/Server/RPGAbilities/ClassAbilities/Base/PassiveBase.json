@@ -1,0 +1,9 @@
+{
+    "abilityId": "PassiveBaseCD",
+    "classId": "BasePassive",
+    "abilityType": "Passive",
+    "targetingType": "Target",
+    "cooldown": 1,
+    "globalCooldown": 1.5,
+    "enabled": false
+}

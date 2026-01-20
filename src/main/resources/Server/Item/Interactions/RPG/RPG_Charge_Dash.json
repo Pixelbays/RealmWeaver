@@ -1,0 +1,22 @@
+{
+  "Type": "ApplyForce",
+  "RunTime": 0.35,
+  "Duration": 0.35,
+  "Direction": {
+    "X": 0,
+    "Y": 0.2,
+    "Z": -1
+  },
+  "AdjustVertical": true,
+  "Force": 15,
+  "WaitForCollision": true,
+  "CollisionNext": "RPG_Charge_Impact",
+  "GroundNext": "RPG_Charge_Impact",
+  "Effects": {
+    "WorldSoundEventId": "SFX_Weapon_Charge_Swing",
+    "MovementEffects": {
+      "DisableAll": true
+    }
+  },
+  "RaycastMode": "FollowLook"
+}

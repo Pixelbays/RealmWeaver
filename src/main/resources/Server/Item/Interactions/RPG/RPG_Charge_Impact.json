@@ -1,0 +1,26 @@
+{
+  "Type": "Selector",
+  "RunTime": 0.1,
+  "Selector": {
+    "Id": "Raycast",
+    "Distance": 6,
+    "IgnoreFluids": true,
+    "IgnoreEmptyCollisionMaterial": true
+  },
+  "HitEntity": "RPG_Charge_OnHit",
+  "Failed": {
+    "Type": "Simple",
+    "RunTime": 0
+  },
+  "Effects": {
+    "Particles": [
+      {
+        "SystemId": "Explosion_Big",
+        "TargetEntityPart": "Entity",
+        "TargetNodeName": "Player",
+        "Color": "#ff0000",
+        "Scale": 1
+      }
+    ]
+  }
+}

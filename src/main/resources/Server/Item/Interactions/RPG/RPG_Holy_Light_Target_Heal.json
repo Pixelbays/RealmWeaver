@@ -1,0 +1,7 @@
+{
+  "Type": "ChangeStat",
+  "Entity": "Target",
+  "StatModifiers": {
+    "Health": 40
+  }
+}

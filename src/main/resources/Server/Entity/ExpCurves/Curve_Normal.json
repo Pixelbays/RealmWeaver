@@ -1,0 +1,8 @@
+{
+  "name": "Normal Leveling Curve",
+  "description": "Balanced progression for standard gameplay",
+  "type": "exponential",
+  "baseExp": 100,
+  "growthRate": 50,
+  "exponent": 1.8
+}

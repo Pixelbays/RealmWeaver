@@ -1,0 +1,10 @@
+{
+  "systemId": "class_paladin",
+  "inheritsFrom": "base_class_level",
+  "displayName": "Paladin Class",
+  "description": "Holy warrior specialized in protection and healing",
+  
+  "enabled": true,
+  "visible": true,
+  "iconId": "rpg:icon_paladin"
+}

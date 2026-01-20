@@ -1,0 +1,40 @@
+{
+  "systemId": "base_class_level",
+  "displayName": "Base Class Level",
+  "description": "Base template for all combat class level progression",
+  "maxLevel": 50,
+  "startingLevel": 1,
+  "expCurveType": "linear",
+  "expCurve": {
+    "type": "linear",
+    "baseExp": 200,
+    "growthRate": 100
+  },
+  "prerequisites": {},
+  "defaultRewards": {
+    "levelUpEffects": {
+      "soundId": "SFX_Discovery_Z1_Short",
+      "particleEffect": "Temp_Level_Up",
+      "notification": {
+        "primaryMessage": "LEVEL UP!",
+        "secondaryMessage": "Character level {level}",
+        "iconItemId": "Item_Book"
+      },
+      "eventTitle": {
+        "primaryMessage": "LEVEL UP!",
+        "secondaryMessage": "Character level {level}",
+        "major": true
+      }
+    },
+    "statPoints": 0,
+    "skillPoints": 0
+  },
+  "levelRewards": {},
+  "statGrowth": {
+    "flatGrowth": {},
+    "milestoneGrowth": {}
+  },
+  "enabled": false,
+  "visible": false,
+  "iconId": ""
+}

@@ -1,0 +1,47 @@
+{
+  "raceId": "half_elf",
+  "displayName": "Half-Elf",
+  "description": "A hybrid of human and elf lineage.",
+  "iconId": "Icon_Race_HalfElf",
+  "enabled": true,
+  "visible": true,
+  "isHybrid": true,
+  "parentRaces": ["base_race", "human", "elf"],
+  "compatibleHybridRaces": [],
+  "incompatibleHybridRaces": [],
+  "minSize": 0.93,
+  "maxSize": 1.03,
+  "startingStats": {
+    "Health": 95,
+    "Mana": 55
+  },
+  "statModifiers": {
+    "additiveModifiers": {
+      "Health": 2,
+      "Mana": 2
+    },
+    "multiplicativeModifiers": {
+      "Agility": 0.02
+    }
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "race_half_elf_versatility",
+      "abilityType": "Race",
+      "unlockType": "Starting",
+      "requiredLevel": 1
+    }
+  ],
+  "abilityIds": ["race_half_elf_versatility"],
+  "allowedCosmeticCategories": ["Hair", "Face", "Body", "Ears"],
+  "allowedCosmeticIds": [],
+  "notAllowedCosmeticCategories": [],
+  "notAllowedCosmeticIds": [],
+  "inheritanceRules": {
+    "statBlendMode": "Weighted",
+    "abilityMerge": "Union",
+    "cosmeticMerge": "WhiteList_Union",
+    "weightA": 0.5,
+    "weightB": 0.5
+  }
+}

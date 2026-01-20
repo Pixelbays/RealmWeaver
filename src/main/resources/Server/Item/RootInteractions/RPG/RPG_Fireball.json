@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Fireball_Launch"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Fireball",
+    "Cooldown": 4.0
+  }
+}

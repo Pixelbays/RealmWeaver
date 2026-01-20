@@ -1,0 +1,9 @@
+{
+  "Type": "LaunchProjectile",
+  "RunTime": 0.25,
+  "Effects": {
+    "ItemAnimationId": "CastHurlCharged",
+    "WorldSoundEventId": "SFX_Staff_Ice_Shoot"
+  },
+  "ProjectileId": "Skeleton_Mage_Corruption_Orb"
+}

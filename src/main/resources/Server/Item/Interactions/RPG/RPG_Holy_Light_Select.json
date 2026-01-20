@@ -1,0 +1,16 @@
+{
+  "Type": "Selector",
+  "RunTime": 0.2,
+  "Selector": {
+    "Id": "Raycast",
+    "Distance": 20,
+    "IgnoreFluids": true,
+    "IgnoreEmptyCollisionMaterial": true
+  },
+  "HitEntity": "RPG_Holy_Light_Target",
+  "FailOn": "Entity",
+  "Failed": {
+    "Type": "RunRootInteraction",
+    "RootInteraction": "RPG_Holy_Light_Self"
+  }
+}

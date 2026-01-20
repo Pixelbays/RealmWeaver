@@ -1,0 +1,23 @@
+{
+  "entity": "hytale:dragon_boss",
+  "displayName": "Dragon Boss",
+  
+  "exp_rewards": {
+    "character_level": 5000,
+    "class_warrior": 2000,
+    "class_mage": 2000,
+    "class_rogue": 2000,
+    "class_cleric": 2000
+  },
+  
+  "bonus_exp_conditions": {
+    "first_kill": {
+      "multiplier": 2.0,
+      "applies_to": ["character_level"]
+    },
+    "solo_kill": {
+      "multiplier": 1.5,
+      "applies_to": ["character_level"]
+    }
+  }
+}

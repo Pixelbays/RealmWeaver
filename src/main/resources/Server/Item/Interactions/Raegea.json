@@ -1,0 +1,8 @@
+{
+  "Type": "ChangeStat",
+  "Rules": {
+    "BlockedBy": [
+      "Primary"
+    ]
+  }
+}

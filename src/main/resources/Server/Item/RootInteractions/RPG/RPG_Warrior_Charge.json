@@ -1,0 +1,10 @@
+{
+  "Interactions": [
+    "RPG_Charge_Dash",
+    {}
+  ],
+  "Cooldown": {
+    "Id": "RPG_Warrior_Charge",
+    "Cooldown": 0
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "MMO Standard Curve",
+  "description": "Traditional MMO-style exp curve similar to WoW",
+  "type": "custom",
+  "baseExp": 400,
+  "growthRate": 1.0,
+  "exponent": 2.0,
+  "customFormula": "400 * ((level^2) + (level * 10))",
+  "notes": "Approximates classic MMO progression"
+}
