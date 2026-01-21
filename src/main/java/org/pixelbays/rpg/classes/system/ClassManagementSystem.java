@@ -9,13 +9,14 @@ import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
-import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.global.system.StatSystem;
+import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
+
 import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -23,17 +24,20 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Integrates with LevelProgressionSystem for class leveling.
  */
 public class ClassManagementSystem {
-    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
-
     // Loaded class definitions from asset pack
     private final Map<String, ClassDefinition> classDefinitions;
 
     // Reference to level progression system for class leveling
     private final LevelProgressionSystem levelProgressionSystem;
+    private StatSystem statSystem;
 
     public ClassManagementSystem(@Nonnull LevelProgressionSystem levelProgressionSystem) {
         this.levelProgressionSystem = levelProgressionSystem;
         this.classDefinitions = new HashMap<>();
+    }
+
+    public void setStatSystem(@Nullable StatSystem statSystem) {
+        this.statSystem = statSystem;
     }
 
     /**
@@ -131,6 +135,10 @@ public class ClassManagementSystem {
             setActiveClass(entityRef, classId, store);
         }
 
+        if (statSystem != null) {
+            statSystem.recalculateClassStatBonuses(entityRef, store);
+        }
+
         // Unlock abilities available at current level
         int currentLevel = 1;
         String systemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
@@ -199,7 +207,10 @@ public class ClassManagementSystem {
         // If this was the active class, clear active
         if (classComp.getActiveClassId().equals(classId)) {
             classComp.setActiveClassId("");
-            // TODO: Recalculate stats when stat system is integrated
+        }
+
+        if (statSystem != null) {
+            statSystem.recalculateClassStatBonuses(entityRef, store);
         }
 
         System.out.println("[ClassSystem] Entity unlearned class: " + classId);
@@ -237,7 +248,9 @@ public class ClassManagementSystem {
         // Set active class
         classComp.setActiveClassId(classId);
 
-        // TODO: Recalculate stats when stat system is integrated
+        if (statSystem != null) {
+            statSystem.recalculateClassStatBonuses(entityRef, store);
+        }
 
         System.out.println("[ClassSystem] Entity activated class: " + classId);
         return "SUCCESS: Activated " + classDef.getDisplayName();

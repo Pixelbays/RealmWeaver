@@ -11,6 +11,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Event fired when an entity levels up in a specific level system.
  * Fired once per level gained (if entity gains 3 levels, this fires 3 times).
  */
+@SuppressWarnings("null")
 public class LevelUpEvent {
     
     private final Ref<EntityStore> entityRef;      // Reference to the entity

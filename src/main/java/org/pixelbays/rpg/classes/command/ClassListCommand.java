@@ -22,6 +22,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 /**
  * /class list - Lists all available classes with their status
  */
+@SuppressWarnings("null")
 public class ClassListCommand extends AbstractPlayerCommand {
 
     private final ClassManagementSystem classSystem;
@@ -60,7 +61,9 @@ public class ClassListCommand extends AbstractPlayerCommand {
             
             if (learned && classComp != null) {
                 ClassComponent.ClassData classData = classComp.getClassData(classId);
-                player.sendMessage(Message.raw("  Learned: " + new java.util.Date(classData.getLearnedTime())));
+                if (classData != null) {
+                    player.sendMessage(Message.raw("  Learned: " + new java.util.Date(classData.getLearnedTime())));
+                }
             } else {
                 player.sendMessage(Message.raw("  " + classDef.getDescription()));
             }

@@ -21,6 +21,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Usage: /testlevel
  * This runs a full automated test of the leveling system
  */
+@SuppressWarnings({"unused", "null"})
 public class TestLevelCommand extends AbstractPlayerCommand {
 
     private final LevelProgressionSystem levelSystem;

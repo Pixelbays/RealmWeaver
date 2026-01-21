@@ -44,6 +44,7 @@ public class LevelSystemConfig implements
             arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
             list -> list == null ? null : list.toArray(String[]::new));
 
+    @SuppressWarnings("unused")
     private static final FunctionCodec<Map<String, Float>, Map<Integer, Float>> INT_FLOAT_MAP_CODEC = new FunctionCodec<>(
             new MapCodec<>(Codec.FLOAT, HashMap::new),
             LevelSystemConfig::toIntKeyFloatMap,

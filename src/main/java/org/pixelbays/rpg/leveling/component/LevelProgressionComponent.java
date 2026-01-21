@@ -20,7 +20,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Supports multiple simultaneous leveling systems (character level, class
  * levels, profession levels, etc.)
  */
-public class LevelProgressionComponent implements Component<EntityStore> {
+@SuppressWarnings("all")
+public class LevelProgressionComponent implements Component<EntityStore>, Cloneable {
 
     // Codec for NBT serialization (required for persistence)
     public static final BuilderCodec<LevelSystemData> LEVEL_SYSTEM_DATA_CODEC = BuilderCodec
@@ -103,18 +104,22 @@ public class LevelProgressionComponent implements Component<EntityStore> {
     @Nonnull
     @Override
     public Component<EntityStore> clone() {
-        LevelProgressionComponent cloned = new LevelProgressionComponent();
-        // Deep clone all level systems
-        for (Map.Entry<String, LevelSystemData> entry : this.levelSystems.entrySet()) {
-            cloned.levelSystems.put(entry.getKey(), entry.getValue().clone());
+        try {
+            LevelProgressionComponent cloned = (LevelProgressionComponent) super.clone();
+            cloned.levelSystems = new HashMap<>();
+            for (Map.Entry<String, LevelSystemData> entry : this.levelSystems.entrySet()) {
+                cloned.levelSystems.put(entry.getKey(), entry.getValue().clone());
+            }
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
         }
-        return cloned;
     }
 
     /**
      * Data for a single leveling system
      */
-    public static class LevelSystemData {
+    public static class LevelSystemData implements Cloneable {
         private String systemId; // Changed from final to allow codec deserialization
         private int currentLevel;
         private float currentExp;
@@ -243,15 +248,21 @@ public class LevelProgressionComponent implements Component<EntityStore> {
         /**
          * Clone this level system data
          */
+        @Override
         public LevelSystemData clone() {
-            LevelSystemData cloned = new LevelSystemData(this.systemId);
-            cloned.currentLevel = this.currentLevel;
-            cloned.currentExp = this.currentExp;
-            cloned.expToNextLevel = this.expToNextLevel;
-            cloned.totalLevelsGained = this.totalLevelsGained;
-            cloned.availableStatPoints = this.availableStatPoints;
-            cloned.availableSkillPoints = this.availableSkillPoints;
-            return cloned;
+            try {
+                LevelSystemData cloned = (LevelSystemData) super.clone();
+                cloned.systemId = this.systemId;
+                cloned.currentLevel = this.currentLevel;
+                cloned.currentExp = this.currentExp;
+                cloned.expToNextLevel = this.expToNextLevel;
+                cloned.totalLevelsGained = this.totalLevelsGained;
+                cloned.availableStatPoints = this.availableStatPoints;
+                cloned.availableSkillPoints = this.availableSkillPoints;
+                return cloned;
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 }

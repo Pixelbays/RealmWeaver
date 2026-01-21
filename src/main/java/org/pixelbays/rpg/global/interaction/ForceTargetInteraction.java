@@ -22,9 +22,11 @@ import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
  * Placeholder interaction to force a target entity to focus the caster.
  * Currently implemented by adding the caster to the target's TargetMemory hostiles list.
  */
+@SuppressWarnings({"FieldHidesSuperclassField", "null"})
 public class ForceTargetInteraction extends SimpleInstantInteraction {
     @Nonnull
-    public static final BuilderCodec<ForceTargetInteraction> CODEC = BuilderCodec.builder(
+    @SuppressWarnings("all")
+    public static final BuilderCodec<ForceTargetInteraction> FORCE_TARGET_CODEC = BuilderCodec.builder(
             ForceTargetInteraction.class, ForceTargetInteraction::new, SimpleInstantInteraction.CODEC
         )
         .documentation("Adds the caster as a hostile target on the selected entity (placeholder taunt).")

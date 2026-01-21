@@ -7,6 +7,7 @@ import java.util.List;
 import com.hypixel.hytale.codec.function.FunctionCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 
+@SuppressWarnings("deprecation")
 public final class ABILITY_ID_LIST_CODEC {
     private ABILITY_ID_LIST_CODEC() {
     }

@@ -25,6 +25,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  *   }
  * }
  */
+@SuppressWarnings("unused")
 public class InteractionExpRewardAdapter {
     
     private final LevelProgressionSystem levelSystem;

@@ -14,7 +14,7 @@ import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
  * Configuration for an exp curve definition loaded from asset pack.
  * Example file: Server/Entity/ExpCurves/Curve_Linear.json
  */
-@SuppressWarnings({ "deprecation", "FieldHidesSuperclassField" })
+@SuppressWarnings({ "FieldHidesSuperclassField" })
 public class StatModifiers {
         public static final BuilderCodec<StatModifiers> CODEC = BuilderCodec
                         .builder(StatModifiers.class, StatModifiers::new)
@@ -50,8 +50,8 @@ public class StatModifiers {
         private Object2FloatMap<String> MultiplicativeModifiers; // % bonuses (e.g., +10% Strength)
 
         public StatModifiers() {
-                this.AdditiveModifiers = new Object2FloatOpenHashMap<String>();
-                this.MultiplicativeModifiers = new Object2FloatOpenHashMap<String>();
+                this.AdditiveModifiers = new Object2FloatOpenHashMap<>();
+                this.MultiplicativeModifiers = new Object2FloatOpenHashMap<>();
         }
 
         public Object2FloatMap<String> getAdditiveModifiers() {

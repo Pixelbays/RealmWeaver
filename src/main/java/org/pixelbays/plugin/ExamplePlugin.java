@@ -9,8 +9,8 @@ import org.pixelbays.rpg.classes.command.ClassCommand;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
-import org.pixelbays.rpg.classes.system.ClassStatBonusSystem;
 import org.pixelbays.rpg.global.interaction.ForceTargetInteraction;
+import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.leveling.command.ResetLevelCommand;
 import org.pixelbays.rpg.leveling.command.TestLevelCommand;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
@@ -39,6 +39,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 /**
  * RPG Mod Plugin - Adds MMO/RPG progression systems to Hytale
  */
+@SuppressWarnings("null")
 public class ExamplePlugin extends JavaPlugin {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
@@ -47,7 +48,7 @@ public class ExamplePlugin extends JavaPlugin {
     private LevelProgressionSystem levelSystem;
     private ClassManagementSystem classManagementSystem;
     private ClassAbilitySystem classAbilitySystem;
-    private ClassStatBonusSystem classStatBonusSystem;
+    private StatSystem statSystem;
     private RaceManagementSystem raceManagementSystem;
 
     private ComponentType<EntityStore, LevelProgressionComponent> levelProgressionComponentType;
@@ -126,7 +127,9 @@ public class ExamplePlugin extends JavaPlugin {
         // Initialize class/job systems
         this.classManagementSystem = new ClassManagementSystem(this.levelSystem);
         this.classAbilitySystem = new ClassAbilitySystem(this.classManagementSystem);
-        this.classStatBonusSystem = new ClassStatBonusSystem(this.classManagementSystem);
+        this.statSystem = new StatSystem(this.classManagementSystem, this.levelSystem);
+        this.classManagementSystem.setStatSystem(this.statSystem);
+        this.levelSystem.setStatSystem(this.statSystem);
 
         // Initialize race systems
         this.raceManagementSystem = new RaceManagementSystem();
@@ -149,7 +152,7 @@ public class ExamplePlugin extends JavaPlugin {
                 this::onExpCurveAssetsRemoved);
 
         // Register custom interactions for RPG abilities
-        Interaction.CODEC.register("ForceTarget", ForceTargetInteraction.class, ForceTargetInteraction.CODEC);
+        Interaction.CODEC.register("ForceTarget", ForceTargetInteraction.class, ForceTargetInteraction.FORCE_TARGET_CODEC);
 
         LOGGER.atInfo().log("Initialized Class/Job System with test data");
 
@@ -319,8 +322,8 @@ public class ExamplePlugin extends JavaPlugin {
     }
 
     @Nonnull
-    public ClassStatBonusSystem getClassStatBonusSystem() {
-        return classStatBonusSystem;
+    public StatSystem getStatSystem() {
+        return statSystem;
     }
 
     @Nonnull

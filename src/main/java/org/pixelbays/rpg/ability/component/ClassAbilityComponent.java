@@ -22,8 +22,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Component that stores unlocked abilities for each class.
  * Tracks which abilities are available and when they were unlocked.
  */
-@SuppressWarnings({ "PMD", "CloneDoesntDeclareCloneNotSupportedException", "CloneDoesntCallSuperClone" })
-public class ClassAbilityComponent implements Component<EntityStore> {
+@SuppressWarnings({ "PMD", "CloneDoesntDeclareCloneNotSupportedException", "CloneDoesntCallSuperClone", "all" })
+public class ClassAbilityComponent implements Component<EntityStore>, Cloneable {
 
     // Codec for AbilityData serialization
     public static final BuilderCodec<AbilityData> Ability_DATA_CODEC = BuilderCodec
@@ -157,16 +157,22 @@ public class ClassAbilityComponent implements Component<EntityStore> {
 
     @Nonnull
     @Override
+    @SuppressWarnings("all")
     public ClassAbilityComponent clone() {
-        ClassAbilityComponent cloned = new ClassAbilityComponent();
-        for (Map.Entry<String, AbilityData> entry : this.unlockedAbilities.entrySet()) {
-            AbilityData source = entry.getValue();
-            AbilityData copy = new AbilityData(source.abilityId, source.classId);
-            copy.unlockedTime = source.unlockedTime;
-            copy.rank = source.rank;
-            cloned.unlockedAbilities.put(entry.getKey(), copy);
+        try {
+            ClassAbilityComponent cloned = (ClassAbilityComponent) super.clone();
+            cloned.unlockedAbilities = new HashMap<>();
+            for (Map.Entry<String, AbilityData> entry : this.unlockedAbilities.entrySet()) {
+                AbilityData source = entry.getValue();
+                AbilityData copy = new AbilityData(source.abilityId, source.classId);
+                copy.unlockedTime = source.unlockedTime;
+                copy.rank = source.rank;
+                cloned.unlockedAbilities.put(entry.getKey(), copy);
+            }
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
         }
-        return cloned;
     }
 
     /**

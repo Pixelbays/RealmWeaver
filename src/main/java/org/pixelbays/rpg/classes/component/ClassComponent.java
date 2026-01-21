@@ -23,8 +23,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Supports multiple learned classes with one active class at a time.
  * Integrates with LevelProgressionSystem for class leveling.
  */
-@SuppressWarnings({"PMD", "CloneDoesntDeclareCloneNotSupportedException", "CloneDoesntCallSuperClone"})
-public class ClassComponent implements Component<EntityStore> {
+@SuppressWarnings({"PMD", "CloneDoesntDeclareCloneNotSupportedException", "CloneDoesntCallSuperClone", "all"})
+public class ClassComponent implements Component<EntityStore>, Cloneable {
     
     // Codec for ClassData serialization
     public static final BuilderCodec<ClassData> CLASS_DATA_CODEC = BuilderCodec
@@ -218,17 +218,22 @@ public class ClassComponent implements Component<EntityStore> {
     
     @Nonnull
     @Override
-    @SuppressWarnings({"all", "CloneDoesntCallSuperClone", "CloneDoesntDeclareCloneNotSupportedException", "PMD.CloneMethodMustImplementCloneable"})
+    @SuppressWarnings({"all"})
     public Component<EntityStore> clone() {
-        ClassComponent cloned = new ClassComponent();
-        cloned.activeClassId = this.activeClassId;
-        for (Map.Entry<String, ClassData> entry : this.learnedClasses.entrySet()) {
-            cloned.learnedClasses.put(entry.getKey(), entry.getValue().copy());
+        try {
+            ClassComponent cloned = (ClassComponent) super.clone();
+            cloned.learnedClasses = new HashMap<>();
+            cloned.unlockedSpells = new HashMap<>();
+            for (Map.Entry<String, ClassData> entry : this.learnedClasses.entrySet()) {
+                cloned.learnedClasses.put(entry.getKey(), entry.getValue().copy());
+            }
+            for (Map.Entry<String, SpellUnlockData> entry : this.unlockedSpells.entrySet()) {
+                cloned.unlockedSpells.put(entry.getKey(), entry.getValue().copy());
+            }
+            return cloned;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
         }
-        for (Map.Entry<String, SpellUnlockData> entry : this.unlockedSpells.entrySet()) {
-            cloned.unlockedSpells.put(entry.getKey(), entry.getValue().copy());
-        }
-        return cloned;
     }
     
     /**

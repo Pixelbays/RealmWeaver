@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 
@@ -30,9 +31,6 @@ import com.hypixel.hytale.server.core.io.PacketHandler;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
-import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
-import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
-import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -48,13 +46,19 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
  * 
  * This system should be registered with Hytale's ECS and updated each tick.
  */
+@SuppressWarnings("null")
 public class LevelProgressionSystem {
 
     // Loaded level system configurations from asset pack
     private final Map<String, LevelSystemConfig> levelSystemConfigs;
+    private StatSystem statSystem;
 
     public LevelProgressionSystem(@Nonnull EventRegistry eventRegistry) {
         this.levelSystemConfigs = new HashMap<>();
+    }
+
+    public void setStatSystem(@Nullable StatSystem statSystem) {
+        this.statSystem = statSystem;
     }
 
     /**
@@ -80,12 +84,12 @@ public class LevelProgressionSystem {
 
         try {
             // Use AssetLoader to load all level system configs from asset packs
-            Map<String, LevelSystemConfig> loadedConfigs =
-            org.pixelbays.rpg.global.util.AssetLoader.loadLevelSystemConfigs();
+            Map<String, LevelSystemConfig> loadedConfigs = org.pixelbays.rpg.global.util.AssetLoader
+                    .loadLevelSystemConfigs();
 
             // Register each loaded config
             for (LevelSystemConfig config : loadedConfigs.values()) {
-            registerLevelSystem(config);
+                registerLevelSystem(config);
             }
 
             System.out.println("[LevelSystem] Successfully loaded " + levelSystemConfigs.size() +
@@ -164,7 +168,9 @@ public class LevelProgressionSystem {
          */
 
         // Apply XP rate gain stat (e.g., boosts/rested XP)
-        float expToGrant = applyExpRateGain(entityRef, amount, store);
+        float expToGrant = statSystem != null && store != null
+                ? statSystem.applyExpRateGain(entityRef, amount, store)
+                : amount;
 
         // Store current level for event
         int previousLevel = levelData.getCurrentLevel();
@@ -180,38 +186,6 @@ public class LevelProgressionSystem {
 
         // Update exp required for next level
         updateExpToNextLevel(levelData, config);
-    }
-
-    private float applyExpRateGain(@Nonnull Ref<EntityStore> entityRef, float baseExp,
-            @Nullable Store<EntityStore> store) {
-        if (baseExp <= 0f) {
-            return baseExp;
-        }
-
-        Store<EntityStore> resolvedStore = store != null ? store : entityRef.getStore();
-
-        EntityStatMap statMap = resolvedStore.getComponent(entityRef, EntityStatMap.getComponentType());
-        if (statMap == null) {
-            return baseExp;
-        }
-
-        int statIndex = EntityStatType.getAssetMap().getIndex("Exp_Rate_Gain");
-        if (statIndex == Integer.MIN_VALUE) {
-            return baseExp;
-        }
-
-        EntityStatValue statValue = statMap.get(statIndex);
-        if (statValue == null) {
-            return baseExp;
-        }
-
-        float ratePercent = statValue.get();
-        float multiplier = 1.0f + (ratePercent / 100.0f);
-        if (multiplier < 0f) {
-            multiplier = 0f;
-        }
-
-        return baseExp * multiplier;
     }
 
     /**
@@ -262,13 +236,14 @@ public class LevelProgressionSystem {
         }
 
         // Apply stat increases
-        if (rewards.getStatIncreases() != null && !rewards.getStatIncreases().isEmpty()) {
-            applyStatIncreases(entityRef, rewards.getStatIncreases());
+        if (store != null && statSystem != null
+                && rewards.getStatIncreases() != null && !rewards.getStatIncreases().isEmpty()) {
+            statSystem.applyStatIncreases(entityRef, rewards.getStatIncreases(), store);
         }
 
         // Apply stat growth from config
-        if (config.getStatGrowth() != null) {
-            applyStatGrowth(entityRef, newLevel, config.getStatGrowth());
+        if (store != null && statSystem != null && config.getStatGrowth() != null) {
+            statSystem.applyStatGrowth(entityRef, newLevel, config.getStatGrowth(), store);
         }
 
         // Trigger level up effects (sound, particles, notification)
@@ -278,46 +253,6 @@ public class LevelProgressionSystem {
 
         // TODO: Handle other rewards (abilities, quests, currency, items, interactions)
         // These will be implemented as other systems are added
-    }
-
-    /**
-     * Apply stat increases to entity
-     */
-    private void applyStatIncreases(@Nonnull Ref<EntityStore> entityRef, Map<String, Float> statIncreases) {
-        // TODO: Integration with Hytale's EntityStatMap
-        // This will modify stats like Health, Mana, etc.
-        // Example:
-        // EntityStatMap statMap = entity.getComponent(EntityStatMap.class);
-        // if (statMap != null) {
-        // statIncreases.forEach((statName, value) -> {
-        // EntityStatType statType = EntityStatType.getByName(statName);
-        // if (statType != null) {
-        // statMap.modifyStat(statType, value);
-        // }
-        // });
-        // }
-
-        System.out.println(
-                "[LevelSystem] Applied stat increases for entity " + entityRef.getIndex() + ": " + statIncreases);
-    }
-
-    /**
-     * Apply stat growth from leveling config
-     */
-    private void applyStatGrowth(@Nonnull Ref<EntityStore> entityRef, int newLevel,
-            LevelSystemConfig.StatGrowthConfig growth) {
-        // Apply flat growth
-        if (growth.getFlatGrowth() != null) {
-            applyStatIncreases(entityRef, growth.getFlatGrowth());
-        }
-
-        // Apply percentage growth (requires reading current stat values)
-        // TODO: Implement percentage-based growth
-
-        // Apply milestone growth
-        if (growth.getMilestoneGrowth() != null && growth.getMilestoneGrowth().containsKey(newLevel)) {
-            applyStatIncreases(entityRef, growth.getMilestoneGrowth().get(newLevel));
-        }
     }
 
     /**

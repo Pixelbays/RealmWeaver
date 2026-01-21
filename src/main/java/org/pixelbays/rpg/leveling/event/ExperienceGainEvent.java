@@ -9,6 +9,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Event fired when an entity gains experience in a level system.
  * Fired BEFORE level-up calculations, allowing other systems to modify the exp amount.
  */
+@SuppressWarnings("null")
 public class ExperienceGainEvent {
     
     private final Ref<EntityStore> entityRef;      // Reference to the entity

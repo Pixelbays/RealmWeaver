@@ -499,13 +499,6 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         return ResourceStats;
     }
 
-    /*
-     * public void setResourceStats(Object2FloatOpenHashMap<String> ResourceStats) {
-     * validateStatIds(ResourceStats);
-     * this.ResourceStats = ResourceStats;
-     * }
-     */
-
     public StatModifiers getBaseStatModifiers() {
         return BaseStatModifiers;
     }
@@ -716,8 +709,8 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         private Object2FloatMap<String> MultiplicativeModifiers; // % bonuses (e.g., +10% Strength)
 
         public StatModifiers() {
-            this.AdditiveModifiers = new Object2FloatOpenHashMap<String>();
-            this.MultiplicativeModifiers = new Object2FloatOpenHashMap<String>();
+            this.AdditiveModifiers = new Object2FloatOpenHashMap<>();
+            this.MultiplicativeModifiers = new Object2FloatOpenHashMap<>();
         }
 
         public Object2FloatMap<String> getAdditiveModifiers() {

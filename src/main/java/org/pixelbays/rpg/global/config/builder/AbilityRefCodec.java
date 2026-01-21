@@ -23,6 +23,7 @@ import com.hypixel.hytale.codec.util.RawJsonReader;
 import com.hypixel.hytale.codec.validation.ValidatableCodec;
 import com.hypixel.hytale.codec.validation.ValidationResults;
 
+@SuppressWarnings("deprecation")
 public final class AbilityRefCodec implements ValidatableCodec<String> {
     public AbilityRefCodec() {
     }
