@@ -1,0 +1,41 @@
+{
+  "abilityId": "paladin_crusader_strike",
+  "parentAbilityId": "warrior_charge",
+  "displayName": "Crusader Strike",
+  "description": "Charge at an enemy with holy fury, dealing damage, stunning them, and healing nearby allies.",
+  "iconId": "Icon_Ability_CrusaderStrike",
+  "classId": "paladin",
+  "resourceCosts": {
+    "Rage": 10.0,
+    "Mana": 20.0
+  },
+  "cooldown": 15.0,
+  "aoeRadius": 10.0,
+  "interactionChainId": "paladin:crusader_strike",
+  "interactionParams": {
+    "damage": "60",
+    "holyDamage": "40",
+    "stunDuration": "2.5",
+    "healAmount": "50",
+    "healRadius": "10"
+  },
+  "castAnimation": "Anim_Paladin_CrusaderStrike",
+  "castSound": "SFX_Paladin_Crusader",
+  "impactSound": "SFX_Holy_Impact_Heavy",
+  "particleEffect": "FX_Holy_Charge",
+  "enabled": true,
+  "tooltip": "Charge to target enemy within 25 yards with holy fury, dealing 60 physical + 40 holy damage and stunning for 2.5 seconds. Heals nearby allies for 50 health. Costs 10 Rage and 20 Mana. 15 second cooldown.",
+  "DisplayName": "REeee",
+  "Description": "reee",
+  "IconId": "Icons/Items/EditorTools/Entity.png",
+  "PrerequisiteAbilities": [
+    null
+  ],
+  "StatRequirements": {
+    "Rage": 12
+  },
+  "InteractionParams": {
+    "res": ""
+  },
+  "InteractionChainId": "Reee"
+}

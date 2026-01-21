@@ -1,9 +1,0 @@
-{
-  "systemId": "class_warrior",
-  "inheritsFrom": "base_class_level",
-  "displayName": "Warrior Class",
-  "description": "Warrior class specialization level progression",
-  "enabled": true,
-  "visible": true,
-  "iconId": "rpg:icon_warrior"
-}

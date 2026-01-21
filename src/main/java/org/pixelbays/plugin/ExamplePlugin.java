@@ -2,23 +2,23 @@ package org.pixelbays.plugin;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.rpg.commands.classes.ClassCommand;
-import org.pixelbays.rpg.commands.levels.ResetLevelCommand;
-import org.pixelbays.rpg.commands.levels.TestLevelCommand;
-import org.pixelbays.rpg.component.ClassAbilityComponent;
-import org.pixelbays.rpg.component.ClassComponent;
-import org.pixelbays.rpg.component.LevelProgressionComponent;
-import org.pixelbays.rpg.config.ClassAbilityDefinition;
-import org.pixelbays.rpg.config.ClassDefinition;
-import org.pixelbays.rpg.config.ExpCurveDefinition;
-import org.pixelbays.rpg.config.LevelSystemConfig;
-import org.pixelbays.rpg.config.RaceDefinition;
-import org.pixelbays.rpg.interaction.ForceTargetInteraction;
-import org.pixelbays.rpg.system.ClassAbilitySystem;
-import org.pixelbays.rpg.system.ClassManagementSystem;
-import org.pixelbays.rpg.system.ClassStatBonusSystem;
-import org.pixelbays.rpg.system.LevelProgressionSystem;
-import org.pixelbays.rpg.system.RaceManagementSystem;
+import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
+import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
+import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
+import org.pixelbays.rpg.classes.command.ClassCommand;
+import org.pixelbays.rpg.classes.component.ClassComponent;
+import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.classes.system.ClassStatBonusSystem;
+import org.pixelbays.rpg.global.interaction.ForceTargetInteraction;
+import org.pixelbays.rpg.leveling.command.ResetLevelCommand;
+import org.pixelbays.rpg.leveling.command.TestLevelCommand;
+import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
+import org.pixelbays.rpg.leveling.config.ExpCurveDefinition;
+import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
+import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
+import org.pixelbays.rpg.race.config.RaceDefinition;
+import org.pixelbays.rpg.race.system.RaceManagementSystem;
 
 import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
@@ -43,13 +43,13 @@ public class ExamplePlugin extends JavaPlugin {
 
     private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
     private static ExamplePlugin instance;
-    
+
     private LevelProgressionSystem levelSystem;
     private ClassManagementSystem classManagementSystem;
     private ClassAbilitySystem classAbilitySystem;
     private ClassStatBonusSystem classStatBonusSystem;
     private RaceManagementSystem raceManagementSystem;
-    
+
     private ComponentType<EntityStore, LevelProgressionComponent> levelProgressionComponentType;
     private ComponentType<EntityStore, ClassComponent> classComponentType;
     private ComponentType<EntityStore, ClassAbilityComponent> classAbilityComponentType;
@@ -69,68 +69,60 @@ public class ExamplePlugin extends JavaPlugin {
 
         // Register asset stores for classes and class abilities
         AssetRegistry.register(
-            HytaleAssetStore.builder(ClassDefinition.class, new DefaultAssetMap<>())
-                .setPath("Classes")
-                .setCodec(ClassDefinition.CODEC)
-                .setKeyFunction(ClassDefinition::getId)
-                .build()
-        );
+                HytaleAssetStore.builder(ClassDefinition.class, new DefaultAssetMap<>())
+                        .setPath("Classes")
+                        .setCodec(ClassDefinition.CODEC)
+                        .setKeyFunction(ClassDefinition::getId)
+                        .build());
         AssetRegistry.register(
-            HytaleAssetStore.builder(ClassAbilityDefinition.class, new DefaultAssetMap<>())
-                .setPath("RPGAbilities")
-                .setCodec(ClassAbilityDefinition.CODEC)
-                .setKeyFunction(ClassAbilityDefinition::getId)
-                .build()
-        );
+                HytaleAssetStore.builder(ClassAbilityDefinition.class, new DefaultAssetMap<>())
+                        .setPath("RPGAbilities")
+                        .setCodec(ClassAbilityDefinition.CODEC)
+                        .setKeyFunction(ClassAbilityDefinition::getId)
+                        .build());
         AssetRegistry.register(
-            HytaleAssetStore.builder(RaceDefinition.class, new DefaultAssetMap<>())
-                .setPath("Races")
-                .setCodec(RaceDefinition.CODEC)
-                .setKeyFunction(RaceDefinition::getId)
-                .build()
-        );
+                HytaleAssetStore.builder(RaceDefinition.class, new DefaultAssetMap<>())
+                        .setPath("Races")
+                        .setCodec(RaceDefinition.CODEC)
+                        .setKeyFunction(RaceDefinition::getId)
+                        .build());
         AssetRegistry.register(
-            HytaleAssetStore.builder(LevelSystemConfig.class, new DefaultAssetMap<>())
-                .setPath("Entity/levels")
-                .setCodec(LevelSystemConfig.CODEC)
-                .setKeyFunction(LevelSystemConfig::getId)
-                .build()
-        );
+                HytaleAssetStore.builder(LevelSystemConfig.class, new DefaultAssetMap<>())
+                        .setPath("Entity/levels")
+                        .setCodec(LevelSystemConfig.CODEC)
+                        .setKeyFunction(LevelSystemConfig::getId)
+                        .build());
         AssetRegistry.register(
-            HytaleAssetStore.builder(ExpCurveDefinition.class, new DefaultAssetMap<>())
-                .setPath("Entity/ExpCurves")
-                .setCodec(ExpCurveDefinition.EXP_CURVE_CODEC)
-                .setKeyFunction(ExpCurveDefinition::getId)
-                .build()
-        );
-        
+                HytaleAssetStore.builder(ExpCurveDefinition.class, new DefaultAssetMap<>())
+                        .setPath("Entity/ExpCurves")
+                        .setCodec(ExpCurveDefinition.EXP_CURVE_CODEC)
+                        .setKeyFunction(ExpCurveDefinition::getId)
+                        .build());
+
         // Register components with ECS (with Codec for persistence)
         this.levelProgressionComponentType = this.getEntityStoreRegistry()
-            .registerComponent(
-                LevelProgressionComponent.class,
-                "LevelProgression",
-                LevelProgressionComponent.CODEC
-            );
-        
+                .registerComponent(
+                        LevelProgressionComponent.class,
+                        "LevelProgression",
+                        LevelProgressionComponent.CODEC);
+
         this.classComponentType = this.getEntityStoreRegistry()
-            .registerComponent(
-                ClassComponent.class,
-                "Class",
-                ClassComponent.CODEC
-            );
-        
+                .registerComponent(
+                        ClassComponent.class,
+                        "Class",
+                        ClassComponent.CODEC);
+
         this.classAbilityComponentType = this.getEntityStoreRegistry()
-            .registerComponent(
-                ClassAbilityComponent.class,
-                "ClassAbility",
-                ClassAbilityComponent.CODEC
-            );
-        
+                .registerComponent(
+                        ClassAbilityComponent.class,
+                        "ClassAbility",
+                        ClassAbilityComponent.CODEC);
+
         LOGGER.atInfo().log("Registered LevelProgressionComponent, ClassComponent, and ClassAbilityComponent");
-        
+
         // Initialize level progression system
         this.levelSystem = new LevelProgressionSystem(this.getEventRegistry());
-        
+
         // Initialize class/job systems
         this.classManagementSystem = new ClassManagementSystem(this.levelSystem);
         this.classAbilitySystem = new ClassAbilitySystem(this.classManagementSystem);
@@ -138,31 +130,36 @@ public class ExamplePlugin extends JavaPlugin {
 
         // Initialize race systems
         this.raceManagementSystem = new RaceManagementSystem();
-        
+
         // Load assets after the asset registry has finished loading
         this.getEventRegistry().register(LoadAssetEvent.class, this::onAssetsLoaded);
         this.getEventRegistry().register(LoadedAssetsEvent.class, ClassDefinition.class, this::onClassAssetsReload);
         this.getEventRegistry().register(RemovedAssetsEvent.class, ClassDefinition.class, this::onClassAssetsRemoved);
-        this.getEventRegistry().register(LoadedAssetsEvent.class, ClassAbilityDefinition.class, this::onAbilityAssetsReload);
-        this.getEventRegistry().register(RemovedAssetsEvent.class, ClassAbilityDefinition.class, this::onAbilityAssetsRemoved);
+        this.getEventRegistry().register(LoadedAssetsEvent.class, ClassAbilityDefinition.class,
+                this::onAbilityAssetsReload);
+        this.getEventRegistry().register(RemovedAssetsEvent.class, ClassAbilityDefinition.class,
+                this::onAbilityAssetsRemoved);
         this.getEventRegistry().register(LoadedAssetsEvent.class, RaceDefinition.class, this::onRaceAssetsReload);
         this.getEventRegistry().register(RemovedAssetsEvent.class, RaceDefinition.class, this::onRaceAssetsRemoved);
         this.getEventRegistry().register(LoadedAssetsEvent.class, LevelSystemConfig.class, this::onLevelAssetsReload);
         this.getEventRegistry().register(RemovedAssetsEvent.class, LevelSystemConfig.class, this::onLevelAssetsRemoved);
-        this.getEventRegistry().register(LoadedAssetsEvent.class, ExpCurveDefinition.class, this::onExpCurveAssetsReload);
-        this.getEventRegistry().register(RemovedAssetsEvent.class, ExpCurveDefinition.class, this::onExpCurveAssetsRemoved);
+        this.getEventRegistry().register(LoadedAssetsEvent.class, ExpCurveDefinition.class,
+                this::onExpCurveAssetsReload);
+        this.getEventRegistry().register(RemovedAssetsEvent.class, ExpCurveDefinition.class,
+                this::onExpCurveAssetsRemoved);
 
         // Register custom interactions for RPG abilities
         Interaction.CODEC.register("ForceTarget", ForceTargetInteraction.class, ForceTargetInteraction.CODEC);
-        
+
         LOGGER.atInfo().log("Initialized Class/Job System with test data");
-        
+
         // Register commands
-        this.getCommandRegistry().registerCommand(new ExampleCommand(this.getName(), this.getManifest().getVersion().toString()));
+        this.getCommandRegistry()
+                .registerCommand(new ExampleCommand(this.getName(), this.getManifest().getVersion().toString()));
         this.getCommandRegistry().registerCommand(new TestLevelCommand());
         this.getCommandRegistry().registerCommand(new ResetLevelCommand());
         this.getCommandRegistry().registerCommand(new ClassCommand());
-        
+
         LOGGER.atInfo().log("RPG MOD setup complete!");
     }
 
@@ -241,7 +238,8 @@ public class ExamplePlugin extends JavaPlugin {
         }
         levelSchema.setAdditionalProperties(true);
         event.addSchema("RPG_LevelSystemConfig.json", levelSchema);
-        event.addSchemaLink("RPG_LevelSystemConfig", java.util.List.of("Entity/levels/*.json", "Entity/levels/**/*.json"), null);
+        event.addSchemaLink("RPG_LevelSystemConfig",
+                java.util.List.of("Entity/levels/*.json", "Entity/levels/**/*.json"), null);
 
         ObjectSchema curveSchema = new ObjectSchema();
         curveSchema.setTitle("RPG Exp Curve Config");
@@ -253,7 +251,8 @@ public class ExamplePlugin extends JavaPlugin {
         }
         curveSchema.setAdditionalProperties(true);
         event.addSchema("RPG_ExpCurveConfig.json", curveSchema);
-        event.addSchemaLink("RPG_ExpCurveConfig", java.util.List.of("Entity/ExpCurves/*.json", "Entity/ExpCurves/**/*.json"), null);
+        event.addSchemaLink("RPG_ExpCurveConfig",
+                java.util.List.of("Entity/ExpCurves/*.json", "Entity/ExpCurves/**/*.json"), null);
     }
 
     private static void addClassSchemas(@Nonnull GenerateSchemaEvent event) {
@@ -280,9 +279,8 @@ public class ExamplePlugin extends JavaPlugin {
         abilitySchema.setAdditionalProperties(true);
         event.addSchema("RPG_ClassAbilityDefinition.json", abilitySchema);
         event.addSchemaLink("RPG_ClassAbilityDefinition", java.util.List.of(
-            "RPGAbilities/*.json",
-            "RPGAbilities/**/*.json"
-        ), null);
+                "RPGAbilities/*.json",
+                "RPGAbilities/**/*.json"), null);
     }
 
     private static void addRaceSchemas(@Nonnull GenerateSchemaEvent event) {
@@ -299,42 +297,42 @@ public class ExamplePlugin extends JavaPlugin {
         event.addSchemaLink("RPG_RaceDefinition", java.util.List.of("Races/*.json", "Races/**/*.json"), null);
 
     }
-    
+
     @Nonnull
     public static ExamplePlugin get() {
         return instance;
     }
-    
+
     @Nonnull
     public LevelProgressionSystem getLevelProgressionSystem() {
         return levelSystem;
     }
-    
+
     @Nonnull
     public ClassManagementSystem getClassManagementSystem() {
         return classManagementSystem;
     }
-    
+
     @Nonnull
     public ClassAbilitySystem getClassAbilitySystem() {
         return classAbilitySystem;
     }
-    
+
     @Nonnull
     public ClassStatBonusSystem getClassStatBonusSystem() {
         return classStatBonusSystem;
     }
-    
+
     @Nonnull
     public ComponentType<EntityStore, LevelProgressionComponent> getLevelProgressionComponentType() {
         return levelProgressionComponentType;
     }
-    
+
     @Nonnull
     public ComponentType<EntityStore, ClassComponent> getClassComponentType() {
         return classComponentType;
     }
-    
+
     @Nonnull
     public ComponentType<EntityStore, ClassAbilityComponent> getClassAbilityComponentType() {
         return classAbilityComponentType;

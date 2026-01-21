@@ -1,7 +1,10 @@
 {
   "Interactions": [
     "RPG_Charge_Dash",
-    {}
+    {
+      "Type": "ChangeStat",
+      "Parent": "Raegea"
+    }
   ],
   "Cooldown": {
     "Id": "RPG_Warrior_Charge",
