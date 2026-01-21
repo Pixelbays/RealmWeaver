@@ -1,88 +1,88 @@
 {
-  "systemId": "character_level",
-  "displayName": "Character Level",
-  "description": "Main character progression system",
+  "id": "character_level",
+  "DisplayName": "Character Level",
+  "Description": "Main character progression system",
   
-  "maxLevel": 60,
-  "startingLevel": 1,
+  "MaxLevel": 60,
+  "StartingLevel": 1,
   
-  "expCurveType": "exponential",
-  "expCurve": {
-    "type": "exponential",
-    "baseExp": 100,
-    "growthRate": 50,
-    "exponent": 1.8
+  "ExpCurveType": "exponential",
+  "ExpCurve": {
+    "Type": "exponential",
+    "BaseExp": 100,
+    "GrowthRate": 50,
+    "Exponent": 1.8
   },
   
-  "prerequisites": {},
+  "Prerequisites": {},
   
-  "defaultRewards": {
-    "statPoints": 5,
-    "skillPoints": 1,
-    "statIncreases": {
+  "DefaultRewards": {
+    "StatPoints": 5,
+    "SkillPoints": 1,
+    "StatIncreases": {
       "Health": 10.0,
       "Mana": 5.0
     }
   },
   
-  "levelRewards": {
+  "LevelRewards": {
     "10": {
-      "statPoints": 10,
-      "itemRewards": ["hytale:mount_basic"],
-      "unlockedAbilities": ["rpg:sprint"],
-      "levelUpEffects": {
-        "soundId": "SFX_UI_MilestoneLevelUp",
-        "particleEffect": "FX_Milestone_Gold",
-        "notification": {
-          "primaryMessage": "MILESTONE REACHED!",
-          "secondaryMessage": "Level 10 - Classes unlocked!",
-          "iconItemId": "Item_Book_Gold"
+      "StatPoints": 10,
+      "ItemRewards": ["hytale:mount_basic"],
+      "UnlockedAbilities": ["rpg:sprint"],
+      "LevelUpEffects": {
+        "SoundId": "SFX_UI_MilestoneLevelUp",
+        "ParticleEffect": "FX_Milestone_Gold",
+        "Notification": {
+          "PrimaryMessage": "MILESTONE REACHED!",
+          "SecondaryMessage": "Level 10 - Classes unlocked!",
+          "IconItemId": "Item_Book_Gold"
         }
       }
     },
     "20": {
-      "statPoints": 15,
-      "skillPoints": 5,
-      "unlockedQuests": ["rpg:epic_quest_line"],
-      "levelUpEffects": {
-        "soundId": "SFX_UI_MilestoneLevelUp",
-        "particleEffect": "FX_Milestone_Gold",
-        "notification": {
-          "primaryMessage": "EPIC MILESTONE!",
-          "secondaryMessage": "Level 20 - Epic quest unlocked!",
-          "iconItemId": "Item_Book_Purple"
+      "StatPoints": 15,
+      "SkillPoints": 5,
+      "UnlockedQuests": ["rpg:epic_quest_line"],
+      "LevelUpEffects": {
+        "SoundId": "SFX_UI_MilestoneLevelUp",
+        "ParticleEffect": "FX_Milestone_Gold",
+        "Notification": {
+          "PrimaryMessage": "EPIC MILESTONE!",
+          "SecondaryMessage": "Level 20 - Epic quest unlocked!",
+          "IconItemId": "Item_Book_Purple"
         }
       }
     },
     "30": {
-      "statPoints": 20,
-      "itemRewards": ["hytale:epic_weapon_chest"]
+      "StatPoints": 20,
+      "ItemRewards": ["hytale:epic_weapon_chest"]
     },
     "40": {
-      "statPoints": 25,
-      "skillPoints": 10
+      "StatPoints": 25,
+      "SkillPoints": 10
     },
     "50": {
-      "statPoints": 30,
-      "skillPoints": 15,
-      "itemRewards": ["hytale:legendary_gear_token"]
+      "StatPoints": 30,
+      "SkillPoints": 15,
+      "ItemRewards": ["hytale:legendary_gear_token"]
     },
     "60": {
-      "statPoints": 50,
-      "skillPoints": 25,
-      "itemRewards": ["hytale:max_level_mount"],
-      "interactionChain": "rpg:max_level_celebration"
+      "StatPoints": 50,
+      "SkillPoints": 25,
+      "ItemRewards": ["hytale:max_level_mount"],
+      "InteractionChain": "rpg:max_level_celebration"
     }
   },
   
-  "statGrowth": {
-    "flatGrowth": {
+  "StatGrowth": {
+    "FlatGrowth": {
       "Health": 10.0,
       "Mana": 5.0,
       "Stamina": 3.0
     },
-    "percentageGrowth": {},
-    "milestoneGrowth": {
+    "PercentageGrowth": {},
+    "MilestoneGrowth": {
       "10": {
         "Health": 50.0,
         "Mana": 25.0
@@ -98,7 +98,7 @@
     }
   },
   
-  "enabled": true,
-  "visible": true,
-  "iconId": "rpg:icon_character_level"
+  "Enabled": true,
+  "Visible": true,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
 }

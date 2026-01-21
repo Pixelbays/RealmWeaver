@@ -1,40 +1,40 @@
 {
-  "systemId": "base_class_level",
-  "displayName": "Base Class Level",
-  "description": "Base template for all combat class level progression",
-  "maxLevel": 50,
-  "startingLevel": 1,
-  "expCurveType": "linear",
-  "expCurve": {
-    "type": "linear",
-    "baseExp": 200,
-    "growthRate": 100
+  "id": "base_class_level",
+  "DisplayName": "Base Class Level",
+  "Description": "Base template for all combat class level progression",
+  "MaxLevel": 50,
+  "StartingLevel": 1,
+  "ExpCurveType": "linear",
+  "ExpCurve": {
+    "Type": "linear",
+    "BaseExp": 200,
+    "GrowthRate": 100
   },
-  "prerequisites": {},
-  "defaultRewards": {
-    "levelUpEffects": {
-      "soundId": "SFX_Discovery_Z1_Short",
-      "particleEffect": "Temp_Level_Up",
-      "notification": {
-        "primaryMessage": "LEVEL UP!",
-        "secondaryMessage": "Character level {level}",
-        "iconItemId": "Item_Book"
+  "Prerequisites": {},
+  "DefaultRewards": {
+    "LevelUpEffects": {
+      "SoundId": "SFX_Discovery_Z1_Short",
+      "ParticleEffect": "Temp_Level_Up",
+      "Notification": {
+        "PrimaryMessage": "LEVEL UP!",
+        "SecondaryMessage": "Character level {level}",
+        "IconItemId": "Item_Book"
       },
-      "eventTitle": {
-        "primaryMessage": "LEVEL UP!",
-        "secondaryMessage": "Character level {level}",
-        "major": true
+      "EventTitle": {
+        "PrimaryMessage": "LEVEL UP!",
+        "SecondaryMessage": "Character level {level}",
+        "Major": true
       }
     },
-    "statPoints": 0,
-    "skillPoints": 0
+    "StatPoints": 0,
+    "SkillPoints": 0
   },
-  "levelRewards": {},
-  "statGrowth": {
-    "flatGrowth": {},
-    "milestoneGrowth": {}
+  "LevelRewards": {},
+  "StatGrowth": {
+    "FlatGrowth": {},
+    "MilestoneGrowth": {}
   },
-  "enabled": false,
-  "visible": false,
-  "iconId": ""
+  "Enabled": false,
+  "Visible": false,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
 }

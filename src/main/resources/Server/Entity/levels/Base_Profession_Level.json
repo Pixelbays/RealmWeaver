@@ -1,28 +1,28 @@
 {
-  "systemId": "base_profession_level",
-  "displayName": "Base Profession Level",
-  "description": "Base template for all profession/crafting level progression",
+  "id": "base_profession_level",
+  "DisplayName": "Base Profession Level",
+  "Description": "Base template for all profession/crafting level progression",
   
-  "maxLevel": 100,
-  "startingLevel": 1,
+  "MaxLevel": 100,
+  "StartingLevel": 1,
   
-  "expCurveRef": "Curve_Fast",
+  "ExpCurveRef": "Curve_Fast",
   
-  "prerequisites": {},
+  "Prerequisites": {},
   
-  "defaultRewards": {
-    "statPoints": 0,
-    "skillPoints": 0
+  "DefaultRewards": {
+    "StatPoints": 0,
+    "SkillPoints": 0
   },
   
-  "levelRewards": {},
+  "LevelRewards": {},
   
-  "statGrowth": {
-    "flatGrowth": {},
-    "milestoneGrowth": {}
+  "StatGrowth": {
+    "FlatGrowth": {},
+    "MilestoneGrowth": {}
   },
   
-  "enabled": false,
-  "visible": false,
-  "iconId": ""
+  "Enabled": false,
+  "Visible": false,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
 }

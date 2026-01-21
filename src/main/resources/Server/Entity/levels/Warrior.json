@@ -1,14 +1,10 @@
 {
-  "systemId": "class_warrior",
-  "inheritsFrom": "base_class_level",
-  "displayName": "Warrior Class",
-  "description": "Warrior class specialization level progression",
-  "enabled": true,
-  "visible": true,
-  "iconId": "rpg:icon_warrior",
-  "ExpCurveRef": "Curve_Fast",
-  "ExpTable": {
-    "ree": 0
-  },
-  "Parent": "Base_Class_Level"
+  "id": "class_warrior",
+  "Parent": "base_class_level",
+  "DisplayName": "Warrior Class",
+  "Description": "Warrior class specialization level progression",
+  "Enabled": true,
+  "Visible": true,
+  "IconId": "rpg:icon_warrior",
+  "ExpCurveRef": "Curve_Fast"
 }
