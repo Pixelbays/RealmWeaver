@@ -11,6 +11,7 @@ import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.global.interaction.ForceTargetInteraction;
 import org.pixelbays.rpg.global.system.StatSystem;
+import org.pixelbays.rpg.leveling.command.LevelTestCommand;
 import org.pixelbays.rpg.leveling.command.ResetLevelCommand;
 import org.pixelbays.rpg.leveling.command.TestLevelCommand;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
@@ -160,6 +161,7 @@ public class ExamplePlugin extends JavaPlugin {
         this.getCommandRegistry()
                 .registerCommand(new ExampleCommand(this.getName(), this.getManifest().getVersion().toString()));
         this.getCommandRegistry().registerCommand(new TestLevelCommand());
+        this.getCommandRegistry().registerCommand(new LevelTestCommand());
         this.getCommandRegistry().registerCommand(new ResetLevelCommand());
         this.getCommandRegistry().registerCommand(new ClassCommand());
 

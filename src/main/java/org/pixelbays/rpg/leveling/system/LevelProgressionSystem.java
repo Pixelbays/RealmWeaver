@@ -65,6 +65,10 @@ public class LevelProgressionSystem {
      * Load a level system configuration from asset pack
      */
     public void registerLevelSystem(LevelSystemConfig config) {
+        if (config == null || config.getSystemId() == null || config.getSystemId().isEmpty()) {
+            System.err.println("[LevelSystem] Ignored null/invalid level system config");
+            return;
+        }
         levelSystemConfigs.put(config.getSystemId(), config);
         System.out.println("[LevelSystem] Registered level system: " + config.getSystemId() +
                 " (" + config.getDisplayName() + ")");
@@ -81,6 +85,8 @@ public class LevelProgressionSystem {
      */
     public void loadLevelSystemsFromAssets() {
         System.out.println("[LevelSystem] Loading level system configurations from asset packs...");
+
+        levelSystemConfigs.clear();
 
         try {
             // Use AssetLoader to load all level system configs from asset packs
@@ -126,6 +132,14 @@ public class LevelProgressionSystem {
      */
     public void grantExperience(@Nonnull Ref<EntityStore> entityRef, String systemId, float amount, String source,
             @Nullable Store<EntityStore> store, @Nullable World world) {
+        if (systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
+        if (amount <= 0f) {
+            return;
+        }
+
         // Get level system config
         LevelSystemConfig config = levelSystemConfigs.get(systemId);
         if (config == null) {
@@ -140,6 +154,8 @@ public class LevelProgressionSystem {
         // Get or create level progression component
         LevelProgressionComponent levelComp = getOrCreateComponent(entityRef);
         LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
+
+        ensureExpToNextLevel(levelData, config);
 
         // Check prerequisites
         if (!checkPrerequisites(levelComp, config)) {
@@ -212,6 +228,8 @@ public class LevelProgressionSystem {
             }
         }
 
+        refreshClassStatsIfNeeded(entityRef, systemId, store);
+
         System.out.println("[LevelSystem] Entity leveled up " + systemId + ": " +
                 startLevel + " -> " + endLevel);
     }
@@ -224,6 +242,9 @@ public class LevelProgressionSystem {
             @Nullable Store<EntityStore> store, @Nullable World world) {
 
         LevelSystemConfig.LevelRewardConfig rewards = config.getRewardsForLevel(newLevel);
+        if (rewards == null) {
+            return;
+        }
 
         // Grant stat points
         if (rewards.getStatPoints() > 0) {
@@ -296,9 +317,17 @@ public class LevelProgressionSystem {
      * Initialize a new level system for an entity
      */
     public void initializeLevelSystem(@Nonnull Ref<EntityStore> entityRef, String systemId) {
+        if (systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
         LevelSystemConfig config = levelSystemConfigs.get(systemId);
         if (config == null) {
             System.err.println("[LevelSystem] Cannot initialize unknown system: " + systemId);
+            return;
+        }
+
+        if (!config.isEnabled()) {
             return;
         }
 
@@ -471,9 +500,17 @@ public class LevelProgressionSystem {
      */
     public void setLevel(@Nonnull Ref<EntityStore> entityRef, String systemId, int level,
             @Nullable Store<EntityStore> store, @Nullable World world) {
+        if (systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
         LevelSystemConfig config = levelSystemConfigs.get(systemId);
         if (config == null) {
             System.err.println("[LevelSystem] Cannot set level for unknown system: " + systemId);
+            return;
+        }
+
+        if (!config.isEnabled()) {
             return;
         }
 
@@ -481,7 +518,8 @@ public class LevelProgressionSystem {
         LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
 
         // Clamp level to valid range
-        int clampedLevel = Math.max(1, Math.min(level, config.getMaxLevel() > 0 ? config.getMaxLevel() : level));
+        int maxLevel = getEffectiveMaxLevel(config);
+        int clampedLevel = Math.max(1, Math.min(level, maxLevel));
 
         levelData.setCurrentLevel(clampedLevel);
         levelData.setCurrentExp(0);
@@ -490,6 +528,8 @@ public class LevelProgressionSystem {
         if (store != null) {
             unlockClassAbilitiesForLevel(entityRef, systemId, clampedLevel, store, false);
         }
+
+        refreshClassStatsIfNeeded(entityRef, systemId, store);
 
         System.out.println("[LevelSystem] Set " + systemId + " level to " + clampedLevel);
     }
@@ -545,9 +585,21 @@ public class LevelProgressionSystem {
      */
     public void addLevels(@Nonnull Ref<EntityStore> entityRef, String systemId, int levelsToAdd,
             @Nullable Store<EntityStore> store, @Nullable World world) {
+        if (systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
+        if (levelsToAdd == 0) {
+            return;
+        }
+
         LevelSystemConfig config = levelSystemConfigs.get(systemId);
         if (config == null) {
             System.err.println("[LevelSystem] Cannot add levels for unknown system: " + systemId);
+            return;
+        }
+
+        if (!config.isEnabled()) {
             return;
         }
 
@@ -558,7 +610,8 @@ public class LevelProgressionSystem {
         int newLevel = currentLevel + levelsToAdd;
 
         // Clamp to valid range
-        newLevel = Math.max(1, Math.min(newLevel, config.getMaxLevel() > 0 ? config.getMaxLevel() : newLevel));
+        int maxLevel = getEffectiveMaxLevel(config);
+        newLevel = Math.max(1, Math.min(newLevel, maxLevel));
 
         if (newLevel > currentLevel) {
             // Leveling up - grant rewards
@@ -568,6 +621,8 @@ public class LevelProgressionSystem {
         levelData.setCurrentLevel(newLevel);
         levelData.setCurrentExp(0);
         updateExpToNextLevel(levelData, config);
+
+        refreshClassStatsIfNeeded(entityRef, systemId, store);
     }
 
     /**
@@ -575,9 +630,17 @@ public class LevelProgressionSystem {
      */
     public void setExperience(@Nonnull Ref<EntityStore> entityRef, String systemId, float experience,
             @Nullable Store<EntityStore> store, @Nullable World world) {
+        if (systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
         LevelSystemConfig config = levelSystemConfigs.get(systemId);
         if (config == null) {
             System.err.println("[LevelSystem] Cannot set experience for unknown system: " + systemId);
+            return;
+        }
+
+        if (!config.isEnabled()) {
             return;
         }
 
@@ -585,12 +648,13 @@ public class LevelProgressionSystem {
         LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
 
         int currentLevel = levelData.getCurrentLevel();
-        levelData.setCurrentExp(Math.max(0, experience));
+        float clampedExp = Math.max(0, experience);
+        levelData.setCurrentExp(clampedExp);
 
         // Manually check for level ups
         int newLevel = currentLevel;
-        float remainingExp = experience;
-        int maxLevel = config.getMaxLevel() > 0 ? config.getMaxLevel() : 999;
+        float remainingExp = clampedExp;
+        int maxLevel = getEffectiveMaxLevel(config);
 
         while (remainingExp >= levelData.getExpToNextLevel() && levelData.getExpToNextLevel() > 0
                 && newLevel < maxLevel) {
@@ -609,6 +673,8 @@ public class LevelProgressionSystem {
         }
 
         updateExpToNextLevel(levelData, config);
+
+        refreshClassStatsIfNeeded(entityRef, systemId, store);
     }
 
     /**
@@ -618,6 +684,14 @@ public class LevelProgressionSystem {
      * @return Actual amount removed (may be less if not enough exp)
      */
     public float removeExperience(@Nonnull Ref<EntityStore> entityRef, String systemId, float amount) {
+        if (systemId == null || systemId.isEmpty()) {
+            return 0f;
+        }
+
+        if (amount <= 0f) {
+            return 0f;
+        }
+
         LevelProgressionComponent levelComp = getComponent(entityRef);
         if (levelComp == null)
             return 0f;
@@ -637,6 +711,14 @@ public class LevelProgressionSystem {
      * Spend stat points (returns true if successful)
      */
     public boolean spendStatPoints(@Nonnull Ref<EntityStore> entityRef, String systemId, int amount) {
+        if (systemId == null || systemId.isEmpty()) {
+            return false;
+        }
+
+        if (amount <= 0) {
+            return false;
+        }
+
         LevelProgressionComponent levelComp = getComponent(entityRef);
         if (levelComp == null)
             return false;
@@ -653,6 +735,14 @@ public class LevelProgressionSystem {
      * Spend skill points (returns true if successful)
      */
     public boolean spendSkillPoints(@Nonnull Ref<EntityStore> entityRef, String systemId, int amount) {
+        if (systemId == null || systemId.isEmpty()) {
+            return false;
+        }
+
+        if (amount <= 0) {
+            return false;
+        }
+
         LevelProgressionComponent levelComp = getComponent(entityRef);
         if (levelComp == null)
             return false;
@@ -673,6 +763,10 @@ public class LevelProgressionSystem {
     public void grantExperienceToGroup(@Nonnull ObjectList<Ref<EntityStore>> entityRefs, String systemId,
             float amount, String source,
             @Nullable Store<EntityStore> store, @Nullable World world) {
+        if (systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
         for (Ref<EntityStore> entityRef : entityRefs) {
             if (entityRef.isValid()) {
                 grantExperience(entityRef, systemId, amount, source, store, world);
@@ -688,6 +782,10 @@ public class LevelProgressionSystem {
     public void grantExperienceInRadius(@Nonnull com.hypixel.hytale.math.vector.Vector3d position, double radius,
             String systemId, float amount, String source,
             @Nonnull Store<EntityStore> store, @Nonnull World world) {
+        if (systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
         // Get spatial resource for players
         SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource = store
                 .getResource(EntityModule.get().getPlayerSpatialResourceType());
@@ -710,6 +808,10 @@ public class LevelProgressionSystem {
      * @return Experience required, or -1 if system not found
      */
     public float calculateExpForLevel(String systemId, int level) {
+        if (systemId == null || systemId.isEmpty()) {
+            return -1f;
+        }
+
         LevelSystemConfig config = levelSystemConfigs.get(systemId);
         if (config == null)
             return -1f;
@@ -723,12 +825,16 @@ public class LevelProgressionSystem {
      * @return Level that would be reached with this exp
      */
     public int getLevelFromExp(String systemId, float totalExp) {
+        if (systemId == null || systemId.isEmpty()) {
+            return 0;
+        }
+
         LevelSystemConfig config = levelSystemConfigs.get(systemId);
         if (config == null)
             return 0;
 
         int level = config.getStartingLevel();
-        int maxLevel = config.getMaxLevel() > 0 ? config.getMaxLevel() : 999;
+        int maxLevel = getEffectiveMaxLevel(config);
 
         float expAccumulated = 0f;
         while (level < maxLevel) {
@@ -760,6 +866,33 @@ public class LevelProgressionSystem {
             component = entityRef.getStore().addComponent(entityRef, LevelProgressionComponent.getComponentType());
         }
         return component;
+    }
+
+    private void ensureExpToNextLevel(@Nonnull LevelProgressionComponent.LevelSystemData levelData,
+            @Nonnull LevelSystemConfig config) {
+        if (levelData.getExpToNextLevel() <= 0 && (config.getMaxLevel() <= 0
+                || levelData.getCurrentLevel() < config.getMaxLevel())) {
+            updateExpToNextLevel(levelData, config);
+        }
+    }
+
+    private int getEffectiveMaxLevel(@Nonnull LevelSystemConfig config) {
+        return config.getMaxLevel() > 0 ? config.getMaxLevel() : 999;
+    }
+
+    private void refreshClassStatsIfNeeded(@Nonnull Ref<EntityStore> entityRef,
+            String systemId,
+            @Nullable Store<EntityStore> store) {
+        if (store == null || statSystem == null || systemId == null || systemId.isEmpty()) {
+            return;
+        }
+
+        var classSystem = ExamplePlugin.get().getClassManagementSystem();
+        if (classSystem.getClassesForLevelSystem(systemId).isEmpty()) {
+            return;
+        }
+
+        statSystem.recalculateClassStatBonuses(entityRef, store);
     }
 
     @Nullable

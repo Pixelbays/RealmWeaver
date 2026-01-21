@@ -57,75 +57,97 @@ public class LevelSystemConfig implements
 
     public static final BuilderCodec<NotificationConfig> NOTIFICATION_CODEC = BuilderCodec
             .builder(NotificationConfig.class, NotificationConfig::new)
-            .append(new KeyedCodec<>("PrimaryMessage", Codec.STRING, false, true), (i, s) -> i.PrimaryMessage = s,
-                    i -> i.PrimaryMessage)
+            .appendInherited(new KeyedCodec<>("PrimaryMessage", Codec.STRING, false, true), (i, s) -> i.PrimaryMessage = s,
+                i -> i.PrimaryMessage,
+                (i, parent) -> i.PrimaryMessage = parent.PrimaryMessage)
             .add()
-            .append(new KeyedCodec<>("SecondaryMessage", Codec.STRING, false, true), (i, s) -> i.SecondaryMessage = s,
-                    i -> i.SecondaryMessage)
+            .appendInherited(new KeyedCodec<>("SecondaryMessage", Codec.STRING, false, true), (i, s) -> i.SecondaryMessage = s,
+                i -> i.SecondaryMessage,
+                (i, parent) -> i.SecondaryMessage = parent.SecondaryMessage)
             .add()
-            .append(new KeyedCodec<>("IconItemId", Codec.STRING, false, true), (i, s) -> i.IconItemId = s,
-                    i -> i.IconItemId)
+            .appendInherited(new KeyedCodec<>("IconItemId", Codec.STRING),
+                    (i, s) -> i.IconItemId = (s == null || s.isEmpty()) ? null : s,
+                    i -> i.IconItemId,
+                    (i, parent) -> i.IconItemId = parent.IconItemId)
             .add()
+
             .build();
 
     public static final BuilderCodec<EventTitleConfig> EVENT_TITLE_CODEC = BuilderCodec
             .builder(EventTitleConfig.class, EventTitleConfig::new)
-            .append(new KeyedCodec<>("PrimaryMessage", Codec.STRING, false, true), (i, s) -> i.PrimaryMessage = s,
-                    i -> i.PrimaryMessage)
+            .appendInherited(new KeyedCodec<>("PrimaryMessage", Codec.STRING, false, true), (i, s) -> i.PrimaryMessage = s,
+                i -> i.PrimaryMessage,
+                (i, parent) -> i.PrimaryMessage = parent.PrimaryMessage)
             .add()
-            .append(new KeyedCodec<>("SecondaryMessage", Codec.STRING, false, true), (i, s) -> i.SecondaryMessage = s,
-                    i -> i.SecondaryMessage)
+            .appendInherited(new KeyedCodec<>("SecondaryMessage", Codec.STRING, false, true), (i, s) -> i.SecondaryMessage = s,
+                i -> i.SecondaryMessage,
+                (i, parent) -> i.SecondaryMessage = parent.SecondaryMessage)
             .add()
-            .append(new KeyedCodec<>("Major", Codec.BOOLEAN, false, true), (i, s) -> i.Major = s, i -> i.Major)
+            .appendInherited(new KeyedCodec<>("Major", Codec.BOOLEAN, false, true), (i, s) -> i.Major = s, i -> i.Major,
+                (i, parent) -> i.Major = parent.Major)
             .add()
             .build();
 
     public static final BuilderCodec<LevelUpEffects> LEVEL_UP_EFFECTS_CODEC = BuilderCodec
             .builder(LevelUpEffects.class, LevelUpEffects::new)
-            .append(new KeyedCodec<>("SoundId", Codec.STRING, false, true), (i, s) -> i.SoundId = s, i -> i.SoundId)
+            .appendInherited(new KeyedCodec<>("SoundId", Codec.STRING, false, true), (i, s) -> i.SoundId = s,
+                i -> i.SoundId,
+                (i, parent) -> i.SoundId = parent.SoundId)
             .add()
-            .append(new KeyedCodec<>("ParticleEffect", Codec.STRING, false, true), (i, s) -> i.ParticleEffect = s,
-                    i -> i.ParticleEffect)
+            .appendInherited(new KeyedCodec<>("ParticleEffect", Codec.STRING, false, true), (i, s) -> i.ParticleEffect = s,
+                i -> i.ParticleEffect,
+                (i, parent) -> i.ParticleEffect = parent.ParticleEffect)
             .add()
-            .append(new KeyedCodec<>("Notification", NotificationConfig.CODEC, false, true),
-                    (i, s) -> i.Notification = s, i -> i.Notification)
+            .appendInherited(new KeyedCodec<>("Notification", NotificationConfig.CODEC, false, true),
+                (i, s) -> i.Notification = s, i -> i.Notification,
+                (i, parent) -> i.Notification = parent.Notification)
             .add()
-            .append(new KeyedCodec<>("EventTitle", EventTitleConfig.CODEC, false, true), (i, s) -> i.EventTitle = s,
-                    i -> i.EventTitle)
+            .appendInherited(new KeyedCodec<>("EventTitle", EventTitleConfig.CODEC, false, true),
+                (i, s) -> i.EventTitle = s, i -> i.EventTitle,
+                (i, parent) -> i.EventTitle = parent.EventTitle)
             .add()
             .build();
 
 
     public static final BuilderCodec<LevelRewardConfig> LEVEL_REWARD_CODEC = BuilderCodec
             .builder(LevelRewardConfig.class, LevelRewardConfig::new)
-            .append(new KeyedCodec<>("StatPoints", Codec.INTEGER, false, true), (i, s) -> i.StatPoints = s,
-                    i -> i.StatPoints)
+            .appendInherited(new KeyedCodec<>("StatPoints", Codec.INTEGER, false, true), (i, s) -> i.StatPoints = s,
+                i -> i.StatPoints,
+                (i, parent) -> i.StatPoints = parent.StatPoints)
             .add()
-            .append(new KeyedCodec<>("SkillPoints", Codec.INTEGER, false, true), (i, s) -> i.SkillPoints = s,
-                    i -> i.SkillPoints)
+            .appendInherited(new KeyedCodec<>("SkillPoints", Codec.INTEGER, false, true), (i, s) -> i.SkillPoints = s,
+                i -> i.SkillPoints,
+                (i, parent) -> i.SkillPoints = parent.SkillPoints)
             .add()
-            .append(new KeyedCodec<>("StatIncreases", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
-                    (i, s) -> i.StatIncreases = s, i -> i.StatIncreases)
+            .appendInherited(new KeyedCodec<>("StatIncreases", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
+                (i, s) -> i.StatIncreases = s, i -> i.StatIncreases,
+                (i, parent) -> i.StatIncreases = parent.StatIncreases)
             .addValidator(com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType.VALIDATOR_CACHE
                     .getMapKeyValidator())
             .add()
-            .append(new KeyedCodec<>("UnlockedAbilities", ABILITY_ID_LIST_CODEC, false, true),
-                    (i, s) -> i.UnlockedAbilities = s, i -> i.UnlockedAbilities)
+            .appendInherited(new KeyedCodec<>("UnlockedAbilities", ABILITY_ID_LIST_CODEC, false, true),
+                (i, s) -> i.UnlockedAbilities = s, i -> i.UnlockedAbilities,
+                (i, parent) -> i.UnlockedAbilities = parent.UnlockedAbilities)
             .add()
-            .append(new KeyedCodec<>("UnlockedQuests", STRING_LIST_CODEC, false, true),
-                    (i, s) -> i.UnlockedQuests = s, i -> i.UnlockedQuests)
+            .appendInherited(new KeyedCodec<>("UnlockedQuests", STRING_LIST_CODEC, false, true),
+                (i, s) -> i.UnlockedQuests = s, i -> i.UnlockedQuests,
+                (i, parent) -> i.UnlockedQuests = parent.UnlockedQuests)
             .add()
-            .append(new KeyedCodec<>("CurrencyRewards", new MapCodec<>(Codec.LONG, HashMap::new), false, true),
-                    (i, s) -> i.CurrencyRewards = s, i -> i.CurrencyRewards)
+            .appendInherited(new KeyedCodec<>("CurrencyRewards", new MapCodec<>(Codec.LONG, HashMap::new), false, true),
+                (i, s) -> i.CurrencyRewards = s, i -> i.CurrencyRewards,
+                (i, parent) -> i.CurrencyRewards = parent.CurrencyRewards)
             .add()
-            .append(new KeyedCodec<>("ItemRewards", STRING_LIST_CODEC, false, true),
-                    (i, s) -> i.ItemRewards = s, i -> i.ItemRewards)
+            .appendInherited(new KeyedCodec<>("ItemRewards", STRING_LIST_CODEC, false, true),
+                (i, s) -> i.ItemRewards = s, i -> i.ItemRewards,
+                (i, parent) -> i.ItemRewards = parent.ItemRewards)
             .add()
-            .append(new KeyedCodec<>("InteractionChain", INTERACTION_CHAIN_REF_CODEC, false, true),
-                    (i, s) -> i.InteractionChain = s, i -> i.InteractionChain)
+            .appendInherited(new KeyedCodec<>("InteractionChain", INTERACTION_CHAIN_REF_CODEC, false, true),
+                (i, s) -> i.InteractionChain = s, i -> i.InteractionChain,
+                (i, parent) -> i.InteractionChain = parent.InteractionChain)
             .add()
-            .append(new KeyedCodec<>("LevelUpEffects", LevelUpEffects.CODEC, false, true),
-                    (i, s) -> i.LevelUpEffects = s, i -> i.LevelUpEffects)
+            .appendInherited(new KeyedCodec<>("LevelUpEffects", LevelUpEffects.CODEC, false, true),
+                (i, s) -> i.LevelUpEffects = s, i -> i.LevelUpEffects,
+                (i, parent) -> i.LevelUpEffects = parent.LevelUpEffects)
             .add()
             .build();
 
@@ -136,18 +158,21 @@ public class LevelSystemConfig implements
 
     public static final BuilderCodec<StatGrowthConfig> STAT_GROWTH_CODEC = BuilderCodec
             .builder(StatGrowthConfig.class, StatGrowthConfig::new)
-            .append(new KeyedCodec<>("FlatGrowth", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
-                    (i, s) -> i.FlatGrowth = s, i -> i.FlatGrowth)
+            .appendInherited(new KeyedCodec<>("FlatGrowth", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
+                (i, s) -> i.FlatGrowth = s, i -> i.FlatGrowth,
+                (i, parent) -> i.FlatGrowth = parent.FlatGrowth)
             .addValidator(com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType.VALIDATOR_CACHE
                     .getMapKeyValidator())
             .add()
-            .append(new KeyedCodec<>("PercentageGrowth", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
-                    (i, s) -> i.PercentageGrowth = s, i -> i.PercentageGrowth)
+            .appendInherited(new KeyedCodec<>("PercentageGrowth", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
+                (i, s) -> i.PercentageGrowth = s, i -> i.PercentageGrowth,
+                (i, parent) -> i.PercentageGrowth = parent.PercentageGrowth)
             .addValidator(com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType.VALIDATOR_CACHE
                     .getMapKeyValidator())
             .add()
-            .append(new KeyedCodec<>("MilestoneGrowth", INT_FLOAT_MAP_MAP_CODEC, false, true),
-                    (i, s) -> i.MilestoneGrowth = s, i -> i.MilestoneGrowth)
+            .appendInherited(new KeyedCodec<>("MilestoneGrowth", INT_FLOAT_MAP_MAP_CODEC, false, true),
+                (i, s) -> i.MilestoneGrowth = s, i -> i.MilestoneGrowth,
+                (i, parent) -> i.MilestoneGrowth = parent.MilestoneGrowth)
             .add()
             .build();
 
@@ -210,7 +235,7 @@ public class LevelSystemConfig implements
                     i -> i.Visible,
                     (i, parent) -> i.Visible = parent.Visible)
             .add()
-            .appendInherited(new KeyedCodec<>("IconId", Codec.STRING, false, true),
+                .appendInherited(new KeyedCodec<>("Icon", Codec.STRING),
                     (i, s) -> i.IconId = (s == null || s.isEmpty()) ? null : s,
                     i -> i.IconId,
                     (i, parent) -> i.IconId = parent.IconId)

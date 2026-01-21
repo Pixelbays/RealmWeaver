@@ -1,5 +1,6 @@
 package org.pixelbays.rpg.classes.config;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,8 +13,8 @@ import org.pixelbays.rpg.global.config.builder.LevelSystemRefCodec;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.AssetRegistry;
-import com.hypixel.hytale.assetstore.codec.AssetCodec;
 import com.hypixel.hytale.assetstore.codec.AssetBuilderCodec;
+import com.hypixel.hytale.assetstore.codec.AssetCodec;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.assetstore.map.JsonAssetWithMap;
 import com.hypixel.hytale.codec.Codec;
@@ -32,15 +33,14 @@ import com.hypixel.hytale.codec.schema.metadata.ui.UIEditor;
 import com.hypixel.hytale.codec.schema.metadata.ui.UIEditorPreview;
 import com.hypixel.hytale.codec.schema.metadata.ui.UIRebuildCaches;
 import com.hypixel.hytale.codec.schema.metadata.ui.UITypeIcon;
-import com.hypixel.hytale.codec.validation.ValidationResults;
-import com.hypixel.hytale.codec.validation.Validators;
+import com.hypixel.hytale.codec.util.RawJsonReader;
 import com.hypixel.hytale.codec.validation.ValidatableCodec;
+import com.hypixel.hytale.codec.validation.ValidationResults;
 import com.hypixel.hytale.codec.validation.Validator;
+import com.hypixel.hytale.codec.validation.Validators;
 import com.hypixel.hytale.codec.validation.validator.MapKeyValidator;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetValidator;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
-import com.hypixel.hytale.codec.util.RawJsonReader;
-import java.io.IOException;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
