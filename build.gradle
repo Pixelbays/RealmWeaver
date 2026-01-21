@@ -14,6 +14,11 @@ java {
     // withJavadocJar()
 }
 
+// Disable sources jar generation due to unreadable paths on NAS
+tasks.named('sourcesJar') {
+    enabled = false
+}
+
 // Quiet warnings about missing Javadocs.
 javadoc {
     options.addStringOption('Xdoclint:-missing', '-quiet')
