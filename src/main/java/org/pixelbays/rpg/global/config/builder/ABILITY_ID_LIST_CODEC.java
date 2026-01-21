@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.hypixel.hytale.codec.function.FunctionCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
+import com.hypixel.hytale.codec.function.FunctionCodec;
 
 @SuppressWarnings("deprecation")
 public final class ABILITY_ID_LIST_CODEC {
