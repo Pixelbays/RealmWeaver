@@ -1,0 +1,22 @@
+{
+    "Parent": "PassiveBase",
+    "Categories": [
+        "Race",
+        "Base"
+    ],
+    "TranslationProperties": {
+        "DisplayName": "Base Race Ability",
+        "Description": "Common defaults for all race abilities."
+    },
+    "AbilityType": "Passive",
+    "GlobalCooldown": 0.0,
+    "GlobalCooldownCategories": [],
+    "PrerequisiteAbilities": [],
+    "StatRequirements": {},
+    "HasRanks": false,
+    "MaxRank": 1,
+    "Interactions": {},
+    "InteractionVars": {},
+    "Enabled": false,
+    "Tooltip": "Shared defaults for race abilities."
+}

@@ -1,0 +1,182 @@
+package org.pixelbays.rpg.ability.command;
+
+import java.util.Arrays;
+
+import javax.annotation.Nonnull;
+
+import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
+import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
+import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
+import org.pixelbays.rpg.classes.component.ClassComponent;
+import org.pixelbays.rpg.global.config.RpgModConfig;
+
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.command.system.CommandContext;
+import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
+import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+/**
+ * Command to bind abilities to hotbar slots.
+ * Usage: /bindability <slot> <abilityId>
+ * Usage: /bindability <slot> clear
+ * Usage: /bindability list
+ */
+@SuppressWarnings("null")
+public class BindAbilityCommand extends AbstractPlayerCommand {
+
+    private final OptionalArg<Integer> slotArg;
+    private final OptionalArg<String> abilityIdArg;
+
+    public BindAbilityCommand() {
+        super("bindability", "Bind an ability to a hotbar slot");
+        this.slotArg = this.withOptionalArg("slot", "Hotbar slot (1-9) or 'list'", ArgTypes.INTEGER);
+        this.abilityIdArg = this.withOptionalArg("abilityId", "Ability ID or 'clear'", ArgTypes.STRING);
+    }
+
+    @Override
+    protected void execute(@Nonnull CommandContext ctx,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull World world) {
+
+        Player player = store.getComponent(ref, Player.getComponentType());
+
+        // Check if neither argument is provided - show usage or list
+        if (!slotArg.provided(ctx) && !abilityIdArg.provided(ctx)) {
+            // No arguments - default to showing list
+            listBindings(player, store, ref);
+            return;
+        }
+
+        // If only slot is provided, treat it specially for "list" keyword
+        if (slotArg.provided(ctx) && !abilityIdArg.provided(ctx)) {
+            // Check if user is trying to clear a binding without providing "clear"
+            player.sendMessage(Message.raw("Usage: /bindability <slot> <abilityId|clear> or /bindability list"));
+            return;
+        }
+
+        // Both arguments must be provided for bind/clear operations
+        if (!slotArg.provided(ctx) || !abilityIdArg.provided(ctx)) {
+            player.sendMessage(Message.raw("Usage: /bindability <slot> <abilityId|clear> or /bindability list"));
+            return;
+        }
+
+        int slot = slotArg.get(ctx);
+        String abilityId = abilityIdArg.get(ctx);
+
+        // Convert from 1-indexed (user input) to 0-indexed (internal hotbar)
+        int internalSlot = slot - 1;
+
+        // Validate slot range (1-9 for user, 0-8 internally)
+        if (internalSlot < 0 || internalSlot > 8) {
+            player.sendMessage(Message.raw("Invalid slot. Please use a slot between 1 and 9."));
+            return;
+        }
+
+        // Check for "list" keyword (case where someone does "/bindability 7 list" or
+        // similar)
+        if ("list".equalsIgnoreCase(abilityId)) {
+            listBindings(player, store, ref);
+            return;
+        }
+
+        // Validate slot is an ability slot
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        if (config == null) {
+            player.sendMessage(Message.raw("Config not found"));
+            return;
+        }
+
+        int[] abilitySlots = config.getHotbarAbilitySlots();
+        boolean isValidSlot = false;
+        for (int abilitySlot : abilitySlots) {
+            if (internalSlot == (abilitySlot - 1)) {
+                isValidSlot = true;
+                break;
+            }
+        }
+
+        if (!isValidSlot) {
+            player.sendMessage(Message.raw("Slot " + slot + " is not configured as an ability slot. Valid slots: " +
+                    Arrays.toString(abilitySlots)));
+            return;
+        }
+
+        // Get or create binding component
+        AbilityBindingComponent bindingComp = store.getComponent(ref,
+                ExamplePlugin.get().getAbilityBindingComponentType());
+        if (bindingComp == null) {
+            bindingComp = store.addComponent(ref, ExamplePlugin.get().getAbilityBindingComponentType());
+        }
+
+        // Handle "clear"
+        if ("clear".equalsIgnoreCase(abilityId) || "unbind".equalsIgnoreCase(abilityId)
+                || "remove".equalsIgnoreCase(abilityId)) {
+            bindingComp.setHotbarBinding(internalSlot, null);
+            
+            // Update hotbar icon
+            ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, null);
+            
+            player.sendMessage(Message.raw("Cleared ability binding for slot " + slot));
+            return;
+        }
+
+        // Validate ability exists
+        ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
+        if (abilityDef == null) {
+            player.sendMessage(Message.raw("Unknown ability: " + abilityId));
+            return;
+        }
+
+        // Check if player has learned this ability
+        ClassAbilitySystem abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        if (!abilitySystem.isAbilityUnlocked(ref, store, abilityId)) {
+            player.sendMessage(Message.raw("You haven't learned the ability: " + abilityDef.getDisplayName()));
+            return;
+        }
+
+        // Bind the ability
+        bindingComp.setHotbarBinding(internalSlot, abilityId);
+        
+        // Update hotbar icon
+        ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, abilityId);
+        
+        player.sendMessage(Message.raw("Bound " + abilityDef.getDisplayName() + " to hotbar slot " + slot +
+                " (key " + slot + ")"));
+    }
+
+    private void listBindings(@Nonnull Player player, @Nonnull Store<EntityStore> store,
+            @Nonnull Ref<EntityStore> ref) {
+        AbilityBindingComponent bindingComp = store.getComponent(ref,
+                ExamplePlugin.get().getAbilityBindingComponentType());
+        if (bindingComp == null || bindingComp.getHotbarBindings().isEmpty()) {
+            player.sendMessage(Message.raw("No ability bindings set"));
+            return;
+        }
+
+        player.sendMessage(Message.raw("=== Your Ability Bindings ==="));
+
+        bindingComp.getHotbarBindings().entrySet().stream()
+                .sorted((a, b) -> Integer.compare(a.getKey(), b.getKey()))
+                .forEach(entry -> {
+                    int internalSlot = entry.getKey();
+                    String abilityId = entry.getValue();
+
+                    ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
+                    String abilityName = abilityDef != null ? abilityDef.getDisplayName() : abilityId;
+
+                    // Display as 1-indexed for user (internal is 0-indexed)
+                    int displaySlot = internalSlot + 1;
+                    player.sendMessage(Message.raw("Slot " + displaySlot + " (key " + displaySlot + "): " + abilityName));
+                });
+    }
+}

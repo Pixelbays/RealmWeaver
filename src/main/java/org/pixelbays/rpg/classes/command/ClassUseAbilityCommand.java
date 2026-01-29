@@ -3,9 +3,9 @@ package org.pixelbays.rpg.classes.command;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
-import org.pixelbays.rpg.classes.component.ClassComponent;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -54,8 +54,8 @@ public class ClassUseAbilityCommand extends AbstractPlayerCommand {
             return;
         }
 
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
-        if (!classComp.hasUnlockedSpell(abilityId)) {
+        ClassAbilityComponent abilityComp = store.getComponent(ref, ExamplePlugin.get().getClassAbilityComponentType());
+        if (abilityComp == null || !abilityComp.hasAbility(abilityId)) {
             player.sendMessage(Message.raw("Ability not unlocked: " + abilityId));
             return;
         }

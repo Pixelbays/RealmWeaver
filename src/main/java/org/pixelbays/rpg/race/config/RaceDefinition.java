@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.rpg.global.config.builder.AbilityRefCodec;
+import org.pixelbays.rpg.global.config.builder.ClassRefCodec;
 import org.pixelbays.rpg.global.config.builder.RaceRefCodec;
 import org.pixelbays.rpg.global.config.builder.StatModifiers;
 
@@ -43,6 +44,7 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
 
     private static final Codec<String> ABILITY_REF_CODEC = new AbilityRefCodec();
     private static final Codec<String> RACE_REF_CODEC = new RaceRefCodec();
+    private static final Codec<String> CLASS_REF_CODEC = new ClassRefCodec();
 
     private static final FunctionCodec<String[], List<String>> ABILITY_ID_LIST_CODEC = new FunctionCodec<>(
             new ArrayCodec<>(ABILITY_REF_CODEC, String[]::new),
@@ -51,6 +53,11 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
 
     private static final FunctionCodec<String[], List<String>> RACE_ID_LIST_CODEC = new FunctionCodec<>(
             new ArrayCodec<>(RACE_REF_CODEC, String[]::new),
+            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+            list -> list == null ? new String[0] : list.toArray(String[]::new));
+
+        private static final FunctionCodec<String[], List<String>> CLASS_ID_LIST_CODEC = new FunctionCodec<>(
+            new ArrayCodec<>(CLASS_REF_CODEC, String[]::new),
             arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
             list -> list == null ? new String[0] : list.toArray(String[]::new));
 
@@ -192,6 +199,7 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
     private List<String> AllowedCosmeticIds;
     private List<String> NotAllowedCosmeticCategories;
     private List<String> NotAllowedCosmeticIds;
+
 
     public RaceDefinition() {
         this.RaceId = "";
@@ -401,7 +409,6 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
     public void setNotAllowedCosmeticIds(List<String> notAllowedCosmeticIds) {
         this.NotAllowedCosmeticIds = notAllowedCosmeticIds;
     }
-
 
     /**
      * Ability unlock configuration for races.

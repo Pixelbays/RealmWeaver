@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Paladin_Holy_Strike_Damage"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Paladin_Holy_Strike",
+    "Cooldown": 5.0
+  }
+}

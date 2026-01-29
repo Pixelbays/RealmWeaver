@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Consecration"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Consecration",
+    "Cooldown": 12.0
+  }
+}

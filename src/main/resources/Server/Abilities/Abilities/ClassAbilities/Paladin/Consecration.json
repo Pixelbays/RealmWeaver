@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "Paladin",
+    "Holy"
+  ],
+  "TranslationProperties": {
+    "Name": "server.abilities.paladin_consecration.name",
+    "Description": "server.abilities.paladin_consecration.description"
+  },
+  "AbilityType": "Active",
+  "GlobalCooldown": 8.0,
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Consecration"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Consecrate the ground, harming nearby enemies."
+}

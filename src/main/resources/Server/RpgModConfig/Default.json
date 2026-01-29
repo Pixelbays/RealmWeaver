@@ -1,0 +1,32 @@
+{
+  "ClassMode": "SingleClass",
+  "ActiveClassMode": "Manual",
+  "XPRouting": "ActiveClassOnly",
+  "ClassTags": [
+    "combat",
+    "profession"
+  ],
+  "XPTagSplits": {
+    "combat": 1.0,
+    "profession": 0.0,
+    "base": 0.0
+  },
+  "BaseXpMultiplier": 1.0,
+  "DefaultPlayerProfileCount": 3,
+  "MaxActiveClasses": 1,
+  "ClassSwitchingRules": "",
+  "DebuggingMode": "None",
+  "PlayerLogging": false,
+  "AntiGrindMod": false,
+  "RequireClassAtStart": false,
+  "RequireRaceAtStart": false,
+  "GlobalMobScaling": false,
+  "ServerName": "",
+  "DiscordJoin": "",
+  "Website": "",
+  "HotbarAbilitySlots": [
+    7,
+    8,
+    9
+  ]
+}

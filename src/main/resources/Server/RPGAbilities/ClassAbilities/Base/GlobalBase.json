@@ -1,9 +1,0 @@
-{
-    "abilityId": "GlobalBaseCD",
-    "classId": "base",
-    "abilityType": "Active",
-    "targetingType": "Target",
-    "cooldown": 1.5,
-    "globalCooldown": 1.5,
-    "enabled": false
-}

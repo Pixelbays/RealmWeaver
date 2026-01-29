@@ -1,0 +1,41 @@
+{
+  "DisplayName": "Base Class Level",
+  "Description": "Base template for all combat class level progression",
+  "MaxLevel": 60,
+  "StartingLevel": 1,
+  "ExpCurveType": "linear",
+  "ExpCurve": {
+    "Type": "linear",
+    "BaseExp": 200,
+    "GrowthRate": 100
+  },
+  "Prerequisites": {},
+  "DefaultRewards": {
+    "LevelUpEffects": {
+      "SoundId": "Level_Up_Wildsar",
+      "ParticleEffect": "Temp_Level_Up",
+      "Notification": {
+        "PrimaryMessage": "LEVEL UP! YOU BAD ASS",
+        "SecondaryMessage": "Character level {level}",
+        "IconItemId": "Item_Book"
+      },
+      "EventTitle": {
+        "PrimaryMessage": "LEVEL UP! YOU BAD ASS",
+        "SecondaryMessage": "Character level {level}",
+        "Major": true
+      },
+      "ChatMessage": "You did it! {system} is now Level! {level}",
+      "KillFeedPopup": "You did it! {system} is now Level! {level}"
+    },
+    "StatPoints": 0,
+    "SkillPoints": 0
+  },
+  "LevelRewards": {},
+  "StatGrowth": {
+    "FlatGrowth": {},
+    "MilestoneGrowth": {}
+  },
+  "Enabled": true,
+  "Visible": false,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
+}

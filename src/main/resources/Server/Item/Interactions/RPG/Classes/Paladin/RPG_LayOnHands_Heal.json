@@ -1,0 +1,7 @@
+{
+    "Type": "ChangeStat",
+    "Entity": "User",
+    "StatModifiers": {
+        "Health": 60
+    }
+}

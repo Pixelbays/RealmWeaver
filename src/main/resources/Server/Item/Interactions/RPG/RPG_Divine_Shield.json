@@ -1,0 +1,15 @@
+{
+    "Type": "Simple",
+    "RunTime": 0.1,
+    "Effects": {
+        "WorldSoundEventId": "SFX_Divine_Respawn",
+        "Particles": [
+            {
+                "SystemId": "Dust_Sparkles_Fine",
+                "TargetEntityPart": "Entity",
+                "TargetNodeName": "Player",
+                "Scale": 0.6
+            }
+        ]
+    }
+}

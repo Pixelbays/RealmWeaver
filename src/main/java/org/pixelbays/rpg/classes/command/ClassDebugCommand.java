@@ -12,8 +12,12 @@ import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.leveling.config.ExpCurveDefinition;
+import org.pixelbays.rpg.leveling.config.LevelRewardConfig;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
+import org.pixelbays.rpg.leveling.config.LevelUpEffects;
+import org.pixelbays.rpg.leveling.config.StatGrowthConfig;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -31,6 +35,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 /**
  * /class debug <className> - Dump class data to chat and console
  */
+@SuppressWarnings("null")
 public class ClassDebugCommand extends AbstractPlayerCommand {
 
     private final ClassManagementSystem classSystem;
@@ -206,7 +211,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
                 }
             }
 
-            LevelSystemConfig.LevelRewardConfig defaultRewards = levelConfig.getDefaultRewards();
+            LevelRewardConfig defaultRewards = levelConfig.getDefaultRewards();
             if (defaultRewards != null && hasAnyRewards(defaultRewards)) {
                 lines.add("DefaultRewards: statPoints=" + defaultRewards.getStatPoints()
                         + ", skillPoints=" + defaultRewards.getSkillPoints()
@@ -219,7 +224,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
                                 ? ", interactionChain=" + defaultRewards.getInteractionChain()
                                 : ""));
 
-                LevelSystemConfig.LevelUpEffects effects = defaultRewards.getLevelUpEffects();
+                LevelUpEffects effects = defaultRewards.getLevelUpEffects();
                 if (effects != null && !effects.isEmpty()) {
                     lines.add("DefaultRewardsEffects: sound=" + effects.getSoundId()
                             + ", particle=" + effects.getParticleEffect()
@@ -232,7 +237,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
                 lines.add("LevelRewardsCount: " + levelConfig.getLevelRewards().size());
             }
 
-            LevelSystemConfig.StatGrowthConfig statGrowth = levelConfig.getStatGrowth();
+            StatGrowthConfig statGrowth = levelConfig.getStatGrowth();
             if (statGrowth != null) {
                 int flatCount = statGrowth.getFlatGrowth() == null ? 0 : statGrowth.getFlatGrowth().size();
                 int percentCount = statGrowth.getPercentageGrowth() == null ? 0
@@ -249,11 +254,11 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
 
         for (String line : lines) {
             player.sendMessage(Message.raw(line));
-            System.out.println("[ClassDebug] " + line);
+            RpgLogging.debugDeveloper("[ClassDebug] %s", line);
         }
     }
 
-    private static boolean hasAnyRewards(@Nonnull LevelSystemConfig.LevelRewardConfig rewards) {
+    private static boolean hasAnyRewards(@Nonnull LevelRewardConfig rewards) {
         if (rewards.getStatPoints() > 0 || rewards.getSkillPoints() > 0) {
             return true;
         }
@@ -282,7 +287,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
             return true;
         }
 
-        LevelSystemConfig.LevelUpEffects effects = rewards.getLevelUpEffects();
+        LevelUpEffects effects = rewards.getLevelUpEffects();
         return effects != null && !effects.isEmpty();
     }
 }

@@ -1,0 +1,8 @@
+{
+  "Type": "EmpowerAbility",
+  "AbilityId": "paladin_holy_strike",
+  "Chance": 1.0,
+  "ResetCooldown": true,
+  "EmpowerCasts": 3,
+  "EmpowerMultiplier": 1.5
+}

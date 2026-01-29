@@ -4,6 +4,6 @@
   ],
   "Cooldown": {
     "Id": "RPG_Fireball",
-    "Cooldown": 4.0
+    "Cooldown": 8.0
   }
 }

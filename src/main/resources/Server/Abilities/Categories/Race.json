@@ -1,0 +1,7 @@
+{
+  "Id": "Race",
+  "Name": "Race",
+  "Icon": "Icons/ItemCategories/Items.png",
+  "InfoDisplayMode": "Tooltip",
+  "Order": 2
+}

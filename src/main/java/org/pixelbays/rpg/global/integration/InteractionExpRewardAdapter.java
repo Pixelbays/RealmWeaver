@@ -26,6 +26,16 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * }
  */
 @SuppressWarnings("unused")
+
+
+
+/* 
+
+THIS IS FILE IS FOR EXAMPLES OF FUTURE INTEGRATIONS ONLY.
+NOT CURRENTLY CALLED ANYWHERE.
+
+*/
+
 public class InteractionExpRewardAdapter {
     
     private final LevelProgressionSystem levelSystem;
@@ -130,7 +140,7 @@ public class InteractionExpRewardAdapter {
         processExpRewards(playerRef, expRewards, "gather_" + resourceId);
     }
     
-    // === Helper methods (implement based on your system) ===
+    // === Helper methods (implement as you need based on systems) ===
     
     private Map<String, Float> loadExpRewardsForEntity(String entityType) {
         // TODO: Load from entity configuration or dedicated exp reward configs

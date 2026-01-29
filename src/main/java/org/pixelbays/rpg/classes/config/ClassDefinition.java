@@ -3,16 +3,21 @@ package org.pixelbays.rpg.classes.config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.rpg.global.config.RpgModConfig;
+import org.pixelbays.rpg.global.config.RpgModConfig.AbilityControlType;
 import org.pixelbays.rpg.global.config.builder.AbilityRefCodec;
 import org.pixelbays.rpg.global.config.builder.LevelSystemRefCodec;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.AssetRegistry;
+import com.hypixel.hytale.assetstore.AssetStore;
 import com.hypixel.hytale.assetstore.codec.AssetBuilderCodec;
 import com.hypixel.hytale.assetstore.codec.AssetCodec;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
@@ -71,7 +76,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         private static final Codec<String> ABILITY_REF_CODEC = new AbilityRefCodec();
         private static final Codec<String> LEVEL_SYSTEM_REF_CODEC = new LevelSystemRefCodec();
 
-    private static final FunctionCodec<String[], List<String>> STAT_ID_LIST_CODEC = new FunctionCodec<>(
+        private static final FunctionCodec<String[], List<String>> STAT_ID_LIST_CODEC = new FunctionCodec<>(
             new ArrayCodec<>(ENTITY_STAT_REF_CODEC, String[]::new),
             arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
             list -> list == null ? null : list.toArray(String[]::new));
@@ -235,9 +240,13 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                     (i, s) -> i.SwitchingRules = s, i -> i.SwitchingRules,
                     (i, parent) -> i.SwitchingRules = parent.SwitchingRules)
             .add()
-            .appendInherited(new KeyedCodec<>("RelearnExpPenalty", Codec.FLOAT, false, true),
+                .appendInherited(new KeyedCodec<>("RelearnExpPenalty", Codec.FLOAT, false, true),
                     (i, s) -> i.RelearnExpPenalty = s, i -> i.RelearnExpPenalty,
                     (i, parent) -> i.RelearnExpPenalty = parent.RelearnExpPenalty)
+                .add()
+            .appendInherited(new KeyedCodec<>("AbilityControlTypeOverride", new EnumCodec<>(AbilityControlType.class), true),
+                    (i, s) -> i.AbilityControlTypeOverride = s, i -> i.AbilityControlTypeOverride,
+                    (i, parent) -> i.AbilityControlTypeOverride = parent.AbilityControlTypeOverride)
             .add()
             .build();
 
@@ -378,7 +387,8 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     private ClassSwitchingRules SwitchingRules;
     // === Relearning Penalty ===
     private float RelearnExpPenalty; // % of total exp lost when relearning (0.0 to 1.0)
-
+    // === Ability Controls ===
+    private AbilityControlType AbilityControlTypeOverride; // Override global ability control type (null = use global)
     // === Constructors ===
     public ClassDefinition() {
         this.id = "";
@@ -402,12 +412,21 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         this.TalentTrees = new ArrayList<>();
         this.SwitchingRules = new ClassSwitchingRules();
         this.RelearnExpPenalty = 0.0f;
+        this.AbilityControlTypeOverride = null; // null = use global default
+    }
+
+    private static AssetStore<String, ClassDefinition, DefaultAssetMap<String, ClassDefinition>> ASSET_STORE;
+
+    public static AssetStore<String, ClassDefinition, DefaultAssetMap<String, ClassDefinition>> getAssetStore() {
+        if (ASSET_STORE == null) {
+            ASSET_STORE = AssetRegistry.getAssetStore(ClassDefinition.class);
+        }
+        return ASSET_STORE;
     }
 
     public static DefaultAssetMap<String, ClassDefinition> getAssetMap() {
         if (ASSET_MAP == null) {
-            ASSET_MAP = (DefaultAssetMap<String, ClassDefinition>) AssetRegistry.getAssetStore(ClassDefinition.class)
-                    .getAssetMap();
+            ASSET_MAP = getAssetStore().getAssetMap();
         }
 
         return ASSET_MAP;
@@ -499,6 +518,70 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         return ResourceStats;
     }
 
+    public Map<String, List<String>> getTags() {
+        Map<String, List<String>> result = new HashMap<>();
+        if (data == null) {
+            return result;
+        }
+
+        Map<String, String[]> rawTags = data.getRawTags();
+        if (rawTags == null || rawTags.isEmpty()) {
+            return result;
+        }
+
+        for (Map.Entry<String, String[]> entry : rawTags.entrySet()) {
+            String key = entry.getKey();
+            String[] values = entry.getValue();
+            if (key == null || values == null || values.length == 0) {
+                continue;
+            }
+
+            List<String> list = new ArrayList<>();
+            for (String value : values) {
+                if (value != null && !value.isEmpty()) {
+                    list.add(value);
+                }
+            }
+
+            if (!list.isEmpty()) {
+                result.put(key, list);
+            }
+        }
+
+        return result;
+    }
+
+    public boolean hasTag(@Nonnull String tagKey, @Nonnull String tagValue) {
+        if (data == null) {
+            return false;
+        }
+
+        Map<String, String[]> rawTags = data.getRawTags();
+        if (rawTags == null || rawTags.isEmpty()) {
+            return false;
+        }
+
+        for (Map.Entry<String, String[]> entry : rawTags.entrySet()) {
+            String key = entry.getKey();
+            String[] values = entry.getValue();
+            if (key == null || values == null || values.length == 0) {
+                continue;
+            }
+
+            if (!key.equalsIgnoreCase(tagKey)) {
+                continue;
+            }
+
+            for (String value : values) {
+                if (value != null && value.equalsIgnoreCase(tagValue)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public StatModifiers getBaseStatModifiers() {
         return BaseStatModifiers;
     }
@@ -558,6 +641,37 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
     public void setLevelMilestones(List<LevelMilestone> LevelMilestones) {
         this.LevelMilestones = LevelMilestones;
+    }
+
+    @Nullable
+    public AbilityControlType getAbilityControlTypeOverride() {
+        return AbilityControlTypeOverride;
+    }
+
+    public void setAbilityControlTypeOverride(@Nullable AbilityControlType abilityControlTypeOverride) {
+        this.AbilityControlTypeOverride = abilityControlTypeOverride;
+    }
+
+    /**
+     * Get the effective ability control type for this class.
+     * If override is set, uses that; otherwise uses global default from config.
+     * 
+     * @param configId The RpgModConfig ID to fetch global default from
+     * @return The effective ability control type
+     */
+    @Nonnull
+    public AbilityControlType getEffectiveAbilityControlType(String configId) {
+        if (AbilityControlTypeOverride != null) {
+            return AbilityControlTypeOverride;
+        }
+        
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
+        if (config != null) {
+            return config.getAbilityControlType();
+        }
+        
+        // Fallback to Hotbar if config not found
+        return AbilityControlType.Hotbar;
     }
 
     public List<TalentTree> getTalentTrees() {

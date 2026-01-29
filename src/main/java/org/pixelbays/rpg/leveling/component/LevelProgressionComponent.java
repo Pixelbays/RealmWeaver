@@ -20,7 +20,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Supports multiple simultaneous leveling systems (character level, class
  * levels, profession levels, etc.)
  */
-@SuppressWarnings("all")
+@SuppressWarnings({"all", "clone", "CloneDoesntDeclareCloneNotSupportedException"})
 public class LevelProgressionComponent implements Component<EntityStore>, Cloneable {
 
     // Codec for NBT serialization (required for persistence)
@@ -103,17 +103,14 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
 
     @Nonnull
     @Override
+    @SuppressWarnings({"clone", "CloneDoesntDeclareCloneNotSupportedException"})
     public Component<EntityStore> clone() {
-        try {
-            LevelProgressionComponent cloned = (LevelProgressionComponent) super.clone();
-            cloned.levelSystems = new HashMap<>();
-            for (Map.Entry<String, LevelSystemData> entry : this.levelSystems.entrySet()) {
-                cloned.levelSystems.put(entry.getKey(), entry.getValue().clone());
-            }
-            return cloned;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
+        LevelProgressionComponent cloned = new LevelProgressionComponent();
+        cloned.levelSystems = new HashMap<>();
+        for (Map.Entry<String, LevelSystemData> entry : this.levelSystems.entrySet()) {
+            cloned.levelSystems.put(entry.getKey(), entry.getValue().clone());
         }
+        return cloned;
     }
 
     /**
@@ -249,20 +246,17 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
          * Clone this level system data
          */
         @Override
+        @SuppressWarnings({"clone", "CloneDoesntDeclareCloneNotSupportedException"})
         public LevelSystemData clone() {
-            try {
-                LevelSystemData cloned = (LevelSystemData) super.clone();
-                cloned.systemId = this.systemId;
-                cloned.currentLevel = this.currentLevel;
-                cloned.currentExp = this.currentExp;
-                cloned.expToNextLevel = this.expToNextLevel;
-                cloned.totalLevelsGained = this.totalLevelsGained;
-                cloned.availableStatPoints = this.availableStatPoints;
-                cloned.availableSkillPoints = this.availableSkillPoints;
-                return cloned;
-            } catch (CloneNotSupportedException e) {
-                throw new AssertionError(e);
-            }
+            LevelSystemData cloned = new LevelSystemData();
+            cloned.systemId = this.systemId;
+            cloned.currentLevel = this.currentLevel;
+            cloned.currentExp = this.currentExp;
+            cloned.expToNextLevel = this.expToNextLevel;
+            cloned.totalLevelsGained = this.totalLevelsGained;
+            cloned.availableStatPoints = this.availableStatPoints;
+            cloned.availableSkillPoints = this.availableSkillPoints;
+            return cloned;
         }
     }
 }

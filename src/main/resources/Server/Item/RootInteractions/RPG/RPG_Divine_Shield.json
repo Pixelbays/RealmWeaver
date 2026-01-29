@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Divine_Shield"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Divine_Shield",
+    "Cooldown": 20.0
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "DisplayName": "Base Profession Level",
+  "Description": "Base template for all profession/crafting level progression",
+  "MaxLevel": 100,
+  "StartingLevel": 1,
+  "ExpCurveRef": "Curve_Fast",
+  "Prerequisites": {},
+  "DefaultRewards": {
+    "StatPoints": 0,
+    "SkillPoints": 0
+  },
+  "LevelRewards": {},
+  "StatGrowth": {
+    "FlatGrowth": {},
+    "MilestoneGrowth": {}
+  },
+  "Enabled": false,
+  "Visible": false,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
+}

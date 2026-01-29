@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Holy_Strike_Damage"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Holy_Strike",
+    "Cooldown": 6.0
+  }
+}

@@ -1,8 +1,0 @@
-{
-  "InitialValue": 1,
-  "Min": 0,
-  "Max": 100,
-  "Shared": false,
-  "ResetType": "InitialValue",
-  "Regenerating": []
-}

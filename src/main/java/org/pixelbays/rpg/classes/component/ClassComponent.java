@@ -23,7 +23,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Supports multiple learned classes with one active class at a time.
  * Integrates with LevelProgressionSystem for class leveling.
  */
-@SuppressWarnings({"PMD", "CloneDoesntDeclareCloneNotSupportedException", "CloneDoesntCallSuperClone", "all"})
+@SuppressWarnings({"PMD", "CloneDoesntDeclareCloneNotSupportedException", "CloneDoesntCallSuperClone", "all", "clone"})
 public class ClassComponent implements Component<EntityStore>, Cloneable {
     
     // Codec for ClassData serialization
@@ -84,7 +84,7 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
     // Map of classId -> class data
     private Map<String, ClassData> learnedClasses;
 
-    // Map of abilityId -> unlock data
+    // Legacy: ability unlocks were previously stored here. Kept for migration.
     private Map<String, SpellUnlockData> unlockedSpells;
     
     // Currently active class ID (only one active at a time)
@@ -179,23 +179,29 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
     }
 
     /**
-     * Check if a spell/ability is unlocked.
+     * Legacy: Check if a spell/ability is unlocked.
+     * Prefer ClassAbilityComponent.
      */
+    @Deprecated
     public boolean hasUnlockedSpell(String abilityId) {
         return unlockedSpells.containsKey(abilityId);
     }
 
     /**
-     * Get unlock data for a spell/ability (returns null if not unlocked).
+     * Legacy: Get unlock data for a spell/ability (returns null if not unlocked).
+     * Prefer ClassAbilityComponent.
      */
+    @Deprecated
     @Nullable
     public SpellUnlockData getUnlockedSpell(String abilityId) {
         return unlockedSpells.get(abilityId);
     }
 
     /**
-     * Unlock a spell/ability.
+     * Legacy: Unlock a spell/ability.
+     * Prefer ClassAbilityComponent.
      */
+    @Deprecated
     public SpellUnlockData unlockSpell(String abilityId, int rank) {
         SpellUnlockData data = new SpellUnlockData(abilityId, rank);
         unlockedSpells.put(abilityId, data);
@@ -203,10 +209,19 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
     }
 
     /**
-     * Get all unlocked spells.
+     * Legacy: Get all unlocked spells.
+     * Prefer ClassAbilityComponent.
      */
+    @Deprecated
     public Map<String, SpellUnlockData> getAllUnlockedSpells() {
         return unlockedSpells;
+    }
+
+    /**
+     * Legacy: Clear all unlocked spells after migration.
+     */
+    public void clearLegacyUnlockedSpells() {
+        unlockedSpells.clear();
     }
     
     /**
@@ -218,22 +233,18 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
     
     @Nonnull
     @Override
-    @SuppressWarnings({"all"})
+    @SuppressWarnings({"all", "clone", "CloneDoesntDeclareCloneNotSupportedException"})
     public Component<EntityStore> clone() {
-        try {
-            ClassComponent cloned = (ClassComponent) super.clone();
-            cloned.learnedClasses = new HashMap<>();
-            cloned.unlockedSpells = new HashMap<>();
-            for (Map.Entry<String, ClassData> entry : this.learnedClasses.entrySet()) {
-                cloned.learnedClasses.put(entry.getKey(), entry.getValue().copy());
-            }
-            for (Map.Entry<String, SpellUnlockData> entry : this.unlockedSpells.entrySet()) {
-                cloned.unlockedSpells.put(entry.getKey(), entry.getValue().copy());
-            }
-            return cloned;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
+        ClassComponent cloned = new ClassComponent();
+        cloned.learnedClasses = new HashMap<>();
+        cloned.unlockedSpells = new HashMap<>();
+        for (Map.Entry<String, ClassData> entry : this.learnedClasses.entrySet()) {
+            cloned.learnedClasses.put(entry.getKey(), entry.getValue().copy());
         }
+        for (Map.Entry<String, SpellUnlockData> entry : this.unlockedSpells.entrySet()) {
+            cloned.unlockedSpells.put(entry.getKey(), entry.getValue().copy());
+        }
+        return cloned;
     }
     
     /**

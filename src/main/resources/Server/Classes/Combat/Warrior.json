@@ -1,0 +1,45 @@
+{
+  "DisplayName": "Warriors",
+  "Description": "A fierce melee combatant who specializes in strength and endurance. Warriors excel at close-quarters combat and can withstand massive amounts of damage.",
+  "Icon": "Icons/ItemsGenerated/Armor_Leather_Medium_Chest.png",
+  "Enabled": true,
+  "Visible": true,
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "LevelSystemId": "Warrior",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "Charge",
+      "UnlockLevel": 1
+    },
+    {
+      "AbilityId": "HolyStrike",
+      "UnlockLevel": 3
+    }
+  ],
+  "TalentTrees": [
+    {
+      "Nodes": [
+        {
+          "GrantsAbilityId": "Fireball",
+          "RequiredNodes": [
+            "0"
+          ]
+        }
+      ]
+    }
+  ],
+  "PerLevelModifiers": {
+    "AdditiveModifiers": {
+      "Health": 100
+    }
+  },
+  "Tags": {
+    "type": [
+      "combat"
+    ],
+    "races": [
+      "Global"
+    ]
+  }
+}

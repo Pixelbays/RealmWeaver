@@ -1,0 +1,29 @@
+{
+  "DisplayName": "WoodWorking",
+  "Description": "A skilled profession focused on crafting and working with wood. Woodworkers create tools, furniture, and other wooden items.",
+  "Enabled": true,
+  "Visible": true,
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "LevelSystemId": "WoodWorking",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "ChopWood",
+      "UnlockLevel": 1
+    }
+  ],
+  "TalentTrees": [
+    {}
+  ],
+  "PerLevelModifiers": {
+    "AdditiveModifiers": {
+      "Health": 100
+    }
+  },
+  "Tags": {
+    "type": [
+      "profession"
+    ]
+  },
+  "Icon": "Icons/ItemsGenerated/Weapon_Axe_Iron.png"
+}

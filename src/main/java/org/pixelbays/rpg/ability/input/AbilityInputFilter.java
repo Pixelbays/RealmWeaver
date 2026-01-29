@@ -1,0 +1,87 @@
+package org.pixelbays.rpg.ability.input;
+
+import javax.annotation.Nonnull;
+
+import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.global.config.RpgModConfig;
+import org.pixelbays.rpg.global.config.RpgModConfig.AbilityControlType;
+
+import com.hypixel.hytale.protocol.Packet;
+import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
+import com.hypixel.hytale.server.core.io.adapter.PlayerPacketFilter;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+
+/**
+ * Main packet filter for intercepting player input and routing to appropriate
+ * ability handlers.
+ * Filters SyncInteractionChains packets (ID 290) and delegates to
+ * control-type-specific handlers.
+ */
+public class AbilityInputFilter implements PlayerPacketFilter {
+
+    private final ExamplePlugin plugin;
+    private final WeaponsInputHandler weaponsHandler;
+    private final HotbarInputHandler hotbarHandler;
+    private final AbilitySlotsInputHandler abilitySlotsHandler;
+
+    public AbilityInputFilter(@Nonnull ExamplePlugin plugin) {
+        this.plugin = plugin;
+        this.weaponsHandler = new WeaponsInputHandler(plugin);
+        this.hotbarHandler = new HotbarInputHandler(plugin);
+        this.abilitySlotsHandler = new AbilitySlotsInputHandler(plugin);
+    }
+
+    @Override
+    public boolean test(@Nonnull PlayerRef playerRef, @Nonnull Packet packet) {
+        // Only process SyncInteractionChains packets (ID 290)
+        if (!(packet instanceof SyncInteractionChains syncPacket)) {
+            return false; // Let packet through
+        }
+
+        // Determine which control type to use for this player
+        AbilityControlType controlType = getPlayerControlType(playerRef);
+        if (controlType == null) {
+            return false; // No control type configured
+        }
+
+        // Route to appropriate handler based on control type
+        return switch (controlType) {
+            case Weapons -> weaponsHandler.handlePacket(playerRef, syncPacket);
+            case Hotbar -> hotbarHandler.handlePacket(playerRef, syncPacket);
+            case AbilitySlots123 -> abilitySlotsHandler.handlePacket(playerRef, syncPacket);
+        };
+    }
+
+    /**
+     * Determine the active control type for a player.
+     * Checks active class override, then falls back to global config.
+     */
+    private AbilityControlType getPlayerControlType(@Nonnull PlayerRef playerRef) {
+        // TODO: Get player's active class and check for override
+        // For now, just use global default
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        if (config != null) {
+            return config.getAbilityControlType();
+        }
+
+        // Fallback to Hotbar
+        return AbilityControlType.Hotbar;
+    }
+
+    /**
+     * Get control type for a specific class.
+     * Checks class override, then falls back to global config.
+     */
+    @Nonnull
+    public static AbilityControlType getControlTypeForClass(@Nonnull String classId, @Nonnull String configId) {
+        ClassDefinition classDef = ClassDefinition.getAssetMap().getAsset(classId);
+        if (classDef != null) {
+            return classDef.getEffectiveAbilityControlType(configId);
+        }
+
+        // Fallback
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
+        return config != null ? config.getAbilityControlType() : AbilityControlType.Hotbar;
+    }
+}

@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "Warrior",
+    "Mobility"
+  ],
+  "TranslationProperties": {
+    "DisplayName": "Charge",
+    "Description": "Charge at an enemy, dealin eg damage and stunning them briefly."
+  },
+  "AbilityType": "Toggle",
+  "Parent": "GlobalBase",
+  "GlobalCooldown": 1.5,
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Warrior_Charge"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Charges to target enemy within 25 yards, dealing 50 damage and stunning for 2 seconds. Costs 10 Rage. 12 second cooldown."
+}

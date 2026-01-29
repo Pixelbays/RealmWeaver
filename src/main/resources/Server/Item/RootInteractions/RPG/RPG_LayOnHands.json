@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_LayOnHands_Heal"
+  ],
+  "Cooldown": {
+    "Id": "RPG_LayOnHands",
+    "Cooldown": 12.0
+  }
+}

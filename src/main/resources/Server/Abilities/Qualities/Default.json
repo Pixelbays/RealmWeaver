@@ -1,0 +1,10 @@
+{
+  "QualityValue": 0,
+  "AbilityTooltipTexture": "UI/ItemQualities/Tooltips/ItemTooltipDefault.png",
+  "AbilityTooltipArrowTexture": "UI/ItemQualities/Tooltips/ItemTooltipDefaultArrow.png",
+  "SlotTexture": "UI/ItemQualities/Slots/SlotDefault.png",
+  "TextColor": "#c9d2dd",
+  "LocalizationKey": "server.general.qualities.Default",
+  "VisibleQualityLabel": true,
+  "HideFromSearch": false
+}

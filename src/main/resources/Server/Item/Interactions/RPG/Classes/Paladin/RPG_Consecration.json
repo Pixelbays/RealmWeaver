@@ -1,0 +1,11 @@
+{
+    "Type": "DamageEntity",
+    "DamageCalculator": {
+        "BaseDamage": {
+            "Physical": 8
+        }
+    },
+    "Effects": {
+        "WorldSoundEventId": "SFX_Sword_T2_Impact"
+    }
+}

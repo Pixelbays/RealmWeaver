@@ -1,0 +1,61 @@
+{
+  "Categories": [
+    "Paladin",
+    "Holy"
+  ],
+  "TranslationProperties": {
+    "Name": "server.abilities.paladin_holy_strike.name",
+    "Description": "server.abilities.paladin_holy_strike.description"
+  },
+  "AbilityType": "Active",
+  "GlobalCooldown": 1.0,
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": true,
+  "MaxRank": 3,
+  "Interactions": {
+    "Primary": "RPG_Paladin_Holy_Strike"
+  },
+  "InteractionVars": {
+    "Rank1": {
+      "Interactions": [
+        {
+          "Parent": "RPG_Paladin_Holy_Strike_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 10
+            }
+          }
+        }
+      ]
+    },
+    "Rank2": {
+      "Interactions": [
+        {
+          "Parent": "RPG_Paladin_Holy_Strike_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 15
+            }
+          }
+        }
+      ]
+    },
+    "Rank3": {
+      "Interactions": [
+        {
+          "Parent": "RPG_Paladin_Holy_Strike_Damage",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Physical": 22
+            }
+          }
+        }
+      ]
+    }
+  },
+  "Enabled": true,
+  "Tooltip": "Strike the enemy with holy power. Damage scales by rank."
+}

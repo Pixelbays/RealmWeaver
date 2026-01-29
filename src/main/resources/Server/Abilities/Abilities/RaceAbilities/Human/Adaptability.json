@@ -1,0 +1,22 @@
+{
+  "Parent": "BaseRaceAbility",
+  "Categories": [
+    "Race",
+    "Passive"
+  ],
+  "TranslationProperties": {
+    "Name": "server.abilities.race_human_adaptability.name",
+    "Description": "server.abilities.race_human_adaptability.description"
+  },
+  "AbilityType": "Passive",
+  "GlobalCooldown": 0.0,
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {},
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Humans gain small bonuses to multiple stats."
+}

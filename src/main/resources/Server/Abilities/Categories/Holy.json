@@ -1,0 +1,7 @@
+{
+  "Id": "Holy",
+  "Name": "Holy",
+  "Icon": "Icons/ItemCategories/Items.png",
+  "InfoDisplayMode": "Tooltip",
+  "Order": 20
+}

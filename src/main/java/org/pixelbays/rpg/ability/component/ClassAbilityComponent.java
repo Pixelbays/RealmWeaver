@@ -53,13 +53,21 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
                     (component, value) -> component.unlockedAbilities = value,
                     component -> component.unlockedAbilities)
             .add()
+            .append(new KeyedCodec<>("ToggleStates", new MapCodec<>(Codec.BOOLEAN, HashMap::new, false)),
+                    (component, value) -> component.toggleStates = value,
+                    component -> component.toggleStates)
+            .add()
             .build();
 
     // Map of abilityId -> ability data
     private Map<String, AbilityData> unlockedAbilities;
+    
+    // Map of abilityId -> toggle state (true = active, false = inactive)
+    private Map<String, Boolean> toggleStates;
 
     public ClassAbilityComponent() {
         this.unlockedAbilities = new HashMap<>();
+        this.toggleStates = new HashMap<>();
     }
 
     /**
@@ -90,7 +98,9 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
     public Set<String> getAbilitiesForClass(String classId) {
         Set<String> classAbilities = new HashSet<>();
         for (AbilityData data : unlockedAbilities.values()) {
-            classAbilities.add(data.getAbilityId());
+            if (classId.equals(data.classId)) {
+                classAbilities.add(data.getAbilityId());
+            }
         }
         return classAbilities;
     }
@@ -100,6 +110,16 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
      */
     public AbilityData unlockAbility(String abilityId, String classId) {
         AbilityData data = new AbilityData(abilityId, classId);
+        unlockedAbilities.put(abilityId, data);
+        return data;
+    }
+
+    /**
+     * Unlock an ability with explicit rank.
+     */
+    public AbilityData unlockAbility(String abilityId, String classId, int rank) {
+        AbilityData data = new AbilityData(abilityId, classId);
+        data.setRank(Math.max(1, rank));
         unlockedAbilities.put(abilityId, data);
         return data;
     }
@@ -147,6 +167,44 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
     }
 
     /**
+     * Check if a toggle ability is currently active
+     */
+    public boolean isToggleActive(String abilityId) {
+        return toggleStates.getOrDefault(abilityId, false);
+    }
+
+    /**
+     * Set toggle state for an ability
+     */
+    public void setToggleState(String abilityId, boolean active) {
+        toggleStates.put(abilityId, active);
+    }
+
+    /**
+     * Toggle the state of a toggle ability
+     * @return the new state (true = now active, false = now inactive)
+     */
+    public boolean toggleAbility(String abilityId) {
+        boolean currentState = toggleStates.getOrDefault(abilityId, false);
+        boolean newState = !currentState;
+        toggleStates.put(abilityId, newState);
+        return newState;
+    }
+
+    /**
+     * Get all active toggle abilities
+     */
+    public Set<String> getActiveToggles() {
+        Set<String> activeToggles = new HashSet<>();
+        for (Map.Entry<String, Boolean> entry : toggleStates.entrySet()) {
+            if (entry.getValue()) {
+                activeToggles.add(entry.getKey());
+            }
+        }
+        return activeToggles;
+    }
+
+    /**
      * Get the component type for registration
      */
     @SuppressWarnings("unchecked")
@@ -169,6 +227,7 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
                 copy.rank = source.rank;
                 cloned.unlockedAbilities.put(entry.getKey(), copy);
             }
+            cloned.toggleStates = new HashMap<>(this.toggleStates);
             return cloned;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(e);

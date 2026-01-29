@@ -28,10 +28,13 @@ public class ClassLearnCommand extends AbstractPlayerCommand {
     public ClassLearnCommand() {
         super("learn", "Learn a new class");
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.classNameArg = this.withRequiredArg("className", "The class to learn", ArgTypes.STRING);
+        @SuppressWarnings("null")
+        RequiredArg<String> className = this.withRequiredArg("className", "The class to learn", ArgTypes.STRING);
+        this.classNameArg = className;
     }
 
     @Override
+    @SuppressWarnings("null")
     protected void execute(@Nonnull CommandContext ctx,
             @Nonnull Store<EntityStore> store,
             @Nonnull Ref<EntityStore> ref,
@@ -42,9 +45,14 @@ public class ClassLearnCommand extends AbstractPlayerCommand {
         String classId = this.classNameArg.get(ctx);
 
         String result = classSystem.learnClass(ref, classId, store);
+        if (result == null) {
+            player.sendMessage(Message.raw("Unknown error"));
+            return;
+        }
 
         if (result.startsWith("ERROR:")) {
-            player.sendMessage(Message.raw(result.substring(7)));
+            @Nonnull String message = result.substring(7);
+            player.sendMessage(Message.raw(message));
         } else {
             player.sendMessage(Message.raw(result));
         }

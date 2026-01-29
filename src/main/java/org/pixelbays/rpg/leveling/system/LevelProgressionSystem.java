@@ -1,17 +1,22 @@
 package org.pixelbays.rpg.leveling.system;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
+import org.pixelbays.rpg.leveling.config.EventTitleConfig;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
+import org.pixelbays.rpg.leveling.config.LevelRewardConfig;
+import org.pixelbays.rpg.leveling.config.LevelUpEffects;
+import org.pixelbays.rpg.leveling.config.NotificationConfig;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -21,6 +26,7 @@ import com.hypixel.hytale.protocol.EntityPart;
 import com.hypixel.hytale.protocol.ItemWithAllMetadata;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.protocol.packets.entities.SpawnModelParticles;
+import com.hypixel.hytale.protocol.packets.interface_.KillFeedMessage;
 import com.hypixel.hytale.protocol.packets.interface_.NotificationStyle;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelParticle;
@@ -49,12 +55,10 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 @SuppressWarnings("null")
 public class LevelProgressionSystem {
 
-    // Loaded level system configurations from asset pack
-    private final Map<String, LevelSystemConfig> levelSystemConfigs;
     private StatSystem statSystem;
 
     public LevelProgressionSystem(@Nonnull EventRegistry eventRegistry) {
-        this.levelSystemConfigs = new HashMap<>();
+        // Level system configs are loaded via Hytale's asset system
     }
 
     public void setStatSystem(@Nullable StatSystem statSystem) {
@@ -62,62 +66,8 @@ public class LevelProgressionSystem {
     }
 
     /**
-     * Load a level system configuration from asset pack
-     */
-    public void registerLevelSystem(LevelSystemConfig config) {
-        if (config == null || config.getSystemId() == null || config.getSystemId().isEmpty()) {
-            System.err.println("[LevelSystem] Ignored null/invalid level system config");
-            return;
-        }
-        levelSystemConfigs.put(config.getSystemId(), config);
-        System.out.println("[LevelSystem] Registered level system: " + config.getSystemId() +
-                " (" + config.getDisplayName() + ")");
-    }
-
-    /**
-     * Load level system configurations from JSON files in the asset pack
-     * Path: Server/Entity/Stats/*.json
-     * 
-     * This method scans all registered asset packs for level system configurations
-     * and loads them.
-     * Configs are loaded using Gson JSON parsing and support inheritance from
-     * parent configs.
-     */
-    public void loadLevelSystemsFromAssets() {
-        System.out.println("[LevelSystem] Loading level system configurations from asset packs...");
-
-        levelSystemConfigs.clear();
-
-        try {
-            // Use AssetLoader to load all level system configs from asset packs
-            Map<String, LevelSystemConfig> loadedConfigs = org.pixelbays.rpg.global.util.AssetLoader
-                    .loadLevelSystemConfigs();
-
-            // Register each loaded config
-            for (LevelSystemConfig config : loadedConfigs.values()) {
-                registerLevelSystem(config);
-            }
-
-            System.out.println("[LevelSystem] Successfully loaded " + levelSystemConfigs.size() +
-                    " level system configurations from asset packs");
-
-        } catch (Exception e) {
-            System.err.println("[LevelSystem] Failed to load level systems from asset packs: " + e.getMessage());
-            System.out.println("[LevelSystem] Falling back to test configs");
-        }
-
-        // If no configs were loaded, use test data as fallback
-        if (levelSystemConfigs.isEmpty()) {
-            System.out
-                    .println("[LevelSystem] No level system configs found in asset packs - using test configs instead");
-        }
-
-        System.out.println(
-                "[LevelSystem] Level progression system initialized with " + levelSystemConfigs.size() + " systems");
-    }
-
-    /**
-     * Create test configurations for testing (fallback when asset loading fails)
+     * Note: Level system configurations are now loaded automatically via Hytale's asset system.
+     * No manual loading is required - configs are accessed directly from the asset store.
      */
 
     /**
@@ -140,10 +90,10 @@ public class LevelProgressionSystem {
             return;
         }
 
-        // Get level system config
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        // Get level system config (from asset store for latest changes)
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null) {
-            System.err.println("[LevelSystem] Unknown level system: " + systemId);
+            RpgLogging.debugDeveloper("[LevelSystem] Unknown level system: %s", systemId);
             return;
         }
 
@@ -151,6 +101,31 @@ public class LevelProgressionSystem {
             return; // System disabled
         }
 
+        if (source == null) {
+            RpgLogging.debugDeveloper("[LevelSystem] Grant exp source is null: systemId=%s amount=%s entity=%s",
+                    systemId, amount, entityRef);
+        }
+
+        // If world is provided, wrap all component modifications in world.execute() for thread safety
+        // This ensures that entity component modifications happen on the correct world thread
+        if (world != null) {
+            world.execute(() -> grantExperienceInternal(entityRef, systemId, amount, source, config, store, world));
+        } else {
+            // No world provided - assume we're already on the correct thread (e.g., from commands)
+            grantExperienceInternal(entityRef, systemId, amount, source, config, store, null);
+        }
+    }
+
+    /**
+     * Internal implementation of experience granting with component modifications.
+     * This should only be called from grantExperience() which handles thread safety.
+     */
+    private void grantExperienceInternal(@Nonnull Ref<EntityStore> entityRef, String systemId, float amount, 
+            String source, @Nonnull LevelSystemConfig config, @Nullable Store<EntityStore> store, 
+            @Nullable World world) {
+        RpgLogging.debugDeveloper("[LevelSystem] Grant exp: systemId=%s amount=%s source=%s entity=%s",
+            systemId, amount, source, entityRef);
+        
         // Get or create level progression component
         LevelProgressionComponent levelComp = getOrCreateComponent(entityRef);
         LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
@@ -159,7 +134,7 @@ public class LevelProgressionSystem {
 
         // Check prerequisites
         if (!checkPrerequisites(levelComp, config)) {
-            System.out.println("[LevelSystem] Prerequisites not met for " + systemId);
+            RpgLogging.debugDeveloper("[LevelSystem] Prerequisites not met for %s", systemId);
             return; // Prerequisites not met
         }
 
@@ -167,21 +142,6 @@ public class LevelProgressionSystem {
         if (config.getMaxLevel() > 0 && levelData.getCurrentLevel() >= config.getMaxLevel()) {
             return; // Already at max level
         }
-
-        // Fire experience gain event (allows modification/cancellation)
-        // TODO: Re-enable when event compilation issue is resolved
-        /*
-         * ExperienceGainEvent expEvent = new ExperienceGainEvent(entityRef, systemId,
-         * amount, source);
-         * fireEvent(expEvent);
-         * 
-         * if (expEvent.isCancelled()) {
-         * return;
-         * }
-         * 
-         * // Apply modified exp amount
-         * float expToGrant = expEvent.getExpAmount();
-         */
 
         // Apply XP rate gain stat (e.g., boosts/rested XP)
         float expToGrant = statSystem != null && store != null
@@ -215,12 +175,6 @@ public class LevelProgressionSystem {
         for (int level = startLevel + 1; level <= endLevel; level++) {
             final int currentLevel = level;
 
-            // TODO: Re-enable when event compilation issue is resolved
-            /*
-             * LevelUpEvent levelUpEvent = new LevelUpEvent(entityRef, systemId,
-             * currentLevel - 1, currentLevel, levelData);
-             * fireEvent(levelUpEvent);
-             */
             applyLevelRewards(entityRef, systemId, currentLevel, levelData, config, store, world);
 
             if (store != null) {
@@ -230,8 +184,8 @@ public class LevelProgressionSystem {
 
         refreshClassStatsIfNeeded(entityRef, systemId, store);
 
-        System.out.println("[LevelSystem] Entity leveled up " + systemId + ": " +
-                startLevel + " -> " + endLevel);
+        RpgLogging.debugDeveloper("[LevelSystem] Entity leveled up %s: %d -> %d", systemId,
+                startLevel, endLevel);
     }
 
     /**
@@ -241,36 +195,104 @@ public class LevelProgressionSystem {
             LevelProgressionComponent.LevelSystemData levelData, LevelSystemConfig config,
             @Nullable Store<EntityStore> store, @Nullable World world) {
 
-        LevelSystemConfig.LevelRewardConfig rewards = config.getRewardsForLevel(newLevel);
-        if (rewards == null) {
-            return;
+        RpgLogging.debugDeveloper("[LevelSystem] applyLevelRewards: systemId=%s, newLevel=%d", systemId, newLevel);
+        RpgLogging.debugDeveloper("[LevelSystem] Config details: id=%s, displayName=%s, parent=%s",
+                config.getId(), config.getDisplayName(), config.getParent());
+
+        // Debug: Check if parent config exists
+        if (config.getParent() != null && !config.getParent().isEmpty()) {
+            LevelSystemConfig parentConfig = getConfig(config.getParent());
+            if (parentConfig != null) {
+                RpgLogging.debugDeveloper("[LevelSystem] Parent config found: %s", parentConfig.getId());
+                if (parentConfig.getDefaultRewards() != null) {
+                    RpgLogging.debugDeveloper("[LevelSystem] Parent has DefaultRewards: statPoints=%d, skillPoints=%d",
+                            parentConfig.getDefaultRewards().getStatPoints(),
+                            parentConfig.getDefaultRewards().getSkillPoints());
+                } else {
+                    RpgLogging.debugDeveloper("[LevelSystem] Parent has NULL DefaultRewards");
+                }
+            } else {
+                RpgLogging.debugDeveloper("[LevelSystem] Parent config NOT FOUND: %s", config.getParent());
+            }
         }
+
+        // Debug: Check what reward levels are available
+        if (config.getLevelRewards() != null) {
+            RpgLogging.debugDeveloper("[LevelSystem] Config has %d reward entries: %s",
+                    config.getLevelRewards().size(), config.getLevelRewards().keySet());
+        } else {
+            RpgLogging.debugDeveloper("[LevelSystem] Config has NULL rewards map");
+        }
+
+        // Debug: Check default rewards
+        if (config.getDefaultRewards() != null) {
+            RpgLogging.debugDeveloper("[LevelSystem] Config has DefaultRewards: statPoints=%d, skillPoints=%d",
+                    config.getDefaultRewards().getStatPoints(), config.getDefaultRewards().getSkillPoints());
+        } else {
+            RpgLogging.debugDeveloper("[LevelSystem] Config has NULL DefaultRewards");
+        }
+
+        LevelRewardConfig rewards = config.getRewardsForLevel(newLevel);
+        if (rewards == null) {
+            RpgLogging.debugDeveloper("[LevelSystem] No rewards found for level %d in system %s", newLevel, systemId);
+            RpgLogging.debugDeveloper("[LevelSystem] Checked config: %s (parent: %s)",
+                    config.getId(), config.getParent());
+
+            if (rewards == null) {
+                return;
+            }
+        }
+
+        RpgLogging.debugDeveloper("[LevelSystem] Rewards found: statPoints=%d, skillPoints=%d",
+                rewards.getStatPoints(), rewards.getSkillPoints());
 
         // Grant stat points
         if (rewards.getStatPoints() > 0) {
+            int beforeStatPoints = levelData.getAvailableStatPoints();
             levelData.addStatPoints(rewards.getStatPoints());
+            RpgLogging.debugDeveloper("[LevelSystem] Granted %d stat points (before=%d, after=%d)",
+                    rewards.getStatPoints(), beforeStatPoints, levelData.getAvailableStatPoints());
         }
 
         // Grant skill points
         if (rewards.getSkillPoints() > 0) {
+            int beforeSkillPoints = levelData.getAvailableSkillPoints();
             levelData.addSkillPoints(rewards.getSkillPoints());
+            RpgLogging.debugDeveloper("[LevelSystem] Granted %d skill points (before=%d, after=%d)",
+                    rewards.getSkillPoints(), beforeSkillPoints, levelData.getAvailableSkillPoints());
         }
 
         // Apply stat increases
         if (store != null && statSystem != null
                 && rewards.getStatIncreases() != null && !rewards.getStatIncreases().isEmpty()) {
+            RpgLogging.debugDeveloper("[LevelSystem] Applying stat increases: %s", rewards.getStatIncreases().keySet());
             statSystem.applyStatIncreases(entityRef, rewards.getStatIncreases(), store);
+        } else {
+            RpgLogging.debugDeveloper(
+                    "[LevelSystem] No stat increases to apply (store=%s, statSystem=%s, statIncreases=%s)",
+                    store != null, statSystem != null,
+                    rewards.getStatIncreases() != null ? rewards.getStatIncreases().isEmpty() : "null");
         }
 
         // Apply stat growth from config
         if (store != null && statSystem != null && config.getStatGrowth() != null) {
+            RpgLogging.debugDeveloper("[LevelSystem] Applying stat growth from config for level %d", newLevel);
             statSystem.applyStatGrowth(entityRef, newLevel, config.getStatGrowth(), store);
+        } else {
+            RpgLogging.debugDeveloper("[LevelSystem] No stat growth to apply (store=%s, statSystem=%s, statGrowth=%s)",
+                    store != null, statSystem != null, config.getStatGrowth() != null);
         }
 
         // Trigger level up effects (sound, particles, notification)
         if (rewards.getLevelUpEffects() != null && !rewards.getLevelUpEffects().isEmpty()) {
+            RpgLogging.debugDeveloper("[LevelSystem] No level-up effects to trigger");
+
             triggerLevelUpEffects(entityRef, systemId, newLevel, rewards.getLevelUpEffects(), store, world);
+        } else {
+            RpgLogging.debugDeveloper("[LevelSystem] No level-up effects to trigger");
         }
+
+        RpgLogging.debugDeveloper("[LevelSystem] applyLevelRewards complete for level %d", newLevel);
 
         // TODO: Handle other rewards (abilities, quests, currency, items, interactions)
         // These will be implemented as other systems are added
@@ -321,9 +343,9 @@ public class LevelProgressionSystem {
             return;
         }
 
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null) {
-            System.err.println("[LevelSystem] Cannot initialize unknown system: " + systemId);
+            RpgLogging.debugDeveloper("[LevelSystem] Cannot initialize unknown system: %s", systemId);
             return;
         }
 
@@ -335,7 +357,7 @@ public class LevelProgressionSystem {
 
         // Only initialize if the system doesn't already exist
         if (levelComp.hasSystem(systemId)) {
-            System.out.println("[LevelSystem] System " + systemId + " already exists, skipping initialization");
+            RpgLogging.debugDeveloper("[LevelSystem] System %s already exists, skipping initialization", systemId);
             return;
         }
 
@@ -348,22 +370,26 @@ public class LevelProgressionSystem {
         // Calculate exp to next level
         updateExpToNextLevel(levelData, config);
 
-        System.out.println("[LevelSystem] Initialized " + systemId + " for entity at level " +
-                config.getStartingLevel());
+        RpgLogging.debugDeveloper("[LevelSystem] Initialized %s for entity at level %s", systemId,
+            config.getStartingLevel());
     }
 
     /**
-     * Get level system configuration
+     * Get level system configuration from asset store (always fetches latest)
      */
     public LevelSystemConfig getConfig(String systemId) {
-        return levelSystemConfigs.get(systemId);
+        if (systemId == null || systemId.isEmpty()) {
+            return null;
+        }
+        // Fetch from asset store to get latest changes
+        return LevelSystemConfig.getAssetMap().getAsset(systemId);
     }
 
     /**
      * Check if entity can access a level system (prerequisites met)
      */
     public boolean canAccessSystem(@Nonnull Ref<EntityStore> entityRef, String systemId) {
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null || !config.isEnabled()) {
             return false;
         }
@@ -504,9 +530,9 @@ public class LevelProgressionSystem {
             return;
         }
 
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null) {
-            System.err.println("[LevelSystem] Cannot set level for unknown system: " + systemId);
+            RpgLogging.debugDeveloper("[LevelSystem] Cannot set level for unknown system: %s", systemId);
             return;
         }
 
@@ -531,7 +557,7 @@ public class LevelProgressionSystem {
 
         refreshClassStatsIfNeeded(entityRef, systemId, store);
 
-        System.out.println("[LevelSystem] Set " + systemId + " level to " + clampedLevel);
+        RpgLogging.debugDeveloper("[LevelSystem] Set %s level to %s", systemId, clampedLevel);
     }
 
     private void unlockClassAbilitiesForLevel(@Nonnull Ref<EntityStore> entityRef,
@@ -548,6 +574,11 @@ public class LevelProgressionSystem {
         ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
         if (classComp == null) {
             return;
+        }
+
+        ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
+        if (abilityComp == null) {
+            abilityComp = store.addComponent(entityRef, ClassAbilityComponent.getComponentType());
         }
 
         for (String classId : classIds) {
@@ -570,9 +601,9 @@ public class LevelProgressionSystem {
                     continue;
                 }
 
-                if (!classComp.hasUnlockedSpell(abilityId)) {
+                if (!abilityComp.hasAbility(abilityId)) {
                     int rank = unlock.getMaxRank() > 0 ? 1 : 1;
-                    classComp.unlockSpell(abilityId, rank);
+                    abilityComp.unlockAbility(abilityId, classId, rank);
                 }
             }
         }
@@ -593,9 +624,9 @@ public class LevelProgressionSystem {
             return;
         }
 
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null) {
-            System.err.println("[LevelSystem] Cannot add levels for unknown system: " + systemId);
+            RpgLogging.debugDeveloper("[LevelSystem] Cannot add levels for unknown system: %s", systemId);
             return;
         }
 
@@ -634,9 +665,9 @@ public class LevelProgressionSystem {
             return;
         }
 
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null) {
-            System.err.println("[LevelSystem] Cannot set experience for unknown system: " + systemId);
+            RpgLogging.debugDeveloper("[LevelSystem] Cannot set experience for unknown system: %s", systemId);
             return;
         }
 
@@ -812,7 +843,7 @@ public class LevelProgressionSystem {
             return -1f;
         }
 
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null)
             return -1f;
 
@@ -829,7 +860,7 @@ public class LevelProgressionSystem {
             return 0;
         }
 
-        LevelSystemConfig config = levelSystemConfigs.get(systemId);
+        LevelSystemConfig config = getConfig(systemId);
         if (config == null)
             return 0;
 
@@ -853,7 +884,7 @@ public class LevelProgressionSystem {
      * Get all registered level system IDs
      */
     public java.util.Set<String> getRegisteredSystems() {
-        return levelSystemConfigs.keySet();
+        return LevelSystemConfig.getAssetMap().getAssetMap().keySet();
     }
 
     // === Helper methods (adapted to Hytale's ECS) ===
@@ -904,7 +935,7 @@ public class LevelProgressionSystem {
      * Trigger level up effects (sound, particles, notification)
      */
     private void triggerLevelUpEffects(@Nonnull Ref<EntityStore> entityRef, String systemId, int newLevel,
-            @Nonnull LevelSystemConfig.LevelUpEffects effects,
+            @Nonnull LevelUpEffects effects,
             @Nullable Store<EntityStore> store, @Nullable World world) {
         if (store == null || world == null) {
             return; // Can't trigger effects without store/world
@@ -941,6 +972,16 @@ public class LevelProgressionSystem {
         if (effects.getEventTitle() != null) {
             showLevelUpEventTitle(playerRef, systemId, newLevel, effects.getEventTitle());
         }
+
+        // Send chat message
+        if (effects.getChatMessage() != null) {
+            sendLevelUpChatMessage(playerRef, systemId, newLevel, effects.getChatMessage());
+        }
+
+        // Send kill feed popup
+        if (effects.getKillFeedPopup() != null) {
+            sendLevelUpKillFeedPopup(playerRef, systemId, newLevel, effects.getKillFeedPopup());
+        }
     }
 
     /**
@@ -952,9 +993,9 @@ public class LevelProgressionSystem {
             // Get sound index from asset map
             int soundIndex = SoundEvent.getAssetMap().getIndex(soundId);
             if (soundIndex == 0 || soundIndex == Integer.MIN_VALUE) {
-                System.err.println("[LevelSystem] Sound asset not found in game files: '" + soundId + "'");
-                System.err.println(
-                        "[LevelSystem] Tip: Check assets/Common/Sounds/ or assets/Server/Audio/ for valid sound IDs");
+                RpgLogging.debugDeveloper("[LevelSystem] Sound asset not found in game files: '%s'", soundId);
+                RpgLogging.debugDeveloper(
+                    "[LevelSystem] Tip: Check assets/Common/Sounds/ or assets/Server/Audio/ for valid sound IDs");
                 return;
             }
 
@@ -962,7 +1003,7 @@ public class LevelProgressionSystem {
             TransformComponent transform = store.getComponent(entityRef,
                     EntityModule.get().getTransformComponentType());
             if (transform == null) {
-                System.err.println("[LevelSystem] No transform component for sound playback");
+                RpgLogging.debugDeveloper("[LevelSystem] No transform component for sound playback");
                 return;
             }
 
@@ -971,14 +1012,14 @@ public class LevelProgressionSystem {
                 try {
                     SoundUtil.playSoundEvent3d(soundIndex, SoundCategory.UI,
                             transform.getPosition(), store);
-                    System.out.println("[LevelSystem] Played sound: " + soundId + " (index: " + soundIndex + ")");
+                    RpgLogging.debugDeveloper("[LevelSystem] Played sound: %s (index: %s)", soundId, soundIndex);
                 } catch (Exception e) {
-                    System.err.println("[LevelSystem] Failed to play sound in world.execute: " + e.getMessage());
+                    RpgLogging.debugDeveloper("[LevelSystem] Failed to play sound in world.execute: %s", e.getMessage());
                 }
             });
         } catch (Exception e) {
-            System.err.println("[LevelSystem] Failed to play sound " + soundId + ": " + e.getMessage());
-            System.err.println("[LevelSystem] " + e);
+            RpgLogging.debugDeveloper("[LevelSystem] Failed to play sound %s: %s", soundId, e.getMessage());
+            RpgLogging.debugDeveloper("[LevelSystem] %s", e);
         }
     }
 
@@ -991,7 +1032,7 @@ public class LevelProgressionSystem {
             // Get entity's network ID
             NetworkId networkId = store.getComponent(entityRef, NetworkId.getComponentType());
             if (networkId == null) {
-                System.err.println("[LevelSystem] No network ID component for particle effect");
+                RpgLogging.debugDeveloper("[LevelSystem] No network ID component for particle effect");
                 return;
             }
             int entityNetworkId = networkId.getId();
@@ -1000,7 +1041,7 @@ public class LevelProgressionSystem {
             TransformComponent transform = store.getComponent(entityRef,
                     EntityModule.get().getTransformComponentType());
             if (transform == null) {
-                System.err.println("[LevelSystem] No transform component for particle effect");
+                RpgLogging.debugDeveloper("[LevelSystem] No transform component for particle effect");
                 return;
             }
 
@@ -1042,15 +1083,15 @@ public class LevelProgressionSystem {
                         }
                     }
 
-                    System.out.println("[LevelSystem] Spawned attached particle effect: " + particleEffect);
+                    RpgLogging.debugDeveloper("[LevelSystem] Spawned attached particle effect: %s", particleEffect);
                 } catch (Exception e) {
-                    System.err.println("[LevelSystem] Failed to spawn particle in world.execute: " + e.getMessage());
-                    System.err.println("[LevelSystem] " + e);
+                    RpgLogging.debugDeveloper("[LevelSystem] Failed to spawn particle in world.execute: %s", e.getMessage());
+                    RpgLogging.debugDeveloper("[LevelSystem] %s", e);
                 }
             });
         } catch (Exception e) {
-            System.err.println("[LevelSystem] Failed to spawn particle " + particleEffect + ": " + e.getMessage());
-            System.err.println("[LevelSystem] " + e);
+            RpgLogging.debugDeveloper("[LevelSystem] Failed to spawn particle %s: %s", particleEffect, e.getMessage());
+            RpgLogging.debugDeveloper("[LevelSystem] %s", e);
         }
     }
 
@@ -1058,7 +1099,7 @@ public class LevelProgressionSystem {
      * Send level up notification banner to player
      */
     private void sendLevelUpNotification(@Nonnull PlayerRef playerRef, String systemId, int newLevel,
-            @Nonnull LevelSystemConfig.NotificationConfig notifConfig) {
+            @Nonnull NotificationConfig notifConfig) {
         try {
             // Get packet handler
             PacketHandler packetHandler = playerRef.getPacketHandler();
@@ -1086,8 +1127,9 @@ public class LevelProgressionSystem {
                     ItemStack itemStack = new ItemStack(notifConfig.getIconItemId(), 1);
                     icon = (ItemWithAllMetadata) itemStack.toPacket();
                 } catch (Exception e) {
-                    System.err.println("[LevelSystem] Failed to create icon item " + notifConfig.getIconItemId() + ": "
-                            + e.getMessage());
+                    RpgLogging.debugDeveloper("[LevelSystem] Failed to create icon item %s: %s",
+                            notifConfig.getIconItemId(),
+                            e.getMessage());
                 }
             }
 
@@ -1105,10 +1147,10 @@ public class LevelProgressionSystem {
             if (secondaryMessage != null) {
                 debugMessage += " - " + secondaryText;
             }
-            System.out.println("[LevelSystem] Sent notification: " + debugMessage);
+            RpgLogging.debugDeveloper("[LevelSystem] Sent notification: %s", debugMessage);
         } catch (Exception e) {
-            System.err.println("[LevelSystem] Failed to send notification: " + e.getMessage());
-            System.err.println("[LevelSystem] " + e);
+            RpgLogging.debugDeveloper("[LevelSystem] Failed to send notification: %s", e.getMessage());
+            RpgLogging.debugDeveloper("[LevelSystem] %s", e);
         }
     }
 
@@ -1116,7 +1158,7 @@ public class LevelProgressionSystem {
      * Show event title popup to player
      */
     private void showLevelUpEventTitle(@Nonnull PlayerRef playerRef, String systemId, int newLevel,
-            @Nonnull LevelSystemConfig.EventTitleConfig titleConfig) {
+            @Nonnull EventTitleConfig titleConfig) {
         try {
             String primaryText = titleConfig.getPrimaryMessage()
                     .replace("{level}", String.valueOf(newLevel))
@@ -1131,8 +1173,68 @@ public class LevelProgressionSystem {
 
             EventTitleUtil.showEventTitleToPlayer(playerRef, primary, secondary, titleConfig.isMajor());
         } catch (Exception e) {
-            System.err.println("[LevelSystem] Failed to show event title: " + e.getMessage());
-            System.err.println("[LevelSystem] " + e);
+            RpgLogging.debugDeveloper("[LevelSystem] Failed to show event title: %s", e.getMessage());
+            RpgLogging.debugDeveloper("[LevelSystem] %s", e);
+        }
+    }
+
+    /**
+     * Send chat message to player on level up
+     */
+    private void sendLevelUpChatMessage(@Nonnull PlayerRef playerRef, String systemId, int newLevel,
+            @Nonnull String chatMessageTemplate) {
+        try {
+            // Replace placeholders in chat message
+            String messageText = chatMessageTemplate
+                    .replace("{level}", String.valueOf(newLevel))
+                    .replace("{system}", systemId);
+
+            // Create chat message packet
+            com.hypixel.hytale.protocol.packets.interface_.ChatMessage chatPacket = 
+                    new com.hypixel.hytale.protocol.packets.interface_.ChatMessage(messageText);
+
+            // Send to player
+            PacketHandler packetHandler = playerRef.getPacketHandler();
+            packetHandler.writeNoCache(chatPacket);
+
+            RpgLogging.debugDeveloper("[LevelSystem] Sent chat message: %s", messageText);
+        } catch (Exception e) {
+            RpgLogging.debugDeveloper("[LevelSystem] Failed to send chat message: %s", e.getMessage());
+            RpgLogging.debugDeveloper("[LevelSystem] %s", e);
+        }
+    }
+
+    /**
+     * Send kill feed popup to player on level up
+     */
+    private void sendLevelUpKillFeedPopup(@Nonnull PlayerRef playerRef, String systemId, int newLevel,
+            @Nonnull String killFeedMessageTemplate) {
+        try {
+            // Replace placeholders in kill feed message
+            String messageText = killFeedMessageTemplate
+                    .replace("{level}", String.valueOf(newLevel))
+                    .replace("{system}", systemId);
+
+            // Create formatted message for kill feed
+            Message message = Message.raw(messageText);
+            
+            // Send kill feed message packet directly (same approach as DeathSystems.java)
+            // killer = null (no killer message for level up)
+            // decedent = our level up message (shows in kill feed)
+            // icon = Icon_LevelUp (shows a level-up icon next to the message)
+            KillFeedMessage killFeedPacket = new KillFeedMessage(
+                    null, // killer message
+                    message.getFormattedMessage(), // decedent/main message
+                    "Icon_LevelUp"  // icon
+            );
+
+            // Send packet to player
+            playerRef.getPacketHandler().write(killFeedPacket);
+
+            RpgLogging.debugDeveloper("[LevelSystem] Sent kill feed popup: %s", messageText);
+        } catch (Exception e) {
+            RpgLogging.debugDeveloper("[LevelSystem] Failed to send kill feed popup: %s", e.getMessage());
+            RpgLogging.debugDeveloper("[LevelSystem] %s", e);
         }
     }
 }

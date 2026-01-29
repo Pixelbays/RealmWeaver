@@ -5,11 +5,13 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -53,6 +55,7 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassAbilityComponent abilityComp = store.getComponent(ref, ExamplePlugin.get().getClassAbilityComponentType());
 
         String classId;
         if (this.classNameArg.provided(ctx)) {
@@ -96,7 +99,7 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
         player.sendMessage(Message.raw("Total XP (tracked): " + String.format("%.0f", totalExp)));
 
         java.util.List<String> abilityIds = new java.util.ArrayList<>(classDef.getAbilityIds());
-        System.out.println("Ability IDs: " + abilityIds);
+        RpgLogging.debugDeveloper("Ability IDs: %s", abilityIds);
         abilityIds.sort(String::compareToIgnoreCase);
 
         if (!abilityIds.isEmpty()) {
@@ -106,7 +109,7 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
                 String displayName = abilityDef != null && abilityDef.getDisplayName() != null && !abilityDef.getDisplayName().isEmpty()
                         ? abilityDef.getDisplayName()
                         : abilityId;
-                boolean unlocked = classComp.hasUnlockedSpell(abilityId);
+                boolean unlocked = abilityComp != null && abilityComp.hasAbility(abilityId);
                 displayList.add(displayName + " (" + abilityId + ")" + (unlocked ? "" : " [LOCKED]"));
             }
 

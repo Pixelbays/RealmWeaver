@@ -57,6 +57,7 @@ tasks.register('updatePluginManifest') {
 // Makes sure the plugin manifest is up to date.
 tasks.named('processResources') {
     dependsOn 'updatePluginManifest'
+    exclude 'Server/Drops/NPCs/**'
 }
 
 // Creates a run configuration in IDEA that will run the Hytale server with

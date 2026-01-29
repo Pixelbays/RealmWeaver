@@ -6,7 +6,11 @@
   "enabled": true,
   "visible": true,
   "isHybrid": true,
-  "parentRaces": ["base_race", "human", "elf"],
+  "parentRaces": [
+    "base_race",
+    "human",
+    "elf"
+  ],
   "compatibleHybridRaces": [],
   "incompatibleHybridRaces": [],
   "minSize": 0.93,
@@ -32,8 +36,15 @@
       "requiredLevel": 1
     }
   ],
-  "abilityIds": ["race_half_elf_versatility"],
-  "allowedCosmeticCategories": ["Hair", "Face", "Body", "Ears"],
+  "abilityIds": [
+    "race_half_elf_versatility"
+  ],
+  "allowedCosmeticCategories": [
+    "Hair",
+    "Face",
+    "Body",
+    "Ears"
+  ],
   "allowedCosmeticIds": [],
   "notAllowedCosmeticCategories": [],
   "notAllowedCosmeticIds": [],
@@ -43,5 +54,9 @@
     "cosmeticMerge": "WhiteList_Union",
     "weightA": 0.5,
     "weightB": 0.5
-  }
+  },
+  "ParentRaces": [
+    "Human",
+    "Elf"
+  ]
 }

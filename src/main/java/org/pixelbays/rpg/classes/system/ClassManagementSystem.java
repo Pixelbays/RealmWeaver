@@ -1,6 +1,5 @@
 package org.pixelbays.rpg.classes.system;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,11 +9,13 @@ import javax.annotation.Nullable;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.global.config.RpgModConfig;
+import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
+import org.pixelbays.rpg.race.system.RaceSystem;
 
-import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -24,58 +25,28 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Integrates with LevelProgressionSystem for class leveling.
  */
 public class ClassManagementSystem {
-    // Loaded class definitions from asset pack
-    private final Map<String, ClassDefinition> classDefinitions;
-
     // Reference to level progression system for class leveling
     private final LevelProgressionSystem levelProgressionSystem;
     private StatSystem statSystem;
+    private RaceSystem raceSystem;
 
     public ClassManagementSystem(@Nonnull LevelProgressionSystem levelProgressionSystem) {
         this.levelProgressionSystem = levelProgressionSystem;
-        this.classDefinitions = new HashMap<>();
     }
 
     public void setStatSystem(@Nullable StatSystem statSystem) {
         this.statSystem = statSystem;
     }
 
-    /**
-     * Register a class definition from asset file
-     */
-    public void registerClass(ClassDefinition classDefinition) {
-        classDefinitions.put(classDefinition.getId(), classDefinition);
-        System.out.println("[ClassSystem] Registered class: " + classDefinition.getId() +
-                " (" + classDefinition.getDisplayName() + ")");
+    public void setRaceSystem(@Nullable RaceSystem raceSystem) {
+        this.raceSystem = raceSystem;
     }
 
     /**
-     * Load class definitions from JSON files in the asset pack
-     * Path: Server/Classes/*.json
-     * 
-     * This method scans all registered asset packs for class definitions and loads
-     * them.
-     * Classes are loaded using Gson JSON parsing and support inheritance from
-     * parent classes.
+     * Get class definition from asset store
      */
-
-    public void loadClassDefinitionsFromAssets() {
-        System.out.println("[ClassSystem] Loading class definitions from asset registry...");
-
-        classDefinitions.clear();
-
-        try {
-            var store = AssetRegistry.getAssetStore(ClassDefinition.class);
-            if (store != null) {
-                for (ClassDefinition classDef : store.getAssetMap().getAssetMap().values()) {
-                    registerClass(classDef);
-                }
-                System.out.println(
-                        "[ClassSystem] Loaded " + classDefinitions.size() + " classes from asset registry");
-            }
-        } catch (Exception e) {
-            System.err.println("[ClassSystem] Failed to load classes from asset registry: " + e.getMessage());
-        }
+    public ClassDefinition getClassDefinition(String classId) {
+        return ClassDefinition.getAssetMap().getAsset(classId);
     }
 
     /**
@@ -89,7 +60,7 @@ public class ClassManagementSystem {
     public String learnClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
         // Get class definition
-        ClassDefinition classDef = classDefinitions.get(classId);
+        ClassDefinition classDef = getClassDefinition(classId);
         if (classDef == null) {
             return "ERROR: Unknown class: " + classId;
         }
@@ -115,7 +86,7 @@ public class ClassManagementSystem {
         // Check exclusive classes
         for (String exclusiveClass : classDef.getExclusiveWith()) {
             if (classComp.hasLearnedClass(exclusiveClass)) {
-                ClassDefinition exclusiveDef = classDefinitions.get(exclusiveClass);
+                ClassDefinition exclusiveDef = getClassDefinition(exclusiveClass);
                 String exclusiveName = exclusiveDef != null ? exclusiveDef.getDisplayName() : exclusiveClass;
                 return "ERROR: Cannot learn " + classDef.getDisplayName() +
                         " while " + exclusiveName + " is learned";
@@ -149,14 +120,19 @@ public class ClassManagementSystem {
             }
         }
 
+        ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
+        if (abilityComp == null) {
+            abilityComp = store.addComponent(entityRef, ClassAbilityComponent.getComponentType());
+        }
+
         for (ClassDefinition.AbilityUnlock unlock : classDef.getAbilityUnlocksAtLevel(currentLevel)) {
             String abilityId = unlock.getAbilityId();
-            if (abilityId != null && !abilityId.isEmpty() && !classComp.hasUnlockedSpell(abilityId)) {
-                classComp.unlockSpell(abilityId, 1);
+            if (abilityId != null && !abilityId.isEmpty() && !abilityComp.hasAbility(abilityId)) {
+                abilityComp.unlockAbility(abilityId, classId, 1);
             }
         }
 
-        System.out.println("[ClassSystem] Entity learned class: " + classId);
+        RpgLogging.debugDeveloper("[ClassSystem] Entity learned class: %s", classId);
         return "SUCCESS: Learned " + classDef.getDisplayName();
     }
 
@@ -170,7 +146,7 @@ public class ClassManagementSystem {
      */
     public String unlearnClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
-        ClassDefinition classDef = classDefinitions.get(classId);
+        ClassDefinition classDef = getClassDefinition(classId);
         if (classDef == null) {
             return "ERROR: Unknown class: " + classId;
         }
@@ -190,8 +166,10 @@ public class ClassManagementSystem {
                 // Remove experience from level system
                 levelProgressionSystem.removeExperience(entityRef, classDef.getLevelSystemId(), penalty);
 
-                System.out.println("[ClassSystem] Applied " + (classDef.getRelearnExpPenalty() * 100) +
-                        "% XP penalty (" + penalty + " XP) for unlearning " + classId);
+                RpgLogging.debugDeveloper("[ClassSystem] Applied %s%% XP penalty (%s XP) for unlearning %s",
+                        classDef.getRelearnExpPenalty() * 100,
+                        penalty,
+                        classId);
             }
         }
 
@@ -213,7 +191,7 @@ public class ClassManagementSystem {
             statSystem.recalculateClassStatBonuses(entityRef, store);
         }
 
-        System.out.println("[ClassSystem] Entity unlearned class: " + classId);
+        RpgLogging.debugDeveloper("[ClassSystem] Entity unlearned class: %s", classId);
         return "SUCCESS: Unlearned " + classDef.getDisplayName();
     }
 
@@ -227,7 +205,7 @@ public class ClassManagementSystem {
      */
     public String setActiveClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
-        ClassDefinition classDef = classDefinitions.get(classId);
+        ClassDefinition classDef = getClassDefinition(classId);
         if (classDef == null) {
             return "ERROR: Unknown class: " + classId;
         }
@@ -241,9 +219,11 @@ public class ClassManagementSystem {
         if (!classDef.getSwitchingRules().canSwitch()) {
             return "ERROR: Cannot switch to this class";
         }
-
-        // TODO: Check combat state if canSwitchInCombat is false
-        // TODO: Check cooldown
+        if (classDef.getSwitchingRules().canSwitchInCombat() == false) {
+            return "ERROR: Cannot switch to this class while in combat";
+        }
+        // TODO: Check cooldown, if not allowed return error with time remaining until
+        // next switch
 
         // Set active class
         classComp.setActiveClassId(classId);
@@ -252,7 +232,7 @@ public class ClassManagementSystem {
             statSystem.recalculateClassStatBonuses(entityRef, store);
         }
 
-        System.out.println("[ClassSystem] Entity activated class: " + classId);
+        RpgLogging.debugDeveloper("[ClassSystem] Entity activated class: %s", classId);
         return "SUCCESS: Activated " + classDef.getDisplayName();
     }
 
@@ -260,17 +240,78 @@ public class ClassManagementSystem {
      * Check if entity meets prerequisites for a class
      */
     @Nullable
-    private String checkPrerequisites(@Nonnull Ref<EntityStore> entityRef, ClassDefinition classDef,
+    private String checkPrerequisites(@Nonnull Ref<EntityStore> entityRef, @Nonnull ClassDefinition classDef,
             @Nonnull Store<EntityStore> store) {
+        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
+
+        // Enforce max combat/profession class limits based on tags
+        RpgModConfig config = resolveConfig();
+        if (config != null && classComp != null) {
+            int maxCombat = config.getMaxCombatClasses();
+            int maxProfession = config.getMaxProfessionClasses();
+
+            boolean isCombat = hasTag(classDef, "type", "combat");
+            boolean isProfession = hasTag(classDef, "type", "profession");
+            boolean isJob = hasTag(classDef, "type", "job");
+            boolean jobExempt = isJob && isJobForKnownClass(classDef, classComp);
+
+            if (!jobExempt) {
+                if (isCombat && maxCombat > 0) {
+                    int combatCount = countLearnedByTag(classComp, "type", "combat");
+                    if (combatCount >= maxCombat) {
+                        return "ERROR: Maximum combat classes reached";
+                    }
+                }
+
+                if (isProfession && maxProfession > 0) {
+                    int professionCount = countLearnedByTag(classComp, "type", "profession");
+                    if (professionCount >= maxProfession) {
+                        return "ERROR: Maximum profession classes reached";
+                    }
+                }
+            }
+        }
+
+        // Enforce class race tags (Tags.races) if present
+        List<String> allowedRaces = getTagValues(classDef, "races");
+        if (allowedRaces != null && !allowedRaces.isEmpty() && raceSystem != null) {
+            String raceId = raceSystem.getRaceId(entityRef);
+            if (raceId.isEmpty()) {
+                return "ERROR: You must select a race before learning " + classDef.getDisplayName();
+            }
+
+            boolean allowsAll = false;
+            boolean allowsRace = false;
+            for (String allowed : allowedRaces) {
+                if (allowed == null || allowed.isEmpty()) {
+                    continue;
+                }
+
+                if (allowed.equalsIgnoreCase("Global")) {
+                    allowsAll = true;
+                    break;
+                }
+
+                if (allowed.equalsIgnoreCase(raceId)) {
+                    allowsRace = true;
+                    break;
+                }
+            }
+
+            if (!allowsAll && !allowsRace) {
+                return "ERROR: Your race cannot learn " + classDef.getDisplayName();
+            }
+        }
+
         // Check class level prerequisites
         LevelProgressionComponent levelComp = store.getComponent(entityRef,
-            LevelProgressionComponent.getComponentType());
+                LevelProgressionComponent.getComponentType());
         if (levelComp != null && classDef.getPrerequisites() != null && !classDef.getPrerequisites().isEmpty()) {
             for (Map.Entry<String, Integer> prereq : classDef.getPrerequisites().entrySet()) {
                 String requiredClassId = prereq.getKey();
                 int requiredLevel = prereq.getValue();
 
-                ClassDefinition requiredClass = classDefinitions.get(requiredClassId);
+                ClassDefinition requiredClass = getClassDefinition(requiredClassId);
                 if (requiredClass == null) {
                     return "ERROR: Requires unknown class " + requiredClassId;
                 }
@@ -291,11 +332,10 @@ public class ClassManagementSystem {
         }
 
         // Check required classes
-        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
         if (classComp != null) {
             for (String requiredClass : classDef.getRequiredClasses()) {
                 if (!classComp.hasLearnedClass(requiredClass)) {
-                    ClassDefinition requiredDef = classDefinitions.get(requiredClass);
+                    ClassDefinition requiredDef = getClassDefinition(requiredClass);
                     String requiredName = requiredDef != null ? requiredDef.getDisplayName() : requiredClass;
                     return "ERROR: Requires " + requiredName + " class";
                 }
@@ -306,24 +346,17 @@ public class ClassManagementSystem {
     }
 
     /**
-     * Get class definition
-     */
-    public ClassDefinition getClassDefinition(String classId) {
-        return classDefinitions.get(classId);
-    }
-
-    /**
-     * Get all class definitions
+     * Get all class definitions from asset store
      */
     public Map<String, ClassDefinition> getAllClassDefinitions() {
-        return classDefinitions;
+        return ClassDefinition.getAssetMap().getAssetMap();
     }
 
     /**
      * Get all registered class IDs
      */
     public java.util.Set<String> getRegisteredClasses() {
-        return classDefinitions.keySet();
+        return getAllClassDefinitions().keySet();
     }
 
     /**
@@ -331,7 +364,7 @@ public class ClassManagementSystem {
      */
     public List<String> getClassesForLevelSystem(@Nonnull String systemId) {
         List<String> results = new java.util.ArrayList<>();
-        for (ClassDefinition classDef : classDefinitions.values()) {
+        for (ClassDefinition classDef : getAllClassDefinitions().values()) {
             String classSystemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
             if (systemId.equals(classSystemId)) {
                 results.add(classDef.getId());
@@ -345,7 +378,7 @@ public class ClassManagementSystem {
      */
     public boolean canLearnClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
-        ClassDefinition classDef = classDefinitions.get(classId);
+        ClassDefinition classDef = getClassDefinition(classId);
         if (classDef == null || !classDef.isEnabled()) {
             return false;
         }
@@ -370,4 +403,79 @@ public class ClassManagementSystem {
         return component;
     }
 
+    @Nullable
+    private RpgModConfig resolveConfig() {
+        var assetMap = RpgModConfig.getAssetMap();
+        if (assetMap == null) {
+            return null;
+        }
+
+        RpgModConfig config = assetMap.getAsset("Default");
+        if (config != null) {
+            return config;
+        }
+
+        if (assetMap.getAssetMap().isEmpty()) {
+            return null;
+        }
+
+        return assetMap.getAssetMap().values().iterator().next();
+    }
+
+    private boolean hasTag(@Nullable ClassDefinition classDef, @Nonnull String tagKey, @Nonnull String tagValue) {
+        return classDef != null && classDef.hasTag(tagKey, tagValue);
+    }
+
+    private boolean isJobForKnownClass(@Nonnull ClassDefinition classDef, @Nonnull ClassComponent classComp) {
+        if (!hasTag(classDef, "type", "job")) {
+            return false;
+        }
+
+        for (String requiredClass : classDef.getRequiredClasses()) {
+            if (classComp.hasLearnedClass(requiredClass)) {
+                return true;
+            }
+        }
+
+        String parent = classDef.getParent();
+        return parent != null && !parent.isEmpty() && classComp.hasLearnedClass(parent);
+    }
+
+    private int countLearnedByTag(@Nonnull ClassComponent classComp, @Nonnull String tagKey, @Nonnull String tagValue) {
+        int count = 0;
+        for (String learnedId : classComp.getLearnedClassIds()) {
+            ClassDefinition learnedDef = getClassDefinition(learnedId);
+            if (!hasTag(learnedDef, tagKey, tagValue)) {
+                continue;
+            }
+
+            if (learnedDef != null && hasTag(learnedDef, "type", "job")
+                    && isJobForKnownClass(learnedDef, classComp)) {
+                continue;
+            }
+
+            count++;
+        }
+        return count;
+    }
+
+    @Nullable
+    private List<String> getTagValues(@Nullable ClassDefinition classDef, @Nonnull String tagKey) {
+        if (classDef == null) {
+            return null;
+        }
+
+        Map<String, List<String>> tags = classDef.getTags();
+        if (tags == null || tags.isEmpty()) {
+            return null;
+        }
+
+        for (Map.Entry<String, List<String>> entry : tags.entrySet()) {
+            if (entry.getKey() != null && entry.getKey().equalsIgnoreCase(tagKey)) {
+                return entry.getValue();
+            }
+        }
+
+        return null;
+    }
 }

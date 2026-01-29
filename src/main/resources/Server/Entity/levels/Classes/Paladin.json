@@ -1,0 +1,8 @@
+{
+  "Parent": "Base_Class_Level",
+  "DisplayName": "Paladin Class",
+  "Description": "Holy warrior specialized in protection and healing",
+  "Enabled": true,
+  "Visible": true,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
+}

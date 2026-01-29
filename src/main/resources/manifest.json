@@ -1,11 +1,11 @@
 {
     "Group": "pixelbays",
     "Name": "RPG Mod Test",
-    "Version": "0.0.4",
+    "Version": "0.0.5",
     "Description": "RPG mod Test",
     "Authors": [
         {
-            "Name": "It's you!"
+            "Name": "HeruEdhel"
         }
     ],
     "Website": "",

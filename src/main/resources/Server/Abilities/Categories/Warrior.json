@@ -1,0 +1,7 @@
+{
+  "Id": "Warrior",
+  "Name": "Warrior",
+  "Icon": "Icons/ItemCategories/Items.png",
+  "InfoDisplayMode": "Tooltip",
+  "Order": 10
+}

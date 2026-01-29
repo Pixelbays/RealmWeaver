@@ -1,0 +1,42 @@
+{
+  "Parent": "Base_Profession_Level",
+  "DisplayName": "Woodworking",
+  "Description": "Craft wooden items and furniture",
+  "LevelRewards": {
+    "10": {
+      "UnlockedAbilities": [
+        "woodworking:craft_oak_furniture"
+      ]
+    },
+    "25": {
+      "UnlockedAbilities": [
+        "woodworking:craft_reinforced_planks"
+      ]
+    },
+    "50": {
+      "UnlockedAbilities": [
+        "woodworking:craft_decorative_items"
+      ],
+      "ItemRewards": [
+        "woodworking:master_saw"
+      ]
+    },
+    "75": {
+      "UnlockedAbilities": [
+        "woodworking:craft_rare_wood_items"
+      ]
+    },
+    "100": {
+      "UnlockedAbilities": [
+        "woodworking:craft_legendary_items"
+      ],
+      "ItemRewards": [
+        "woodworking:grandmaster_toolkit"
+      ],
+      "InteractionChain": "woodworking:grandmaster_ceremony"
+    }
+  },
+  "Enabled": true,
+  "Visible": true,
+  "IconId": "rpg:icon_woodworking"
+}

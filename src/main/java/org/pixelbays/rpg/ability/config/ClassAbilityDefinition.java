@@ -1,141 +1,224 @@
 package org.pixelbays.rpg.ability.config;
 
-import java.util.ArrayList;
+import java.lang.ref.SoftReference;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import org.pixelbays.rpg.ability.config.ClassAbilityDefinition.AbilityInputBinding;
 import org.pixelbays.rpg.global.config.builder.AbilityRefCodec;
-import org.pixelbays.rpg.global.config.builder.InteractionChainRefCodec;
+import org.pixelbays.rpg.item.codec.InteractionVarsEntry;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.AssetKeyValidator;
 import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.assetstore.AssetStore;
 import com.hypixel.hytale.assetstore.codec.AssetBuilderCodec;
-import com.hypixel.hytale.assetstore.codec.ContainedAssetCodec;
+import com.hypixel.hytale.assetstore.codec.AssetCodec;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
+import com.hypixel.hytale.assetstore.map.IndexedLookupTableAssetMap;
 import com.hypixel.hytale.assetstore.map.JsonAssetWithMap;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
-import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.EnumCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
+import com.hypixel.hytale.codec.codecs.map.EnumMapCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
-import com.hypixel.hytale.codec.function.FunctionCodec;
+import com.hypixel.hytale.codec.schema.metadata.ui.UIButton;
+import com.hypixel.hytale.codec.schema.metadata.ui.UICreateButtons;
 import com.hypixel.hytale.codec.schema.metadata.ui.UIEditor;
+import com.hypixel.hytale.codec.schema.metadata.ui.UIEditorPreview;
+import com.hypixel.hytale.codec.schema.metadata.ui.UIEditorSectionStart;
+import com.hypixel.hytale.codec.schema.metadata.ui.UIPropertyTitle;
 import com.hypixel.hytale.codec.schema.metadata.ui.UIRebuildCaches;
+import com.hypixel.hytale.codec.schema.metadata.ui.UISidebarButtons;
+import com.hypixel.hytale.codec.schema.metadata.ui.UITypeIcon;
 import com.hypixel.hytale.codec.validation.ValidatorCache;
+import com.hypixel.hytale.codec.validation.Validators;
+import com.hypixel.hytale.common.util.MapUtil;
+import com.hypixel.hytale.protocol.AssetIconProperties;
+import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetValidator;
+import com.hypixel.hytale.server.core.asset.type.item.config.ItemPullbackConfig;
+import com.hypixel.hytale.server.core.asset.type.itemanimation.config.ItemPlayerAnimations;
+import com.hypixel.hytale.server.core.asset.type.itemsound.config.ItemSoundSet;
+import com.hypixel.hytale.server.core.asset.type.model.config.ModelParticle;
+import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.UnarmedInteractions;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.InteractionConfiguration;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
 
-/**
- * Configuration for an RPG ability (class or race).
- * Loaded from /Server/RPGAbilities/** (recursive)
- * 
- * This defines the ability properties. Class or race assets reference
- * these by id.
- */
-@SuppressWarnings({ "deprecation" })
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 public class ClassAbilityDefinition
         implements JsonAssetWithMap<String, DefaultAssetMap<String, ClassAbilityDefinition>> {
-
-    private static final FunctionCodec<String[], List<String>> STRING_LIST_CODEC = new FunctionCodec<>(
-            Codec.STRING_ARRAY,
-            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
-            list -> list == null ? new String[0] : list.toArray(String[]::new));
-
-    private static final FunctionCodec<RankModifier[], List<RankModifier>> RANK_MODIFIER_LIST_CODEC = new FunctionCodec<>(
-            new ArrayCodec<>(RankModifier.CODEC, RankModifier[]::new),
-            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
-            list -> list == null ? new RankModifier[0] : list.toArray(RankModifier[]::new));
-
-    private static final FunctionCodec<Integer[], List<Integer>> INT_LIST_CODEC = new FunctionCodec<>(
+    
+    private static final Codec<List<Integer>> INT_LIST_CODEC = new com.hypixel.hytale.codec.function.FunctionCodec<>(
             new ArrayCodec<>(Codec.INTEGER, Integer[]::new),
-            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
-            list -> list == null ? new Integer[0] : list.toArray(Integer[]::new));
-
-    private static final Codec<String> ABILITY_REF_CODEC = new AbilityRefCodec();
-    private static final Codec<String> INTERACTION_CHAIN_REF_CODEC = new InteractionChainRefCodec();
-
-    public static final AssetBuilderCodec<String, ClassAbilityDefinition> CODEC = AssetBuilderCodec.builder(
-            ClassAbilityDefinition.class,
-            ClassAbilityDefinition::new,
-            Codec.STRING,
-            (t, k) -> t.AbilityId = k,
-            t -> t.AbilityId,
-            (asset, data) -> asset.data = data,
-            asset -> asset.data)
-            .appendInherited(new KeyedCodec<>("DisplayName", Codec.STRING, false, true), (i, s) -> i.DisplayName = s,
-                    i -> i.DisplayName,
-                    (i, parent) -> i.DisplayName = parent.DisplayName)
-            .add()
-            .appendInherited(new KeyedCodec<>("Description", Codec.STRING, false, true), (i, s) -> i.Description = s,
-                    i -> i.Description,
-                    (i, parent) -> i.Description = parent.Description)
-            .add()
-            .appendInherited(new KeyedCodec<>("IconId", Codec.STRING, false, true),
-                    (i, s) -> i.IconId = (s == null || s.isEmpty()) ? null : s,
-                    i -> i.IconId,
-                    (i, parent) -> i.IconId = parent.IconId)
+            arr -> arr == null ? Collections.emptyList() : Arrays.asList(arr),
+            list -> list == null ? new Integer[0] : list.toArray(new Integer[0]));
+            
+    private static final AssetBuilderCodec.Builder<String, ClassAbilityDefinition> CODEC_BUILDER = AssetBuilderCodec
+            .builder(
+                    ClassAbilityDefinition.class,
+                    ClassAbilityDefinition::new,
+                    Codec.STRING,
+                    (item, blockTypeKey) -> item.id = blockTypeKey,
+                    item -> item.id,
+                    (asset, data) -> asset.data = data,
+                    asset -> asset.data)
+            .metadata(new UIEditorPreview(UIEditorPreview.PreviewType.ITEM))
+            .metadata(new UITypeIcon("Item.png"))
+            .metadata(
+                    new UIRebuildCaches(
+                            false,
+                            UIRebuildCaches.ClientCache.MODELS,
+                            UIRebuildCaches.ClientCache.BLOCK_TEXTURES,
+                            UIRebuildCaches.ClientCache.MODEL_TEXTURES,
+                            UIRebuildCaches.ClientCache.MAP_GEOMETRY,
+                            UIRebuildCaches.ClientCache.ITEM_ICONS))
+            .metadata(new UISidebarButtons(new UIButton("server.assetEditor.buttons.equipItem", "EquipItem")))
+            .metadata(new UICreateButtons(new UIButton("server.assetEditor.buttons.createAndEquipItem", "EquipItem")))
+            .<String>appendInherited(new KeyedCodec<>("Icon", Codec.STRING), 
+                    (i, s) -> i.Icon = (s == null || s.isEmpty()) ? null : s,
+                    i -> i.Icon,
+                    (i, parent) -> i.Icon = parent.Icon)
             .addValidator(CommonAssetValidator.ICON_ITEM)
             .metadata(new UIEditor(new UIEditor.Icon("Icons/ItemsGenerated/{assetId}.png", 64, 64)))
             .metadata(new UIRebuildCaches(UIRebuildCaches.ClientCache.ITEM_ICONS))
             .add()
-            .appendInherited(new KeyedCodec<>("Parent", ABILITY_REF_CODEC, false, true),
-                    (i, s) -> i.ParentAbilityId = s, i -> i.ParentAbilityId,
-                    (i, parent) -> i.ParentAbilityId = parent.ParentAbilityId)
+            .<String[]>appendInherited(
+                    new KeyedCodec<>("Categories",
+                            new ArrayCodec<>(Codec.STRING, String[]::new)
+                                    .metadata(new UIEditor(new UIEditor.Dropdown("AbilityCategories")))),
+                    (ability, s) -> ability.Categories = s,
+                    ability -> ability.Categories,
+                    (ability, parent) -> ability.Categories = parent.Categories)
+            .addValidatorLate(() -> AbilityCategory.VALIDATOR_CACHE.getArrayValidator().late())
+            .documentation("A list of categories this Ability will be shown in on the creative library menu.")
             .add()
-            .appendInherited(new KeyedCodec<>("AbilityType", new EnumCodec<>(AbilityType.class), false, true),
-                    (i, s) -> i.AbilityTypeValue = s, i -> i.AbilityTypeValue,
-                    (i, parent) -> i.AbilityTypeValue = parent.AbilityTypeValue)
+            .<AbilityTranslationProperties>appendInherited(
+                    new KeyedCodec<>("TranslationProperties", AbilityTranslationProperties.CODEC),
+                    (ability, s) -> ability.translationProperties = s,
+                    ability -> ability.translationProperties,
+                    (ability, parent) -> ability.translationProperties = parent.translationProperties)
+            .documentation("The translation properties for this Ability asset.")
             .add()
-            .appendInherited(new KeyedCodec<>("TargetingType", new EnumCodec<>(TargetingType.class), false, true),
-                    (i, s) -> i.TargetingTypeValue = s, i -> i.TargetingTypeValue,
-                    (i, parent) -> i.TargetingTypeValue = parent.TargetingTypeValue)
+            .appendInherited(
+                    new KeyedCodec<>("AbilityLevel", Codec.INTEGER),
+                    (ability, s) -> ability.abilityLevel = s,
+                    ability -> ability.abilityLevel,
+                    (ability, parent) -> ability.abilityLevel = parent.abilityLevel)
             .add()
-            .appendInherited(new KeyedCodec<>("ResourceCosts", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
-                    (i, s) -> i.ResourceCosts = s, i -> i.ResourceCosts,
-                    (i, parent) -> i.ResourceCosts = parent.ResourceCosts)
-            .addValidator(EntityStatType.VALIDATOR_CACHE.getMapKeyValidator())
+            .<String>appendInherited(
+                    new KeyedCodec<>("SoundEventId", Codec.STRING),
+                    (ability, s) -> ability.soundEventId = s,
+                    ability -> ability.soundEventId,
+                    (ability, parent) -> ability.soundEventId = parent.soundEventId)
+            .addValidator(SoundEvent.VALIDATOR_CACHE.getValidator())
             .add()
-            .appendInherited(new KeyedCodec<>("Cooldown", Codec.FLOAT, false, true), (i, s) -> i.Cooldown = s,
-                    i -> i.Cooldown,
-                    (i, parent) -> i.Cooldown = parent.Cooldown)
+            .<String>appendInherited(
+                    new KeyedCodec<>("AbilitySoundSetId", Codec.STRING),
+                    (ability, s) -> ability.abilitySoundSetId = s,
+                    ability -> ability.abilitySoundSetId,
+                    (ability, parent) -> ability.abilitySoundSetId = parent.abilitySoundSetId)
+            .addValidator(Validators.nonNull())
+            .addValidator(ItemSoundSet.VALIDATOR_CACHE.getValidator())
             .add()
-            .appendInherited(new KeyedCodec<>("GlobalCooldown", Codec.FLOAT, false, true),
-                    (i, s) -> i.GlobalCooldown = s, i -> i.GlobalCooldown,
-                    (i, parent) -> i.GlobalCooldown = parent.GlobalCooldown)
+            .appendInherited(
+                    new KeyedCodec<>("UsePlayerAnimations", Codec.BOOLEAN),
+                    (ability, s) -> ability.usePlayerAnimations = s,
+                    ability -> ability.usePlayerAnimations,
+                    (ability, parent) -> ability.usePlayerAnimations = parent.usePlayerAnimations)
             .add()
-            .appendInherited(new KeyedCodec<>("CooldownCategories", STRING_LIST_CODEC, false, true),
-                    (i, s) -> i.CooldownCategories = s, i -> i.CooldownCategories,
-                    (i, parent) -> i.CooldownCategories = parent.CooldownCategories)
+            .<String>appendInherited(
+                    new KeyedCodec<>("PlayerAnimationsId", ItemPlayerAnimations.CHILD_CODEC),
+                    (ability, s) -> ability.playerAnimationsId = s,
+                    ability -> ability.playerAnimationsId,
+                    (ability, parent) -> ability.playerAnimationsId = parent.playerAnimationsId)
+            .addValidator(Validators.nonNull())
+            .addValidator(ItemPlayerAnimations.VALIDATOR_CACHE.getValidator())
             .add()
-            .appendInherited(new KeyedCodec<>("CastTime", Codec.FLOAT, false, true), (i, s) -> i.CastTime = s,
-                    i -> i.CastTime,
-                    (i, parent) -> i.CastTime = parent.CastTime)
+            .<ModelParticle[]>appendInherited(
+                    new KeyedCodec<>("Particles", ModelParticle.ARRAY_CODEC),
+                    (ability, s) -> ability.particles = s,
+                    ability -> ability.particles,
+                    (ability, parent) -> ability.particles = parent.particles)
+            .metadata(new UIPropertyTitle("Item Particles"))
+            .metadata(new UIRebuildCaches(UIRebuildCaches.ClientCache.MODELS))
+            .documentation(
+                    "The particles played for this item. If this is a block, block specific properties should be used instead.")
             .add()
-            .appendInherited(new KeyedCodec<>("ChannelDuration", Codec.FLOAT, false, true),
-                    (i, s) -> i.ChannelDuration = s, i -> i.ChannelDuration,
-                    (i, parent) -> i.ChannelDuration = parent.ChannelDuration)
+            .<ModelParticle[]>appendInherited(
+                    new KeyedCodec<>("FirstPersonParticles", ModelParticle.ARRAY_CODEC),
+                    (ability, s) -> ability.firstPersonParticles = s,
+                    ability -> ability.firstPersonParticles,
+                    (ability, parent) -> ability.firstPersonParticles = parent.firstPersonParticles)
+            .metadata(new UIPropertyTitle("Item First Person Particles"))
+            .metadata(new UIRebuildCaches(UIRebuildCaches.ClientCache.MODELS))
+            .documentation(
+                    "The particles played for this item when in first person. If this is a block, block specific properties should be used instead.")
             .add()
-            .appendInherited(new KeyedCodec<>("Interruptible", Codec.BOOLEAN, false, true),
-                    (i, s) -> i.Interruptible = s, i -> i.Interruptible,
-                    (i, parent) -> i.Interruptible = parent.Interruptible)
+            .<Map<InteractionType, String>>appendInherited(
+                    new KeyedCodec<>("Interactions",
+                            new EnumMapCodec<>(InteractionType.class, RootInteraction.CHILD_ASSET_CODEC)),
+                    (ability, v) -> ability.interactions = MapUtil.combineUnmodifiable(ability.interactions, v,
+                            () -> new EnumMap<>(InteractionType.class)),
+                    ability -> ability.interactions,
+                    (ability, parent) -> ability.interactions = parent.interactions)
+            .addValidator(RootInteraction.VALIDATOR_CACHE.getMapValueValidator())
+            .metadata(new UIEditorSectionStart("Interactions"))
             .add()
-            .appendInherited(new KeyedCodec<>("Range", Codec.FLOAT, false, true), (i, s) -> i.Range = s, i -> i.Range,
-                    (i, parent) -> i.Range = parent.Range)
+            .<InteractionConfiguration>appendInherited(
+                    new KeyedCodec<>("InteractionConfig", InteractionConfiguration.CODEC),
+                    (ability, v) -> ability.interactionConfig = v,
+                    ability -> ability.interactionConfig,
+                    (ability, parent) -> ability.interactionConfig = parent.interactionConfig)
+            .addValidator(Validators.nonNull())
             .add()
-            .appendInherited(new KeyedCodec<>("AoeRadius", Codec.FLOAT, false, true), (i, s) -> i.AoeRadius = s,
-                    i -> i.AoeRadius,
-                    (i, parent) -> i.AoeRadius = parent.AoeRadius)
+            .<Map<String, InteractionVarsEntry>>appendInherited(
+                    new KeyedCodec<>("InteractionVars",
+                            new MapCodec<>(InteractionVarsEntry.CODEC, HashMap::new)),
+                    (ability, v) -> ability.interactionVars = MapUtil.combineUnmodifiable(ability.interactionVars, v),
+                    ability -> ability.interactionVars,
+                    (ability, parent) -> ability.interactionVars = parent.interactionVars)
+            .documentation(
+                    "Map of named interaction overrides with inline Interaction definitions. " +
+                    "Each Interaction can specify Parent, DamageCalculator, DamageEffects, Effects, and other properties."
+            )
             .add()
-            .appendInherited(new KeyedCodec<>("ConeAngle", Codec.FLOAT, false, true), (i, s) -> i.ConeAngle = s,
-                    i -> i.ConeAngle,
-                    (i, parent) -> i.ConeAngle = parent.ConeAngle)
+
+            .<ItemPullbackConfig>appendInherited(
+                    new KeyedCodec<>("PullbackConfig", ItemPullbackConfig.CODEC),
+                    (ability, s) -> ability.pullbackConfig = s,
+                    ability -> ability.pullbackConfig,
+                    (ability, parent) -> ability.pullbackConfig = parent.pullbackConfig)
+            .documentation("Overrides the offset of first person arms when close to obstacles")
+            .add()
+            .appendInherited(new KeyedCodec<>("Enabled", Codec.BOOLEAN, false, true), (i, s) -> i.Enabled = s,
+                    i -> i.Enabled,
+                    (i, parent) -> i.Enabled = parent.Enabled)
+            .add()
+            .appendInherited(new KeyedCodec<>("Tooltip", Codec.STRING, false, true), (i, s) -> i.Tooltip = s,
+                    i -> i.Tooltip,
+                    (i, parent) -> i.Tooltip = parent.Tooltip)
+            .add()
+            .appendInherited(new KeyedCodec<>("InputBinding", new EnumCodec<>(AbilityInputBinding.class), false, true),
+                    (i, s) -> i.InputBinding = s, i -> i.InputBinding,
+                    (i, parent) -> i.InputBinding = parent.InputBinding)
+            .add()
+            .appendInherited(new KeyedCodec<>("HotbarKeyOverrides", INT_LIST_CODEC, false, true),
+                    (i, s) -> i.HotbarKeyOverrides = s, i -> i.HotbarKeyOverrides,
+                    (i, parent) -> i.HotbarKeyOverrides = parent.HotbarKeyOverrides)
             .add()
             .appendInherited(new KeyedCodec<>("PrerequisiteAbilities", AbilityRefCodec.CODEC, false, true),
                     (i, s) -> i.PrerequisiteAbilities = s, i -> i.PrerequisiteAbilities,
@@ -155,437 +238,400 @@ public class ClassAbilityDefinition
                     i -> i.MaxRank,
                     (i, parent) -> i.MaxRank = parent.MaxRank)
             .add()
-            .appendInherited(new KeyedCodec<>("RankModifiers", RANK_MODIFIER_LIST_CODEC, false, true),
-                    (i, s) -> i.RankModifiers = s, i -> i.RankModifiers,
-                    (i, parent) -> i.RankModifiers = parent.RankModifiers)
+            .appendInherited(new KeyedCodec<>("GlobalCooldown", Codec.FLOAT, false, true),
+                    (i, s) -> i.GlobalCooldown = s, i -> i.GlobalCooldown,
+                    (i, parent) -> i.GlobalCooldown = parent.GlobalCooldown)
             .add()
-            .appendInherited(new KeyedCodec<>("InteractionChainId", INTERACTION_CHAIN_REF_CODEC, false, true),
-                    (i, s) -> i.InteractionChainId = s, i -> i.InteractionChainId,
-                    (i, parent) -> i.InteractionChainId = parent.InteractionChainId)
+            .appendInherited(new KeyedCodec<>("GlobalCooldownCategories", new ArrayCodec<>(Codec.STRING,
+                    String[]::new), false, true),
+                    (i, s) -> i.GlobalCooldownCategories = s, i -> i.GlobalCooldownCategories,
+                    (i, parent) -> i.GlobalCooldownCategories = parent.GlobalCooldownCategories)
             .add()
-            .appendInherited(
-                    new KeyedCodec<>("InteractionParams", new MapCodec<>(Codec.STRING, HashMap::new), false, true),
-                    (i, s) -> i.InteractionParams = s, i -> i.InteractionParams,
-                    (i, parent) -> i.InteractionParams = parent.InteractionParams)
+            .appendInherited(new KeyedCodec<>("AbilityType", new EnumCodec<>(AbilityType.class), false, true),
+                    (i, s) -> i.AbilityTypeValue = s, i -> i.AbilityTypeValue,
+                    (i, parent) -> i.AbilityTypeValue = parent.AbilityTypeValue)
             .add()
-            .appendInherited(new KeyedCodec<>("CastAnimation", Codec.STRING, false, true),
-                    (i, s) -> i.CastAnimation = s, i -> i.CastAnimation,
-                    (i, parent) -> i.CastAnimation = parent.CastAnimation)
-            .add()
-            .appendInherited(new KeyedCodec<>("CastSound", Codec.STRING, false, true), (i, s) -> i.CastSound = s,
-                    i -> i.CastSound,
-                    (i, parent) -> i.CastSound = parent.CastSound)
-            .add()
-            .appendInherited(new KeyedCodec<>("ImpactSound", Codec.STRING, false, true), (i, s) -> i.ImpactSound = s,
-                    i -> i.ImpactSound,
-                    (i, parent) -> i.ImpactSound = parent.ImpactSound)
-            .add()
-            .appendInherited(new KeyedCodec<>("ParticleEffect", Codec.STRING, false, true),
-                    (i, s) -> i.ParticleEffect = s, i -> i.ParticleEffect,
-                    (i, parent) -> i.ParticleEffect = parent.ParticleEffect)
-            .add()
-            .appendInherited(new KeyedCodec<>("Enabled", Codec.BOOLEAN, false, true), (i, s) -> i.Enabled = s,
-                    i -> i.Enabled,
-                    (i, parent) -> i.Enabled = parent.Enabled)
-            .add()
-            .appendInherited(new KeyedCodec<>("Tooltip", Codec.STRING, false, true), (i, s) -> i.Tooltip = s,
-                    i -> i.Tooltip,
-                    (i, parent) -> i.Tooltip = parent.Tooltip)
-            .add()
-            .appendInherited(new KeyedCodec<>("InputBinding", new EnumCodec<>(AbilityInputBinding.class), false, true),
-                    (i, s) -> i.InputBinding = s, i -> i.InputBinding,
-                    (i, parent) -> i.InputBinding = parent.InputBinding)
-            .add()
-            .appendInherited(new KeyedCodec<>("HotbarKeyOverrides", INT_LIST_CODEC, false, true),
-                    (i, s) -> i.HotbarKeyOverrides = s, i -> i.HotbarKeyOverrides,
-                    (i, parent) -> i.HotbarKeyOverrides = parent.HotbarKeyOverrides)
-            .add()
-            .build();
+            .afterDecode(ClassAbilityDefinition::processConfig);
 
-    public static AssetBuilderCodec<String, ClassAbilityDefinition> getCODEC() {
-        return CODEC;
-    }
-
-    public static final ContainedAssetCodec<String, ClassAbilityDefinition, ?> CHILD_ASSET_CODEC = new ContainedAssetCodec<>(
-            ClassAbilityDefinition.class, CODEC);
-
+    public static final AssetCodec<String, ClassAbilityDefinition> CODEC = CODEC_BUILDER.build();
     public static final ValidatorCache<String> VALIDATOR_CACHE = new ValidatorCache<>(
             new AssetKeyValidator<>(ClassAbilityDefinition::getAssetStore));
+    private static AssetStore<String, ClassAbilityDefinition, DefaultAssetMap<String, ClassAbilityDefinition>> ASSET_STORE;
 
-    private static DefaultAssetMap<String, ClassAbilityDefinition> ASSET_MAP;
-    private AssetExtraInfo.Data data;
+    protected AssetExtraInfo.Data data;
+    protected String id;
+    protected String Icon;
+    protected AssetIconProperties iconProperties;
+    protected AbilityTranslationProperties translationProperties;
+    protected AbilityType AbilityTypeValue;
+    protected float GlobalCooldown;
+    protected String[] GlobalCooldownCategories;
+    protected List<String> PrerequisiteAbilities;
+    protected Map<String, Integer> StatRequirements;
+    protected int abilityLevel;
+    protected String qualityId;
+    protected int qualityIndex = 0;
+    protected String playerAnimationsId = "Default";
+    protected boolean usePlayerAnimations = false;
+    protected String animation;
+    protected String[] Categories;
+    protected String soundEventId;
+    protected transient int soundEventIndex;
+    protected String abilitySoundSetId = "ISS_Default";
+    protected transient int abilitySoundSetIndex;
+    protected ModelParticle[] particles;
+    protected ModelParticle[] firstPersonParticles;
+    protected Map<InteractionType, String> interactions = Collections.emptyMap();
+    protected Map<String, InteractionVarsEntry> interactionVars = Collections.emptyMap();
+    protected InteractionConfiguration interactionConfig;
+    protected boolean HasRanks = false;
+    protected int MaxRank = 0;
+    protected boolean Enabled = true;
+    protected String Tooltip;
+    protected AbilityInputBinding InputBinding;
+    protected List<Integer> HotbarKeyOverrides;
 
-    // === Basic Info ===
-    private String AbilityId; // Unique identifier (e.g., "warrior_charge")
-    private String DisplayName; // Display name
-    private String Description; // Ability description
-    private String IconId; // Icon asset ID
+    @Nullable
+    protected ItemPullbackConfig pullbackConfig;
 
-    // === Inheritance ===
-    private String ParentAbilityId; // Parent ability to extend from (e.g., "basic_strike")
+    private transient SoftReference<org.pixelbays.rpg.ability.protocol.AbilityBase> cachedPacket;
 
-    // === Ability Type ===
-    private AbilityType AbilityTypeValue; // Active, Passive, Toggle
-    private TargetingType TargetingTypeValue; // Self, Target, Ground, AoE, Cone, etc.
+    public static AssetStore<String, ClassAbilityDefinition, DefaultAssetMap<String, ClassAbilityDefinition>> getAssetStore() {
+        if (ASSET_STORE == null) {
+            ASSET_STORE = AssetRegistry.getAssetStore(ClassAbilityDefinition.class);
+        }
 
-    // === Costs ===
-    private Map<String, Float> ResourceCosts; // Resource costs (e.g., "Mana": 50.0)
-
-    // === Cooldown ===
-    private float Cooldown; // Cooldown in seconds
-    private float GlobalCooldown; // GCD override (0 = use default)
-    private List<String> CooldownCategories; // Categories this ability shares cooldowns with
-
-    // === Casting ===
-    private float CastTime; // Cast time in seconds (0 = instant)
-    private float ChannelDuration; // Channel duration (0 = not channeled)
-    private boolean Interruptible; // Can be interrupted?
-
-    // === Range and Targeting ===
-    private float Range; // Maximum range (0 = melee)
-    private float AoeRadius; // AoE radius (if applicable)
-    private float ConeAngle; // Cone angle in degrees (if applicable)
-
-    // === Requirements ===
-    private List<String> PrerequisiteAbilities; // Required abilities before this can be learned
-    private Map<String, Integer> StatRequirements; // Required stats (e.g., "Strength": 50)
-
-    // === Ranks ===
-    private boolean HasRanks; // Does this ability have multiple ranks?
-    private int MaxRank; // Maximum rank (if hasRanks = true)
-    private List<RankModifier> RankModifiers; // How each rank modifies the ability
-
-    // === Interaction Chain ===
-    private String InteractionChainId; // Hytale interaction chain to execute
-    private Map<String, String> InteractionParams; // Parameters to pass to interaction
-
-    // === Visual/Audio ===
-    private String CastAnimation; // Animation to play when casting
-    private String CastSound; // Sound to play when casting
-    private String ImpactSound; // Sound to play on impact
-    private String ParticleEffect; // Particle effect
-
-    // === Misc ===
-    private boolean Enabled; // Is this ability enabled?
-    private String Tooltip; // Detailed tooltip text
-
-    // === Input Binding ===
-    private AbilityInputBinding InputBinding; // Ability1/2/3 binding
-    private List<Integer> HotbarKeyOverrides; // Placeholder for 1-9 hotbar overrides
-
-    // === Constructors ===
-    public ClassAbilityDefinition() {
-        this.AbilityId = "";
-        this.DisplayName = "";
-        this.Description = "";
-        this.IconId = null;
-        this.AbilityTypeValue = AbilityType.Active;
-        this.TargetingTypeValue = TargetingType.Self;
-        this.ResourceCosts = new HashMap<>();
-        this.Cooldown = 0f;
-        this.GlobalCooldown = 0f;
-        this.CooldownCategories = new ArrayList<>();
-        this.CastTime = 0f;
-        this.ChannelDuration = 0f;
-        this.Interruptible = true;
-        this.Range = 0f;
-        this.AoeRadius = 0f;
-        this.ConeAngle = 0f;
-        this.PrerequisiteAbilities = new ArrayList<>();
-        this.StatRequirements = new HashMap<>();
-        this.HasRanks = false;
-        this.MaxRank = 1;
-        this.RankModifiers = new ArrayList<>();
-        this.InteractionChainId = "";
-        this.InteractionParams = new HashMap<>();
-        this.CastAnimation = "";
-        this.CastSound = "";
-        this.ImpactSound = "";
-        this.ParticleEffect = "";
-        this.Enabled = true;
-        this.Tooltip = "";
-        this.InputBinding = null;
-        this.HotbarKeyOverrides = new ArrayList<>();
+        return ASSET_STORE;
     }
 
     public static DefaultAssetMap<String, ClassAbilityDefinition> getAssetMap() {
-        if (ASSET_MAP == null) {
-            ASSET_MAP = (DefaultAssetMap<String, ClassAbilityDefinition>) AssetRegistry
-                    .getAssetStore(ClassAbilityDefinition.class).getAssetMap();
-        }
-
-        return ASSET_MAP;
+        return (DefaultAssetMap<String, ClassAbilityDefinition>) getAssetStore().getAssetMap();
     }
 
-    public static AssetStore<String, ClassAbilityDefinition, ?> getAssetStore() {
-        return (AssetStore<String, ClassAbilityDefinition, ?>) AssetRegistry
-                .getAssetStore(ClassAbilityDefinition.class);
+    protected ClassAbilityDefinition() {
+    }
+
+    public ClassAbilityDefinition(String id) {
+        this.id = id;
+    }
+
+    public ClassAbilityDefinition(@Nonnull ClassAbilityDefinition other) {
+        this.data = other.data;
+        this.id = other.id;
+        this.Icon = other.Icon;
+        this.iconProperties = other.iconProperties;
+        this.translationProperties = other.translationProperties;
+        this.abilityLevel = other.abilityLevel;
+        this.qualityId = other.qualityId;
+        this.playerAnimationsId = other.playerAnimationsId;
+        this.usePlayerAnimations = other.usePlayerAnimations;
+        this.animation = other.animation;
+        this.Categories = other.Categories;
+        this.soundEventId = other.soundEventId;
+        this.soundEventIndex = other.soundEventIndex;
+        this.abilitySoundSetId = other.abilitySoundSetId;
+        this.abilitySoundSetIndex = other.abilitySoundSetIndex;
+        this.particles = other.particles;
+        this.firstPersonParticles = other.firstPersonParticles;
+        this.interactions = other.interactions;
+        this.interactionVars = other.interactionVars;
+        this.interactionConfig = other.interactionConfig;
+        this.HasRanks = other.HasRanks;
+        this.MaxRank = other.MaxRank;
+        this.Enabled = other.Enabled;
+        this.Tooltip = other.Tooltip;
+        this.InputBinding = other.InputBinding;
+        this.HotbarKeyOverrides = other.HotbarKeyOverrides;
+        this.PrerequisiteAbilities = other.PrerequisiteAbilities;
+        this.StatRequirements = other.StatRequirements;
+        this.GlobalCooldown = other.GlobalCooldown;
+        this.GlobalCooldownCategories = other.GlobalCooldownCategories;
+        this.pullbackConfig = other.pullbackConfig;
+        this.AbilityTypeValue = other.AbilityTypeValue;
     }
 
     @Nonnull
-    @Override
+    public org.pixelbays.rpg.ability.protocol.AbilityBase toPacket() {
+        org.pixelbays.rpg.ability.protocol.AbilityBase cached = this.cachedPacket == null ? null : this.cachedPacket.get();
+        if (cached != null) {
+            return cached;
+        } else {
+            org.pixelbays.rpg.ability.protocol.AbilityBase packet = new org.pixelbays.rpg.ability.protocol.AbilityBase();
+            packet.id = this.id;
+            if (this.Icon != null) {
+                packet.icon = this.Icon;
+            }
+
+            if (this.iconProperties != null) {
+                packet.iconProperties = this.iconProperties;
+            }
+
+            if (this.translationProperties != null) {
+                packet.translationProperties = this.translationProperties.toPacket();
+            }
+
+            if (this.animation != null) {
+                packet.animation = this.animation;
+            }
+
+            packet.playerAnimationsId = this.playerAnimationsId;
+            packet.usePlayerAnimations = this.usePlayerAnimations;
+            packet.abilityLevel = this.abilityLevel;
+            packet.qualityIndex = this.qualityIndex;
+
+            if (this.Categories != null && this.Categories.length > 0) {
+                packet.categories = this.Categories;
+            }
+
+            packet.soundEventIndex = this.soundEventIndex;
+            packet.abilitySoundSetIndex = this.abilitySoundSetIndex;
+            if (this.particles != null && this.particles.length > 0) {
+                packet.particles = new com.hypixel.hytale.protocol.ModelParticle[this.particles.length];
+
+                for (int i = 0; i < this.particles.length; i++) {
+                    packet.particles[i] = this.particles[i].toPacket();
+                }
+            }
+
+            if (this.firstPersonParticles != null && this.firstPersonParticles.length > 0) {
+                packet.firstPersonParticles = new com.hypixel.hytale.protocol.ModelParticle[this.firstPersonParticles.length];
+
+                for (int i = 0; i < this.firstPersonParticles.length; i++) {
+                    packet.firstPersonParticles[i] = this.firstPersonParticles[i].toPacket();
+                }
+            }
+
+            Object2IntOpenHashMap<InteractionType> interactionsIntMap = new Object2IntOpenHashMap<>();
+
+            for (Entry<InteractionType, String> e : this.interactions.entrySet()) {
+                interactionsIntMap.put(e.getKey(), RootInteraction.getRootInteractionIdOrUnknown(e.getValue()));
+            }
+
+            packet.interactions = interactionsIntMap;
+            
+            Object2IntOpenHashMap<String> interactionVarsIntMap = new Object2IntOpenHashMap<>();
+            
+            packet.interactionVars = interactionVarsIntMap.isEmpty() ? null : interactionVarsIntMap;
+            packet.interactionConfig = this.interactionConfig.toPacket();
+
+            if (this.data != null) {
+                IntSet expandedTagIndexes = this.data.getExpandedTagIndexes();
+                if (expandedTagIndexes != null) {
+                    packet.tagIndexes = expandedTagIndexes.toIntArray();
+                }
+            }
+
+            this.cachedPacket = new SoftReference<>(packet);
+            return packet;
+        }
+    }
+
+    @Nullable
+    public ClassAbilityDefinition getAbilityForState(String state) {
+        String id = this.getAbilityIdForState(state);
+        return id == null ? null : getAssetMap().getAsset(id);
+    }
+
+    @Nullable
+    public String getAbilityIdForState(String state) {
+        // TODO: Implement state logic if needed
+        return null;
+    }
+
+    public boolean isState() {
+        return this.getStateForAbility(this.id) != null;
+    }
+
+    @Nullable
+    public String getStateForAbility(@Nonnull ClassAbilityDefinition ability) {
+        return this.getStateForAbility(ability.getId());
+    }
+
+    @Nullable
+    public String getStateForAbility(String abilityId) {
+        // TODO: Implement state logic if needed
+        return null;
+    }
+
+    public AssetExtraInfo.Data getData() {
+        return this.data;
+    }
+
     public String getId() {
-        return this.AbilityId == null ? "" : this.AbilityId;
+        return this.id;
     }
 
-    // === Getters and Setters ===
+    @Nonnull
+    public String getTranslationKey() {
+        if (this.translationProperties != null) {
+            String nameTranslation = this.translationProperties.getName();
+            if (nameTranslation != null) {
+                return nameTranslation;
+            }
+        }
 
-    public String getAbilityId() {
-        return AbilityId;
+        return "server.abilities." + this.id + ".name";
     }
 
-    public void setAbilityId(String abilityId) {
-        this.AbilityId = abilityId;
+    @Nonnull
+    public String getDescriptionTranslationKey() {
+        if (this.translationProperties != null) {
+            String descriptionTranslation = this.translationProperties.getDescription();
+            if (descriptionTranslation != null) {
+                return descriptionTranslation;
+            }
+        }
+
+        return "server.abilities." + this.id + ".description";
+    }
+
+    public boolean getUsePlayerAnimations() {
+        return this.usePlayerAnimations;
+    }
+
+    public String getPlayerAnimationsId() {
+        return this.playerAnimationsId;
+    }
+
+    public String getIcon() {
+        return this.Icon;
+    }
+
+    public AssetIconProperties getIconProperties() {
+        return this.iconProperties;
+    }
+
+    public AbilityTranslationProperties getTranslationProperties() {
+        return this.translationProperties;
+    }
+
+    public int getAbilityLevel() {
+        return this.abilityLevel;
+    }
+
+    public int getQualityIndex() {
+        return this.qualityIndex;
+    }
+
+    public String[] getCategories() {
+        return this.Categories;
+    }
+
+    public String getSoundEventId() {
+        return this.soundEventId;
+    }
+
+    public int getSoundEventIndex() {
+        return this.soundEventIndex;
+    }
+
+    public Map<InteractionType, String> getInteractions() {
+        return this.interactions;
+    }
+
+    public Map<String, InteractionVarsEntry> getInteractionVars() {
+        return this.interactionVars;
+    }
+
+    public InteractionConfiguration getInteractionConfig() {
+        return this.interactionConfig;
+    }
+
+    public int getAbilitySoundSetIndex() {
+        return this.abilitySoundSetIndex;
     }
 
     public String getDisplayName() {
-        return DisplayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.DisplayName = displayName;
-    }
-
-    public String getDescription() {
-        return Description;
-    }
-
-    public void setDescription(String description) {
-        this.Description = description;
-    }
-
-    public String getIconId() {
-        return IconId;
-    }
-
-    public void setIconId(String iconId) {
-        this.IconId = iconId;
-    }
-
-    public String getParentAbilityId() {
-        return ParentAbilityId;
-    }
-
-    public void setParentAbilityId(String parentAbilityId) {
-        this.ParentAbilityId = parentAbilityId;
-    }
-
-    public AbilityType getAbilityType() {
-        return AbilityTypeValue;
-    }
-
-    public void setAbilityType(AbilityType abilityType) {
-        this.AbilityTypeValue = abilityType;
-    }
-
-    public TargetingType getTargetingType() {
-        return TargetingTypeValue;
-    }
-
-    public void setTargetingType(TargetingType targetingType) {
-        this.TargetingTypeValue = targetingType;
-    }
-
-    public Map<String, Float> getResourceCosts() {
-        return ResourceCosts;
-    }
-
-    public void setResourceCosts(Map<String, Float> resourceCosts) {
-        this.ResourceCosts = resourceCosts;
-    }
-
-    public float getCooldown() {
-        return Cooldown;
-    }
-
-    public void setCooldown(float cooldown) {
-        this.Cooldown = cooldown;
-    }
-
-    public float getGlobalCooldown() {
-        return GlobalCooldown;
-    }
-
-    public void setGlobalCooldown(float globalCooldown) {
-        this.GlobalCooldown = globalCooldown;
-    }
-
-    public List<String> getCooldownCategories() {
-        return CooldownCategories;
-    }
-
-    public void setCooldownCategories(List<String> cooldownCategories) {
-        this.CooldownCategories = cooldownCategories;
-    }
-
-    public float getCastTime() {
-        return CastTime;
-    }
-
-    public void setCastTime(float castTime) {
-        this.CastTime = castTime;
-    }
-
-    public float getChannelDuration() {
-        return ChannelDuration;
-    }
-
-    public void setChannelDuration(float channelDuration) {
-        this.ChannelDuration = channelDuration;
-    }
-
-    public boolean isInterruptible() {
-        return Interruptible;
-    }
-
-    public void setInterruptible(boolean interruptible) {
-        this.Interruptible = interruptible;
-    }
-
-    public float getRange() {
-        return Range;
-    }
-
-    public void setRange(float range) {
-        this.Range = range;
-    }
-
-    public float getAoeRadius() {
-        return AoeRadius;
-    }
-
-    public void setAoeRadius(float aoeRadius) {
-        this.AoeRadius = aoeRadius;
-    }
-
-    public float getConeAngle() {
-        return ConeAngle;
-    }
-
-    public void setConeAngle(float coneAngle) {
-        this.ConeAngle = coneAngle;
-    }
-
-    public List<String> getPrerequisiteAbilities() {
-        return PrerequisiteAbilities;
-    }
-
-    public void setPrerequisiteAbilities(List<String> prerequisiteAbilities) {
-        this.PrerequisiteAbilities = prerequisiteAbilities;
-    }
-
-    public Map<String, Integer> getStatRequirements() {
-        return StatRequirements;
-    }
-
-    public void setStatRequirements(Map<String, Integer> statRequirements) {
-        this.StatRequirements = statRequirements;
-    }
-
-    public boolean hasRanks() {
-        return HasRanks;
-    }
-
-    public void setHasRanks(boolean hasRanks) {
-        this.HasRanks = hasRanks;
-    }
-
-    public int getMaxRank() {
-        return MaxRank;
-    }
-
-    public void setMaxRank(int maxRank) {
-        this.MaxRank = maxRank;
-    }
-
-    public List<RankModifier> getRankModifiers() {
-        return RankModifiers;
-    }
-
-    public void setRankModifiers(List<RankModifier> rankModifiers) {
-        this.RankModifiers = rankModifiers;
+        return this.getTranslationKey();
     }
 
     public String getInteractionChainId() {
-        return InteractionChainId;
-    }
-
-    public void setInteractionChainId(String interactionChainId) {
-        this.InteractionChainId = interactionChainId;
-    }
-
-    public Map<String, String> getInteractionParams() {
-        return InteractionParams;
-    }
-
-    public void setInteractionParams(Map<String, String> interactionParams) {
-        this.InteractionParams = interactionParams;
-    }
-
-    public String getCastAnimation() {
-        return CastAnimation;
-    }
-
-    public void setCastAnimation(String castAnimation) {
-        this.CastAnimation = castAnimation;
-    }
-
-    public String getCastSound() {
-        return CastSound;
-    }
-
-    public void setCastSound(String castSound) {
-        this.CastSound = castSound;
-    }
-
-    public String getImpactSound() {
-        return ImpactSound;
-    }
-
-    public void setImpactSound(String impactSound) {
-        this.ImpactSound = impactSound;
-    }
-
-    public String getParticleEffect() {
-        return ParticleEffect;
-    }
-
-    public void setParticleEffect(String particleEffect) {
-        this.ParticleEffect = particleEffect;
-    }
-
-    public boolean isEnabled() {
-        return Enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.Enabled = enabled;
-    }
-
-    public String getTooltip() {
-        return Tooltip;
-    }
-
-    public void setTooltip(String tooltip) {
-        this.Tooltip = tooltip;
+        return this.interactions.getOrDefault(InteractionType.Primary, null);
     }
 
     public AbilityInputBinding getInputBinding() {
-        return InputBinding;
+        return this.InputBinding;
     }
 
-    public void setInputBinding(AbilityInputBinding inputBinding) {
-        this.InputBinding = inputBinding;
+    public List<String> getPrerequisiteAbilities() {
+        return this.PrerequisiteAbilities;
+    }
+
+    public Map<String, Integer> getStatRequirements() {
+        return this.StatRequirements;
+    }
+
+    public boolean getHasRanks() {
+        return this.HasRanks;
+    }
+
+    public int getMaxRank() {
+        return this.MaxRank;
+    }
+
+    public float getGlobalCooldown() {
+        return this.GlobalCooldown;
+    }
+
+    public String[] getGlobalCooldownCategories() {
+        return this.GlobalCooldownCategories;
+    }
+
+    public AbilityType getAbilityType() {
+        return this.AbilityTypeValue;
     }
 
     public List<Integer> getHotbarKeyOverrides() {
-        return HotbarKeyOverrides;
+        return this.HotbarKeyOverrides;
     }
 
-    public void setHotbarKeyOverrides(List<Integer> hotbarKeyOverrides) {
-        this.HotbarKeyOverrides = hotbarKeyOverrides;
+    public boolean isEnabled() {
+        return this.Enabled;
     }
 
+    public String getTooltip() {
+        return this.Tooltip;
+    }
+
+    protected void processConfig() {
+
+        Map<InteractionType, String> interactions = this.interactions.isEmpty() ? new EnumMap<>(InteractionType.class)
+                : new EnumMap<>(this.interactions);
+        DefaultAssetMap<String, UnarmedInteractions> unarmedInteractionsAssetMap = UnarmedInteractions.getAssetMap();
+        UnarmedInteractions fallbackInteractions = this.playerAnimationsId != null
+                ? unarmedInteractionsAssetMap.getAsset(this.playerAnimationsId)
+                : null;
+        if (fallbackInteractions != null) {
+            for (Entry<InteractionType, String> entry : fallbackInteractions.getInteractions().entrySet()) {
+                interactions.putIfAbsent(entry.getKey(), entry.getValue());
+            }
+        }
+
+        UnarmedInteractions defaultUnarmedInteractions = unarmedInteractionsAssetMap.getAsset("Empty");
+        if (defaultUnarmedInteractions != null) {
+            for (Entry<InteractionType, String> entry : defaultUnarmedInteractions.getInteractions().entrySet()) {
+                interactions.putIfAbsent(entry.getKey(), entry.getValue());
+            }
+        }
+
+        this.interactions = Collections.unmodifiableMap(interactions);
+
+        IndexedLookupTableAssetMap<String, AbilityQuality> abilityQualityAssetMap = AbilityQuality.getAssetMap();
+        if (this.qualityId != null && abilityQualityAssetMap != null) {
+            this.qualityIndex = abilityQualityAssetMap.getIndexOrDefault(this.qualityId, 0);
+            AbilityQuality abilityQuality = abilityQualityAssetMap.getAsset(this.qualityIndex);
+        }
+
+        if (this.interactionConfig == null) {
+            this.interactionConfig = InteractionConfiguration.DEFAULT;
+        }
+
+        if (this.soundEventId != null) {
+            this.soundEventIndex = SoundEvent.getAssetMap().getIndex(this.soundEventId);
+        }
+
+        this.abilitySoundSetIndex = ItemSoundSet.getAssetMap().getIndex(this.abilitySoundSetId);
+    }
     // === Enums ===
 
     public enum AbilityType {
@@ -610,43 +656,20 @@ public class ClassAbilityDefinition
         Ability3
     }
 
-    // === Nested Classes ===
-
-    /**
-     * Describes how ability properties change with rank
+    /*
+     * // LEAVE THIS IN FOR REFERENCE
+     * static {
+     * CODEC_BUILDER.<Map>appendInherited(
+     * new KeyedCodec<>("State",
+     * new MapCodec(
+     * new ContainedAssetCodec<>(Item.class, CODEC,
+     * ContainedAssetCodec.Mode.INJECT_PARENT),
+     * HashMap::new)),
+     * (item, m) -> item.stateToBlock = m,
+     * item -> item.stateToBlock,
+     * (item, parent) -> item.stateToBlock = parent.stateToBlock)
+     * .metadata(new UIEditorSectionStart("State"))
+     * .add();
+     * }
      */
-    public static class RankModifier {
-        public static final BuilderCodec<RankModifier> CODEC = BuilderCodec
-                .builder(RankModifier.class, RankModifier::new)
-                .append(new KeyedCodec<>("Rank", Codec.INTEGER, false, true), (i, s) -> i.Rank = s, i -> i.Rank)
-                .add()
-                .append(new KeyedCodec<>("PropertyChanges", new MapCodec<>(Codec.FLOAT, HashMap::new), false, true),
-                        (i, s) -> i.PropertyChanges = s, i -> i.PropertyChanges)
-                .add()
-                .build();
-
-        private int Rank;
-        private Map<String, Float> PropertyChanges; // Property -> new value (e.g., "damage": 150.0)
-
-        public RankModifier() {
-            this.Rank = 1;
-            this.PropertyChanges = new HashMap<>();
-        }
-
-        public int getRank() {
-            return Rank;
-        }
-
-        public void setRank(int rank) {
-            this.Rank = rank;
-        }
-
-        public Map<String, Float> getPropertyChanges() {
-            return PropertyChanges;
-        }
-
-        public void setPropertyChanges(Map<String, Float> propertyChanges) {
-            this.PropertyChanges = propertyChanges;
-        }
-    }
 }

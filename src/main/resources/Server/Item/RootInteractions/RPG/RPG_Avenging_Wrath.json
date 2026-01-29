@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Avenging_Wrath"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Avenging_Wrath",
+    "Cooldown": 30.0
+  }
+}

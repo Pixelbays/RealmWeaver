@@ -1,0 +1,108 @@
+{
+  "DisplayName": "Character Level",
+  "Description": "Main character progression system",
+  "MaxLevel": 60,
+  "StartingLevel": 1,
+  "ExpCurveType": "exponential",
+  "ExpCurve": {
+    "Type": "exponential",
+    "BaseExp": 100,
+    "GrowthRate": 50,
+    "Exponent": 1.8
+  },
+  "Prerequisites": {},
+  "DefaultRewards": {
+    "StatPoints": 5,
+    "SkillPoints": 1,
+    "StatIncreases": {
+      "Health": 10.0,
+      "Mana": 5.0
+    }
+  },
+  "LevelRewards": {
+    "10": {
+      "StatPoints": 10,
+      "ItemRewards": [
+        "hytale:mount_basic"
+      ],
+      "UnlockedAbilities": [
+        "rpg:sprint"
+      ],
+      "LevelUpEffects": {
+        "SoundId": "SFX_Item_Repair",
+        "ParticleEffect": "Dust_Sparkles_Fine",
+        "Notification": {
+          "PrimaryMessage": "MILESTONE REACHED!",
+          "SecondaryMessage": "Level 10 - Classes unlocked!",
+          "IconItemId": "Item_Book_Gold"
+        }
+      }
+    },
+    "20": {
+      "StatPoints": 15,
+      "SkillPoints": 5,
+      "UnlockedQuests": [
+        "rpg:epic_quest_line"
+      ],
+      "LevelUpEffects": {
+        "SoundId": "SFX_Item_Repair",
+        "ParticleEffect": "Dust_Sparkles_Fine",
+        "Notification": {
+          "PrimaryMessage": "EPIC MILESTONE!",
+          "SecondaryMessage": "Level 20 - Epic quest unlocked!",
+          "IconItemId": "Item_Book_Purple"
+        }
+      }
+    },
+    "30": {
+      "StatPoints": 20,
+      "ItemRewards": [
+        "hytale:epic_weapon_chest"
+      ]
+    },
+    "40": {
+      "StatPoints": 25,
+      "SkillPoints": 10
+    },
+    "50": {
+      "StatPoints": 30,
+      "SkillPoints": 15,
+      "ItemRewards": [
+        "hytale:legendary_gear_token"
+      ]
+    },
+    "60": {
+      "StatPoints": 50,
+      "SkillPoints": 25,
+      "ItemRewards": [
+        "hytale:max_level_mount"
+      ],
+      "InteractionChain": "rpg:max_level_celebration"
+    }
+  },
+  "StatGrowth": {
+    "FlatGrowth": {
+      "Health": 10.0,
+      "Mana": 5.0,
+      "Stamina": 3.0
+    },
+    "PercentageGrowth": {},
+    "MilestoneGrowth": {
+      "10": {
+        "Health": 50.0,
+        "Mana": 25.0
+      },
+      "25": {
+        "Health": 100.0,
+        "Mana": 50.0
+      },
+      "50": {
+        "Health": 200.0,
+        "Mana": 100.0
+      }
+    }
+  },
+  "Enabled": true,
+  "Visible": true,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
+}
