@@ -65,7 +65,7 @@ public class ClassSetLevelCommand extends AbstractPlayerCommand {
             return;
         }
 
-        String systemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         if (systemId == null || systemId.isEmpty()) {
             player.sendMessage(Message.raw("Class has no level system configured: " + classId));
             return;

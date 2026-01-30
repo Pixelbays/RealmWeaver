@@ -1,4 +1,4 @@
-package org.pixelbays.rpg.item.codec;
+package org.pixelbays.rpg.global.config;
 
 import java.util.Collections;
 import java.util.Map;

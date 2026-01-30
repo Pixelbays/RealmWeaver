@@ -7,7 +7,7 @@ import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.system.RpgLogging;
+import org.pixelbays.rpg.global.util.RpgLogging;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;

@@ -1,4 +1,4 @@
-package org.pixelbays.rpg.global.system;
+package org.pixelbays.rpg.global.util;
 
 import javax.annotation.Nullable;
 

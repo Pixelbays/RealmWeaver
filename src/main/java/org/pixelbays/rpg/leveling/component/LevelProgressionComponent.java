@@ -20,7 +20,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Supports multiple simultaneous leveling systems (character level, class
  * levels, profession levels, etc.)
  */
-@SuppressWarnings({"all", "clone", "CloneDoesntDeclareCloneNotSupportedException"})
+@SuppressWarnings({"PMD", "PMD.CloneMethodMustDeclareCloneNotSupportedException", "CloneDoesntDeclareCloneNotSupportedException", "CloneDoesntCallSuperClone", "all", "clone"})
 public class LevelProgressionComponent implements Component<EntityStore>, Cloneable {
 
     // Codec for NBT serialization (required for persistence)
@@ -41,6 +41,9 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
             .append(new KeyedCodec<>("TotalLevelsGained", Codec.INTEGER),
                     (data, value) -> data.totalLevelsGained = value, data -> data.totalLevelsGained)
             .add()
+                .append(new KeyedCodec<>("LastGrowthAppliedLevel", Codec.INTEGER),
+                    (data, value) -> data.lastGrowthAppliedLevel = value, data -> data.lastGrowthAppliedLevel)
+                .add()
             .append(new KeyedCodec<>("AvailableStatPoints", Codec.INTEGER),
                     (data, value) -> data.availableStatPoints = value, data -> data.availableStatPoints)
             .add()
@@ -54,16 +57,30 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
             .append(new KeyedCodec<>("LevelSystems", new MapCodec<>(LEVEL_SYSTEM_DATA_CODEC, HashMap::new, false)),
                     (component, value) -> component.levelSystems = value, component -> component.levelSystems)
             .add()
+            .append(new KeyedCodec<>("LastLogoutEpochMs", Codec.LONG),
+                (component, value) -> component.lastLogoutEpochMs = value,
+                component -> component.lastLogoutEpochMs)
+            .add()
             .build();
 
     /**
      * Map of level system ID -> level data
-     * Examples: "character_level", "class_warrior", "profession_woodworking"
+     * Examples: "Base_Character_Level", "class_warrior", "profession_woodworking"
      */
     private Map<String, LevelSystemData> levelSystems;
+    private long lastLogoutEpochMs;
 
     public LevelProgressionComponent() {
         this.levelSystems = new HashMap<>();
+        this.lastLogoutEpochMs = 0L;
+    }
+
+    public long getLastLogoutEpochMs() {
+        return lastLogoutEpochMs;
+    }
+
+    public void setLastLogoutEpochMs(long lastLogoutEpochMs) {
+        this.lastLogoutEpochMs = lastLogoutEpochMs;
     }
 
     /**
@@ -103,13 +120,14 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
 
     @Nonnull
     @Override
-    @SuppressWarnings({"clone", "CloneDoesntDeclareCloneNotSupportedException"})
-    public Component<EntityStore> clone() {
+    @SuppressWarnings({"PMD", "PMD.CloneMethodMustDeclareCloneNotSupportedException", "all", "clone", "CloneDoesntDeclareCloneNotSupportedException"})
+    public Component<EntityStore> clone() { // NOPMD
         LevelProgressionComponent cloned = new LevelProgressionComponent();
         cloned.levelSystems = new HashMap<>();
         for (Map.Entry<String, LevelSystemData> entry : this.levelSystems.entrySet()) {
             cloned.levelSystems.put(entry.getKey(), entry.getValue().clone());
         }
+        cloned.lastLogoutEpochMs = this.lastLogoutEpochMs;
         return cloned;
     }
 
@@ -122,6 +140,7 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
         private float currentExp;
         private float expToNextLevel;
         private int totalLevelsGained; // Track total levels for multi-level-up events
+        private int lastGrowthAppliedLevel; // Tracks last level where stat growth was applied
 
         // Reward tracking
         private int availableStatPoints;
@@ -134,6 +153,7 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
             this.currentExp = 0;
             this.expToNextLevel = 100;
             this.totalLevelsGained = 0;
+            this.lastGrowthAppliedLevel = 0;
             this.availableStatPoints = 0;
             this.availableSkillPoints = 0;
         }
@@ -144,6 +164,7 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
             this.currentExp = 0;
             this.expToNextLevel = 100; // Default, will be overridden by config
             this.totalLevelsGained = 0;
+            this.lastGrowthAppliedLevel = 0;
             this.availableStatPoints = 0;
             this.availableSkillPoints = 0;
         }
@@ -183,6 +204,14 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
 
         public void setTotalLevelsGained(int totalLevelsGained) {
             this.totalLevelsGained = totalLevelsGained;
+        }
+
+        public int getLastGrowthAppliedLevel() {
+            return lastGrowthAppliedLevel;
+        }
+
+        public void setLastGrowthAppliedLevel(int lastGrowthAppliedLevel) {
+            this.lastGrowthAppliedLevel = lastGrowthAppliedLevel;
         }
 
         public void incrementLevelsGained() {
@@ -254,6 +283,7 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
             cloned.currentExp = this.currentExp;
             cloned.expToNextLevel = this.expToNextLevel;
             cloned.totalLevelsGained = this.totalLevelsGained;
+            cloned.lastGrowthAppliedLevel = this.lastGrowthAppliedLevel;
             cloned.availableStatPoints = this.availableStatPoints;
             cloned.availableSkillPoints = this.availableSkillPoints;
             return cloned;

@@ -12,7 +12,7 @@ import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
-import org.pixelbays.rpg.global.system.RpgLogging;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.config.ExpCurveDefinition;
 import org.pixelbays.rpg.leveling.config.LevelRewardConfig;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
@@ -68,9 +68,9 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
 
         ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
         boolean learned = classComp != null && classComp.hasLearnedClass(classId);
-        boolean active = classComp != null && classId.equals(classComp.getActiveClassId());
+        boolean active = classComp != null && classId.equals(classComp.getPrimaryClassId());
 
-        String systemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         int currentLevel = systemId != null && !systemId.isEmpty() ? levelSystem.getLevel(ref, systemId) : 0;
         float expToNext = systemId != null && !systemId.isEmpty() ? levelSystem.getExpToNextLevel(ref, systemId) : 0f;
         float currentExp = systemId != null && !systemId.isEmpty() ? levelSystem.getExperience(ref, systemId) : 0f;

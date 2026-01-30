@@ -11,7 +11,7 @@ import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
-import org.pixelbays.rpg.global.system.RpgLogging;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -27,8 +27,8 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * /class progress [className] - Show class progression (defaults to active
- * class)
+ * /class progress [className] - Show class progression (defaults to primary
+ * learned class)
  */
 public class ClassProgressCommand extends AbstractPlayerCommand {
 
@@ -42,7 +42,7 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
         this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
-        this.classNameArg = this.withOptionalArg("className", "The class to view (defaults to active)",
+        this.classNameArg = this.withOptionalArg("className", "The class to view (defaults to primary)",
                 ArgTypes.STRING);
     }
 
@@ -61,11 +61,12 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
         if (this.classNameArg.provided(ctx)) {
             classId = this.classNameArg.get(ctx);
         } else {
-            if (classComp == null || classComp.getActiveClassId() == null || classComp.getActiveClassId().isEmpty()) {
-                player.sendMessage(Message.raw("No active class. Specify class name: /class progress <className>"));
+            String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
+            if (primaryClassId == null || primaryClassId.isEmpty()) {
+                player.sendMessage(Message.raw("No learned class. Specify class name: /class progress <className>"));
                 return;
             }
-            classId = classComp.getActiveClassId();
+            classId = primaryClassId;
         }
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
@@ -80,23 +81,21 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
         }
 
         ClassComponent.ClassData classData = classComp.getClassData(classId);
-        boolean isActive = classId.equals(classComp.getActiveClassId());
+        boolean isPrimary = classId.equals(classComp.getPrimaryClassId());
 
-        String systemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         int currentLevel = (systemId != null && !systemId.isEmpty()) ? levelSystem.getLevel(ref, systemId) : 0;
         float currentExp = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExperience(ref, systemId) : 0f;
         float expToNext = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExpToNextLevel(ref, systemId) : 0f;
         float expProgress = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExpProgress(ref, systemId) : 0f;
 
         player.sendMessage(Message.raw("=== " + classDef.getDisplayName() + " Progress ==="));
-        player.sendMessage(Message.raw("Status: " + (isActive ? "Active" : "Inactive")));
+        player.sendMessage(Message.raw("Status: " + (isPrimary ? "Primary" : "Inactive")));
         player.sendMessage(Message.raw("Level System: " + systemId));
         player.sendMessage(Message.raw("Current Level: " + currentLevel));
         player.sendMessage(Message.raw("Current XP: " + String.format("%.0f", currentExp)
             + " / " + String.format("%.0f", expToNext)
             + " (" + (int) (expProgress * 100) + "%)"));
-        float totalExp = classData != null ? classData.getTotalExpEarned() : 0f;
-        player.sendMessage(Message.raw("Total XP (tracked): " + String.format("%.0f", totalExp)));
 
         java.util.List<String> abilityIds = new java.util.ArrayList<>(classDef.getAbilityIds());
         RpgLogging.debugDeveloper("Ability IDs: %s", abilityIds);

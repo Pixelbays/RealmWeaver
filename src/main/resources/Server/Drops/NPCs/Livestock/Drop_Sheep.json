@@ -32,7 +32,8 @@
       {
         "Type": "Exp",
         "ExpMin": 1000,
-        "ExpMax": 1000
+        "ExpMax": 1000,
+        "SystemId": "combat"
       }
     ]
   }

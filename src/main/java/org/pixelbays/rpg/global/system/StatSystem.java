@@ -10,7 +10,10 @@ import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.global.config.builder.StatModifiers;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.config.StatGrowthConfig;
+import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
+import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
@@ -18,6 +21,8 @@ import org.pixelbays.rpg.race.system.RaceManagementSystem;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.event.EventRegistry;
+import com.hypixel.hytale.server.core.event.events.player.PlayerConnectEvent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
@@ -47,12 +52,68 @@ public class StatSystem {
 
     public StatSystem(@Nonnull ClassManagementSystem classManagementSystem,
             @Nonnull RaceManagementSystem raceManagementSystem,
-            @Nonnull LevelProgressionSystem levelProgressionSystem) {
+            @Nonnull LevelProgressionSystem levelProgressionSystem,
+            @Nonnull EventRegistry eventRegistry) {
         this.classManagementSystem = classManagementSystem;
         this.raceManagementSystem = raceManagementSystem;
         this.levelProgressionSystem = levelProgressionSystem;
         this.classModifiersCache = new HashMap<>();
         this.raceModifiersCache = new HashMap<>();
+
+        eventRegistry.register(PlayerConnectEvent.class, onPlayerConnect());
+    }
+
+    private java.util.function.Consumer<PlayerConnectEvent> onPlayerConnect() {
+        return event -> {
+            var playerRef = event.getPlayerRef();
+            Ref<EntityStore> entityRef = playerRef.getReference();
+            if (entityRef == null || !entityRef.isValid()) {
+                return;
+            }
+
+            Store<EntityStore> store = entityRef.getStore();
+            boolean classInitialized = classManagementSystem.ensureStartingClass(entityRef, store);
+            if (!classInitialized) {
+                recalculateClassStatBonuses(entityRef, store);
+            }
+            recalculateRaceStatBonuses(entityRef, store);
+            recalculateStatGrowthBonuses(entityRef, store);
+        };
+    }
+
+    private void recalculateStatGrowthBonuses(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        LevelProgressionComponent levelComp = store.getComponent(entityRef, LevelProgressionComponent.getComponentType());
+        if (levelComp == null) {
+            return;
+        }
+
+        for (LevelProgressionComponent.LevelSystemData data : levelComp.getAllSystems().values()) {
+            if (data == null) {
+                continue;
+            }
+
+            String systemId = data.getSystemId();
+            LevelSystemConfig config = levelProgressionSystem.getConfig(systemId);
+            if (config == null || config.getStatGrowth() == null) {
+                continue;
+            }
+
+            int currentLevel = data.getCurrentLevel();
+            int lastApplied = data.getLastGrowthAppliedLevel();
+            if (currentLevel <= 1 || currentLevel <= lastApplied) {
+                continue;
+            }
+
+            int startLevel = Math.max(2, lastApplied + 1);
+            for (int level = startLevel; level <= currentLevel; level++) {
+                applyStatGrowth(entityRef, level, config.getStatGrowth(), store);
+            }
+
+            data.setLastGrowthAppliedLevel(currentLevel);
+            RpgLogging.debugDeveloper("[StatSystem] Reapplied stat growth for %s: %d -> %d",
+                    systemId, startLevel, currentLevel);
+        }
     }
 
     /**
@@ -98,26 +159,32 @@ public class StatSystem {
             return;
         }
 
-        String activeClassId = classComp.getActiveClassId();
-        if (activeClassId == null || activeClassId.isEmpty()) {
+        if (classComp.getLearnedClassIds().isEmpty()) {
             clearClassStatBonuses(entityRef, store);
             return;
         }
 
-        ClassDefinition classDef = classManagementSystem.getClassDefinition(activeClassId);
-        if (classDef == null) {
-            return;
+        AppliedModifiers modifiers = new AppliedModifiers();
+        for (String classId : classComp.getLearnedClassIds()) {
+            if (classId == null || classId.isEmpty()) {
+                continue;
+            }
+            ClassDefinition classDef = classManagementSystem.getClassDefinition(classId);
+            if (classDef == null) {
+                continue;
+            }
+            AppliedModifiers classModifiers = calculateClassModifiers(entityRef, classDef);
+            mergeModifiers(modifiers, classModifiers);
         }
-
-        AppliedModifiers modifiers = calculateClassModifiers(entityRef, classDef);
 
         AppliedModifiers oldModifiers = classModifiersCache.get(entityRef);
-        if (oldModifiers != null) {
-            removeModifiers(entityRef, oldModifiers, store, "rpg_class");
-        }
+        updateModifiers(entityRef, modifiers, oldModifiers, store, "rpg_class");
 
-        applyModifiers(entityRef, modifiers, store, "rpg_class");
-        classModifiersCache.put(entityRef, modifiers);
+        if (!modifiers.isEmpty()) {
+            classModifiersCache.put(entityRef, modifiers);
+        } else {
+            classModifiersCache.remove(entityRef);
+        }
     }
 
     /**
@@ -252,15 +319,12 @@ public class StatSystem {
      */
     public void recalculateRaceStatBonuses(@Nonnull Ref<EntityStore> entityRef,
             @Nonnull Store<EntityStore> store) {
-        // Remove old race modifiers if they exist
         AppliedModifiers oldModifiers = raceModifiersCache.get(entityRef);
-        if (oldModifiers != null && !oldModifiers.isEmpty()) {
-            removeModifiers(entityRef, oldModifiers, store, "rpg_race");
-        }
 
         // Get entity's race
         RaceComponent raceComponent = store.getComponent(entityRef, RaceComponent.getComponentType());
         if (raceComponent == null || raceComponent.getRaceId() == null || raceComponent.getRaceId().isEmpty()) {
+            updateModifiers(entityRef, new AppliedModifiers(), oldModifiers, store, "rpg_race");
             raceModifiersCache.remove(entityRef);
             return;
         }
@@ -269,6 +333,7 @@ public class StatSystem {
         RaceDefinition raceDef = raceManagementSystem.getRaceDefinition(raceComponent.getRaceId());
         if (raceDef == null) {
             RpgLogging.debugDeveloper("[StatSystem] Race definition not found: %s", raceComponent.getRaceId());
+            updateModifiers(entityRef, new AppliedModifiers(), oldModifiers, store, "rpg_race");
             raceModifiersCache.remove(entityRef);
             return;
         }
@@ -276,9 +341,9 @@ public class StatSystem {
         // Calculate new race modifiers
         AppliedModifiers newModifiers = calculateRaceModifiers(raceDef);
 
-        // Apply new modifiers
+        updateModifiers(entityRef, newModifiers, oldModifiers, store, "rpg_race");
+
         if (!newModifiers.isEmpty()) {
-            applyModifiers(entityRef, newModifiers, store, "rpg_race");
             raceModifiersCache.put(entityRef, newModifiers);
             RpgLogging.debugDeveloper("[StatSystem] Applied race stat bonuses for %s: %s", raceDef.getId(),
                     newModifiers);
@@ -344,9 +409,23 @@ public class StatSystem {
         return total;
     }
 
+    private void mergeModifiers(@Nonnull AppliedModifiers target, @Nonnull AppliedModifiers source) {
+        if (source.additiveModifiers != null) {
+            for (Map.Entry<String, Float> entry : source.additiveModifiers.entrySet()) {
+                target.additiveModifiers.merge(entry.getKey(), entry.getValue(), Float::sum);
+            }
+        }
+
+        if (source.multiplicativeModifiers != null) {
+            for (Map.Entry<String, Float> entry : source.multiplicativeModifiers.entrySet()) {
+                target.multiplicativeModifiers.merge(entry.getKey(), entry.getValue(), Float::sum);
+            }
+        }
+    }
+
     private int getClassLevel(@Nonnull Ref<EntityStore> entityRef,
             @Nonnull ClassDefinition classDef) {
-        String systemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         if (systemId == null || systemId.isEmpty()) {
             return 1;
         }
@@ -421,6 +500,95 @@ public class StatSystem {
             statMap.putModifier(statIndex, modifierKey, staticModifier);
             RpgLogging.debugDeveloper("[StatSystem] Applied multiplicative modifier to %s: +%s%%", statId, modifier);
         }
+    }
+
+    private void updateModifiers(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull AppliedModifiers newModifiers,
+            @Nullable AppliedModifiers oldModifiers,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull String modifierKeyPrefix) {
+        EntityStatMap statMap = store.getComponent(entityRef, EntityStatMap.getComponentType());
+        if (statMap == null) {
+            RpgLogging.debugDeveloper("[StatSystem] No EntityStatMap found for entity %s", entityRef.getIndex());
+            return;
+        }
+
+        AppliedModifiers oldSafe = oldModifiers == null ? new AppliedModifiers() : oldModifiers;
+
+        updateModifierMap(statMap, newModifiers.additiveModifiers, oldSafe.additiveModifiers,
+                modifierKeyPrefix + "_additive_", true);
+        updateModifierMap(statMap, newModifiers.multiplicativeModifiers, oldSafe.multiplicativeModifiers,
+                modifierKeyPrefix + "_multiplicative_", false);
+    }
+
+    private void updateModifierMap(@Nonnull EntityStatMap statMap,
+            @Nonnull Map<String, Float> newMap,
+            @Nonnull Map<String, Float> oldMap,
+            @Nonnull String keyPrefix,
+            boolean additive) {
+        java.util.Set<String> keys = new java.util.HashSet<>();
+        keys.addAll(newMap.keySet());
+        keys.addAll(oldMap.keySet());
+
+        for (String statId : keys) {
+            Float newValue = newMap.get(statId);
+            Float oldValue = oldMap.get(statId);
+
+            boolean newPresent = newValue != null && newValue != 0f;
+            boolean oldPresent = oldValue != null && oldValue != 0f;
+
+            if (!newPresent && !oldPresent) {
+                continue;
+            }
+
+            int statIndex = EntityStatType.getAssetMap().getIndex(statId);
+            if (statIndex == Integer.MIN_VALUE) {
+                RpgLogging.debugDeveloper("[StatSystem] Unknown stat type for modifier update: %s", statId);
+                continue;
+            }
+
+            String modifierKey = keyPrefix + statId;
+
+            if (!newPresent && oldPresent) {
+                statMap.removeModifier(statIndex, modifierKey);
+                continue;
+            }
+
+            if (newPresent && oldPresent && floatEquals(newValue, oldValue)) {
+                continue;
+            }
+
+            boolean increased = newPresent && (oldValue == null || newValue > oldValue + 0.0001f);
+
+            StaticModifier staticModifier;
+            if (additive) {
+                staticModifier = new StaticModifier(Modifier.ModifierTarget.MAX,
+                        StaticModifier.CalculationType.ADDITIVE, newValue);
+            } else {
+                float multiplier = 1.0f + (newValue / 100.0f);
+                staticModifier = new StaticModifier(Modifier.ModifierTarget.MAX,
+                        StaticModifier.CalculationType.MULTIPLICATIVE, multiplier);
+            }
+
+            statMap.putModifier(statIndex, modifierKey, staticModifier);
+
+            if (increased && isRegeneratingStat(statIndex) && !isChargeStat(statId)) {
+                statMap.maximizeStatValue(statIndex);
+            }
+        }
+    }
+
+    private boolean floatEquals(float a, float b) {
+        return Math.abs(a - b) < 0.0001f;
+    }
+
+    private boolean isRegeneratingStat(int statIndex) {
+        EntityStatType statType = EntityStatType.getAssetMap().getAsset(statIndex);
+        return statType != null && statType.getRegenerating() != null && statType.getRegenerating().length > 0;
+    }
+
+    private boolean isChargeStat(@Nonnull String statId) {
+        return "Ammo".equalsIgnoreCase(statId) || statId.endsWith("Charges");
     }
 
     private void removeModifiers(@Nonnull Ref<EntityStore> entityRef, AppliedModifiers modifiers,

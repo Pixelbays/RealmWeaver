@@ -1,7 +1,7 @@
 package org.pixelbays.rpg.classes.component;
 
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,63 +37,22 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
                     (data, value) -> data.learnedTime = value,
                     data -> data.learnedTime)
             .add()
-            .append(new KeyedCodec<>("TotalExpEarned", Codec.FLOAT), 
-                    (data, value) -> data.totalExpEarned = value,
-                    data -> data.totalExpEarned)
-            .add()
-            .append(new KeyedCodec<>("IsActive", Codec.BOOLEAN), 
-                    (data, value) -> data.isActive = value,
-                    data -> data.isActive)
-            .add()
             .build();
     
-        // Codec for SpellUnlockData serialization
-        public static final BuilderCodec<SpellUnlockData> SPELL_UNLOCK_CODEC = BuilderCodec
-            .builder(SpellUnlockData.class, SpellUnlockData::new)
-            .append(new KeyedCodec<>("AbilityId", Codec.STRING),
-                (data, value) -> data.abilityId = value,
-                data -> data.abilityId)
-            .add()
-            .append(new KeyedCodec<>("UnlockedTime", Codec.LONG),
-                (data, value) -> data.unlockedTime = value,
-                data -> data.unlockedTime)
-            .add()
-            .append(new KeyedCodec<>("Rank", Codec.INTEGER),
-                (data, value) -> data.rank = value,
-                data -> data.rank)
-            .add()
-            .build();
-
         // Component codec for persistence
     public static final BuilderCodec<ClassComponent> CODEC = BuilderCodec
             .builder(ClassComponent.class, ClassComponent::new)
-            .append(new KeyedCodec<>("LearnedClasses", new MapCodec<>(CLASS_DATA_CODEC, HashMap::new, false)),
+            .append(new KeyedCodec<>("LearnedClasses", new MapCodec<>(CLASS_DATA_CODEC, LinkedHashMap::new, false)),
                     (component, value) -> component.learnedClasses = value, 
                     component -> component.learnedClasses)
-            .add()
-            .append(new KeyedCodec<>("UnlockedSpells", new MapCodec<>(SPELL_UNLOCK_CODEC, HashMap::new, false)),
-                (component, value) -> component.unlockedSpells = value,
-                component -> component.unlockedSpells)
-            .add()
-            .append(new KeyedCodec<>("ActiveClassId", Codec.STRING), 
-                    (component, value) -> component.activeClassId = value,
-                    component -> component.activeClassId)
             .add()
             .build();
     
     // Map of classId -> class data
     private Map<String, ClassData> learnedClasses;
 
-    // Legacy: ability unlocks were previously stored here. Kept for migration.
-    private Map<String, SpellUnlockData> unlockedSpells;
-    
-    // Currently active class ID (only one active at a time)
-    private String activeClassId;
-    
     public ClassComponent() {
-        this.learnedClasses = new HashMap<>();
-        this.unlockedSpells = new HashMap<>();
-        this.activeClassId = "";
+        this.learnedClasses = new LinkedHashMap<>();
     }
     
     /**
@@ -115,39 +74,38 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      * Get all learned class IDs
      */
     public Set<String> getLearnedClassIds() {
-        return new HashSet<>(learnedClasses.keySet());
+        return new LinkedHashSet<>(learnedClasses.keySet());
     }
-    
+
     /**
-     * Get active class ID
-     */
-    public String getActiveClassId() {
-        return activeClassId;
-    }
-    
-    /**
-     * Set active class (does not validate, system should validate)
-     */
-    public void setActiveClassId(String classId) {
-        // Mark old active class as inactive
-        if (!activeClassId.isEmpty() && learnedClasses.containsKey(activeClassId)) {
-            learnedClasses.get(activeClassId).setActive(false);
-        }
-        
-        this.activeClassId = classId;
-        
-        // Mark new active class as active
-        if (!classId.isEmpty() && learnedClasses.containsKey(classId)) {
-            learnedClasses.get(classId).setActive(true);
-        }
-    }
-    
-    /**
-     * Get active class data
+     * Get the primary learned class id (first learned).
      */
     @Nullable
-    public ClassData getActiveClassData() {
-        return activeClassId.isEmpty() ? null : learnedClasses.get(activeClassId);
+    public String getPrimaryClassId() {
+        if (learnedClasses.isEmpty()) {
+            return null;
+        }
+        return learnedClasses.keySet().iterator().next();
+    }
+
+    /**
+     * Move a learned class to the primary position.
+     */
+    public void prioritizeClass(String classId) {
+        if (classId == null || classId.isEmpty() || !learnedClasses.containsKey(classId)) {
+            return;
+        }
+
+        if (!(learnedClasses instanceof LinkedHashMap)) {
+            return;
+        }
+
+        ClassData data = learnedClasses.remove(classId);
+        LinkedHashMap<String, ClassData> reordered = new LinkedHashMap<>();
+        reordered.put(classId, data);
+        reordered.putAll(learnedClasses);
+        learnedClasses.clear();
+        learnedClasses.putAll(reordered);
     }
     
     /**
@@ -164,10 +122,6 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      */
     @Nullable
     public ClassData unlearnClass(String classId) {
-        // If this was the active class, clear active
-        if (activeClassId.equals(classId)) {
-            activeClassId = "";
-        }
         return learnedClasses.remove(classId);
     }
     
@@ -178,52 +132,6 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
         return learnedClasses;
     }
 
-    /**
-     * Legacy: Check if a spell/ability is unlocked.
-     * Prefer ClassAbilityComponent.
-     */
-    @Deprecated
-    public boolean hasUnlockedSpell(String abilityId) {
-        return unlockedSpells.containsKey(abilityId);
-    }
-
-    /**
-     * Legacy: Get unlock data for a spell/ability (returns null if not unlocked).
-     * Prefer ClassAbilityComponent.
-     */
-    @Deprecated
-    @Nullable
-    public SpellUnlockData getUnlockedSpell(String abilityId) {
-        return unlockedSpells.get(abilityId);
-    }
-
-    /**
-     * Legacy: Unlock a spell/ability.
-     * Prefer ClassAbilityComponent.
-     */
-    @Deprecated
-    public SpellUnlockData unlockSpell(String abilityId, int rank) {
-        SpellUnlockData data = new SpellUnlockData(abilityId, rank);
-        unlockedSpells.put(abilityId, data);
-        return data;
-    }
-
-    /**
-     * Legacy: Get all unlocked spells.
-     * Prefer ClassAbilityComponent.
-     */
-    @Deprecated
-    public Map<String, SpellUnlockData> getAllUnlockedSpells() {
-        return unlockedSpells;
-    }
-
-    /**
-     * Legacy: Clear all unlocked spells after migration.
-     */
-    public void clearLegacyUnlockedSpells() {
-        unlockedSpells.clear();
-    }
-    
     /**
      * Get the component type for registration
      */
@@ -236,13 +144,9 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
     @SuppressWarnings({"all", "clone", "CloneDoesntDeclareCloneNotSupportedException"})
     public Component<EntityStore> clone() {
         ClassComponent cloned = new ClassComponent();
-        cloned.learnedClasses = new HashMap<>();
-        cloned.unlockedSpells = new HashMap<>();
+        cloned.learnedClasses = new LinkedHashMap<>();
         for (Map.Entry<String, ClassData> entry : this.learnedClasses.entrySet()) {
             cloned.learnedClasses.put(entry.getKey(), entry.getValue().copy());
-        }
-        for (Map.Entry<String, SpellUnlockData> entry : this.unlockedSpells.entrySet()) {
-            cloned.unlockedSpells.put(entry.getKey(), entry.getValue().copy());
         }
         return cloned;
     }
@@ -253,22 +157,16 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
     public static class ClassData {
         private String classId;
         private long learnedTime;         // Timestamp when class was learned
-        private float totalExpEarned;     // Total exp earned (for penalty calculation)
-        private boolean isActive;         // Is this the currently active class?
         
         // Default constructor for codec
         public ClassData() {
             this.classId = "";
             this.learnedTime = System.currentTimeMillis();
-            this.totalExpEarned = 0f;
-            this.isActive = false;
         }
         
         public ClassData(String classId) {
             this.classId = classId;
             this.learnedTime = System.currentTimeMillis();
-            this.totalExpEarned = 0f;
-            this.isActive = false;
         }
         
         public String getId() {
@@ -279,70 +177,9 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
             return learnedTime;
         }
         
-        public float getTotalExpEarned() {
-            return totalExpEarned;
-        }
-        
-        public void addTotalExp(float amount) {
-            this.totalExpEarned += amount;
-        }
-        
-        public boolean isActive() {
-            return isActive;
-        }
-        
-        public void setActive(boolean active) {
-            this.isActive = active;
-        }
-        
         public ClassData copy() {
             ClassData cloned = new ClassData(this.classId);
             cloned.learnedTime = this.learnedTime;
-            cloned.totalExpEarned = this.totalExpEarned;
-            cloned.isActive = this.isActive;
-            return cloned;
-        }
-    }
-
-    /**
-     * Data for a single unlocked spell/ability
-     */
-    public static class SpellUnlockData {
-        private String abilityId;
-        private long unlockedTime;
-        private int rank;
-
-        public SpellUnlockData() {
-            this.abilityId = "";
-            this.unlockedTime = System.currentTimeMillis();
-            this.rank = 1;
-        }
-
-        public SpellUnlockData(String abilityId, int rank) {
-            this.abilityId = abilityId;
-            this.unlockedTime = System.currentTimeMillis();
-            this.rank = Math.max(1, rank);
-        }
-
-        public String getAbilityId() {
-            return abilityId;
-        }
-
-        public long getUnlockedTime() {
-            return unlockedTime;
-        }
-
-        public int getRank() {
-            return rank;
-        }
-
-        public void setRank(int rank) {
-            this.rank = Math.max(1, rank);
-        }
-
-        public SpellUnlockData copy() {
-            SpellUnlockData cloned = new SpellUnlockData(this.abilityId, this.rank);
-            cloned.unlockedTime = this.unlockedTime;
             return cloned;
         }
     }

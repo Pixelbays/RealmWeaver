@@ -10,8 +10,8 @@ import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.global.system.StatSystem;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 import org.pixelbays.rpg.race.system.RaceSystem;
@@ -101,18 +101,13 @@ public class ClassManagementSystem {
             levelProgressionSystem.initializeLevelSystem(entityRef, classDef.getLevelSystemId());
         }
 
-        // If this is the first class or no active class, make it active
-        if (classComp.getActiveClassId().isEmpty()) {
-            setActiveClass(entityRef, classId, store);
-        }
-
         if (statSystem != null) {
             statSystem.recalculateClassStatBonuses(entityRef, store);
         }
 
         // Unlock abilities available at current level
         int currentLevel = 1;
-        String systemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         if (systemId != null && !systemId.isEmpty()) {
             currentLevel = levelProgressionSystem.getLevel(entityRef, systemId);
             if (currentLevel <= 0) {
@@ -137,7 +132,7 @@ public class ClassManagementSystem {
     }
 
     /**
-     * Unlearn a class (with XP penalty if relearning)
+     * Unlearn a class
      * 
      * @param entityRef Entity unlearning the class
      * @param classId   Class to unlearn
@@ -156,20 +151,28 @@ public class ClassManagementSystem {
             return "ERROR: Class " + classId + " is not learned";
         }
 
-        // Apply relearn penalty if configured
-        if (classDef.getRelearnExpPenalty() > 0 && !classDef.getLevelSystemId().isEmpty()) {
-            ClassComponent.ClassData classData = classComp.getClassData(classId);
-            if (classData != null) {
-                float totalExp = classData.getTotalExpEarned();
-                float penalty = totalExp * classDef.getRelearnExpPenalty();
+        // Apply relearn penalty using current level system exp
+        if (classDef.getRelearnExpPenalty() > 0) {
+            String levelSystemId = classDef.usesCharacterLevel()
+                    ? "Base_Character_Level"
+                    : classDef.getLevelSystemId();
 
-                // Remove experience from level system
-                levelProgressionSystem.removeExperience(entityRef, classDef.getLevelSystemId(), penalty);
+            if (levelSystemId != null && !levelSystemId.isEmpty()) {
+                LevelProgressionComponent levelComp = store.getComponent(entityRef,
+                        LevelProgressionComponent.getComponentType());
+                if (levelComp != null && levelComp.getSystem(levelSystemId) != null) {
+                    float currentExp = levelProgressionSystem.getExperience(entityRef, levelSystemId);
+                    float penalty = currentExp * classDef.getRelearnExpPenalty();
 
-                RpgLogging.debugDeveloper("[ClassSystem] Applied %s%% XP penalty (%s XP) for unlearning %s",
-                        classDef.getRelearnExpPenalty() * 100,
-                        penalty,
-                        classId);
+                    if (penalty > 0f) {
+                        levelProgressionSystem.removeExperience(entityRef, levelSystemId, penalty);
+                        RpgLogging.debugDeveloper(
+                                "[ClassSystem] Applied %s%% XP penalty (%s XP) for unlearning %s",
+                                classDef.getRelearnExpPenalty() * 100,
+                                penalty,
+                                classId);
+                    }
+                }
             }
         }
 
@@ -182,11 +185,6 @@ public class ClassManagementSystem {
             abilityComp.removeAbilitiesForClass(classId);
         }
 
-        // If this was the active class, clear active
-        if (classComp.getActiveClassId().equals(classId)) {
-            classComp.setActiveClassId("");
-        }
-
         if (statSystem != null) {
             statSystem.recalculateClassStatBonuses(entityRef, store);
         }
@@ -196,7 +194,7 @@ public class ClassManagementSystem {
     }
 
     /**
-     * Set active class
+     * Prioritize a learned class
      * 
      * @param entityRef Entity changing class
      * @param classId   Class to activate
@@ -225,8 +223,8 @@ public class ClassManagementSystem {
         // TODO: Check cooldown, if not allowed return error with time remaining until
         // next switch
 
-        // Set active class
-        classComp.setActiveClassId(classId);
+        // Prioritize the requested class in learned class order
+        classComp.prioritizeClass(classId);
 
         if (statSystem != null) {
             statSystem.recalculateClassStatBonuses(entityRef, store);
@@ -317,7 +315,7 @@ public class ClassManagementSystem {
                 }
 
                 String levelSystemId = requiredClass.usesCharacterLevel()
-                        ? "character_level"
+                        ? "Base_Character_Level"
                         : requiredClass.getLevelSystemId();
                 if (levelSystemId == null || levelSystemId.isEmpty()) {
                     return "ERROR: Requires " + requiredClass.getDisplayName() + " level " + requiredLevel;
@@ -365,7 +363,7 @@ public class ClassManagementSystem {
     public List<String> getClassesForLevelSystem(@Nonnull String systemId) {
         List<String> results = new java.util.ArrayList<>();
         for (ClassDefinition classDef : getAllClassDefinitions().values()) {
-            String classSystemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
+            String classSystemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
             if (systemId.equals(classSystemId)) {
                 results.add(classDef.getId());
             }
@@ -389,6 +387,56 @@ public class ClassManagementSystem {
         }
 
         return checkPrerequisites(entityRef, classDef, store) == null;
+    }
+
+    /**
+     * Ensure the entity has at least one class learned.
+     *
+     * @return true if a class was learned during this call
+     */
+    public boolean ensureStartingClass(@Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store) {
+        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
+        if (classComp != null && !classComp.getLearnedClassIds().isEmpty()) {
+            return false;
+        }
+
+        ClassComponent resolved = getOrCreateClassComponent(entityRef, store);
+
+        ClassDefinition startingClass = null;
+        java.util.List<ClassDefinition> candidates = new java.util.ArrayList<>(getAllClassDefinitions().values());
+        candidates.sort((a, b) -> {
+            if (a == null && b == null) {
+                return 0;
+            }
+            if (a == null) {
+                return 1;
+            }
+            if (b == null) {
+                return -1;
+            }
+            return a.getId().compareToIgnoreCase(b.getId());
+        });
+
+        for (ClassDefinition def : candidates) {
+            if (def == null || !def.isEnabled() || !def.isStartingClass()) {
+                continue;
+            }
+            startingClass = def;
+            break;
+        }
+
+        if (startingClass == null) {
+            return false;
+        }
+
+        String result = learnClass(entityRef, startingClass.getId(), store);
+        if (result != null && result.startsWith("SUCCESS")) {
+            return true;
+        }
+
+        RpgLogging.debugDeveloper("[ClassSystem] Failed to auto-learn starting class %s: %s",
+                startingClass.getId(), result);
+        return false;
     }
 
     // === Helper Methods ===

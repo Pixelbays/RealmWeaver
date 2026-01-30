@@ -2,12 +2,25 @@
   "ClassMode": "SingleClass",
   "ActiveClassMode": "Manual",
   "XPRouting": "ActiveClassOnly",
+  "RestedXpEnabled": false,
+  "RestedXpBonusPercent": 50,
+  "RestedXpConsumeRatio": 1,
+  "RestedXpGainTags": [
+    "combat",
+    "profession",
+    "job"
+  ],
+  "HardcoreEnabled": false,
+  "HardcoreLossType": "ResetToZero",
+  "HardcoreLevelLossPercent": 50,
   "ClassTags": [
     "combat",
-    "profession"
+    "profession",
+    "job"
   ],
   "XPTagSplits": {
     "combat": 1.0,
+    "job": 1.0,
     "profession": 0.0,
     "base": 0.0
   },
@@ -15,7 +28,7 @@
   "DefaultPlayerProfileCount": 3,
   "MaxActiveClasses": 1,
   "ClassSwitchingRules": "",
-  "DebuggingMode": "None",
+  "DebuggingMode": "DeveloperDontUse",
   "PlayerLogging": false,
   "AntiGrindMod": false,
   "RequireClassAtStart": false,
@@ -28,5 +41,6 @@
     7,
     8,
     9
-  ]
+  ],
+  "BaseGlobalCooldown": 1500
 }

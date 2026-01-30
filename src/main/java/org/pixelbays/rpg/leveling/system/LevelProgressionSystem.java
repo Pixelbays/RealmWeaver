@@ -9,14 +9,15 @@ import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
-import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.global.system.StatSystem;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.config.EventTitleConfig;
-import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 import org.pixelbays.rpg.leveling.config.LevelRewardConfig;
+import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 import org.pixelbays.rpg.leveling.config.LevelUpEffects;
 import org.pixelbays.rpg.leveling.config.NotificationConfig;
+import org.pixelbays.rpg.leveling.event.LevelUpEvent;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -74,7 +75,7 @@ public class LevelProgressionSystem {
      * Grant experience to an entity in a specific level system
      * 
      * @param entityRef The entity reference gaining exp
-     * @param systemId  The level system ID (e.g., "character_level")
+     * @param systemId  The level system ID (e.g., "Base_Character_Level")
      * @param amount    Amount of exp to grant
      * @param source    Source of the exp (for events/logging)
      * @param store     Optional store for triggering effects (can be null)
@@ -184,6 +185,8 @@ public class LevelProgressionSystem {
 
         refreshClassStatsIfNeeded(entityRef, systemId, store);
 
+        LevelUpEvent.dispatch(entityRef, systemId, startLevel, endLevel);
+
         RpgLogging.debugDeveloper("[LevelSystem] Entity leveled up %s: %d -> %d", systemId,
                 startLevel, endLevel);
     }
@@ -246,6 +249,16 @@ public class LevelProgressionSystem {
         RpgLogging.debugDeveloper("[LevelSystem] Rewards found: statPoints=%d, skillPoints=%d",
                 rewards.getStatPoints(), rewards.getSkillPoints());
 
+        // Apply direct stat increases from rewards
+        if (statSystem != null && store != null && rewards.getStatIncreases() != null) {
+            statSystem.applyStatIncreases(entityRef, rewards.getStatIncreases(), store);
+        }
+
+        // Apply stat growth for this level (flat, percentage, milestone)
+        if (statSystem != null && store != null && config.getStatGrowth() != null) {
+            statSystem.applyStatGrowth(entityRef, newLevel, config.getStatGrowth(), store);
+        }
+
         // Grant stat points
         if (rewards.getStatPoints() > 0) {
             int beforeStatPoints = levelData.getAvailableStatPoints();
@@ -278,6 +291,7 @@ public class LevelProgressionSystem {
         if (store != null && statSystem != null && config.getStatGrowth() != null) {
             RpgLogging.debugDeveloper("[LevelSystem] Applying stat growth from config for level %d", newLevel);
             statSystem.applyStatGrowth(entityRef, newLevel, config.getStatGrowth(), store);
+            levelData.setLastGrowthAppliedLevel(newLevel);
         } else {
             RpgLogging.debugDeveloper("[LevelSystem] No stat growth to apply (store=%s, statSystem=%s, statGrowth=%s)",
                     store != null, statSystem != null, config.getStatGrowth() != null);
@@ -285,8 +299,7 @@ public class LevelProgressionSystem {
 
         // Trigger level up effects (sound, particles, notification)
         if (rewards.getLevelUpEffects() != null && !rewards.getLevelUpEffects().isEmpty()) {
-            RpgLogging.debugDeveloper("[LevelSystem] No level-up effects to trigger");
-
+            RpgLogging.debugDeveloper("[LevelSystem] Triggering level-up effects");
             triggerLevelUpEffects(entityRef, systemId, newLevel, rewards.getLevelUpEffects(), store, world);
         } else {
             RpgLogging.debugDeveloper("[LevelSystem] No level-up effects to trigger");
@@ -937,9 +950,11 @@ public class LevelProgressionSystem {
     private void triggerLevelUpEffects(@Nonnull Ref<EntityStore> entityRef, String systemId, int newLevel,
             @Nonnull LevelUpEffects effects,
             @Nullable Store<EntityStore> store, @Nullable World world) {
-        if (store == null || world == null) {
-            return; // Can't trigger effects without store/world
+        if (store == null) {
+            return; // Can't trigger effects without store
         }
+
+        World effectiveWorld = world != null ? world : store.getExternalData().getWorld();
 
         // Check if entity is a player
         PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
@@ -954,13 +969,16 @@ public class LevelProgressionSystem {
         }
 
         // Play sound effect
-        if (effects.getSoundId() != null) {
-            playSoundEffect(entityRef, effects.getSoundId(), store, world);
-        }
+        if (effectiveWorld != null) {
+            // Play sound effect
+            if (effects.getSoundId() != null) {
+                playSoundEffect(entityRef, effects.getSoundId(), store, effectiveWorld);
+            }
 
-        // Spawn particle effect
-        if (effects.getParticleEffect() != null) {
-            spawnParticleEffect(entityRef, effects.getParticleEffect(), store, world);
+            // Spawn particle effect
+            if (effects.getParticleEffect() != null) {
+                spawnParticleEffect(entityRef, effects.getParticleEffect(), store, effectiveWorld);
+            }
         }
 
         // Send notification

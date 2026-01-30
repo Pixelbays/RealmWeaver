@@ -60,19 +60,16 @@ public class ClassInfoCommand extends AbstractPlayerCommand {
             if (classComp == null) {
                 player.sendMessage(Message.raw("Status: LEARNED"));
                 player.sendMessage(Message.raw("Learned: unknown"));
-                player.sendMessage(Message.raw("Total XP: unknown"));
                 return;
             }
             ClassComponent.ClassData classData = classComp.getClassData(classId);
-            boolean isActive = classId.equals(classComp.getActiveClassId());
+            boolean isPrimary = classId.equals(classComp.getPrimaryClassId());
 
-            player.sendMessage(Message.raw("Status: " + (isActive ? "Active" : "LEARNED")));
+            player.sendMessage(Message.raw("Status: " + (isPrimary ? "Primary" : "LEARNED")));
             if (classData != null) {
                 player.sendMessage(Message.raw("Learned: " + new java.util.Date(classData.getLearnedTime())));
-                player.sendMessage(Message.raw("Total XP: " + String.format("%.0f", classData.getTotalExpEarned())));
             } else {
                 player.sendMessage(Message.raw("Learned: unknown"));
-                player.sendMessage(Message.raw("Total XP: unknown"));
             }
         } else {
             player.sendMessage(Message.raw("Status: LOCKED"));

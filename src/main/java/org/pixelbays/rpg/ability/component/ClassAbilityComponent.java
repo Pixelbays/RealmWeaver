@@ -129,6 +129,7 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
      */
     @Nullable
     public AbilityData removeAbility(String abilityId) {
+        toggleStates.remove(abilityId);
         return unlockedAbilities.remove(abilityId);
     }
 
@@ -136,7 +137,13 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
      * Remove all abilities for a class
      */
     public void removeAbilitiesForClass(String classId) {
-        unlockedAbilities.entrySet().removeIf(entry -> classId.equals(entry.getValue().classId));
+        unlockedAbilities.entrySet().removeIf(entry -> {
+            boolean remove = classId.equals(entry.getValue().classId);
+            if (remove) {
+                toggleStates.remove(entry.getKey());
+            }
+            return remove;
+        });
     }
 
     /**
@@ -260,6 +267,10 @@ public class ClassAbilityComponent implements Component<EntityStore>, Cloneable 
 
         public String getAbilityId() {
             return abilityId;
+        }
+
+        public String getClassId() {
+            return classId;
         }
 
         public long getUnlockedTime() {

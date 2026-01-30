@@ -18,7 +18,7 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * /class switch <className> - Switch to a different active class
+ * /class switch <className> - Prioritize a learned class
  */
 public class ClassSwitchCommand extends AbstractPlayerCommand {
 
@@ -26,7 +26,7 @@ public class ClassSwitchCommand extends AbstractPlayerCommand {
     private final RequiredArg<String> classNameArg;
 
     public ClassSwitchCommand() {
-        super("switch", "Switch your active class");
+        super("switch", "Prioritize your learned class");
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.classNameArg = this.withRequiredArg("className", "The class to switch to", ArgTypes.STRING);
     }

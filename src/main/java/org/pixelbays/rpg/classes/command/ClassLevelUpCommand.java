@@ -6,6 +6,7 @@ import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.leveling.event.GiveXPEvent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -57,7 +58,7 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
             return;
         }
 
-        String systemId = classDef.usesCharacterLevel() ? "character_level" : classDef.getLevelSystemId();
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         if (systemId == null || systemId.isEmpty()) {
             player.sendMessage(Message.raw("Class has no level system configured: " + classId));
             return;
@@ -73,7 +74,8 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
             return;
         }
 
-        levelSystem.grantExperience(ref, systemId, expToNext, "command:class_levelup", store, world);
+        long expToGrant = (long) Math.ceil(expToNext);
+        GiveXPEvent.dispatch(ref, expToGrant, systemId);
         int newLevel = levelSystem.getLevel(ref, systemId);
 
         player.sendMessage(Message.raw("Leveled up " + classDef.getDisplayName() + " to " + newLevel + "."));

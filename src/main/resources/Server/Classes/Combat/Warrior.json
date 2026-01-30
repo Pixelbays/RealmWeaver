@@ -11,10 +11,6 @@
     {
       "AbilityId": "Charge",
       "UnlockLevel": 1
-    },
-    {
-      "AbilityId": "HolyStrike",
-      "UnlockLevel": 3
     }
   ],
   "TalentTrees": [
@@ -40,6 +36,15 @@
     ],
     "races": [
       "Global"
+    ]
+  },
+  "EquipmentRestrictions": {
+    "RestrictionMode": "Hard",
+    "AllowedArmorTypes": [
+      "cobalt"
+    ],
+    "AllowedWeaponTypes": [
+      "axe"
     ]
   }
 }

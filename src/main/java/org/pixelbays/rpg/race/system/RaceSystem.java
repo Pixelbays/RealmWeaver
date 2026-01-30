@@ -5,9 +5,8 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-
-import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.global.system.StatSystem;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 

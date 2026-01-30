@@ -13,10 +13,13 @@ import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.codecs.EnumCodec;
 import com.hypixel.hytale.codec.codecs.map.Object2FloatMapCodec;
+import com.hypixel.hytale.codec.codecs.map.Object2IntMapCodec;
 import com.hypixel.hytale.codec.function.FunctionCodec;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 /**
  * Master configuration for the RPG mod.
@@ -53,6 +56,11 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         Min,
         Max,
         DeveloperDontUse
+    }
+
+    public enum HardcoreLossType {
+        ResetToZero,
+        LosePercent
     }
 
     /**
@@ -129,11 +137,40 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
             .append(new KeyedCodec<>("XPRouting", new EnumCodec<>(XpRoutingMode.class), false, true),
                     (i, s) -> i.xpRouting = s, i -> i.xpRouting)
             .add()
+            .append(new KeyedCodec<>("RestedXpEnabled", Codec.BOOLEAN, false, true),
+                    (i, s) -> i.restedXpEnabled = s, i -> i.restedXpEnabled)
+            .add()
+            .append(new KeyedCodec<>("RestedXpBonusPercent", Codec.INTEGER, false, true),
+                    (i, s) -> i.restedXpBonusPercent = s, i -> i.restedXpBonusPercent)
+            .add()
+            .append(new KeyedCodec<>("RestedXpConsumeRatio", Codec.INTEGER, false, true),
+                    (i, s) -> i.restedXpConsumeRatio = s, i -> i.restedXpConsumeRatio)
+            .add()
+            .append(new KeyedCodec<>("RestedXpGainTags", STRING_LIST_CODEC, false, true),
+                    (i, s) -> i.restedXpGainTags = s, i -> i.restedXpGainTags)
+            .add()
+
+            .append(new KeyedCodec<>("HardcoreEnabled", Codec.BOOLEAN, false, true),
+                    (i, s) -> i.hardcoreEnabled = s, i -> i.hardcoreEnabled)
+            .add()
+            .append(new KeyedCodec<>("HardcoreLossType", new EnumCodec<>(HardcoreLossType.class), false, true),
+                    (i, s) -> i.hardcoreLossType = s, i -> i.hardcoreLossType)
+            .add()
+            .append(new KeyedCodec<>("HardcoreLevelLossPercent", Codec.INTEGER, false, true),
+                    (i, s) -> i.hardcoreLevelLossPercent = s, i -> i.hardcoreLevelLossPercent)
+            .add()
 
             .append(new KeyedCodec<>("XPTagSplits",
                     new Object2FloatMapCodec<>(Codec.STRING, Object2FloatOpenHashMap::new), true),
                     (i, s) -> i.xpTagSplits = s, i -> i.xpTagSplits)
             .documentation("THIS IS A PLACEHOLDER DO NOT USE")
+            .add()
+            .append(new KeyedCodec<>("BaseGlobalCooldown", Codec.INTEGER, false, true),
+                    (i, s) -> i.baseGlobalCooldown = s, i -> i.baseGlobalCooldown)
+            .add()
+            .append(new KeyedCodec<>("GlobalCooldownCategories",
+                    new Object2IntMapCodec<>(Codec.STRING, Object2IntOpenHashMap::new), true),
+                    (i, s) -> i.globalCooldownCategories = s, i -> i.globalCooldownCategories)
             .add()
             .append(new KeyedCodec<>("BaseXpMultiplier", Codec.FLOAT, false, true),
                     (i, s) -> i.baseXpMultiplier = s, i -> i.baseXpMultiplier)
@@ -202,6 +239,15 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
     private XpRoutingMode xpRouting;
     private List<String> xpTags;
     private Object2FloatMap<String> xpTagSplits;
+    private int baseGlobalCooldown;
+    private Object2IntMap<String> globalCooldownCategories;
+    private boolean restedXpEnabled;
+    private int restedXpBonusPercent;
+    private int restedXpConsumeRatio;
+    private List<String> restedXpGainTags;
+    private boolean hardcoreEnabled;
+    private HardcoreLossType hardcoreLossType;
+    private int hardcoreLevelLossPercent;
     private float baseXpMultiplier;
     private int defaultPlayerProfileCount;
     private int maxCombatClasses;
@@ -228,6 +274,15 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         this.xpRouting = XpRoutingMode.ActiveClassOnly;
         this.xpTags = new ArrayList<>();
         this.xpTagSplits = new Object2FloatOpenHashMap<>();
+        this.baseGlobalCooldown = 0;
+        this.globalCooldownCategories = new Object2IntOpenHashMap<>();
+        this.restedXpEnabled = false;
+        this.restedXpBonusPercent = 0;
+        this.restedXpConsumeRatio = 1;
+        this.restedXpGainTags = new ArrayList<>();
+        this.hardcoreEnabled = false;
+        this.hardcoreLossType = HardcoreLossType.ResetToZero;
+        this.hardcoreLevelLossPercent = 50;
         this.baseXpMultiplier = 1.0f;
         this.defaultPlayerProfileCount = 3;
         this.maxCombatClasses = 1;
@@ -303,6 +358,78 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public void setXpTagSplits(Object2FloatMap<String> xpTagSplits) {
         this.xpTagSplits = xpTagSplits;
+    }
+
+    public int getBaseGlobalCooldown() {
+        return baseGlobalCooldown;
+    }
+
+    public void setBaseGlobalCooldown(int baseGlobalCooldown) {
+        this.baseGlobalCooldown = baseGlobalCooldown;
+    }
+
+    public Object2IntMap<String> getGlobalCooldownCategories() {
+        return globalCooldownCategories;
+    }
+
+    public void setGlobalCooldownCategories(Object2IntMap<String> globalCooldownCategories) {
+        this.globalCooldownCategories = globalCooldownCategories;
+    }
+
+    public boolean isRestedXpEnabled() {
+        return restedXpEnabled;
+    }
+
+    public void setRestedXpEnabled(boolean restedXpEnabled) {
+        this.restedXpEnabled = restedXpEnabled;
+    }
+
+    public int getRestedXpBonusPercent() {
+        return restedXpBonusPercent;
+    }
+
+    public void setRestedXpBonusPercent(int restedXpBonusPercent) {
+        this.restedXpBonusPercent = restedXpBonusPercent;
+    }
+
+    public int getRestedXpConsumeRatio() {
+        return restedXpConsumeRatio;
+    }
+
+    public void setRestedXpConsumeRatio(int restedXpConsumeRatio) {
+        this.restedXpConsumeRatio = restedXpConsumeRatio;
+    }
+
+    public List<String> getRestedXpGainTags() {
+        return restedXpGainTags;
+    }
+
+    public void setRestedXpGainTags(List<String> restedXpGainTags) {
+        this.restedXpGainTags = restedXpGainTags;
+    }
+
+    public boolean isHardcoreEnabled() {
+        return hardcoreEnabled;
+    }
+
+    public void setHardcoreEnabled(boolean hardcoreEnabled) {
+        this.hardcoreEnabled = hardcoreEnabled;
+    }
+
+    public HardcoreLossType getHardcoreLossType() {
+        return hardcoreLossType;
+    }
+
+    public void setHardcoreLossType(HardcoreLossType hardcoreLossType) {
+        this.hardcoreLossType = hardcoreLossType;
+    }
+
+    public int getHardcoreLevelLossPercent() {
+        return hardcoreLevelLossPercent;
+    }
+
+    public void setHardcoreLevelLossPercent(int hardcoreLevelLossPercent) {
+        this.hardcoreLevelLossPercent = hardcoreLevelLossPercent;
     }
 
     public float getBaseXpMultiplier() {

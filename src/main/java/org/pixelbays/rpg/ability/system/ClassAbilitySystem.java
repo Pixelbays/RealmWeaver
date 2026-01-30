@@ -12,7 +12,7 @@ import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition.AbilityType;
 import org.pixelbays.rpg.ability.interaction.AbilityInteractionMeta;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
-import org.pixelbays.rpg.global.system.RpgLogging;
+import org.pixelbays.rpg.global.util.RpgLogging;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -30,6 +30,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Unlock logic is handled elsewhere.
  */
 public class ClassAbilitySystem {
+
+    private final GlobalCoolDown globalCoolDown = new GlobalCoolDown();
 
     public ClassAbilitySystem(@Nonnull ClassManagementSystem classManagementSystem) {
         // Abilities are loaded via Hytale's asset system
@@ -90,6 +92,11 @@ public class ClassAbilitySystem {
         // Check if ability is enabled
         if (!abilityDef.isEnabled()) {
             return TriggerResult.failure("Ability is disabled: " + abilityDef.getDisplayName());
+        }
+
+        GlobalCoolDown.GcdResult gcdResult = globalCoolDown.tryConsume(entityRef, store, abilityDef);
+        if (!gcdResult.allowed()) {
+            return TriggerResult.failure("Global cooldown active (" + gcdResult.remainingMs() + "ms)");
         }
 
         // Get the interaction chain ID from the ability definition

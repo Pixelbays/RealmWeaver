@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
+import org.pixelbays.rpg.leveling.event.GiveXPEvent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -109,7 +110,8 @@ public class LevelTestCommand extends AbstractPlayerCommand {
             return;
         }
 
-        levelSystem.grantExperience(ref, systemId, expToNext, "command:leveltest", store, world);
+        long expToGrant = (long) Math.ceil(expToNext);
+        GiveXPEvent.dispatch(ref, expToGrant, systemId);
 
         int newLevel = levelSystem.getLevel(ref, systemId);
         float currentExp = levelSystem.getExperience(ref, systemId);

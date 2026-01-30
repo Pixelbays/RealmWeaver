@@ -53,9 +53,9 @@ public class ClassListCommand extends AbstractPlayerCommand {
             
             String classId = classDef.getId();
             boolean learned = classComp != null && classComp.hasLearnedClass(classId);
-            boolean isActive = classComp != null && classId.equals(classComp.getActiveClassId());
+            boolean isPrimary = classComp != null && classId.equals(classComp.getPrimaryClassId());
             
-            String status = learned ? (isActive ? "[Active]" : "[LEARNED]") : "[LOCKED]";
+            String status = learned ? (isPrimary ? "[PRIMARY]" : "[LEARNED]") : "[LOCKED]";
             
             player.sendMessage(Message.raw(status + " " + classDef.getDisplayName() + " (" + classId + ")"));
             

@@ -20,19 +20,25 @@ import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.drop.ExpItemDropContainer;
 import org.pixelbays.rpg.global.interaction.ForceTargetInteraction;
-import org.pixelbays.rpg.global.system.RpgLogging;
 import org.pixelbays.rpg.global.system.StatSystem;
+import org.pixelbays.rpg.item.system.EquipmentRestrictions;
 import org.pixelbays.rpg.global.system.XpDeathDropSystem;
-import org.pixelbays.rpg.global.system.XpGrantSystem;
+import org.pixelbays.rpg.global.util.RpgLogging;
+//import org.pixelbays.rpg.global.system.XpGrantSystem;
 import org.pixelbays.rpg.leveling.command.LevelTestCommand;
 import org.pixelbays.rpg.leveling.command.ResetLevelCommand;
 import org.pixelbays.rpg.leveling.command.TestLevelCommand;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.config.ExpCurveDefinition;
+import org.pixelbays.rpg.leveling.config.ExpItemDropContainer;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
+import org.pixelbays.rpg.leveling.event.GiveXPEvent;
+import org.pixelbays.rpg.leveling.event.LevelUpEvent;
+import org.pixelbays.rpg.leveling.handlers.GiveXPHandler;
+import org.pixelbays.rpg.leveling.handlers.LevelUpHandler;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
+import org.pixelbays.rpg.leveling.system.RestedXpSystem;
 import org.pixelbays.rpg.race.command.RaceCommand;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
@@ -53,7 +59,6 @@ import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-
 /**
  * RPG Mod Plugin - Adds MMO/RPG progression systems to Hytale
  */
@@ -67,9 +72,11 @@ public class ExamplePlugin extends JavaPlugin {
     private ClassAbilitySystem classAbilitySystem;
     private HotbarAbilityIconManager hotbarIconManager;
     private StatSystem statSystem;
-    private XpGrantSystem xpGrantSystem;
     private RaceManagementSystem raceManagementSystem;
     private RaceSystem raceSystem;
+    @SuppressWarnings("unused")
+    private RestedXpSystem restedXpSystem;
+    private EquipmentRestrictions equipmentRestrictions;
 
     private ComponentType<EntityStore, LevelProgressionComponent> levelProgressionComponentType;
     private ComponentType<EntityStore, ClassComponent> classComponentType;
@@ -77,13 +84,14 @@ public class ExamplePlugin extends JavaPlugin {
     private ComponentType<EntityStore, AbilityEmpowerComponent> abilityEmpowerComponentType;
     private ComponentType<EntityStore, RaceComponent> raceComponentType;
     private ComponentType<EntityStore, AbilityBindingComponent> abilityBindingComponentType;
-    
+
     private PacketFilter abilityInputFilter;
 
     public ExamplePlugin(@Nonnull JavaPluginInit init) {
         super(init);
         instance = this;
-        RpgLogging.debugDeveloper("Hello from %s version %s", this.getName(), this.getManifest().getVersion().toString());
+        RpgLogging.debugDeveloper("Hello from %s version %s", this.getName(),
+                this.getManifest().getVersion().toString());
     }
 
     @Override
@@ -152,6 +160,7 @@ public class ExamplePlugin extends JavaPlugin {
                         "LevelProgression",
                         LevelProgressionComponent.CODEC);
 
+
         this.classComponentType = this.getEntityStoreRegistry()
                 .registerComponent(
                         ClassComponent.class,
@@ -165,10 +174,10 @@ public class ExamplePlugin extends JavaPlugin {
                         ClassAbilityComponent.CODEC);
 
         this.abilityEmpowerComponentType = this.getEntityStoreRegistry()
-            .registerComponent(
-                AbilityEmpowerComponent.class,
-                "AbilityEmpower",
-                AbilityEmpowerComponent.CODEC);
+                .registerComponent(
+                        AbilityEmpowerComponent.class,
+                        "AbilityEmpower",
+                        AbilityEmpowerComponent.CODEC);
 
         this.raceComponentType = this.getEntityStoreRegistry()
                 .registerComponent(
@@ -184,10 +193,13 @@ public class ExamplePlugin extends JavaPlugin {
         AbilityBindingComponent.setComponentType(this.abilityBindingComponentType);
 
         RpgLogging.debugDeveloper(
-            "Registered LevelProgressionComponent, ClassComponent, ClassAbilityComponent, AbilityEmpowerComponent, RaceComponent, and AbilityBindingComponent");
+                "Registered LevelProgressionComponent, ClassComponent, ClassAbilityComponent, AbilityEmpowerComponent, RaceComponent, and AbilityBindingComponent");
 
+        this.getEventRegistry().register(GiveXPEvent.class, new GiveXPHandler());
+        this.getEventRegistry().register(LevelUpEvent.class, new LevelUpHandler());
         // Initialize level progression system
         this.levelSystem = new LevelProgressionSystem(this.getEventRegistry());
+        this.restedXpSystem = new RestedXpSystem(this.getEventRegistry());
 
         // Initialize race systems (before class/stat systems since they depend on it)
         this.raceManagementSystem = new RaceManagementSystem();
@@ -196,7 +208,8 @@ public class ExamplePlugin extends JavaPlugin {
         this.classManagementSystem = new ClassManagementSystem(this.levelSystem);
         this.classAbilitySystem = new ClassAbilitySystem(this.classManagementSystem);
         this.hotbarIconManager = new HotbarAbilityIconManager();
-        this.statSystem = new StatSystem(this.classManagementSystem, this.raceManagementSystem, this.levelSystem);
+        this.statSystem = new StatSystem(this.classManagementSystem, this.raceManagementSystem, this.levelSystem,
+            this.getEventRegistry());
         this.classManagementSystem.setStatSystem(this.statSystem);
         this.levelSystem.setStatSystem(this.statSystem);
 
@@ -213,21 +226,28 @@ public class ExamplePlugin extends JavaPlugin {
         this.raceSystem.setStatSystem(this.statSystem);
         this.classManagementSystem.setRaceSystem(this.raceSystem);
 
-        // Initialize XP grant system
-        this.xpGrantSystem = new XpGrantSystem(this.levelSystem, this.classManagementSystem,
-                this.raceManagementSystem);
-
         // Register NPC death XP drop system
-        this.getEntityStoreRegistry().registerSystem(new XpDeathDropSystem(this.xpGrantSystem));
+        this.getEntityStoreRegistry().registerSystem(new XpDeathDropSystem());
+
+        // Register hardcore death handler
+        this.getEntityStoreRegistry().registerSystem(new org.pixelbays.rpg.leveling.handlers.HardcoreHandler());
 
         // Register custom interactions for RPG abilities
         Interaction.CODEC.register("ForceTarget", ForceTargetInteraction.class,
                 ForceTargetInteraction.FORCE_TARGET_CODEC);
         Interaction.CODEC.register("EmpowerAbility", EmpowerAbilityInteraction.class,
-            EmpowerAbilityInteraction.CODEC);
+                EmpowerAbilityInteraction.CODEC);
 
         // Register custom item drop containers
         ItemDropContainer.CODEC.register("Exp", ExpItemDropContainer.class, ExpItemDropContainer.CODEC);
+
+        // Register equipment restriction system
+        this.equipmentRestrictions = new EquipmentRestrictions(this.classManagementSystem);
+        this.equipmentRestrictions.register(this.getEventRegistry());
+
+        // Register class level milestone rewards listener
+        new org.pixelbays.rpg.classes.integration.LevelMilestone()
+            .register(this.getEventRegistry());
 
         RpgLogging.debugDeveloper("Initialized Class/Job System with test data");
 
@@ -258,7 +278,6 @@ public class ExamplePlugin extends JavaPlugin {
         }
     }
 
-
     @Nonnull
     public static ExamplePlugin get() {
         return instance;
@@ -287,11 +306,6 @@ public class ExamplePlugin extends JavaPlugin {
     @Nonnull
     public StatSystem getStatSystem() {
         return statSystem;
-    }
-
-    @Nonnull
-    public XpGrantSystem getXpGrantSystem() {
-        return xpGrantSystem;
     }
 
     @Nonnull
@@ -333,4 +347,5 @@ public class ExamplePlugin extends JavaPlugin {
     public ComponentType<EntityStore, AbilityBindingComponent> getAbilityBindingComponentType() {
         return abilityBindingComponentType;
     }
+
 }

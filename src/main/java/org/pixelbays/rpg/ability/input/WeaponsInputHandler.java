@@ -3,7 +3,7 @@ package org.pixelbays.rpg.ability.input;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
-import org.pixelbays.rpg.global.system.RpgLogging;
+import org.pixelbays.rpg.global.util.RpgLogging;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;

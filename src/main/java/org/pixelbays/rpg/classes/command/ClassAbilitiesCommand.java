@@ -22,8 +22,8 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * /class abilities [className] - Show abilities for a class (defaults to active
- * class)
+ * /class abilities [className] - Show abilities for a class (defaults to primary
+ * learned class)
  */
 public class ClassAbilitiesCommand extends AbstractPlayerCommand {
 
@@ -35,7 +35,7 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
         super("abilities", "View class abilities");
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
-        this.classNameArg = this.withOptionalArg("className", "The class to view (defaults to active)",
+        this.classNameArg = this.withOptionalArg("className", "The class to view (defaults to primary)",
                 ArgTypes.STRING);
     }
 
@@ -53,11 +53,12 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
         if (this.classNameArg.provided(ctx)) {
             classId = this.classNameArg.get(ctx);
         } else {
-            if (classComp == null || classComp.getActiveClassId() == null || classComp.getActiveClassId().isEmpty()) {
-                player.sendMessage(Message.raw("No active class. Specify class name: /class abilities <className>"));
+            String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
+            if (primaryClassId == null || primaryClassId.isEmpty()) {
+                player.sendMessage(Message.raw("No learned class. Specify class name: /class abilities <className>"));
                 return;
             }
-            classId = classComp.getActiveClassId();
+            classId = primaryClassId;
         }
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);

@@ -7,9 +7,8 @@
     "DisplayName": "Charge",
     "Description": "Charge at an enemy, dealin eg damage and stunning them briefly."
   },
-  "AbilityType": "Toggle",
+  "AbilityType": "Active",
   "Parent": "GlobalBase",
-  "GlobalCooldown": 1.5,
   "GlobalCooldownCategories": [],
   "PrerequisiteAbilities": [],
   "StatRequirements": {},

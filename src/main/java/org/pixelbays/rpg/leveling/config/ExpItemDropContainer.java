@@ -1,4 +1,4 @@
-package org.pixelbays.rpg.global.drop;
+package org.pixelbays.rpg.leveling.config;
 
 import java.util.List;
 import java.util.Set;
@@ -8,8 +8,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.bson.BsonDocument;
-import org.bson.BsonInt32;
-import org.bson.BsonString;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -25,7 +23,7 @@ import com.hypixel.hytale.server.core.asset.type.item.config.container.ItemDropC
  * {
  *   "ExpMin": 5,
  *   "ExpMax": 15,
- *   "SystemId": "character_level"
+ *   "SystemId": "Base_Character_Level"
  * }
  */
 @SuppressWarnings({ "deprecation", "all", "null" })
@@ -87,24 +85,6 @@ public class ExpItemDropContainer extends ItemDropContainer {
         return systemId != null && !systemId.isEmpty() ? systemId : null;
     }
 
-    @Nonnull
-    public ItemDrop createDrop() {
-        int min = Math.max(0, expMin);
-        int max = Math.max(min, expMax);
-        if (max <= 0) {
-            min = 0;
-            max = 0;
-        }
-
-        BsonDocument metadata = new BsonDocument();
-        if (systemId != null && !systemId.isEmpty()) {
-            metadata.put(EXP_SYSTEM_ID_KEY, new BsonString(systemId));
-        }
-        metadata.put(EXP_MIN_KEY, new BsonInt32(min));
-        metadata.put(EXP_MAX_KEY, new BsonInt32(max));
-
-        return new ItemDrop(null, metadata, min, max);
-    }
 
     public static boolean isExpMetadata(@Nullable BsonDocument metadata) {
         if (metadata == null) {
@@ -129,12 +109,10 @@ public class ExpItemDropContainer extends ItemDropContainer {
 
     @Override
     protected void populateDrops(List<ItemDrop> drops, DoubleSupplier chanceProvider, Set<String> droplistReferences) {
-        drops.add(createDrop());
     }
 
     @Override
     public List<ItemDrop> getAllDrops(List<ItemDrop> drops) {
-        drops.add(createDrop());
         return drops;
     }
 

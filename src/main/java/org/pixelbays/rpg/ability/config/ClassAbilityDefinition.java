@@ -13,8 +13,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition.AbilityInputBinding;
+import org.pixelbays.rpg.global.config.InteractionVarsEntry;
 import org.pixelbays.rpg.global.config.builder.AbilityRefCodec;
-import org.pixelbays.rpg.item.codec.InteractionVarsEntry;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.AssetKeyValidator;
