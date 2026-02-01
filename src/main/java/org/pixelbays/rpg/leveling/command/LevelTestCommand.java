@@ -23,8 +23,8 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
- * /leveltest -all
- * /leveltest -LevelSystemId
+ * /leveltest all
+ * /leveltest <LevelSystemId>
  */
 @SuppressWarnings("null")
 public class LevelTestCommand extends AbstractPlayerCommand {
@@ -35,7 +35,7 @@ public class LevelTestCommand extends AbstractPlayerCommand {
     public LevelTestCommand() {
         super("leveltest", "Run a quick test of one or all level systems");
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
-        this.targetArg = this.withOptionalArg("target", "-all or -SystemId", ArgTypes.STRING);
+        this.targetArg = this.withOptionalArg("target", "all or <SystemId>", ArgTypes.STRING);
     }
 
     @Override
@@ -47,13 +47,14 @@ public class LevelTestCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
 
-        String rawTarget = targetArg.provided(ctx) ? targetArg.get(ctx) : "-all";
+        String rawTarget = targetArg.provided(ctx) ? targetArg.get(ctx) : "all";
         if (rawTarget == null || rawTarget.isEmpty()) {
-            rawTarget = "-all";
+            rawTarget = "all";
         }
 
-        boolean all = rawTarget.equalsIgnoreCase("-all") || rawTarget.equalsIgnoreCase("all");
-        String systemId = rawTarget.startsWith("-") ? rawTarget.substring(1) : rawTarget;
+        String cleanedTarget = rawTarget.startsWith("-") ? rawTarget.substring(1) : rawTarget;
+        boolean all = cleanedTarget.equalsIgnoreCase("all");
+        String systemId = cleanedTarget;
 
         if (all) {
             List<String> systems = new ArrayList<>(levelSystem.getRegisteredSystems());
@@ -74,7 +75,7 @@ public class LevelTestCommand extends AbstractPlayerCommand {
         }
 
         if (systemId == null || systemId.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /leveltest -all or /leveltest -<SystemId>"));
+            player.sendMessage(Message.raw("Usage: /leveltest all or /leveltest <SystemId>"));
             return;
         }
 

@@ -15,6 +15,7 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -31,12 +32,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 @SuppressWarnings("null")
 public class BindAbilityCommand extends AbstractPlayerCommand {
 
-    private final OptionalArg<Integer> slotArg;
-    private final OptionalArg<String> abilityIdArg;
+     private final RequiredArg<String> slotArg;
+     private final OptionalArg<String> abilityIdArg;
 
     public BindAbilityCommand() {
         super("bindability", "Bind an ability to a hotbar slot");
-        this.slotArg = this.withOptionalArg("slot", "Hotbar slot (1-9) or 'list'", ArgTypes.INTEGER);
+        this.slotArg = this.withRequiredArg("slot", "Hotbar slot (1-9) or 'list'", ArgTypes.STRING);
         this.abilityIdArg = this.withOptionalArg("abilityId", "Ability ID or 'clear'", ArgTypes.STRING);
     }
 
@@ -49,28 +50,31 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
 
-        // Check if neither argument is provided - show usage or list
-        if (!slotArg.provided(ctx) && !abilityIdArg.provided(ctx)) {
-            // No arguments - default to showing list
+        String slotToken = slotArg.get(ctx);
+        String abilityId = abilityIdArg.provided(ctx) ? abilityIdArg.get(ctx) : null;
+
+        if (slotToken == null || slotToken.isEmpty()) {
+            player.sendMessage(Message.raw("Usage: /bindability <slot> <abilityId|clear> or /bindability list"));
+            return;
+        }
+
+        if ("list".equalsIgnoreCase(slotToken)) {
             listBindings(player, store, ref);
             return;
         }
 
-        // If only slot is provided, treat it specially for "list" keyword
-        if (slotArg.provided(ctx) && !abilityIdArg.provided(ctx)) {
-            // Check if user is trying to clear a binding without providing "clear"
+        if (abilityId == null || abilityId.isEmpty()) {
             player.sendMessage(Message.raw("Usage: /bindability <slot> <abilityId|clear> or /bindability list"));
             return;
         }
 
-        // Both arguments must be provided for bind/clear operations
-        if (!slotArg.provided(ctx) || !abilityIdArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /bindability <slot> <abilityId|clear> or /bindability list"));
+        int slot;
+        try {
+            slot = Integer.parseInt(slotToken);
+        } catch (NumberFormatException e) {
+            player.sendMessage(Message.raw("Invalid slot. Please use a slot between 1 and 9."));
             return;
         }
-
-        int slot = slotArg.get(ctx);
-        String abilityId = abilityIdArg.get(ctx);
 
         // Convert from 1-indexed (user input) to 0-indexed (internal hotbar)
         int internalSlot = slot - 1;
@@ -81,8 +85,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
             return;
         }
 
-        // Check for "list" keyword (case where someone does "/bindability 7 list" or
-        // similar)
+        // Check for "list" keyword (case where someone does "/bindability 7 list" or similar)
         if ("list".equalsIgnoreCase(abilityId)) {
             listBindings(player, store, ref);
             return;
