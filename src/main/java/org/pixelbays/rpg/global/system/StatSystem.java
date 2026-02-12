@@ -10,6 +10,10 @@ import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.global.config.builder.StatModifiers;
+import org.pixelbays.rpg.global.event.ClassStatBonusesRecalculatedEvent;
+import org.pixelbays.rpg.global.event.RaceStatBonusesRecalculatedEvent;
+import org.pixelbays.rpg.global.event.StatGrowthAppliedEvent;
+import org.pixelbays.rpg.global.event.StatIncreasesAppliedEvent;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.config.StatGrowthConfig;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
@@ -185,6 +189,8 @@ public class StatSystem {
         } else {
             classModifiersCache.remove(entityRef);
         }
+
+        ClassStatBonusesRecalculatedEvent.dispatch(entityRef, classComp.getLearnedClassIds());
     }
 
     /**
@@ -196,6 +202,8 @@ public class StatSystem {
         if (oldModifiers != null) {
             removeModifiers(entityRef, oldModifiers, store, "rpg_class");
         }
+
+        ClassStatBonusesRecalculatedEvent.dispatch(entityRef, java.util.Set.of());
     }
 
     /**
@@ -214,6 +222,8 @@ public class StatSystem {
             return;
         }
 
+        Map<String, Float> applied = new HashMap<>();
+
         for (Map.Entry<String, Float> entry : statIncreases.entrySet()) {
             String statId = entry.getKey();
             Float increase = entry.getValue();
@@ -230,9 +240,14 @@ public class StatSystem {
 
             // Apply flat increase to current value using EntityStatMap
             float oldValue = statMap.addStatValue(statIndex, increase);
+            applied.put(statId, increase);
 
             RpgLogging.debugDeveloper("[StatSystem] Applied stat increase to %s: %s -> %s", statId, oldValue,
                     oldValue + increase);
+        }
+
+        if (!applied.isEmpty()) {
+            StatIncreasesAppliedEvent.dispatch(entityRef, applied);
         }
     }
 
@@ -295,6 +310,8 @@ public class StatSystem {
         if (growth.getMilestoneGrowth() != null && growth.getMilestoneGrowth().containsKey(newLevel)) {
             applyStatIncreases(entityRef, growth.getMilestoneGrowth().get(newLevel), store);
         }
+
+        StatGrowthAppliedEvent.dispatch(entityRef, newLevel, growth);
     }
 
     /**
@@ -326,6 +343,7 @@ public class StatSystem {
         if (raceComponent == null || raceComponent.getRaceId() == null || raceComponent.getRaceId().isEmpty()) {
             updateModifiers(entityRef, new AppliedModifiers(), oldModifiers, store, "rpg_race");
             raceModifiersCache.remove(entityRef);
+            RaceStatBonusesRecalculatedEvent.dispatch(entityRef, "");
             return;
         }
 
@@ -335,6 +353,7 @@ public class StatSystem {
             RpgLogging.debugDeveloper("[StatSystem] Race definition not found: %s", raceComponent.getRaceId());
             updateModifiers(entityRef, new AppliedModifiers(), oldModifiers, store, "rpg_race");
             raceModifiersCache.remove(entityRef);
+            RaceStatBonusesRecalculatedEvent.dispatch(entityRef, "");
             return;
         }
 
@@ -350,6 +369,8 @@ public class StatSystem {
         } else {
             raceModifiersCache.remove(entityRef);
         }
+
+        RaceStatBonusesRecalculatedEvent.dispatch(entityRef, raceDef.getId());
     }
 
     /**
