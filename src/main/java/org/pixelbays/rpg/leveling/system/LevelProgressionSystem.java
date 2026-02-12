@@ -17,7 +17,9 @@ import org.pixelbays.rpg.leveling.config.LevelRewardConfig;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 import org.pixelbays.rpg.leveling.config.LevelUpEffects;
 import org.pixelbays.rpg.leveling.config.NotificationConfig;
+import org.pixelbays.rpg.leveling.event.LevelRewardsAppliedEvent;
 import org.pixelbays.rpg.leveling.event.LevelUpEvent;
+import org.pixelbays.rpg.ability.event.ClassAbilityUnlockedEvent;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -306,6 +308,8 @@ public class LevelProgressionSystem {
         }
 
         RpgLogging.debugDeveloper("[LevelSystem] applyLevelRewards complete for level %d", newLevel);
+
+        LevelRewardsAppliedEvent.dispatch(entityRef, systemId, newLevel, rewards);
 
         // TODO: Handle other rewards (abilities, quests, currency, items, interactions)
         // These will be implemented as other systems are added
@@ -617,6 +621,7 @@ public class LevelProgressionSystem {
                 if (!abilityComp.hasAbility(abilityId)) {
                     int rank = unlock.getMaxRank() > 0 ? 1 : 1;
                     abilityComp.unlockAbility(abilityId, classId, rank);
+                    ClassAbilityUnlockedEvent.dispatch(entityRef, classId, abilityId, rank, systemId, exactLevel);
                 }
             }
         }

@@ -9,6 +9,8 @@ import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
+import org.pixelbays.rpg.race.event.RaceAbilityUnlockedEvent;
+import org.pixelbays.rpg.race.event.RaceChangedEvent;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -48,11 +50,14 @@ public class RaceSystem {
         Store<EntityStore> effectiveStore = store != null ? store : entityRef.getStore();
 
         RaceComponent raceComponent = getOrCreateRaceComponent(entityRef, effectiveStore);
+        String oldRaceId = raceComponent.getRaceId() == null ? "" : raceComponent.getRaceId();
         raceComponent.setRaceId(raceId);
 
         applyRaceStats(entityRef, raceDef, effectiveStore);
-        applyRaceAbilities(raceDef, raceComponent);
+        applyRaceAbilities(entityRef, raceDef, raceComponent);
         applyCosmeticRules(raceDef);
+
+        RaceChangedEvent.dispatch(entityRef, oldRaceId, raceId);
 
         RpgLogging.debugDeveloper("[RaceSystem] Set race to ", raceId);
         return true;
@@ -98,7 +103,8 @@ public class RaceSystem {
         statSystem.recalculateRaceStatBonuses(entityRef, store);
     }
 
-        private void applyRaceAbilities(@Nonnull RaceDefinition raceDef,
+    private void applyRaceAbilities(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull RaceDefinition raceDef,
             @Nonnull RaceComponent raceComponent) {
         if (raceDef.getAbilityIds() == null) {
             return;
@@ -111,6 +117,7 @@ public class RaceSystem {
 
             if (!raceComponent.hasUnlockedRaceAbility(abilityId)) {
                 raceComponent.unlockRaceAbility(abilityId);
+                RaceAbilityUnlockedEvent.dispatch(entityRef, raceDef.getRaceId(), abilityId);
             }
         }
 
