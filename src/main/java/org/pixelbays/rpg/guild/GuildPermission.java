@@ -1,0 +1,18 @@
+package org.pixelbays.rpg.guild;
+
+public enum GuildPermission {
+    INVITE,
+    KICK,
+    PROMOTE,
+    MANAGE_ROLES,
+    SET_JOIN_POLICY,
+    ACCEPT_APPLICATIONS,
+    REJECT_APPLICATIONS,
+    MANAGE_GUILD_INFO,
+    MANAGE_GUILD_BANK,
+    MANAGE_GUILD_EVENTS,
+    MANAGE_GUILD_WAR,
+    MANAGE_GUILD_ALLIANCES,
+    USE_GUILD_CHAT,
+    USE_GUILD_BANK,
+}
