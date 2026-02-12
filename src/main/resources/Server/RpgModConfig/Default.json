@@ -26,6 +26,36 @@
   },
   "BaseXpMultiplier": 1.0,
   "DefaultPlayerProfileCount": 3,
+  "InventoryHandling": "Strength",
+  "DefaultInventorySize": 9,
+  "StrengthInventorySlots": {
+    "5": 9,
+    "6": 11
+  },
+  "ExtraSlotsRingsEnabled": false,
+  "ExtraSlotsTrinketsEnabled": false,
+  "ExtraSlotsNeckEnabled": false,
+  "PartyEnabled": true,
+  "PartyMaxSize": 5,
+  "RaidEnabled": true,
+  "RaidMaxSize": 20,
+  "PartyXpEnabled": true,
+  "PartyXpGrantingMode": "SplitEqualInRange",
+  "PartyXpRangeBlocks": 48,
+  "PartyXpMinMembersInRange": 1,
+  "PartyNpcAllowed": true,
+  "PartyPersistenceEnabled": false,
+  "PartyPersistenceIntervalSeconds": 60,
+  "GuildEnabled": true,
+  "GuildMaxMembers": 50,
+  "GuildInviteExpirySeconds": 3600,
+  "GuildNameMinLength": 3,
+  "GuildNameMaxLength": 24,
+  "GuildTagMinLength": 2,
+  "GuildTagMaxLength": 5,
+  "GuildDefaultJoinPolicy": "InviteOnly",
+  "GuildPersistenceEnabled": true,
+  "GuildPersistenceIntervalSeconds": 120,
   "MaxActiveClasses": 1,
   "ClassSwitchingRules": "",
   "DebuggingMode": "DeveloperDontUse",
@@ -42,5 +72,21 @@
     8,
     9
   ],
-  "BaseGlobalCooldown": 1500
+  "BaseGlobalCooldown": 1500,
+  "TargetingStyle": "MOBA",
+  "CameraStyle": "Vanilla",
+  "AdvantageRollModifiers": {
+    "Rage": [
+      {
+        "Min": 1,
+        "Max": 10,
+        "Modifier": -2
+      },
+      {
+        "Min": 11,
+        "Max": 20,
+        "Modifier": 2
+      }
+    ]
+  }
 }

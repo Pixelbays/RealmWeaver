@@ -1,6 +1,9 @@
 {
   "Interactions": [
-    "RPG_Charge_Dash"
+    "RPG_Charge_Dash",
+    {
+      "Type": "ChangeState"
+    }
   ],
   "Cooldown": {
     "Id": "RPG_Warrior_Charge",
