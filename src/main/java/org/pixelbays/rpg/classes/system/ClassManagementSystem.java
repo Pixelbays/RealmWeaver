@@ -7,8 +7,12 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
+import org.pixelbays.rpg.ability.event.ClassAbilityUnlockedEvent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.classes.event.ActiveClassChangedEvent;
+import org.pixelbays.rpg.classes.event.ClassLearnedEvent;
+import org.pixelbays.rpg.classes.event.ClassUnlearnedEvent;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
@@ -114,6 +118,7 @@ public class ClassManagementSystem {
                 currentLevel = 1;
             }
         }
+        String resolvedSystemId = systemId == null ? "" : systemId;
 
         ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
         if (abilityComp == null) {
@@ -124,8 +129,11 @@ public class ClassManagementSystem {
             String abilityId = unlock.getAbilityId();
             if (abilityId != null && !abilityId.isEmpty() && !abilityComp.hasAbility(abilityId)) {
                 abilityComp.unlockAbility(abilityId, classId, 1);
+                ClassAbilityUnlockedEvent.dispatch(entityRef, classId, abilityId, 1, resolvedSystemId, false);
             }
         }
+
+        ClassLearnedEvent.dispatch(entityRef, classId);
 
         RpgLogging.debugDeveloper("[ClassSystem] Entity learned class: %s", classId);
         return "SUCCESS: Learned " + classDef.getDisplayName();
@@ -189,6 +197,8 @@ public class ClassManagementSystem {
             statSystem.recalculateClassStatBonuses(entityRef, store);
         }
 
+        ClassUnlearnedEvent.dispatch(entityRef, classId);
+
         RpgLogging.debugDeveloper("[ClassSystem] Entity unlearned class: %s", classId);
         return "SUCCESS: Unlearned " + classDef.getDisplayName();
     }
@@ -224,11 +234,16 @@ public class ClassManagementSystem {
         // next switch
 
         // Prioritize the requested class in learned class order
+        String oldActiveClassId = classComp.getPrimaryClassId();
         classComp.prioritizeClass(classId);
 
         if (statSystem != null) {
             statSystem.recalculateClassStatBonuses(entityRef, store);
         }
+
+        ActiveClassChangedEvent.dispatch(entityRef,
+            oldActiveClassId == null ? "" : oldActiveClassId,
+            classId);
 
         RpgLogging.debugDeveloper("[ClassSystem] Entity activated class: %s", classId);
         return "SUCCESS: Activated " + classDef.getDisplayName();
