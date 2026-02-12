@@ -7,9 +7,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.ability.component.AbilityEmpowerComponent;
+import org.pixelbays.rpg.ability.component.AbilityTriggerBlockComponent;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition.AbilityType;
+import org.pixelbays.rpg.ability.event.AbilityTriggerFailedEvent;
+import org.pixelbays.rpg.ability.event.AbilityTriggeredEvent;
+import org.pixelbays.rpg.ability.event.BlockAbilityTriggerEvent;
 import org.pixelbays.rpg.ability.interaction.AbilityInteractionMeta;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
@@ -83,34 +87,48 @@ public class ClassAbilitySystem {
             @Nonnull String abilityId,
             @Nonnull InteractionType interactionType) {
 
+        AbilityTriggerBlockComponent blockComponent = store.getComponent(entityRef,
+            AbilityTriggerBlockComponent.getComponentType());
+        if (blockComponent != null && blockComponent.isBlocked()) {
+            String reason = blockComponent.getReason();
+            String message = reason == null || reason.isEmpty()
+                ? "Abilities are currently blocked."
+                : "Abilities are currently blocked: " + reason;
+            BlockAbilityTriggerEvent.dispatch(entityRef, abilityId, interactionType, "");
+            return fail(entityRef, abilityId, message);
+        }
+
         // Get ability definition
         ClassAbilityDefinition abilityDef = getAbilityDefinition(abilityId);
         if (abilityDef == null) {
-            return TriggerResult.failure("Ability not found: " + abilityId);
+            return fail(entityRef, abilityId, "Ability not found: " + abilityId);
         }
 
         // Check if ability is enabled
         if (!abilityDef.isEnabled()) {
-            return TriggerResult.failure("Ability is disabled: " + abilityDef.getDisplayName());
+            return fail(entityRef, abilityId, "Ability is disabled: " + abilityDef.getDisplayName());
         }
 
         GlobalCoolDown.GcdResult gcdResult = globalCoolDown.tryConsume(entityRef, store, abilityDef);
         if (!gcdResult.allowed()) {
-            return TriggerResult.failure("Global cooldown active (" + gcdResult.remainingMs() + "ms)");
+            return fail(entityRef, abilityId,
+                    "Global cooldown active (" + gcdResult.remainingMs() + "ms)");
         }
 
         // Get the interaction chain ID from the ability definition
         String chainId = abilityDef.getInteractionChainId();
         if (chainId == null || chainId.isEmpty()) {
             RpgLogging.debugDeveloper("Ability %s has no interaction chain defined", abilityId);
-            return TriggerResult.failure("Ability has no interaction chain: " + abilityDef.getDisplayName());
+            return fail(entityRef, abilityId,
+                    "Ability has no interaction chain: " + abilityDef.getDisplayName());
         }
 
         // Load the root interaction
         RootInteraction root = RootInteraction.getAssetMap().getAsset(chainId);
         if (root == null) {
             RpgLogging.debugDeveloper("Root interaction not found: %s for ability %s", chainId, abilityId);
-            return TriggerResult.failure("Interaction not found for ability: " + abilityDef.getDisplayName());
+            return fail(entityRef, abilityId,
+                    "Interaction not found for ability: " + abilityDef.getDisplayName());
         }
 
         // Get the interaction manager
@@ -118,7 +136,7 @@ public class ClassAbilitySystem {
                 InteractionModule.get().getInteractionManagerComponent());
         if (manager == null) {
             RpgLogging.debugDeveloper("Interaction manager not available for entity %s", entityRef);
-            return TriggerResult.failure("Interaction manager not available");
+            return fail(entityRef, abilityId, "Interaction manager not available");
         }
 
         // Create interaction context
@@ -144,6 +162,8 @@ public class ClassAbilitySystem {
             abilityId,
             chainId,
             interactionType);
+
+        AbilityTriggeredEvent.dispatch(entityRef, abilityId, interactionType, chainId);
 
         return TriggerResult.success(abilityDef, chainId);
     }
@@ -202,6 +222,19 @@ public class ClassAbilitySystem {
         return getAbilitiesByType(AbilityType.Active);
     }
 
+    public void setAbilityTriggersBlocked(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            boolean blocked,
+            @Nullable String reason) {
+        AbilityTriggerBlockComponent blockComponent = store.getComponent(entityRef,
+                AbilityTriggerBlockComponent.getComponentType());
+        if (blockComponent == null) {
+            blockComponent = store.addComponent(entityRef, AbilityTriggerBlockComponent.getComponentType());
+        }
+        blockComponent.setBlocked(blocked, reason);
+    }
+
     /**
      * Get all abilities of a specific type
      */
@@ -214,6 +247,12 @@ public class ClassAbilitySystem {
             }
         }
         return abilities;
+    }
+
+    private TriggerResult fail(@Nonnull Ref<EntityStore> entityRef, @Nonnull String abilityId,
+            @Nonnull String reason) {
+        AbilityTriggerFailedEvent.dispatch(entityRef, abilityId, reason);
+        return TriggerResult.failure(reason);
     }
 
     /**
