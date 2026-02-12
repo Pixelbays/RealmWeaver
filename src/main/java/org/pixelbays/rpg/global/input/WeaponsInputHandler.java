@@ -1,4 +1,4 @@
-package org.pixelbays.rpg.ability.input;
+package org.pixelbays.rpg.global.input;
 
 import javax.annotation.Nonnull;
 

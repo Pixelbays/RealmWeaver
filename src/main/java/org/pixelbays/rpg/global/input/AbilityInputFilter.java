@@ -1,4 +1,4 @@
-package org.pixelbays.rpg.ability.input;
+package org.pixelbays.rpg.global.input;
 
 import javax.annotation.Nonnull;
 
@@ -6,6 +6,7 @@ import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.config.RpgModConfig.AbilityControlType;
+import org.pixelbays.rpg.movement.input.ClickToMoveInputHandler;
 
 import com.hypixel.hytale.protocol.Packet;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
@@ -20,36 +21,47 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
  */
 public class AbilityInputFilter implements PlayerPacketFilter {
 
-    private final ExamplePlugin plugin;
     private final WeaponsInputHandler weaponsHandler;
     private final HotbarInputHandler hotbarHandler;
     private final AbilitySlotsInputHandler abilitySlotsHandler;
+    private final ClickToMoveInputHandler clickToMoveHandler;
 
     public AbilityInputFilter(@Nonnull ExamplePlugin plugin) {
-        this.plugin = plugin;
         this.weaponsHandler = new WeaponsInputHandler(plugin);
         this.hotbarHandler = new HotbarInputHandler(plugin);
         this.abilitySlotsHandler = new AbilitySlotsInputHandler(plugin);
+        this.clickToMoveHandler = new ClickToMoveInputHandler();
     }
 
     @Override
-    public boolean test(@Nonnull PlayerRef playerRef, @Nonnull Packet packet) {
+    public boolean test(PlayerRef playerRef, Packet packet) {
         // Only process SyncInteractionChains packets (ID 290)
-        if (!(packet instanceof SyncInteractionChains syncPacket)) {
+    if (!(packet instanceof SyncInteractionChains syncPacket)) {
             return false; // Let packet through
         }
 
+        if (playerRef == null) {
+            return false;
+        }
+
+        @Nonnull
+        PlayerRef safeRef = playerRef;
+        
+        if (clickToMoveHandler.handlePacket(safeRef, syncPacket)) {
+            return true; // Consume movement click
+        }
+
         // Determine which control type to use for this player
-        AbilityControlType controlType = getPlayerControlType(playerRef);
+        AbilityControlType controlType = getPlayerControlType(safeRef);
         if (controlType == null) {
             return false; // No control type configured
         }
 
         // Route to appropriate handler based on control type
         return switch (controlType) {
-            case Weapons -> weaponsHandler.handlePacket(playerRef, syncPacket);
-            case Hotbar -> hotbarHandler.handlePacket(playerRef, syncPacket);
-            case AbilitySlots123 -> abilitySlotsHandler.handlePacket(playerRef, syncPacket);
+            case Weapons -> weaponsHandler.handlePacket(safeRef, syncPacket);
+            case Hotbar -> hotbarHandler.handlePacket(safeRef, syncPacket);
+            case AbilitySlots123 -> abilitySlotsHandler.handlePacket(safeRef, syncPacket);
         };
     }
 
@@ -73,7 +85,6 @@ public class AbilityInputFilter implements PlayerPacketFilter {
      * Get control type for a specific class.
      * Checks class override, then falls back to global config.
      */
-    @Nonnull
     public static AbilityControlType getControlTypeForClass(@Nonnull String classId, @Nonnull String configId) {
         ClassDefinition classDef = ClassDefinition.getAssetMap().getAsset(classId);
         if (classDef != null) {
@@ -84,4 +95,5 @@ public class AbilityInputFilter implements PlayerPacketFilter {
         RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
         return config != null ? config.getAbilityControlType() : AbilityControlType.Hotbar;
     }
+
 }
