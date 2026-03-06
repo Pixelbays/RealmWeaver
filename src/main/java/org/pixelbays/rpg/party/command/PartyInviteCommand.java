@@ -38,26 +38,26 @@ public class PartyInviteCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!playerArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /party invite <player>"));
+            player.sendMessage(Message.translation("server.rpg.party.usage.invite"));
             return;
         }
 
         String targetName = playerArg.get(ctx);
         if (targetName == null || targetName.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /party invite <player>"));
+            player.sendMessage(Message.translation("server.rpg.party.usage.invite"));
             return;
         }
 
         PlayerRef targetRef = PartyCommandUtil.findPlayerByName(targetName);
         if (targetRef == null) {
-            player.sendMessage(Message.raw("Player not found."));
+            player.sendMessage(Message.translation("server.rpg.common.playerNotFound"));
             return;
         }
 
         PartyActionResult result = partyManager.invitePlayer(playerRef.getUuid(), targetRef.getUuid());
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(PartyCommandUtil.managerResultMessage(result.getMessage()));
         if (result.isSuccess()) {
-            targetRef.sendMessage(Message.raw(playerRef.getUsername() + " invited you to a party."));
+            targetRef.sendMessage(Message.translation("server.rpg.party.notify.invitedBy").param("player", playerRef.getUsername()));
         }
     }
 }

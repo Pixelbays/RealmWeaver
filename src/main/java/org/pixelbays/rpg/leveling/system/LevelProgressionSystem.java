@@ -1212,13 +1212,8 @@ public class LevelProgressionSystem {
                     .replace("{level}", String.valueOf(newLevel))
                     .replace("{system}", systemId);
 
-            // Create chat message packet
-            com.hypixel.hytale.protocol.packets.interface_.ChatMessage chatPacket = 
-                    new com.hypixel.hytale.protocol.packets.interface_.ChatMessage(messageText);
-
-            // Send to player
-            PacketHandler packetHandler = playerRef.getPacketHandler();
-            packetHandler.writeNoCache(chatPacket);
+                // Send to player via server message API
+                playerRef.sendMessage(Message.raw(messageText));
 
             RpgLogging.debugDeveloper("[LevelSystem] Sent chat message: %s", messageText);
         } catch (Exception e) {

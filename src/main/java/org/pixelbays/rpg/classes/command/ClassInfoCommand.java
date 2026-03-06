@@ -45,46 +45,50 @@ public class ClassInfoCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.raw("Class not found: " + classId));
+            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
         ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
         boolean learned = classComp != null && classComp.hasLearnedClass(classId);
 
-        player.sendMessage(Message.raw("=== " + classDef.getDisplayName() + " ==="));
-        player.sendMessage(Message.raw(classDef.getDescription()));
-        player.sendMessage(Message.raw(""));
+        player.sendMessage(Message.translation("server.rpg.class.info.header").param("name", classDef.getDisplayName()));
+        player.sendMessage(Message.translation("server.rpg.class.info.description").param("description", classDef.getDescription()));
+        player.sendMessage(Message.translation("server.rpg.class.common.blank"));
 
         if (learned) {
             if (classComp == null) {
-                player.sendMessage(Message.raw("Status: LEARNED"));
-                player.sendMessage(Message.raw("Learned: unknown"));
+                player.sendMessage(Message.translation("server.rpg.class.info.status").param("status", "LEARNED"));
+                player.sendMessage(Message.translation("server.rpg.class.info.learnedUnknown"));
                 return;
             }
             ClassComponent.ClassData classData = classComp.getClassData(classId);
             boolean isPrimary = classId.equals(classComp.getPrimaryClassId());
 
-            player.sendMessage(Message.raw("Status: " + (isPrimary ? "Primary" : "LEARNED")));
+            player.sendMessage(Message.translation("server.rpg.class.info.status")
+                    .param("status", isPrimary ? "Primary" : "LEARNED"));
             if (classData != null) {
-                player.sendMessage(Message.raw("Learned: " + new java.util.Date(classData.getLearnedTime())));
+                player.sendMessage(Message.translation("server.rpg.class.info.learnedAt")
+                        .param("time", new java.util.Date(classData.getLearnedTime()).toString()));
             } else {
-                player.sendMessage(Message.raw("Learned: unknown"));
+                player.sendMessage(Message.translation("server.rpg.class.info.learnedUnknown"));
             }
         } else {
-            player.sendMessage(Message.raw("Status: LOCKED"));
-            player.sendMessage(Message.raw(""));
-            player.sendMessage(Message.raw("Requirements:"));
+            player.sendMessage(Message.translation("server.rpg.class.info.status").param("status", "LOCKED"));
+            player.sendMessage(Message.translation("server.rpg.class.common.blank"));
+            player.sendMessage(Message.translation("server.rpg.class.info.requirementsHeader"));
 
 
             if (!classDef.getRequiredClasses().isEmpty()) {
-                player.sendMessage(Message.raw("  - Classes: " + String.join(", ", classDef.getRequiredClasses())));
+                player.sendMessage(Message.translation("server.rpg.class.info.requirementsClasses")
+                        .param("classes", String.join(", ", classDef.getRequiredClasses())));
             }
         }
 
         int abilityCount = classDef.getAbilityIds().size();
         if (abilityCount > 0) {
-            player.sendMessage(Message.raw("Abilities: " + abilityCount));
+            player.sendMessage(Message.translation("server.rpg.class.info.abilitiesCount")
+                    .param("count", Integer.toString(abilityCount)));
         }
     }
 }

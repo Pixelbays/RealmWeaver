@@ -1,7 +1,5 @@
 package org.pixelbays.rpg.race.system;
 
-import java.util.List;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 

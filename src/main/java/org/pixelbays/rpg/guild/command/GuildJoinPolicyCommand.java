@@ -39,19 +39,19 @@ public class GuildJoinPolicyCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!policyArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /guild joinpolicy <invite|open|application>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.joinpolicy"));
             return;
         }
 
         String rawPolicy = policyArg.get(ctx);
         GuildJoinPolicy policy = parsePolicy(rawPolicy);
         if (policy == null) {
-            player.sendMessage(Message.raw("Invalid policy. Use invite, open, or application."));
+            player.sendMessage(Message.translation("server.rpg.guild.error.invalidPolicy"));
             return;
         }
 
         GuildActionResult result = guildManager.setJoinPolicy(playerRef.getUuid(), policy);
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
     }
 
     private GuildJoinPolicy parsePolicy(String rawPolicy) {

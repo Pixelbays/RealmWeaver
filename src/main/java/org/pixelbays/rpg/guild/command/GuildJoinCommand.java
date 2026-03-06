@@ -38,17 +38,17 @@ public class GuildJoinCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!guildArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /guild join <name|tag>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.join"));
             return;
         }
 
         String guildName = guildArg.get(ctx);
         if (guildName == null || guildName.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /guild join <name|tag>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.join"));
             return;
         }
 
         GuildActionResult result = guildManager.joinGuild(playerRef.getUuid(), guildName);
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
     }
 }

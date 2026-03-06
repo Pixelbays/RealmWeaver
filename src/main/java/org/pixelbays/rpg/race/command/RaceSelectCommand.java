@@ -48,24 +48,24 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
 
         RaceDefinition raceDef = raceManagementSystem.getRaceDefinition(raceId);
         if (raceDef == null) {
-            player.sendMessage(Message.raw("Unknown race: " + raceId));
+            player.sendMessage(Message.translation("server.rpg.race.error.unknown").param("id", raceId));
             return;
         }
 
         if (!raceDef.isEnabled()) {
-            player.sendMessage(Message.raw("Race is disabled: " + raceId));
+            player.sendMessage(Message.translation("server.rpg.race.error.disabled").param("id", raceId));
             return;
         }
 
         String activeRaceId = raceSystem.getRaceId(ref);
         if (activeRaceId != null && !activeRaceId.isEmpty() && activeRaceId.equals(raceId)) {
-            player.sendMessage(Message.raw("You already have this race selected."));
+            player.sendMessage(Message.translation("server.rpg.race.error.alreadySelected"));
             return;
         }
 
         boolean applied = raceSystem.setRace(ref, raceId, store);
         if (!applied) {
-            player.sendMessage(Message.raw("Unable to select race: " + raceId));
+            player.sendMessage(Message.translation("server.rpg.race.error.unableToSelect").param("id", raceId));
             return;
         }
 
@@ -74,9 +74,9 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
                 : raceId;
 
         if (activeRaceId != null && !activeRaceId.isEmpty()) {
-            player.sendMessage(Message.raw("Race switched: " + displayName));
+            player.sendMessage(Message.translation("server.rpg.race.success.switched").param("name", displayName));
         } else {
-            player.sendMessage(Message.raw("Race selected: " + displayName));
+            player.sendMessage(Message.translation("server.rpg.race.success.selected").param("name", displayName));
         }
     }
 }

@@ -63,7 +63,7 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
         } else {
             String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
             if (primaryClassId == null || primaryClassId.isEmpty()) {
-                player.sendMessage(Message.raw("No learned class. Specify class name: /class progress <className>"));
+                player.sendMessage(Message.translation("server.rpg.class.progress.noLearnedClass"));
                 return;
             }
             classId = primaryClassId;
@@ -71,12 +71,13 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.raw("Class not found: " + classId));
+            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
-            player.sendMessage(Message.raw("You have not learned " + classDef.getDisplayName()));
+            player.sendMessage(Message.translation("server.rpg.class.error.notLearned")
+                    .param("class", classDef.getDisplayName()));
             return;
         }
 
@@ -89,13 +90,16 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
         float expToNext = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExpToNextLevel(ref, systemId) : 0f;
         float expProgress = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExpProgress(ref, systemId) : 0f;
 
-        player.sendMessage(Message.raw("=== " + classDef.getDisplayName() + " Progress ==="));
-        player.sendMessage(Message.raw("Status: " + (isPrimary ? "Primary" : "Inactive")));
-        player.sendMessage(Message.raw("Level System: " + systemId));
-        player.sendMessage(Message.raw("Current Level: " + currentLevel));
-        player.sendMessage(Message.raw("Current XP: " + String.format("%.0f", currentExp)
-            + " / " + String.format("%.0f", expToNext)
-            + " (" + (int) (expProgress * 100) + "%)"));
+        player.sendMessage(Message.translation("server.rpg.class.progress.header").param("name", classDef.getDisplayName()));
+        player.sendMessage(Message.translation("server.rpg.class.progress.status")
+            .param("status", isPrimary ? "Primary" : "Inactive"));
+        player.sendMessage(Message.translation("server.rpg.class.progress.levelSystem").param("systemId", systemId));
+        player.sendMessage(Message.translation("server.rpg.class.progress.currentLevel")
+            .param("level", Integer.toString(currentLevel)));
+        player.sendMessage(Message.translation("server.rpg.class.progress.currentXp")
+            .param("current", String.format("%.0f", currentExp))
+            .param("next", String.format("%.0f", expToNext))
+            .param("percent", Integer.toString((int) (expProgress * 100))));
 
         java.util.List<String> abilityIds = new java.util.ArrayList<>(classDef.getAbilityIds());
         RpgLogging.debugDeveloper("Ability IDs: %s", abilityIds);
@@ -112,23 +116,28 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
                 displayList.add(displayName + " (" + abilityId + ")" + (unlocked ? "" : " [LOCKED]"));
             }
 
-            player.sendMessage(Message.raw("Abilities: " + String.join(", ", displayList)));
+            player.sendMessage(Message.translation("server.rpg.class.progress.abilities")
+                    .param("abilities", String.join(", ", displayList)));
         } else {
-            player.sendMessage(Message.raw("Abilities: none"));
+            player.sendMessage(Message.translation("server.rpg.class.progress.abilitiesNone"));
         }
 
         // Show stat bonuses
         if (!classDef.getBaseStatModifiers().isEmpty()) {
-            player.sendMessage(Message.raw(""));
-            player.sendMessage(Message.raw("Base Stat Bonuses:"));
+            player.sendMessage(Message.translation("server.rpg.class.common.blank"));
+            player.sendMessage(Message.translation("server.rpg.class.progress.baseStatBonuses"));
 
             for (Map.Entry<String, Float> entry : classDef.getBaseStatModifiers().getAdditiveModifiers().entrySet()) {
-                player.sendMessage(Message.raw("  +" + entry.getValue() + " " + entry.getKey()));
+                player.sendMessage(Message.translation("server.rpg.class.progress.baseStatAdd")
+                        .param("value", Float.toString(entry.getValue()))
+                        .param("stat", entry.getKey()));
             }
 
             for (Map.Entry<String, Float> entry : classDef.getBaseStatModifiers().getMultiplicativeModifiers()
                     .entrySet()) {
-                player.sendMessage(Message.raw("  +" + (entry.getValue() * 100) + "% " + entry.getKey()));
+                player.sendMessage(Message.translation("server.rpg.class.progress.baseStatMult")
+                        .param("value", Float.toString(entry.getValue() * 100f))
+                        .param("stat", entry.getKey()));
             }
         }
     }

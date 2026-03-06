@@ -59,29 +59,29 @@ public class LevelTestCommand extends AbstractPlayerCommand {
         if (all) {
             List<String> systems = new ArrayList<>(levelSystem.getRegisteredSystems());
             if (systems.isEmpty()) {
-                player.sendMessage(Message.raw("No level systems registered."));
+                player.sendMessage(Message.translation("server.rpg.level.test.noSystems"));
                 return;
             }
 
-            player.sendMessage(Message.raw("=== Level System Test (ALL) ==="));
+            player.sendMessage(Message.translation("server.rpg.level.test.headerAll"));
             for (String id : systems) {
                 if (id == null || id.isEmpty()) {
                     continue;
                 }
                 runSingleTest(player, ref, id, store, world);
             }
-            player.sendMessage(Message.raw("=== Level System Test Complete ==="));
+            player.sendMessage(Message.translation("server.rpg.level.test.complete"));
             return;
         }
 
         if (systemId == null || systemId.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /leveltest all or /leveltest <SystemId>"));
+            player.sendMessage(Message.translation("server.rpg.level.test.usage"));
             return;
         }
 
-        player.sendMessage(Message.raw("=== Level System Test ==="));
+        player.sendMessage(Message.translation("server.rpg.level.test.headerSingle"));
         runSingleTest(player, ref, systemId, store, world);
-        player.sendMessage(Message.raw("=== Level System Test Complete ==="));
+        player.sendMessage(Message.translation("server.rpg.level.test.complete"));
     }
 
     private void runSingleTest(@Nonnull Player player,
@@ -92,12 +92,12 @@ public class LevelTestCommand extends AbstractPlayerCommand {
 
         LevelSystemConfig config = levelSystem.getConfig(systemId);
         if (config == null) {
-            player.sendMessage(Message.raw("- " + systemId + ": NOT FOUND"));
+            player.sendMessage(Message.translation("server.rpg.level.test.systemNotFound").param("systemId", systemId));
             return;
         }
 
         if (!config.isEnabled()) {
-            player.sendMessage(Message.raw("- " + systemId + ": DISABLED"));
+            player.sendMessage(Message.translation("server.rpg.level.test.systemDisabled").param("systemId", systemId));
             return;
         }
 
@@ -107,7 +107,9 @@ public class LevelTestCommand extends AbstractPlayerCommand {
         float expToNext = levelSystem.getExpToNextLevel(ref, systemId);
 
         if (expToNext <= 0f) {
-            player.sendMessage(Message.raw("- " + systemId + ": level " + startLevel + " (MAX)"));
+            player.sendMessage(Message.translation("server.rpg.level.test.systemMax")
+                    .param("systemId", systemId)
+                    .param("level", startLevel));
             return;
         }
 
@@ -122,8 +124,12 @@ public class LevelTestCommand extends AbstractPlayerCommand {
                 ? config.getDisplayName()
                 : systemId;
 
-        player.sendMessage(Message.raw("- " + displayName + " (" + systemId + "): "
-                + startLevel + " -> " + newLevel
-                + " | exp " + String.format("%.0f", currentExp) + "/" + String.format("%.0f", newExpToNext)));
+        player.sendMessage(Message.translation("server.rpg.level.test.systemResult")
+            .param("displayName", displayName)
+            .param("systemId", systemId)
+            .param("startLevel", startLevel)
+            .param("newLevel", newLevel)
+            .param("currentExp", String.format("%.0f", currentExp))
+            .param("newExpToNext", String.format("%.0f", newExpToNext)));
     }
 }

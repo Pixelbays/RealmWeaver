@@ -62,7 +62,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.raw("Class not found: " + classId));
+            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
@@ -253,7 +253,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
         }
 
         for (String line : lines) {
-            player.sendMessage(Message.raw(line));
+            player.sendMessage(Message.translation("server.rpg.class.debug.line").param("text", line));
             RpgLogging.debugDeveloper("[ClassDebug] %s", line);
         }
     }

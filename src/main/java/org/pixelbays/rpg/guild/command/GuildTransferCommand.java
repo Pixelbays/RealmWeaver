@@ -38,26 +38,26 @@ public class GuildTransferCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!playerArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /guild transfer <player>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.transfer"));
             return;
         }
 
         String targetName = playerArg.get(ctx);
         if (targetName == null || targetName.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /guild transfer <player>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.transfer"));
             return;
         }
 
         PlayerRef targetRef = GuildCommandUtil.findPlayerByName(targetName);
         if (targetRef == null) {
-            player.sendMessage(Message.raw("Player not found."));
+            player.sendMessage(Message.translation("server.rpg.common.playerNotFound"));
             return;
         }
 
         GuildActionResult result = guildManager.transferLeadership(playerRef.getUuid(), targetRef.getUuid());
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
         if (result.isSuccess()) {
-            targetRef.sendMessage(Message.raw("You are now the guild leader."));
+            targetRef.sendMessage(Message.translation("server.rpg.guild.notify.nowLeader"));
         }
     }
 }

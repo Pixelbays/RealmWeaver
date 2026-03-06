@@ -38,7 +38,7 @@ public class GuildInfoCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         Guild guild = guildManager.getGuildForMember(playerRef.getUuid());
         if (guild == null) {
-            player.sendMessage(Message.raw("You are not in a guild."));
+            player.sendMessage(Message.translation("server.rpg.guild.error.notInGuild"));
             return;
         }
 
@@ -47,10 +47,14 @@ public class GuildInfoCommand extends AbstractPlayerCommand {
                 .map(role -> role.getName() + "(" + role.getId() + ")")
                 .collect(Collectors.joining(", "));
 
-        player.sendMessage(Message.raw("Guild: " + guild.getName() + " [" + guild.getTag() + "]"));
-        player.sendMessage(Message.raw("Leader: " + leaderName));
-        player.sendMessage(Message.raw("Members: " + guild.size()));
-        player.sendMessage(Message.raw("Join Policy: " + guild.getJoinPolicy()));
-        player.sendMessage(Message.raw("Roles: " + (roles.isEmpty() ? GuildRole.MEMBER_ID : roles)));
+        player.sendMessage(Message.translation("server.rpg.guild.info.header")
+            .param("name", guild.getName())
+            .param("tag", guild.getTag()));
+        player.sendMessage(Message.translation("server.rpg.guild.info.leader").param("leader", leaderName));
+        player.sendMessage(Message.translation("server.rpg.guild.info.members").param("count", guild.size()));
+        player.sendMessage(Message.translation("server.rpg.guild.info.joinPolicy")
+            .param("policy", guild.getJoinPolicy().name()));
+        player.sendMessage(Message.translation("server.rpg.guild.info.roles")
+            .param("roles", roles.isEmpty() ? GuildRole.MEMBER_ID : roles));
     }
 }

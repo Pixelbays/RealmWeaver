@@ -38,26 +38,26 @@ public class GuildKickCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!playerArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /guild kick <player>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.kick"));
             return;
         }
 
         String targetName = playerArg.get(ctx);
         if (targetName == null || targetName.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /guild kick <player>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.kick"));
             return;
         }
 
         PlayerRef targetRef = GuildCommandUtil.findPlayerByName(targetName);
         if (targetRef == null) {
-            player.sendMessage(Message.raw("Player not found."));
+            player.sendMessage(Message.translation("server.rpg.common.playerNotFound"));
             return;
         }
 
         GuildActionResult result = guildManager.kickMember(playerRef.getUuid(), targetRef.getUuid());
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
         if (result.isSuccess()) {
-            targetRef.sendMessage(Message.raw("You were kicked from the guild."));
+            targetRef.sendMessage(Message.translation("server.rpg.guild.notify.kicked"));
         }
     }
 }

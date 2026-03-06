@@ -42,6 +42,6 @@ public class PartyCreateCommand extends AbstractPlayerCommand {
         PartyType type = rawType != null && rawType.equalsIgnoreCase("raid") ? PartyType.RAID : PartyType.PARTY;
 
         PartyActionResult result = partyManager.createParty(playerRef.getUuid(), type);
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(PartyCommandUtil.managerResultMessage(result.getMessage()));
     }
 }

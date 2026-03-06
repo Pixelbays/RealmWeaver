@@ -42,11 +42,6 @@ public class ClassUnlearnCommand extends AbstractPlayerCommand {
         String classId = this.classNameArg.get(ctx);
         
         String result = classSystem.unlearnClass(ref, classId, store);
-        
-        if (result.startsWith("ERROR:")) {
-            player.sendMessage(Message.raw(result.substring(7)));
-        } else {
-            player.sendMessage(Message.raw(result));
-        }
+        player.sendMessage(ClassCommandUtil.managerResultMessage(result));
     }
 }

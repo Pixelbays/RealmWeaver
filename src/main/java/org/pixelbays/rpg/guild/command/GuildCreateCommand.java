@@ -40,18 +40,18 @@ public class GuildCreateCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!nameArg.provided(ctx) || !tagArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /guild create <name> <tag>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.create"));
             return;
         }
 
         String name = nameArg.get(ctx);
         String tag = tagArg.get(ctx);
         if (name == null || name.isEmpty() || tag == null || tag.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /guild create <name> <tag>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.create"));
             return;
         }
 
         GuildActionResult result = guildManager.createGuild(playerRef.getUuid(), name, tag);
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
     }
 }

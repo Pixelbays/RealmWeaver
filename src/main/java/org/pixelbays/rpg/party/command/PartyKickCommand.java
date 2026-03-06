@@ -38,23 +38,23 @@ public class PartyKickCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!playerArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /party kick <player>"));
+            player.sendMessage(Message.translation("server.rpg.party.usage.kick"));
             return;
         }
 
         String targetName = playerArg.get(ctx);
         if (targetName == null || targetName.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /party kick <player>"));
+            player.sendMessage(Message.translation("server.rpg.party.usage.kick"));
             return;
         }
 
         PlayerRef targetRef = PartyCommandUtil.findPlayerByName(targetName);
         if (targetRef == null) {
-            player.sendMessage(Message.raw("Player not found."));
+            player.sendMessage(Message.translation("server.rpg.common.playerNotFound"));
             return;
         }
 
         PartyActionResult result = partyManager.kickMember(playerRef.getUuid(), targetRef.getUuid());
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(PartyCommandUtil.managerResultMessage(result.getMessage()));
     }
 }

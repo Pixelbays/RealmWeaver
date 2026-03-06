@@ -43,7 +43,7 @@ public class GuildRoleSetPermCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!roleArg.provided(ctx) || !permArg.provided(ctx) || !enabledArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /guild role setperm <role> <permission> <true|false>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.roleSetPerm"));
             return;
         }
 
@@ -51,24 +51,24 @@ public class GuildRoleSetPermCommand extends AbstractPlayerCommand {
         String permissionRaw = permArg.get(ctx);
         String enabledRaw = enabledArg.get(ctx);
         if (roleId == null || permissionRaw == null || enabledRaw == null) {
-            player.sendMessage(Message.raw("Usage: /guild role setperm <role> <permission> <true|false>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.roleSetPerm"));
             return;
         }
 
         GuildPermission permission = parsePermission(permissionRaw);
         if (permission == null) {
-            player.sendMessage(Message.raw("Unknown permission."));
+            player.sendMessage(Message.translation("server.rpg.guild.error.unknownPermission"));
             return;
         }
 
         Boolean enabled = parseEnabled(enabledRaw);
         if (enabled == null) {
-            player.sendMessage(Message.raw("Enabled must be true or false."));
+            player.sendMessage(Message.translation("server.rpg.guild.error.enabledMustBeBoolean"));
             return;
         }
 
         GuildActionResult result = guildManager.setRolePermission(playerRef.getUuid(), roleId, permission, enabled);
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
     }
 
     private GuildPermission parsePermission(String raw) {

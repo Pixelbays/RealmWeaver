@@ -68,13 +68,14 @@ public class UnlockAbilityCommand extends AbstractPlayerCommand {
         // Validate ability exists
         ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
         if (abilityDef == null) {
-            player.sendMessage(Message.raw("Unknown ability: " + abilityId));
+            player.sendMessage(Message.translation("server.rpg.ability.unlock.unknownAbility").param("abilityId", abilityId));
             return;
         }
 
         // Check if already unlocked
         if (abilityComp.hasAbility(abilityId)) {
-            player.sendMessage(Message.raw("Ability already unlocked: " + abilityDef.getDisplayName()));
+            player.sendMessage(Message.translation("server.rpg.ability.unlock.alreadyUnlocked")
+                    .param("ability", abilityDef.getDisplayName()));
             return;
         }
 
@@ -84,25 +85,27 @@ public class UnlockAbilityCommand extends AbstractPlayerCommand {
         String displayName = abilityDef.getDisplayName();
         String typeName = abilityDef.getAbilityType() != null ? abilityDef.getAbilityType().toString() : "Unknown";
         
-        player.sendMessage(Message.raw("Unlocked ability: " + displayName + " (" + typeName + ")"));
+        player.sendMessage(Message.translation("server.rpg.ability.unlock.success")
+            .param("ability", displayName)
+            .param("type", typeName));
         
         // If it's a passive or toggle, mention it will tick
         if (abilityDef.getAbilityType() == ClassAbilityDefinition.AbilityType.Passive) {
-            player.sendMessage(Message.raw("This is a PASSIVE ability - it will run every tick!"));
+            player.sendMessage(Message.translation("server.rpg.ability.unlock.typePassive"));
         } else if (abilityDef.getAbilityType() == ClassAbilityDefinition.AbilityType.Toggle) {
-            player.sendMessage(Message.raw("This is a TOGGLE ability - use /bindability to bind it to a hotbar slot"));
+            player.sendMessage(Message.translation("server.rpg.ability.unlock.typeToggle"));
         } else {
-            player.sendMessage(Message.raw("This is an ACTIVE ability - use /bindability to bind it to a hotbar slot"));
+            player.sendMessage(Message.translation("server.rpg.ability.unlock.typeActive"));
         }
     }
 
     private void listUnlockedAbilities(@Nonnull Player player, @Nonnull ClassAbilityComponent abilityComp) {
         if (abilityComp.getUnlockedAbilityIds().isEmpty()) {
-            player.sendMessage(Message.raw("No abilities unlocked. Use /unlockability <abilityId> to unlock one."));
+            player.sendMessage(Message.translation("server.rpg.ability.unlock.none"));
             return;
         }
 
-        player.sendMessage(Message.raw("=== Unlocked Abilities ==="));
+        player.sendMessage(Message.translation("server.rpg.ability.unlock.header"));
 
         for (String abilityId : abilityComp.getUnlockedAbilityIds()) {
             ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
@@ -110,7 +113,9 @@ public class UnlockAbilityCommand extends AbstractPlayerCommand {
             String typeName = abilityDef != null && abilityDef.getAbilityType() != null 
                     ? abilityDef.getAbilityType().toString() : "Unknown";
 
-            player.sendMessage(Message.raw("- " + displayName + " (" + typeName + ")"));
+            player.sendMessage(Message.translation("server.rpg.ability.unlock.entry")
+                    .param("ability", displayName)
+                    .param("type", typeName));
         }
     }
 }

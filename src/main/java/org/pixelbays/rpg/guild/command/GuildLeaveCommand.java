@@ -34,6 +34,6 @@ public class GuildLeaveCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         GuildActionResult result = guildManager.leaveGuild(playerRef.getUuid());
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
     }
 }

@@ -42,11 +42,6 @@ public class ClassSwitchCommand extends AbstractPlayerCommand {
         String classId = this.classNameArg.get(ctx);
         
         String result = classSystem.setActiveClass(ref, classId, store);
-        
-        if (result.startsWith("ERROR:")) {
-            player.sendMessage(Message.raw(result.substring(7)));
-        } else {
-            player.sendMessage(Message.raw(result));
-        }
+        player.sendMessage(ClassCommandUtil.managerResultMessage(result));
     }
 }

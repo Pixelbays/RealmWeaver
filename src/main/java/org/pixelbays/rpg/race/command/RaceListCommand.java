@@ -44,11 +44,11 @@ public class RaceListCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         String activeRaceId = raceSystem.getRaceId(ref);
 
-        player.sendMessage(Message.raw("=== Available Races ==="));
+        player.sendMessage(Message.translation("server.rpg.race.list.header"));
 
         Map<String, RaceDefinition> allRaces = raceManagementSystem.getRaceDefinitions();
         if (allRaces.isEmpty()) {
-            player.sendMessage(Message.raw("No races registered."));
+            player.sendMessage(Message.translation("server.rpg.race.list.none"));
             return;
         }
 
@@ -66,7 +66,10 @@ public class RaceListCommand extends AbstractPlayerCommand {
                     ? raceDef.getDisplayName()
                     : raceId;
 
-            player.sendMessage(Message.raw(status + " " + displayName + " (" + raceId + ")"));
+                player.sendMessage(Message.translation("server.rpg.race.list.entry")
+                    .param("status", status)
+                    .param("name", displayName)
+                    .param("id", raceId));
         }
     }
 }

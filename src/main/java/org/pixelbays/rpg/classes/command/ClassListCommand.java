@@ -42,7 +42,7 @@ public class ClassListCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
         
-        player.sendMessage(Message.raw("=== Available Classes ==="));
+        player.sendMessage(Message.translation("server.rpg.class.list.header"));
         
         Map<String, ClassDefinition> allClasses = classSystem.getAllClassDefinitions();
         
@@ -54,18 +54,30 @@ public class ClassListCommand extends AbstractPlayerCommand {
             String classId = classDef.getId();
             boolean learned = classComp != null && classComp.hasLearnedClass(classId);
             boolean isPrimary = classComp != null && classId.equals(classComp.getPrimaryClassId());
-            
-            String status = learned ? (isPrimary ? "[PRIMARY]" : "[LEARNED]") : "[LOCKED]";
-            
-            player.sendMessage(Message.raw(status + " " + classDef.getDisplayName() + " (" + classId + ")"));
+
+            if (learned && isPrimary) {
+                player.sendMessage(Message.translation("server.rpg.class.list.entry.primary")
+                        .param("name", classDef.getDisplayName())
+                        .param("id", classId));
+            } else if (learned) {
+                player.sendMessage(Message.translation("server.rpg.class.list.entry.learned")
+                        .param("name", classDef.getDisplayName())
+                        .param("id", classId));
+            } else {
+                player.sendMessage(Message.translation("server.rpg.class.list.entry.locked")
+                        .param("name", classDef.getDisplayName())
+                        .param("id", classId));
+            }
             
             if (learned && classComp != null) {
                 ClassComponent.ClassData classData = classComp.getClassData(classId);
                 if (classData != null) {
-                    player.sendMessage(Message.raw("  Learned: " + new java.util.Date(classData.getLearnedTime())));
+                    player.sendMessage(Message.translation("server.rpg.class.list.learnedAt")
+                            .param("time", new java.util.Date(classData.getLearnedTime()).toString()));
                 }
             } else {
-                player.sendMessage(Message.raw("  " + classDef.getDescription()));
+                player.sendMessage(Message.translation("server.rpg.class.list.description")
+                        .param("description", classDef.getDescription()));
             }
         }
     }

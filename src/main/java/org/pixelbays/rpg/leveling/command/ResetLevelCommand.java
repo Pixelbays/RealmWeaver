@@ -36,14 +36,14 @@ public class ResetLevelCommand extends AbstractPlayerCommand {
                 ExamplePlugin.get().getLevelProgressionComponentType());
 
         if (levelComp == null) {
-            player.sendMessage(Message.raw("No level data to reset."));
+            player.sendMessage(Message.translation("server.rpg.level.reset.none"));
             return;
         }
 
         int systemCount = levelComp.getAllSystems().size();
         levelComp.getAllSystems().clear();
 
-        player.sendMessage(Message.raw("Successfully reset " + systemCount + " level system(s)"));
-        player.sendMessage(Message.raw("All level progression data has been cleared."));
+        player.sendMessage(Message.translation("server.rpg.level.reset.success").param("count", systemCount));
+        player.sendMessage(Message.translation("server.rpg.level.reset.cleared"));
     }
 }

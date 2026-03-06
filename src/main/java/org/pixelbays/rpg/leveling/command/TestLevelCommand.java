@@ -36,18 +36,17 @@ public class TestLevelCommand extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world) {
         Player player = store.getComponent(ref, Player.getComponentType());
-        player.sendMessage(Message.raw("Level test not implemented. Use /leveltest instead."));
+        player.sendMessage(Message.translation("server.rpg.level.test.placeholder"));
     }
 
     @SuppressWarnings("unused")
     private void showSystemStatus(Player player, String systemId, LevelProgressionComponent.LevelSystemData data) {
-        player.sendMessage(Message.raw(String.format(
-                "%s: Level %d (%.1f/%.1f exp) [Stats: %d, Skills: %d]",
-                systemId,
-                data.getCurrentLevel(),
-                data.getCurrentExp(),
-                data.getExpToNextLevel(),
-                data.getAvailableStatPoints(),
-                data.getAvailableSkillPoints())));
+        player.sendMessage(Message.translation("server.rpg.level.test.status")
+            .param("systemId", systemId)
+            .param("level", data.getCurrentLevel())
+            .param("currentExp", String.format("%.1f", data.getCurrentExp()))
+            .param("expToNext", String.format("%.1f", data.getExpToNextLevel()))
+            .param("stats", data.getAvailableStatPoints())
+            .param("skills", data.getAvailableSkillPoints()));
     }
 }

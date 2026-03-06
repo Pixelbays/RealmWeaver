@@ -38,17 +38,17 @@ public class GuildRoleCreateCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (!nameArg.provided(ctx)) {
-            player.sendMessage(Message.raw("Usage: /guild role create <name>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.roleCreate"));
             return;
         }
 
         String roleName = nameArg.get(ctx);
         if (roleName == null || roleName.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /guild role create <name>"));
+            player.sendMessage(Message.translation("server.rpg.guild.usage.roleCreate"));
             return;
         }
 
         GuildActionResult result = guildManager.createRole(playerRef.getUuid(), roleName);
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
     }
 }

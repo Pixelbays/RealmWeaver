@@ -54,7 +54,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         String abilityId = abilityIdArg.provided(ctx) ? abilityIdArg.get(ctx) : null;
 
         if (slotToken == null || slotToken.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /bindability <slot> <abilityId|clear> or /bindability list"));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.usage"));
             return;
         }
 
@@ -64,7 +64,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         }
 
         if (abilityId == null || abilityId.isEmpty()) {
-            player.sendMessage(Message.raw("Usage: /bindability <slot> <abilityId|clear> or /bindability list"));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.usage"));
             return;
         }
 
@@ -72,7 +72,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         try {
             slot = Integer.parseInt(slotToken);
         } catch (NumberFormatException e) {
-            player.sendMessage(Message.raw("Invalid slot. Please use a slot between 1 and 9."));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.invalidSlot"));
             return;
         }
 
@@ -81,7 +81,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
 
         // Validate slot range (1-9 for user, 0-8 internally)
         if (internalSlot < 0 || internalSlot > 8) {
-            player.sendMessage(Message.raw("Invalid slot. Please use a slot between 1 and 9."));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.invalidSlot"));
             return;
         }
 
@@ -94,7 +94,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         // Validate slot is an ability slot
         RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
         if (config == null) {
-            player.sendMessage(Message.raw("Config not found"));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.configNotFound"));
             return;
         }
 
@@ -108,8 +108,9 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         }
 
         if (!isValidSlot) {
-            player.sendMessage(Message.raw("Slot " + slot + " is not configured as an ability slot. Valid slots: " +
-                    Arrays.toString(abilitySlots)));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.slotNotConfigured")
+                .param("slot", slot)
+                .param("validSlots", Arrays.toString(abilitySlots)));
             return;
         }
 
@@ -128,21 +129,22 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
             // Update hotbar icon
             ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, null);
             
-            player.sendMessage(Message.raw("Cleared ability binding for slot " + slot));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.cleared").param("slot", slot));
             return;
         }
 
         // Validate ability exists
         ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
         if (abilityDef == null) {
-            player.sendMessage(Message.raw("Unknown ability: " + abilityId));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.unknownAbility").param("abilityId", abilityId));
             return;
         }
 
         // Check if player has learned this ability
         ClassAbilitySystem abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
         if (!abilitySystem.isAbilityUnlocked(ref, store, abilityId)) {
-            player.sendMessage(Message.raw("You haven't learned the ability: " + abilityDef.getDisplayName()));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.notLearned")
+                    .param("ability", abilityDef.getDisplayName()));
             return;
         }
 
@@ -152,8 +154,9 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         // Update hotbar icon
         ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, abilityId);
         
-        player.sendMessage(Message.raw("Bound " + abilityDef.getDisplayName() + " to hotbar slot " + slot +
-                " (key " + slot + ")"));
+        player.sendMessage(Message.translation("server.rpg.ability.bind.bound")
+            .param("ability", abilityDef.getDisplayName())
+            .param("slot", slot));
     }
 
     private void listBindings(@Nonnull Player player, @Nonnull Store<EntityStore> store,
@@ -161,11 +164,11 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         AbilityBindingComponent bindingComp = store.getComponent(ref,
                 ExamplePlugin.get().getAbilityBindingComponentType());
         if (bindingComp == null || bindingComp.getHotbarBindings().isEmpty()) {
-            player.sendMessage(Message.raw("No ability bindings set"));
+            player.sendMessage(Message.translation("server.rpg.ability.bind.none"));
             return;
         }
 
-        player.sendMessage(Message.raw("=== Your Ability Bindings ==="));
+        player.sendMessage(Message.translation("server.rpg.ability.bind.header"));
 
         bindingComp.getHotbarBindings().entrySet().stream()
                 .sorted((a, b) -> Integer.compare(a.getKey(), b.getKey()))
@@ -178,7 +181,9 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
 
                     // Display as 1-indexed for user (internal is 0-indexed)
                     int displaySlot = internalSlot + 1;
-                    player.sendMessage(Message.raw("Slot " + displaySlot + " (key " + displaySlot + "): " + abilityName));
+                    player.sendMessage(Message.translation("server.rpg.ability.bind.entry")
+                            .param("slot", displaySlot)
+                            .param("ability", abilityName));
                 });
     }
 }

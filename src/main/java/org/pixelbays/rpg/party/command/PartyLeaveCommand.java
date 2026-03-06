@@ -34,6 +34,6 @@ public class PartyLeaveCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         PartyActionResult result = partyManager.leaveParty(playerRef.getUuid());
-        player.sendMessage(Message.raw(result.getMessage()));
+        player.sendMessage(PartyCommandUtil.managerResultMessage(result.getMessage()));
     }
 }

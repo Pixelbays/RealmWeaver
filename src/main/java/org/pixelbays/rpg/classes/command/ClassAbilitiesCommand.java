@@ -55,7 +55,7 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
         } else {
             String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
             if (primaryClassId == null || primaryClassId.isEmpty()) {
-                player.sendMessage(Message.raw("No learned class. Specify class name: /class abilities <className>"));
+                player.sendMessage(Message.translation("server.rpg.class.abilities.noLearnedClass"));
                 return;
             }
             classId = primaryClassId;
@@ -63,17 +63,18 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.raw("Class not found: " + classId));
+            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
-        player.sendMessage(Message.raw("=== " + classDef.getDisplayName() + " Abilities ==="));
+        player.sendMessage(Message.translation("server.rpg.class.abilities.header")
+                .param("name", classDef.getDisplayName()));
 
         java.util.List<String> abilityIds = new java.util.ArrayList<>(classDef.getAbilityIds());
         abilityIds.sort(String::compareToIgnoreCase);
 
         if (abilityIds.isEmpty()) {
-            player.sendMessage(Message.raw("No abilities for this class"));
+            player.sendMessage(Message.translation("server.rpg.class.abilities.none"));
             return;
         }
 
@@ -82,7 +83,7 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
             String display = abilityDef != null && abilityDef.getDisplayName() != null && !abilityDef.getDisplayName().isEmpty()
                     ? abilityDef.getDisplayName() + " (" + abilityId + ")"
                     : abilityId;
-            player.sendMessage(Message.raw("- " + display));
+            player.sendMessage(Message.translation("server.rpg.class.abilities.entry").param("ability", display));
         }
     }
 }
