@@ -345,6 +345,79 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         }
     }
 
+    public static class LockpickingDifficultyTier {
+        public static final BuilderCodec<LockpickingDifficultyTier> CODEC = BuilderCodec
+            .builder(LockpickingDifficultyTier.class, LockpickingDifficultyTier::new)
+            .append(new KeyedCodec<>("PinCount", Codec.INTEGER, false, true),
+                (i, s) -> i.pinCount = s, i -> i.pinCount)
+            .add()
+            .append(new KeyedCodec<>("TimeLimitSeconds", Codec.FLOAT, false, true),
+                (i, s) -> i.timeLimitSeconds = s, i -> i.timeLimitSeconds)
+            .add()
+            .append(new KeyedCodec<>("SweetSpotSize", Codec.FLOAT, false, true),
+                (i, s) -> i.sweetSpotSize = s, i -> i.sweetSpotSize)
+            .add()
+            .append(new KeyedCodec<>("NeedleSpeed", Codec.FLOAT, false, true),
+                (i, s) -> i.needleSpeed = s, i -> i.needleSpeed)
+            .add()
+            .append(new KeyedCodec<>("SweetSpotSizeScale", Codec.FLOAT, false, true),
+                (i, s) -> i.sweetSpotSizeScale = s, i -> i.sweetSpotSizeScale)
+            .add()
+            .append(new KeyedCodec<>("NeedleSpeedScale", Codec.FLOAT, false, true),
+                (i, s) -> i.needleSpeedScale = s, i -> i.needleSpeedScale)
+            .add()
+            .append(new KeyedCodec<>("MaxMistakes", Codec.INTEGER, false, true),
+                (i, s) -> i.maxMistakes = s, i -> i.maxMistakes)
+            .add()
+            .build();
+
+        private int pinCount;
+        private float timeLimitSeconds;
+        private float sweetSpotSize;
+        private float needleSpeed;
+        private float sweetSpotSizeScale;
+        private float needleSpeedScale;
+        private int maxMistakes;
+
+        public LockpickingDifficultyTier() {
+            this.pinCount = 3;
+            this.timeLimitSeconds = 20.0f;
+            this.sweetSpotSize = 0.18f;
+            this.needleSpeed = 0.45f;
+            this.sweetSpotSizeScale = 1.0f;
+            this.needleSpeedScale = 1.0f;
+            this.maxMistakes = 2;
+        }
+
+        public int getPinCount() {
+            return pinCount;
+        }
+
+        public float getTimeLimitSeconds() {
+            return timeLimitSeconds;
+        }
+
+        public float getSweetSpotSize() {
+            return sweetSpotSize;
+        }
+
+        public float getNeedleSpeed() {
+            return needleSpeed;
+        }
+
+        public float getSweetSpotSizeScale() {
+            return sweetSpotSizeScale;
+        }
+
+        public float getNeedleSpeedScale() {
+            return needleSpeedScale;
+        }
+
+        public int getMaxMistakes() {
+            return maxMistakes;
+        }
+    }
+
     public static final AssetBuilderCodec<String, RpgModConfig> CODEC = AssetBuilderCodec.builder(
             RpgModConfig.class,
             RpgModConfig::new,
@@ -472,6 +545,13 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
                     new MapCodec<>(ROLL_MODIFIER_RANGE_LIST_CODEC, HashMap::new, false), true),
                     (i, s) -> i.advantageRollModifiers = s, i -> i.advantageRollModifiers)
                 .add()
+                .append(new KeyedCodec<>("LockpickItemTag", Codec.STRING, false, true),
+                    (i, s) -> i.lockpickItemTag = s, i -> i.lockpickItemTag)
+                .add()
+                .append(new KeyedCodec<>("LockpickingDifficultyTiers",
+                    new MapCodec<>(LockpickingDifficultyTier.CODEC, HashMap::new, false), true),
+                    (i, s) -> i.lockpickingDifficultyTiers = s, i -> i.lockpickingDifficultyTiers)
+                .add()
             .append(new KeyedCodec<>("BaseGlobalCooldown", Codec.INTEGER, false, true),
                     (i, s) -> i.baseGlobalCooldown = s, i -> i.baseGlobalCooldown)
             .add()
@@ -572,6 +652,8 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
     private List<String> xpTags;
     private Object2FloatMap<String> xpTagSplits;
     private Map<String, List<RollModifierRange>> advantageRollModifiers;
+    private String lockpickItemTag;
+    private Map<String, LockpickingDifficultyTier> lockpickingDifficultyTiers;
     private int baseGlobalCooldown;
     private Object2IntMap<String> globalCooldownCategories;
     private boolean restedXpEnabled;
@@ -637,6 +719,8 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         this.xpTags = new ArrayList<>();
         this.xpTagSplits = new Object2FloatOpenHashMap<>();
         this.advantageRollModifiers = new HashMap<>();
+        this.lockpickItemTag = "Lockpick";
+        this.lockpickingDifficultyTiers = new HashMap<>();
         this.baseGlobalCooldown = 0;
         this.globalCooldownCategories = new Object2IntOpenHashMap<>();
         this.restedXpEnabled = false;
@@ -758,6 +842,22 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public void setAdvantageRollModifiers(Map<String, List<RollModifierRange>> advantageRollModifiers) {
         this.advantageRollModifiers = advantageRollModifiers;
+    }
+
+    public String getLockpickItemTag() {
+        return lockpickItemTag;
+    }
+
+    public void setLockpickItemTag(String lockpickItemTag) {
+        this.lockpickItemTag = lockpickItemTag;
+    }
+
+    public Map<String, LockpickingDifficultyTier> getLockpickingDifficultyTiers() {
+        return lockpickingDifficultyTiers;
+    }
+
+    public void setLockpickingDifficultyTiers(Map<String, LockpickingDifficultyTier> lockpickingDifficultyTiers) {
+        this.lockpickingDifficultyTiers = lockpickingDifficultyTiers;
     }
 
     public int getBaseGlobalCooldown() {
