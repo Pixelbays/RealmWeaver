@@ -72,6 +72,17 @@ import org.pixelbays.rpg.leveling.handlers.GiveXPHandler;
 import org.pixelbays.rpg.leveling.handlers.LevelUpHandler;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 import org.pixelbays.rpg.leveling.system.RestedXpSystem;
+import org.pixelbays.rpg.lockpicking.component.LockpickingSessionComponent;
+import org.pixelbays.rpg.lockpicking.input.LockpickingInputFilter;
+import org.pixelbays.rpg.lockpicking.interaction.LockpickInteraction;
+import org.pixelbays.rpg.lockpicking.system.LockpickingSystem;
+import org.pixelbays.rpg.npc.command.NpcRpgDebugCommand;
+import org.pixelbays.rpg.npc.component.NpcRpgDebugComponent;
+import org.pixelbays.rpg.npc.component.NpcRpgSetupComponent;
+import org.pixelbays.rpg.npc.corecomponents.builders.BuilderActionRpgCastAbility;
+import org.pixelbays.rpg.npc.corecomponents.builders.BuilderActionRpgSetup;
+import org.pixelbays.rpg.npc.system.NpcRpgDebugOverlaySystem;
+import org.pixelbays.rpg.npc.system.NpcRpgSetupSystem;
 import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.command.PartyCommand;
 import org.pixelbays.rpg.party.config.PartyData;
@@ -105,6 +116,8 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Roo
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.npc.NPCPlugin;
+import com.hypixel.hytale.server.npc.entities.NPCEntity;
 
 /**
  * RPG Mod Plugin - Adds MMO/RPG progression systems to Hytale
@@ -134,9 +147,14 @@ public class ExamplePlugin extends JavaPlugin {
         private ComponentType<EntityStore, RaceComponent> raceComponentType;
         private ComponentType<EntityStore, AbilityBindingComponent> abilityBindingComponentType;
         private ComponentType<EntityStore, AbilityTriggerBlockComponent> abilityTriggerBlockComponentType;
+        private ComponentType<EntityStore, NpcRpgDebugComponent> npcRpgDebugComponentType;
+        private ComponentType<EntityStore, NpcRpgSetupComponent> npcRpgSetupComponentType;
+        private ComponentType<EntityStore, LockpickingSessionComponent> lockpickingSessionComponentType;
 
         private PacketFilter abilityInputFilter;
         private PacketFilter inventoryOpenFilter;
+        private PacketFilter lockpickingInputFilter;
+        private LockpickingSystem lockpickingSystem;
 
         public ExamplePlugin(@Nonnull JavaPluginInit init) {
                 super(init);
@@ -261,6 +279,24 @@ public class ExamplePlugin extends JavaPlugin {
                                                 "AbilityTriggerBlock",
                                                 AbilityTriggerBlockComponent.CODEC);
 
+                this.lockpickingSessionComponentType = this.getEntityStoreRegistry()
+                                .registerComponent(
+                                                LockpickingSessionComponent.class,
+                                                "LockpickingSession",
+                                                LockpickingSessionComponent.CODEC);
+
+                this.npcRpgDebugComponentType = this.getEntityStoreRegistry()
+                                .registerComponent(
+                                                NpcRpgDebugComponent.class,
+                                                "NpcRpgDebug",
+                                                NpcRpgDebugComponent.CODEC);
+
+                this.npcRpgSetupComponentType = this.getEntityStoreRegistry()
+                                .registerComponent(
+                                                NpcRpgSetupComponent.class,
+                                                "NpcRpgSetup",
+                                                NpcRpgSetupComponent.CODEC);
+
                 RpgLogging.debugDeveloper(
                                 "Registered LevelProgressionComponent, ClassComponent, ClassAbilityComponent, AbilityEmpowerComponent, RaceComponent, AbilityBindingComponent, and AbilityTriggerBlockComponent");
 
@@ -297,6 +333,11 @@ public class ExamplePlugin extends JavaPlugin {
                                                 this.classAbilitySystem));
                 RpgLogging.debugDeveloper("Registered PassiveAbilityTickingSystem for passive and toggle abilities");
 
+                this.lockpickingSystem = new LockpickingSystem(this.lockpickingSessionComponentType);
+                this.getEntityStoreRegistry().registerSystem(this.lockpickingSystem);
+                this.lockpickingInputFilter = PacketAdapters.registerInbound(new LockpickingInputFilter());
+                RpgLogging.debugDeveloper("Registered lockpicking input packet filter");
+
                 // Initialize remaining race systems
                 this.raceSystem = new RaceSystem(this.raceManagementSystem);
                 this.raceSystem.setStatSystem(this.statSystem);
@@ -304,6 +345,18 @@ public class ExamplePlugin extends JavaPlugin {
 
                 // Register NPC death XP drop system
                 this.getEntityStoreRegistry().registerSystem(new XpDeathDropSystem());
+
+                NPCPlugin npcPlugin = NPCPlugin.get();
+                if (npcPlugin == null) {
+                        RpgLogging.debugDeveloper("NPCPlugin unavailable; skipping NPC RPG registration.");
+                } else {
+                        npcPlugin.registerCoreComponentType("RpgSetup", BuilderActionRpgSetup::new);
+                        npcPlugin.registerCoreComponentType("RpgCastAbility", BuilderActionRpgCastAbility::new);
+                        this.getEntityStoreRegistry().registerSystem(
+                                        new NpcRpgSetupSystem(this.npcRpgSetupComponentType));
+                        this.getEntityStoreRegistry().registerSystem(
+                                        new NpcRpgDebugOverlaySystem(NPCEntity.getComponentType(), this.npcRpgDebugComponentType));
+                }
 
 
                 // Register hardcore death handler
@@ -316,6 +369,8 @@ public class ExamplePlugin extends JavaPlugin {
                                 DiceRollInteraction.DICE_ROLL_CODEC);
                 Interaction.CODEC.register("EmpowerAbility", EmpowerAbilityInteraction.class,
                                 EmpowerAbilityInteraction.CODEC);
+                Interaction.CODEC.register("Lockpicking", LockpickInteraction.class,
+                                LockpickInteraction.LOCKPICK_CODEC);
 
                 // Register custom item drop containers
                 ItemDropContainer.CODEC.register("Exp", ExpItemDropContainer.class, ExpItemDropContainer.CODEC);
@@ -341,6 +396,7 @@ public class ExamplePlugin extends JavaPlugin {
                 this.getCommandRegistry().registerCommand(new BindAbilityCommand());
                 this.getCommandRegistry().registerCommand(new SyncHotbarCommand());
                 this.getCommandRegistry().registerCommand(new UnlockAbilityCommand());
+                this.getCommandRegistry().registerCommand(new NpcRpgDebugCommand());
 
                 this.partyManager.loadFromAssets();
                 this.guildManager.loadFromAssets();
@@ -371,6 +427,10 @@ public class ExamplePlugin extends JavaPlugin {
                 if (this.inventoryOpenFilter != null) {
                         PacketAdapters.deregisterInbound(this.inventoryOpenFilter);
                         RpgLogging.debugDeveloper("Deregistered inventory open packet filter");
+                }
+                if (this.lockpickingInputFilter != null) {
+                        PacketAdapters.deregisterInbound(this.lockpickingInputFilter);
+                        RpgLogging.debugDeveloper("Deregistered lockpicking input packet filter");
                 }
         }
 
@@ -430,6 +490,11 @@ public class ExamplePlugin extends JavaPlugin {
         }
 
         @Nonnull
+        public ComponentType<EntityStore, LockpickingSessionComponent> getLockpickingSessionComponentType() {
+                return lockpickingSessionComponentType;
+        }
+
+        @Nonnull
         public ComponentType<EntityStore, ClassComponent> getClassComponentType() {
                 return classComponentType;
         }
@@ -449,9 +514,22 @@ public class ExamplePlugin extends JavaPlugin {
                 return raceComponentType;
         }
 
+        public ComponentType<EntityStore, NpcRpgSetupComponent> getNpcRpgSetupComponentType() {
+                return npcRpgSetupComponentType;
+        }
+
+        public ComponentType<EntityStore, NpcRpgDebugComponent> getNpcRpgDebugComponentType() {
+                return npcRpgDebugComponentType;
+        }
+
         @Nonnull
         public ComponentType<EntityStore, AbilityBindingComponent> getAbilityBindingComponentType() {
                 return abilityBindingComponentType;
+        }
+
+        @Nonnull
+        public LockpickingSystem getLockpickingSystem() {
+                return lockpickingSystem;
         }
 
         @Nonnull
