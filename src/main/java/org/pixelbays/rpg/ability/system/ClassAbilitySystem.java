@@ -20,13 +20,27 @@ import org.pixelbays.rpg.global.util.RpgLogging;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.protocol.InteractionType;
+import com.hypixel.hytale.protocol.SoundCategory;
+import com.hypixel.hytale.protocol.packets.entities.SpawnModelParticles;
 import com.hypixel.hytale.server.core.entity.InteractionChain;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.InteractionManager;
+import com.hypixel.hytale.server.core.modules.entity.EntityModule;
+import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.UnarmedInteractions;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
+import com.hypixel.hytale.server.core.asset.type.model.config.ModelParticle;
+import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.world.SoundUtil;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+
+import it.unimi.dsi.fastutil.objects.ObjectList;
 
 /**
  * System that manages class abilities - registration, lookup, and
@@ -155,6 +169,7 @@ public class ClassAbilitySystem {
         // Execute the ability
         InteractionChain chain = manager.initChain(interactionType, context, root, false);
         manager.queueExecuteChain(chain);
+        triggerAbilityEffects(entityRef, store, manager, interactionType, abilityDef, chainId, context);
 
         RpgLogging.debugDeveloper(
             "Ability triggered: entity=%s, ability=%s, chain=%s, interactionType=%s",
@@ -166,6 +181,154 @@ public class ClassAbilitySystem {
         AbilityTriggeredEvent.dispatch(entityRef, abilityId, interactionType, chainId);
 
         return TriggerResult.success(abilityDef, chainId);
+    }
+
+    private void triggerAbilityEffects(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull InteractionManager manager,
+            @Nonnull InteractionType interactionType,
+            @Nonnull ClassAbilityDefinition abilityDef,
+            @Nonnull String mainChainId,
+            @Nonnull InteractionContext context) {
+        triggerAnimationChain(entityRef, store, manager, interactionType, abilityDef, mainChainId, context);
+        triggerSoundEffect(entityRef, store, abilityDef);
+        triggerParticleEffects(entityRef, store, abilityDef);
+    }
+
+    private void triggerAnimationChain(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull InteractionManager manager,
+            @Nonnull InteractionType interactionType,
+            @Nonnull ClassAbilityDefinition abilityDef,
+            @Nonnull String mainChainId,
+            @Nonnull InteractionContext context) {
+        if (!abilityDef.getUsePlayerAnimations()) {
+            return;
+        }
+
+        String playerAnimationsId = abilityDef.getPlayerAnimationsId();
+        if (playerAnimationsId == null || playerAnimationsId.isEmpty()) {
+            return;
+        }
+
+        UnarmedInteractions animationSet = UnarmedInteractions.getAssetMap().getAsset(playerAnimationsId);
+        if (animationSet == null || animationSet.getInteractions() == null) {
+            RpgLogging.debugDeveloper("Animation set not found for ability %s: %s", abilityDef.getId(), playerAnimationsId);
+            return;
+        }
+
+        String animationChainId = animationSet.getInteractions().get(interactionType);
+        if (animationChainId == null || animationChainId.isEmpty()) {
+            animationChainId = animationSet.getInteractions().get(InteractionType.Primary);
+        }
+        if (animationChainId == null || animationChainId.isEmpty() || animationChainId.equals(mainChainId)) {
+            return;
+        }
+
+        RootInteraction animationRoot = RootInteraction.getAssetMap().getAsset(animationChainId);
+        if (animationRoot == null) {
+            RpgLogging.debugDeveloper(
+                "Animation root interaction not found for ability %s: %s",
+                abilityDef.getId(),
+                animationChainId);
+            return;
+        }
+
+        InteractionChain animationChain = manager.initChain(interactionType, context.duplicate(), animationRoot, false);
+        manager.queueExecuteChain(animationChain);
+        RpgLogging.debugDeveloper(
+            "Ability animation triggered: entity=%s, ability=%s, animationSet=%s, chain=%s",
+            entityRef,
+            abilityDef.getId(),
+            playerAnimationsId,
+            animationChainId);
+    }
+
+    private void triggerSoundEffect(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ClassAbilityDefinition abilityDef) {
+        String soundEventId = abilityDef.getSoundEventId();
+        if (soundEventId == null || soundEventId.isEmpty()) {
+            return;
+        }
+
+        int soundEventIndex = SoundEvent.getAssetMap().getIndex(soundEventId);
+        if (soundEventIndex == 0 || soundEventIndex == Integer.MIN_VALUE) {
+            RpgLogging.debugDeveloper("Ability sound not found for ability %s: %s", abilityDef.getId(), soundEventId);
+            return;
+        }
+
+        World world = store.getExternalData().getWorld();
+        if (world == null) {
+            return;
+        }
+
+        world.execute(() -> {
+            TransformComponent transform = store.getComponent(entityRef, EntityModule.get().getTransformComponentType());
+            if (transform == null) {
+                return;
+            }
+
+            try {
+                SoundUtil.playSoundEvent3d(soundEventIndex, SoundCategory.SFX, transform.getPosition(), store);
+            } catch (Exception e) {
+                RpgLogging.debugDeveloper("Failed to play ability sound %s for %s: %s", soundEventId, abilityDef.getId(), e.getMessage());
+            }
+        });
+    }
+
+    private void triggerParticleEffects(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ClassAbilityDefinition abilityDef) {
+        ModelParticle[] particles = abilityDef.getParticles();
+        if (particles == null || particles.length == 0) {
+            return;
+        }
+
+        World world = store.getExternalData().getWorld();
+        if (world == null) {
+            return;
+        }
+
+        world.execute(() -> {
+            NetworkId networkId = store.getComponent(entityRef, NetworkId.getComponentType());
+            if (networkId == null) {
+                return;
+            }
+
+            TransformComponent transform = store.getComponent(entityRef, EntityModule.get().getTransformComponentType());
+            if (transform == null) {
+                return;
+            }
+
+            com.hypixel.hytale.protocol.ModelParticle[] protocolParticles =
+                new com.hypixel.hytale.protocol.ModelParticle[particles.length];
+            for (int i = 0; i < particles.length; i++) {
+                protocolParticles[i] = particles[i].toPacket();
+            }
+
+            SpawnModelParticles packet = new SpawnModelParticles(networkId.getId(), protocolParticles);
+
+            SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource =
+                store.getResource(EntityModule.get().getPlayerSpatialResourceType());
+            ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
+            playerSpatialResource.getSpatialStructure().collect(transform.getPosition(), 96.0, nearbyPlayers);
+
+            for (Ref<EntityStore> playerRef : nearbyPlayers) {
+                if (!playerRef.isValid()) {
+                    continue;
+                }
+
+                PlayerRef playerRefComponent = store.getComponent(playerRef, PlayerRef.getComponentType());
+                if (playerRefComponent != null) {
+                    playerRefComponent.getPacketHandler().writeNoCache(packet);
+                }
+            }
+        });
     }
 
     /**
