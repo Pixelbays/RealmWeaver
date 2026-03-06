@@ -525,6 +525,14 @@ public class ClassAbilityDefinition
         return this.soundEventIndex;
     }
 
+    public ModelParticle[] getParticles() {
+        return this.particles;
+    }
+
+    public ModelParticle[] getFirstPersonParticles() {
+        return this.firstPersonParticles;
+    }
+
     public Map<InteractionType, String> getInteractions() {
         return this.interactions;
     }
