@@ -114,20 +114,23 @@ public class HotbarInputHandler {
             // Get ability binding for this slot
             AbilityBindingComponent bindingComp = store.getComponent(entityRef, AbilityBindingComponent.getComponentType());
             if (bindingComp == null) {
-                playerComponent.sendMessage(Message.raw("No ability bound to slot " + abilitySlot + ". Use /bindability"));
+                playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.noBoundSlot")
+                        .param("slot", abilitySlot));
                 return;
             }
 
             String abilityId = bindingComp.getHotbarBinding(abilitySlot);
             if (abilityId == null || abilityId.isEmpty()) {
-                playerComponent.sendMessage(Message.raw("No ability bound to slot " + abilitySlot + ". Use /bindability"));
+                playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.noBoundSlot")
+                        .param("slot", abilitySlot));
                 return;
             }
 
             // Get ability definition to determine interaction type
             ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
             if (abilityDef == null) {
-                playerComponent.sendMessage(Message.raw("Ability not found: " + abilityId));
+                playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.notFound")
+                        .param("abilityId", abilityId));
                 return;
             }
 
@@ -146,7 +149,8 @@ public class HotbarInputHandler {
             if (result.isFailure()) {
                 String errorMsg = result.getErrorMessage();
                 if (errorMsg != null) {
-                    playerComponent.sendMessage(Message.raw(errorMsg));
+                    playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.error")
+                            .param("error", errorMsg));
                 }
                 return;
             }
@@ -162,7 +166,8 @@ public class HotbarInputHandler {
             );
 
             // Send feedback to player
-            playerComponent.sendMessage(Message.raw(result.getDisplayName()));
+            playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.activated")
+                    .param("name", result.getDisplayName()));
         });
     }
 }

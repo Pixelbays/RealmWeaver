@@ -104,7 +104,8 @@ public class WeaponsInputHandler {
                     interactionType);
 
             // Placeholder: Send chat message to player
-            playerComponent.sendMessage(Message.raw("Weapon Ability: " + interactionType + " (not yet implemented)"));
+            playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.notImplemented")
+                    .param("type", interactionType.name()));
         });
     }
 }
