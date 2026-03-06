@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 @SuppressWarnings("null")
@@ -42,6 +43,17 @@ public class RestedXpSystem {
             }
 
             Store<EntityStore> store = entityRef.getStore();
+            World world = store.getExternalData().getWorld();
+            if (world == null) {
+                return;
+            }
+
+            world.execute(() -> handlePlayerConnect(entityRef));
+        };
+    }
+
+    private void handlePlayerConnect(@Nonnull Ref<EntityStore> entityRef) {
+        Store<EntityStore> store = entityRef.getStore();
             RpgModConfig config = resolveConfig();
             if (config == null || !config.isRestedXpEnabled()) {
                 return;
@@ -105,7 +117,6 @@ public class RestedXpSystem {
 
             statMap.addStatValue(restedIndex, add);
             RpgLogging.debugDeveloper("Rested XP gained: +%s (hours=%s rate=%s current=%s max=%s)", add, hoursOffline, ratePerHour, current, max);
-        };
     }
 
     private Consumer<PlayerDisconnectEvent> onPlayerDisconnect() {
@@ -117,13 +128,23 @@ public class RestedXpSystem {
             }
 
             Store<EntityStore> store = entityRef.getStore();
-            LevelProgressionComponent levelComp = store.getComponent(entityRef, LevelProgressionComponent.getComponentType());
-            if (levelComp == null) {
-                levelComp = store.addComponent(entityRef, LevelProgressionComponent.getComponentType());
+            World world = store.getExternalData().getWorld();
+            if (world == null) {
+                return;
             }
 
-            levelComp.setLastLogoutEpochMs(System.currentTimeMillis());
+            world.execute(() -> handlePlayerDisconnect(entityRef));
         };
+    }
+
+    private void handlePlayerDisconnect(@Nonnull Ref<EntityStore> entityRef) {
+        Store<EntityStore> store = entityRef.getStore();
+        LevelProgressionComponent levelComp = store.getComponent(entityRef, LevelProgressionComponent.getComponentType());
+        if (levelComp == null) {
+            levelComp = store.addComponent(entityRef, LevelProgressionComponent.getComponentType());
+        }
+
+        levelComp.setLastLogoutEpochMs(System.currentTimeMillis());
     }
 
     private boolean canGainRestedXp(@Nonnull Ref<EntityStore> playerRef,
