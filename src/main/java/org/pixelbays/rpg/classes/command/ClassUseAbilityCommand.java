@@ -50,31 +50,31 @@ public class ClassUseAbilityCommand extends AbstractPlayerCommand {
 
         ClassAbilityDefinition abilityDef = abilitySystem.getAbilityDefinition(abilityId);
         if (abilityDef == null) {
-            player.sendMessage(Message.translation("server.rpg.class.ability.error.notFound").param("abilityId", abilityId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.ability.error.notFound").param("abilityId", abilityId));
             return;
         }
 
         ClassAbilityComponent abilityComp = store.getComponent(ref, ExamplePlugin.get().getClassAbilityComponentType());
         if (abilityComp == null || !abilityComp.hasAbility(abilityId)) {
-            player.sendMessage(Message.translation("server.rpg.class.ability.error.notUnlocked").param("abilityId", abilityId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.ability.error.notUnlocked").param("abilityId", abilityId));
             return;
         }
 
         String chainId = abilityDef.getInteractionChainId();
         if (chainId == null || chainId.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.class.ability.error.noChain").param("abilityId", abilityId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.ability.error.noChain").param("abilityId", abilityId));
             return;
         }
 
         RootInteraction root = RootInteraction.getAssetMap().getAsset(chainId);
         if (root == null) {
-            player.sendMessage(Message.translation("server.rpg.class.ability.error.rootNotFound").param("chainId", chainId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.ability.error.rootNotFound").param("chainId", chainId));
             return;
         }
 
         InteractionManager manager = store.getComponent(ref, InteractionModule.get().getInteractionManagerComponent());
         if (manager == null) {
-            player.sendMessage(Message.translation("server.rpg.class.ability.error.interactionManagerMissing"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.ability.error.interactionManagerMissing"));
             return;
         }
 
@@ -90,7 +90,7 @@ public class ClassUseAbilityCommand extends AbstractPlayerCommand {
         InteractionChain chain = manager.initChain(type, context, root, false);
         manager.queueExecuteChain(chain);
 
-        player.sendMessage(Message.translation("server.rpg.class.ability.success.triggered")
+        player.sendMessage(Message.translation("pixelbays.rpg.class.ability.success.triggered")
             .param("ability", abilityDef.getDisplayName())
             .param("chainId", chainId));
     }

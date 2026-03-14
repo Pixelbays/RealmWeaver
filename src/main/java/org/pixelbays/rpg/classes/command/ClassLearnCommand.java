@@ -46,7 +46,7 @@ public class ClassLearnCommand extends AbstractPlayerCommand {
 
         String result = classSystem.learnClass(ref, classId, store);
         if (result == null) {
-            player.sendMessage(Message.translation("server.rpg.common.unknownError"));
+            player.sendMessage(Message.translation("pixelbays.rpg.common.unknownError"));
             return;
         }
 

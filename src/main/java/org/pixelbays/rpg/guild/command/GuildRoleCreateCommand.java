@@ -10,7 +10,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -20,12 +20,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class GuildRoleCreateCommand extends AbstractPlayerCommand {
 
-    private final OptionalArg<String> nameArg;
+    private final RequiredArg<String> nameArg;
     private final GuildManager guildManager;
 
     public GuildRoleCreateCommand() {
         super("create", "Create a guild role");
-        this.nameArg = this.withOptionalArg("name", "Role name", ArgTypes.STRING);
+        this.nameArg = this.withRequiredArg("name", "Role name", ArgTypes.STRING);
         this.guildManager = ExamplePlugin.get().getGuildManager();
     }
 
@@ -37,14 +37,9 @@ public class GuildRoleCreateCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        if (!nameArg.provided(ctx)) {
-            player.sendMessage(Message.translation("server.rpg.guild.usage.roleCreate"));
-            return;
-        }
-
         String roleName = nameArg.get(ctx);
-        if (roleName == null || roleName.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.guild.usage.roleCreate"));
+        if (roleName == null || roleName.isBlank()) {
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.usage.roleCreate"));
             return;
         }
 

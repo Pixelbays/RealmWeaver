@@ -36,5 +36,6 @@ public class GuildCommand extends AbstractCommandCollection {
         this.addSubCommand(new GuildRoleCommand());
         this.addSubCommand(new GuildDisbandCommand());
         this.addSubCommand(new GuildInfoCommand());
+        this.addSubCommand(new GuildUiCommand());
     }
 }

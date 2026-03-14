@@ -18,7 +18,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -35,15 +35,23 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
     private final ClassManagementSystem classSystem;
     private final LevelProgressionSystem levelSystem;
     private final ClassAbilitySystem abilitySystem;
-    private final OptionalArg<String> classNameArg;
+    private final RequiredArg<String> classNameArg;
 
     public ClassProgressCommand() {
         super("progress", "View class progression");
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
         this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
-        this.classNameArg = this.withOptionalArg("className", "The class to view (defaults to primary)",
-                ArgTypes.STRING);
+        this.classNameArg = null;
+        this.addUsageVariant(new ClassProgressCommand("View class progression"));
+    }
+
+    private ClassProgressCommand(String description) {
+        super(description);
+        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        this.classNameArg = this.withRequiredArg("className", "The class to view", ArgTypes.STRING);
     }
 
     @Override
@@ -58,12 +66,12 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
         ClassAbilityComponent abilityComp = store.getComponent(ref, ExamplePlugin.get().getClassAbilityComponentType());
 
         String classId;
-        if (this.classNameArg.provided(ctx)) {
+        if (this.classNameArg != null) {
             classId = this.classNameArg.get(ctx);
         } else {
             String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
             if (primaryClassId == null || primaryClassId.isEmpty()) {
-                player.sendMessage(Message.translation("server.rpg.class.progress.noLearnedClass"));
+                player.sendMessage(Message.translation("pixelbays.rpg.class.progress.noLearnedClass"));
                 return;
             }
             classId = primaryClassId;
@@ -71,32 +79,33 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
-            player.sendMessage(Message.translation("server.rpg.class.error.notLearned")
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notLearned")
                     .param("class", classDef.getDisplayName()));
             return;
         }
 
-        ClassComponent.ClassData classData = classComp.getClassData(classId);
         boolean isPrimary = classId.equals(classComp.getPrimaryClassId());
 
         String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
+        String displaySystemId = systemId != null && !systemId.isEmpty() ? systemId : "-";
         int currentLevel = (systemId != null && !systemId.isEmpty()) ? levelSystem.getLevel(ref, systemId) : 0;
         float currentExp = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExperience(ref, systemId) : 0f;
         float expToNext = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExpToNextLevel(ref, systemId) : 0f;
         float expProgress = (systemId != null && !systemId.isEmpty()) ? levelSystem.getExpProgress(ref, systemId) : 0f;
 
-        player.sendMessage(Message.translation("server.rpg.class.progress.header").param("name", classDef.getDisplayName()));
-        player.sendMessage(Message.translation("server.rpg.class.progress.status")
-            .param("status", isPrimary ? "Primary" : "Inactive"));
-        player.sendMessage(Message.translation("server.rpg.class.progress.levelSystem").param("systemId", systemId));
-        player.sendMessage(Message.translation("server.rpg.class.progress.currentLevel")
+        player.sendMessage(Message.translation("pixelbays.rpg.class.progress.header").param("name", classDef.getDisplayName()));
+        player.sendMessage(Message.translation("pixelbays.rpg.class.progress.status")
+            .param("status", Message.translation(
+                    isPrimary ? "pixelbays.rpg.class.status.primary" : "pixelbays.rpg.class.status.inactive")));
+        player.sendMessage(Message.translation("pixelbays.rpg.class.progress.levelSystem").param("systemId", displaySystemId));
+        player.sendMessage(Message.translation("pixelbays.rpg.class.progress.currentLevel")
             .param("level", Integer.toString(currentLevel)));
-        player.sendMessage(Message.translation("server.rpg.class.progress.currentXp")
+        player.sendMessage(Message.translation("pixelbays.rpg.class.progress.currentXp")
             .param("current", String.format("%.0f", currentExp))
             .param("next", String.format("%.0f", expToNext))
             .param("percent", Integer.toString((int) (expProgress * 100))));
@@ -116,26 +125,26 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
                 displayList.add(displayName + " (" + abilityId + ")" + (unlocked ? "" : " [LOCKED]"));
             }
 
-            player.sendMessage(Message.translation("server.rpg.class.progress.abilities")
+            player.sendMessage(Message.translation("pixelbays.rpg.class.progress.abilities")
                     .param("abilities", String.join(", ", displayList)));
         } else {
-            player.sendMessage(Message.translation("server.rpg.class.progress.abilitiesNone"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.progress.abilitiesNone"));
         }
 
         // Show stat bonuses
         if (!classDef.getBaseStatModifiers().isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.class.common.blank"));
-            player.sendMessage(Message.translation("server.rpg.class.progress.baseStatBonuses"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.common.blank"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.progress.baseStatBonuses"));
 
             for (Map.Entry<String, Float> entry : classDef.getBaseStatModifiers().getAdditiveModifiers().entrySet()) {
-                player.sendMessage(Message.translation("server.rpg.class.progress.baseStatAdd")
+                player.sendMessage(Message.translation("pixelbays.rpg.class.progress.baseStatAdd")
                         .param("value", Float.toString(entry.getValue()))
                         .param("stat", entry.getKey()));
             }
 
             for (Map.Entry<String, Float> entry : classDef.getBaseStatModifiers().getMultiplicativeModifiers()
                     .entrySet()) {
-                player.sendMessage(Message.translation("server.rpg.class.progress.baseStatMult")
+                player.sendMessage(Message.translation("pixelbays.rpg.class.progress.baseStatMult")
                         .param("value", Float.toString(entry.getValue() * 100f))
                         .param("stat", entry.getKey()));
             }

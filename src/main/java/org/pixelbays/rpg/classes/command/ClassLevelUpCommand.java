@@ -48,20 +48,20 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
         ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
-            player.sendMessage(Message.translation("server.rpg.class.error.notLearned")
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notLearned")
                     .param("class", classDef.getDisplayName()));
             return;
         }
 
         String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         if (systemId == null || systemId.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.class.error.noLevelSystem")
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.noLevelSystem")
                     .param("classId", classId));
             return;
         }
@@ -72,7 +72,7 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
 
         float expToNext = levelSystem.getExpToNextLevel(ref, systemId);
         if (expToNext <= 0f) {
-            player.sendMessage(Message.translation("server.rpg.class.level.max")
+            player.sendMessage(Message.translation("pixelbays.rpg.class.level.max")
                     .param("class", classDef.getDisplayName()));
             return;
         }
@@ -81,7 +81,7 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
         GiveXPEvent.dispatch(ref, expToGrant, systemId);
         int newLevel = levelSystem.getLevel(ref, systemId);
 
-        player.sendMessage(Message.translation("server.rpg.class.level.up")
+        player.sendMessage(Message.translation("pixelbays.rpg.class.level.up")
             .param("class", classDef.getDisplayName())
             .param("level", Integer.toString(newLevel)));
     }

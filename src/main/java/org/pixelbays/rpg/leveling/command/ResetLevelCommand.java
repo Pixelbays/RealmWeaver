@@ -36,14 +36,14 @@ public class ResetLevelCommand extends AbstractPlayerCommand {
                 ExamplePlugin.get().getLevelProgressionComponentType());
 
         if (levelComp == null) {
-            player.sendMessage(Message.translation("server.rpg.level.reset.none"));
+            player.sendMessage(Message.translation("pixelbays.rpg.level.reset.none"));
             return;
         }
 
         int systemCount = levelComp.getAllSystems().size();
         levelComp.getAllSystems().clear();
 
-        player.sendMessage(Message.translation("server.rpg.level.reset.success").param("count", systemCount));
-        player.sendMessage(Message.translation("server.rpg.level.reset.cleared"));
+        player.sendMessage(Message.translation("pixelbays.rpg.level.reset.success").param("count", systemCount));
+        player.sendMessage(Message.translation("pixelbays.rpg.level.reset.cleared"));
     }
 }

@@ -39,7 +39,7 @@ public class GuildRoleListCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         Guild guild = guildManager.getGuildForMember(playerRef.getUuid());
         if (guild == null) {
-            player.sendMessage(Message.translation("server.rpg.guild.error.notInGuild"));
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.error.notInGuild"));
             return;
         }
 
@@ -47,7 +47,7 @@ public class GuildRoleListCommand extends AbstractPlayerCommand {
             String permissions = role.getPermissions().stream()
                     .map(GuildPermission::name)
                     .collect(Collectors.joining(", "));
-                player.sendMessage(Message.translation("server.rpg.guild.role.listEntry")
+                player.sendMessage(Message.translation("pixelbays.rpg.guild.role.listEntry")
                     .param("name", role.getName())
                     .param("id", role.getId())
                     .param("permissions", permissions.isEmpty() ? "No permissions" : permissions));

@@ -7,8 +7,6 @@ import javax.annotation.Nonnull;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildManager;
-import org.pixelbays.rpg.guild.GuildRole;
-
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
@@ -38,23 +36,28 @@ public class GuildInfoCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         Guild guild = guildManager.getGuildForMember(playerRef.getUuid());
         if (guild == null) {
-            player.sendMessage(Message.translation("server.rpg.guild.error.notInGuild"));
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.error.notInGuild"));
             return;
         }
 
         String leaderName = GuildCommandUtil.resolveDisplayName(guild.getLeaderId());
         String roles = guild.getRoles().values().stream()
-                .map(role -> role.getName() + "(" + role.getId() + ")")
+            .map(role -> role.getName() + " (" + role.getId() + ")")
                 .collect(Collectors.joining(", "));
 
-        player.sendMessage(Message.translation("server.rpg.guild.info.header")
+        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.header")
             .param("name", guild.getName())
             .param("tag", guild.getTag()));
-        player.sendMessage(Message.translation("server.rpg.guild.info.leader").param("leader", leaderName));
-        player.sendMessage(Message.translation("server.rpg.guild.info.members").param("count", guild.size()));
-        player.sendMessage(Message.translation("server.rpg.guild.info.joinPolicy")
-            .param("policy", guild.getJoinPolicy().name()));
-        player.sendMessage(Message.translation("server.rpg.guild.info.roles")
-            .param("roles", roles.isEmpty() ? GuildRole.MEMBER_ID : roles));
+        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.leader").param("leader", leaderName));
+        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.members").param("count", guild.size()));
+        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.joinPolicy")
+            .param("policy", GuildCommandUtil.joinPolicyMessage(guild.getJoinPolicy())));
+        if (roles.isEmpty()) {
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.info.roles")
+                    .param("roles", Message.translation("pixelbays.rpg.common.none")));
+        } else {
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.info.roles")
+                    .param("roles", roles));
+        }
     }
 }

@@ -44,11 +44,11 @@ public class RaceListCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         String activeRaceId = raceSystem.getRaceId(ref);
 
-        player.sendMessage(Message.translation("server.rpg.race.list.header"));
+        player.sendMessage(Message.translation("pixelbays.rpg.race.list.header"));
 
         Map<String, RaceDefinition> allRaces = raceManagementSystem.getRaceDefinitions();
         if (allRaces.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.race.list.none"));
+            player.sendMessage(Message.translation("pixelbays.rpg.race.list.none"));
             return;
         }
 
@@ -60,13 +60,15 @@ public class RaceListCommand extends AbstractPlayerCommand {
 
             String raceId = raceDef.getRaceId();
             boolean isActive = raceId != null && raceId.equals(activeRaceId);
-            String status = isActive ? "[Selected]" : (raceDef.isEnabled() ? "[Available]" : "[Disabled]");
+                Message status = Message.translation(isActive
+                    ? "pixelbays.rpg.race.status.selected"
+                    : (raceDef.isEnabled() ? "pixelbays.rpg.race.status.available" : "pixelbays.rpg.race.status.disabled"));
 
             String displayName = raceDef.getDisplayName() != null && !raceDef.getDisplayName().isEmpty()
                     ? raceDef.getDisplayName()
                     : raceId;
 
-                player.sendMessage(Message.translation("server.rpg.race.list.entry")
+                player.sendMessage(Message.translation("pixelbays.rpg.race.list.entry")
                     .param("status", status)
                     .param("name", displayName)
                     .param("id", raceId));

@@ -48,24 +48,24 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
 
         RaceDefinition raceDef = raceManagementSystem.getRaceDefinition(raceId);
         if (raceDef == null) {
-            player.sendMessage(Message.translation("server.rpg.race.error.unknown").param("id", raceId));
+            player.sendMessage(Message.translation("pixelbays.rpg.race.error.unknown").param("id", raceId));
             return;
         }
 
         if (!raceDef.isEnabled()) {
-            player.sendMessage(Message.translation("server.rpg.race.error.disabled").param("id", raceId));
+            player.sendMessage(Message.translation("pixelbays.rpg.race.error.disabled").param("id", raceId));
             return;
         }
 
         String activeRaceId = raceSystem.getRaceId(ref);
         if (activeRaceId != null && !activeRaceId.isEmpty() && activeRaceId.equals(raceId)) {
-            player.sendMessage(Message.translation("server.rpg.race.error.alreadySelected"));
+            player.sendMessage(Message.translation("pixelbays.rpg.race.error.alreadySelected"));
             return;
         }
 
         boolean applied = raceSystem.setRace(ref, raceId, store);
         if (!applied) {
-            player.sendMessage(Message.translation("server.rpg.race.error.unableToSelect").param("id", raceId));
+            player.sendMessage(Message.translation("pixelbays.rpg.race.error.unableToSelect").param("id", raceId));
             return;
         }
 
@@ -74,9 +74,9 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
                 : raceId;
 
         if (activeRaceId != null && !activeRaceId.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.race.success.switched").param("name", displayName));
+            player.sendMessage(Message.translation("pixelbays.rpg.race.success.switched").param("name", displayName));
         } else {
-            player.sendMessage(Message.translation("server.rpg.race.success.selected").param("name", displayName));
+            player.sendMessage(Message.translation("pixelbays.rpg.race.success.selected").param("name", displayName));
         }
     }
 }

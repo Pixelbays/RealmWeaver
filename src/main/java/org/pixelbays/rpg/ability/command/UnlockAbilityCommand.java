@@ -10,7 +10,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -25,11 +25,17 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  */
 public class UnlockAbilityCommand extends AbstractPlayerCommand {
 
-    private final OptionalArg<String> abilityIdArg;
+    private final RequiredArg<String> abilityIdArg;
 
     public UnlockAbilityCommand() {
         super("unlockability", "Unlock an ability for testing");
-        this.abilityIdArg = this.withOptionalArg("abilityId", "Ability ID to unlock or 'list'", ArgTypes.STRING);
+        this.abilityIdArg = null;
+        this.addUsageVariant(new UnlockAbilityCommand("Unlock an ability for testing"));
+    }
+
+    private UnlockAbilityCommand(String description) {
+        super(description);
+        this.abilityIdArg = this.withRequiredArg("abilityId", "Ability ID to unlock or 'list'", ArgTypes.STRING);
     }
 
     @Override
@@ -52,7 +58,7 @@ public class UnlockAbilityCommand extends AbstractPlayerCommand {
         }
 
         // If no argument, show list
-        if (!abilityIdArg.provided(ctx)) {
+        if (abilityIdArg == null) {
             listUnlockedAbilities(player, abilityComp);
             return;
         }
@@ -68,13 +74,13 @@ public class UnlockAbilityCommand extends AbstractPlayerCommand {
         // Validate ability exists
         ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
         if (abilityDef == null) {
-            player.sendMessage(Message.translation("server.rpg.ability.unlock.unknownAbility").param("abilityId", abilityId));
+            player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.unknownAbility").param("abilityId", abilityId));
             return;
         }
 
         // Check if already unlocked
         if (abilityComp.hasAbility(abilityId)) {
-            player.sendMessage(Message.translation("server.rpg.ability.unlock.alreadyUnlocked")
+            player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.alreadyUnlocked")
                     .param("ability", abilityDef.getDisplayName()));
             return;
         }
@@ -83,39 +89,49 @@ public class UnlockAbilityCommand extends AbstractPlayerCommand {
         abilityComp.unlockAbility(abilityId, "TestClass");
 
         String displayName = abilityDef.getDisplayName();
-        String typeName = abilityDef.getAbilityType() != null ? abilityDef.getAbilityType().toString() : "Unknown";
+        Message typeName = getAbilityTypeMessage(abilityDef);
         
-        player.sendMessage(Message.translation("server.rpg.ability.unlock.success")
+        player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.success")
             .param("ability", displayName)
             .param("type", typeName));
         
         // If it's a passive or toggle, mention it will tick
-        if (abilityDef.getAbilityType() == ClassAbilityDefinition.AbilityType.Passive) {
-            player.sendMessage(Message.translation("server.rpg.ability.unlock.typePassive"));
-        } else if (abilityDef.getAbilityType() == ClassAbilityDefinition.AbilityType.Toggle) {
-            player.sendMessage(Message.translation("server.rpg.ability.unlock.typeToggle"));
-        } else {
-            player.sendMessage(Message.translation("server.rpg.ability.unlock.typeActive"));
+        switch (abilityDef.getAbilityType()) {
+            case Passive -> player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.typePassive"));
+            case Toggle -> player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.typeToggle"));
+            case Active -> player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.typeActive"));
         }
     }
 
     private void listUnlockedAbilities(@Nonnull Player player, @Nonnull ClassAbilityComponent abilityComp) {
         if (abilityComp.getUnlockedAbilityIds().isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.ability.unlock.none"));
+            player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.none"));
             return;
         }
 
-        player.sendMessage(Message.translation("server.rpg.ability.unlock.header"));
+        player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.header"));
 
         for (String abilityId : abilityComp.getUnlockedAbilityIds()) {
             ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
             String displayName = abilityDef != null ? abilityDef.getDisplayName() : abilityId;
-            String typeName = abilityDef != null && abilityDef.getAbilityType() != null 
-                    ? abilityDef.getAbilityType().toString() : "Unknown";
+            Message typeName = getAbilityTypeMessage(abilityDef);
 
-            player.sendMessage(Message.translation("server.rpg.ability.unlock.entry")
+            player.sendMessage(Message.translation("pixelbays.rpg.ability.unlock.entry")
                     .param("ability", displayName)
                     .param("type", typeName));
         }
+    }
+
+    @Nonnull
+    private Message getAbilityTypeMessage(ClassAbilityDefinition abilityDef) {
+        if (abilityDef == null || abilityDef.getAbilityType() == null) {
+            return Message.translation("pixelbays.rpg.ability.type.unknown");
+        }
+
+        return switch (abilityDef.getAbilityType()) {
+            case Passive -> Message.translation("pixelbays.rpg.ability.type.passive");
+            case Toggle -> Message.translation("pixelbays.rpg.ability.type.toggle");
+            case Active -> Message.translation("pixelbays.rpg.ability.type.active");
+        };
     }
 }

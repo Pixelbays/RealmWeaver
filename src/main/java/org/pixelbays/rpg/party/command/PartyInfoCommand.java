@@ -37,7 +37,7 @@ public class PartyInfoCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         Party party = partyManager.getPartyForMember(playerRef.getUuid());
         if (party == null) {
-            player.sendMessage(Message.translation("server.rpg.party.error.notInParty"));
+            player.sendMessage(Message.translation("pixelbays.rpg.party.error.notInParty"));
             return;
         }
 
@@ -49,12 +49,23 @@ public class PartyInfoCommand extends AbstractPlayerCommand {
                 .map(PartyCommandUtil::resolveDisplayName)
                 .collect(Collectors.joining(", "));
 
-        player.sendMessage(Message.translation("server.rpg.party.info.id").param("id", party.getId().toString()));
-        player.sendMessage(Message.translation("server.rpg.party.info.type").param("type", party.getType().name()));
-        player.sendMessage(Message.translation("server.rpg.party.info.leader").param("leader", leaderName));
-        player.sendMessage(Message.translation("server.rpg.party.info.assistants")
-            .param("assistants", assistants.isEmpty() ? "None" : assistants));
-        player.sendMessage(Message.translation("server.rpg.party.info.members")
-            .param("members", members.isEmpty() ? "None" : members));
+        player.sendMessage(Message.translation("pixelbays.rpg.party.info.id").param("id", party.getId().toString()));
+        player.sendMessage(Message.translation("pixelbays.rpg.party.info.type")
+                .param("type", PartyCommandUtil.partyTypeMessage(party.getType())));
+        player.sendMessage(Message.translation("pixelbays.rpg.party.info.leader").param("leader", leaderName));
+        if (assistants.isEmpty()) {
+            player.sendMessage(Message.translation("pixelbays.rpg.party.info.assistants")
+                    .param("assistants", Message.translation("pixelbays.rpg.common.none")));
+        } else {
+            player.sendMessage(Message.translation("pixelbays.rpg.party.info.assistants")
+                    .param("assistants", assistants));
+        }
+        if (members.isEmpty()) {
+            player.sendMessage(Message.translation("pixelbays.rpg.party.info.members")
+                    .param("members", Message.translation("pixelbays.rpg.common.none")));
+        } else {
+            player.sendMessage(Message.translation("pixelbays.rpg.party.info.members")
+                    .param("members", members));
+        }
     }
 }

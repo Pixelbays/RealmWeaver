@@ -11,7 +11,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -21,12 +21,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class GuildJoinPolicyCommand extends AbstractPlayerCommand {
 
-    private final OptionalArg<String> policyArg;
+    private final RequiredArg<String> policyArg;
     private final GuildManager guildManager;
 
     public GuildJoinPolicyCommand() {
         super("joinpolicy", "Set guild join policy");
-        this.policyArg = this.withOptionalArg("policy", "invite|open|application", ArgTypes.STRING);
+        this.policyArg = this.withRequiredArg("policy", "invite|open|application", ArgTypes.STRING);
         this.guildManager = ExamplePlugin.get().getGuildManager();
     }
 
@@ -38,15 +38,10 @@ public class GuildJoinPolicyCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        if (!policyArg.provided(ctx)) {
-            player.sendMessage(Message.translation("server.rpg.guild.usage.joinpolicy"));
-            return;
-        }
-
         String rawPolicy = policyArg.get(ctx);
         GuildJoinPolicy policy = parsePolicy(rawPolicy);
         if (policy == null) {
-            player.sendMessage(Message.translation("server.rpg.guild.error.invalidPolicy"));
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.error.invalidPolicy"));
             return;
         }
 

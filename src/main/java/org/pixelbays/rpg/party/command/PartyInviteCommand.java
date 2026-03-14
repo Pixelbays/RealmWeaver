@@ -10,7 +10,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -20,12 +20,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class PartyInviteCommand extends AbstractPlayerCommand {
 
-    private final OptionalArg<String> playerArg;
+    private final RequiredArg<String> playerArg;
     private final PartyManager partyManager;
 
     public PartyInviteCommand() {
         super("invite", "Invite a player to your party");
-        this.playerArg = this.withOptionalArg("player", "Player name", ArgTypes.STRING);
+        this.playerArg = this.withRequiredArg("player", "Player name", ArgTypes.STRING);
         this.partyManager = ExamplePlugin.get().getPartyManager();
     }
 
@@ -37,27 +37,22 @@ public class PartyInviteCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        if (!playerArg.provided(ctx)) {
-            player.sendMessage(Message.translation("server.rpg.party.usage.invite"));
-            return;
-        }
-
         String targetName = playerArg.get(ctx);
-        if (targetName == null || targetName.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.party.usage.invite"));
+        if (targetName == null || targetName.isBlank()) {
+            player.sendMessage(Message.translation("pixelbays.rpg.party.usage.invite"));
             return;
         }
 
         PlayerRef targetRef = PartyCommandUtil.findPlayerByName(targetName);
         if (targetRef == null) {
-            player.sendMessage(Message.translation("server.rpg.common.playerNotFound"));
+            player.sendMessage(Message.translation("pixelbays.rpg.common.playerNotFound"));
             return;
         }
 
         PartyActionResult result = partyManager.invitePlayer(playerRef.getUuid(), targetRef.getUuid());
         player.sendMessage(PartyCommandUtil.managerResultMessage(result.getMessage()));
         if (result.isSuccess()) {
-            targetRef.sendMessage(Message.translation("server.rpg.party.notify.invitedBy").param("player", playerRef.getUsername()));
+            targetRef.sendMessage(Message.translation("pixelbays.rpg.party.notify.invitedBy").param("player", playerRef.getUsername()));
         }
     }
 }

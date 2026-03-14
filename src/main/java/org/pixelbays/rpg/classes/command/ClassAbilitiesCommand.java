@@ -13,7 +13,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -29,14 +29,21 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
 
     private final ClassManagementSystem classSystem;
     private final ClassAbilitySystem abilitySystem;
-    private final OptionalArg<String> classNameArg;
+    private final RequiredArg<String> classNameArg;
 
     public ClassAbilitiesCommand() {
         super("abilities", "View class abilities");
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
-        this.classNameArg = this.withOptionalArg("className", "The class to view (defaults to primary)",
-                ArgTypes.STRING);
+        this.classNameArg = null;
+        this.addUsageVariant(new ClassAbilitiesCommand("View class abilities"));
+    }
+
+    private ClassAbilitiesCommand(String description) {
+        super(description);
+        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        this.classNameArg = this.withRequiredArg("className", "The class to view", ArgTypes.STRING);
     }
 
     @Override
@@ -50,12 +57,12 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
         ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
 
         String classId;
-        if (this.classNameArg.provided(ctx)) {
+        if (this.classNameArg != null) {
             classId = this.classNameArg.get(ctx);
         } else {
             String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
             if (primaryClassId == null || primaryClassId.isEmpty()) {
-                player.sendMessage(Message.translation("server.rpg.class.abilities.noLearnedClass"));
+                player.sendMessage(Message.translation("pixelbays.rpg.class.abilities.noLearnedClass"));
                 return;
             }
             classId = primaryClassId;
@@ -63,18 +70,18 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
-        player.sendMessage(Message.translation("server.rpg.class.abilities.header")
+        player.sendMessage(Message.translation("pixelbays.rpg.class.abilities.header")
                 .param("name", classDef.getDisplayName()));
 
         java.util.List<String> abilityIds = new java.util.ArrayList<>(classDef.getAbilityIds());
         abilityIds.sort(String::compareToIgnoreCase);
 
         if (abilityIds.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.class.abilities.none"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.abilities.none"));
             return;
         }
 
@@ -83,7 +90,7 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
             String display = abilityDef != null && abilityDef.getDisplayName() != null && !abilityDef.getDisplayName().isEmpty()
                     ? abilityDef.getDisplayName() + " (" + abilityId + ")"
                     : abilityId;
-            player.sendMessage(Message.translation("server.rpg.class.abilities.entry").param("ability", display));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.abilities.entry").param("ability", display));
         }
     }
 }

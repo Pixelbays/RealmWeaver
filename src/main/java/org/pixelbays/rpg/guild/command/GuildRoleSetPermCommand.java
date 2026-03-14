@@ -11,7 +11,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -21,16 +21,16 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class GuildRoleSetPermCommand extends AbstractPlayerCommand {
 
-    private final OptionalArg<String> roleArg;
-    private final OptionalArg<String> permArg;
-    private final OptionalArg<String> enabledArg;
+    private final RequiredArg<String> roleArg;
+    private final RequiredArg<String> permArg;
+    private final RequiredArg<String> enabledArg;
     private final GuildManager guildManager;
 
     public GuildRoleSetPermCommand() {
         super("setperm", "Set a role permission");
-        this.roleArg = this.withOptionalArg("role", "Role id", ArgTypes.STRING);
-        this.permArg = this.withOptionalArg("permission", "Permission", ArgTypes.STRING);
-        this.enabledArg = this.withOptionalArg("enabled", "true|false", ArgTypes.STRING);
+        this.roleArg = this.withRequiredArg("role", "Role id", ArgTypes.STRING);
+        this.permArg = this.withRequiredArg("permission", "Permission", ArgTypes.STRING);
+        this.enabledArg = this.withRequiredArg("enabled", "true|false", ArgTypes.STRING);
         this.guildManager = ExamplePlugin.get().getGuildManager();
     }
 
@@ -42,28 +42,24 @@ public class GuildRoleSetPermCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        if (!roleArg.provided(ctx) || !permArg.provided(ctx) || !enabledArg.provided(ctx)) {
-            player.sendMessage(Message.translation("server.rpg.guild.usage.roleSetPerm"));
-            return;
-        }
-
         String roleId = roleArg.get(ctx);
         String permissionRaw = permArg.get(ctx);
         String enabledRaw = enabledArg.get(ctx);
-        if (roleId == null || permissionRaw == null || enabledRaw == null) {
-            player.sendMessage(Message.translation("server.rpg.guild.usage.roleSetPerm"));
+        if (roleId == null || permissionRaw == null || enabledRaw == null
+                || roleId.isBlank() || permissionRaw.isBlank() || enabledRaw.isBlank()) {
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.usage.roleSetPerm"));
             return;
         }
 
         GuildPermission permission = parsePermission(permissionRaw);
         if (permission == null) {
-            player.sendMessage(Message.translation("server.rpg.guild.error.unknownPermission"));
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.error.unknownPermission"));
             return;
         }
 
         Boolean enabled = parseEnabled(enabledRaw);
         if (enabled == null) {
-            player.sendMessage(Message.translation("server.rpg.guild.error.enabledMustBeBoolean"));
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.error.enabledMustBeBoolean"));
             return;
         }
 

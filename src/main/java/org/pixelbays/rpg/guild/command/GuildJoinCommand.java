@@ -10,7 +10,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -20,12 +20,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class GuildJoinCommand extends AbstractPlayerCommand {
 
-    private final OptionalArg<String> guildArg;
+    private final RequiredArg<String> guildArg;
     private final GuildManager guildManager;
 
     public GuildJoinCommand() {
         super("join", "Join a guild");
-        this.guildArg = this.withOptionalArg("guild", "Guild name or tag", ArgTypes.STRING);
+        this.guildArg = this.withRequiredArg("guild", "Guild name or tag", ArgTypes.STRING);
         this.guildManager = ExamplePlugin.get().getGuildManager();
     }
 
@@ -37,14 +37,9 @@ public class GuildJoinCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        if (!guildArg.provided(ctx)) {
-            player.sendMessage(Message.translation("server.rpg.guild.usage.join"));
-            return;
-        }
-
         String guildName = guildArg.get(ctx);
-        if (guildName == null || guildName.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.guild.usage.join"));
+        if (guildName == null || guildName.isBlank()) {
+            player.sendMessage(Message.translation("pixelbays.rpg.guild.usage.join"));
             return;
         }
 

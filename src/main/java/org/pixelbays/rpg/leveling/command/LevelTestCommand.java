@@ -14,7 +14,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.command.system.CommandContext;
-import com.hypixel.hytale.server.core.command.system.arguments.system.OptionalArg;
+import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredArg;
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.entity.entities.Player;
@@ -30,12 +30,19 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 public class LevelTestCommand extends AbstractPlayerCommand {
 
     private final LevelProgressionSystem levelSystem;
-    private final OptionalArg<String> targetArg;
+    private final RequiredArg<String> targetArg;
 
     public LevelTestCommand() {
         super("leveltest", "Run a quick test of one or all level systems");
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
-        this.targetArg = this.withOptionalArg("target", "all or <SystemId>", ArgTypes.STRING);
+        this.targetArg = null;
+        this.addUsageVariant(new LevelTestCommand("Run a quick test of one or all level systems"));
+    }
+
+    private LevelTestCommand(String description) {
+        super(description);
+        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.targetArg = this.withRequiredArg("target", "all or <SystemId>", ArgTypes.STRING);
     }
 
     @Override
@@ -47,57 +54,49 @@ public class LevelTestCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
 
-        String rawTarget = targetArg.provided(ctx) ? targetArg.get(ctx) : "all";
+        String rawTarget = targetArg != null ? targetArg.get(ctx) : "all";
         if (rawTarget == null || rawTarget.isEmpty()) {
             rawTarget = "all";
         }
 
-        String cleanedTarget = rawTarget.startsWith("-") ? rawTarget.substring(1) : rawTarget;
-        boolean all = cleanedTarget.equalsIgnoreCase("all");
-        String systemId = cleanedTarget;
+        boolean all = rawTarget.equalsIgnoreCase("all");
+        String systemId = rawTarget;
 
         if (all) {
             List<String> systems = new ArrayList<>(levelSystem.getRegisteredSystems());
             if (systems.isEmpty()) {
-                player.sendMessage(Message.translation("server.rpg.level.test.noSystems"));
+                player.sendMessage(Message.translation("pixelbays.rpg.level.test.noSystems"));
                 return;
             }
 
-            player.sendMessage(Message.translation("server.rpg.level.test.headerAll"));
+            player.sendMessage(Message.translation("pixelbays.rpg.level.test.headerAll"));
             for (String id : systems) {
                 if (id == null || id.isEmpty()) {
                     continue;
                 }
-                runSingleTest(player, ref, id, store, world);
+                runSingleTest(player, ref, id);
             }
-            player.sendMessage(Message.translation("server.rpg.level.test.complete"));
+            player.sendMessage(Message.translation("pixelbays.rpg.level.test.complete"));
             return;
         }
 
-        if (systemId == null || systemId.isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.level.test.usage"));
-            return;
-        }
-
-        player.sendMessage(Message.translation("server.rpg.level.test.headerSingle"));
-        runSingleTest(player, ref, systemId, store, world);
-        player.sendMessage(Message.translation("server.rpg.level.test.complete"));
+        player.sendMessage(Message.translation("pixelbays.rpg.level.test.headerSingle"));
+        runSingleTest(player, ref, systemId);
+        player.sendMessage(Message.translation("pixelbays.rpg.level.test.complete"));
     }
 
     private void runSingleTest(@Nonnull Player player,
             @Nonnull Ref<EntityStore> ref,
-            @Nonnull String systemId,
-            @Nonnull Store<EntityStore> store,
-            @Nonnull World world) {
+            @Nonnull String systemId) {
 
         LevelSystemConfig config = levelSystem.getConfig(systemId);
         if (config == null) {
-            player.sendMessage(Message.translation("server.rpg.level.test.systemNotFound").param("systemId", systemId));
+            player.sendMessage(Message.translation("pixelbays.rpg.level.test.systemNotFound").param("systemId", systemId));
             return;
         }
 
         if (!config.isEnabled()) {
-            player.sendMessage(Message.translation("server.rpg.level.test.systemDisabled").param("systemId", systemId));
+            player.sendMessage(Message.translation("pixelbays.rpg.level.test.systemDisabled").param("systemId", systemId));
             return;
         }
 
@@ -107,7 +106,7 @@ public class LevelTestCommand extends AbstractPlayerCommand {
         float expToNext = levelSystem.getExpToNextLevel(ref, systemId);
 
         if (expToNext <= 0f) {
-            player.sendMessage(Message.translation("server.rpg.level.test.systemMax")
+            player.sendMessage(Message.translation("pixelbays.rpg.level.test.systemMax")
                     .param("systemId", systemId)
                     .param("level", startLevel));
             return;
@@ -124,7 +123,7 @@ public class LevelTestCommand extends AbstractPlayerCommand {
                 ? config.getDisplayName()
                 : systemId;
 
-        player.sendMessage(Message.translation("server.rpg.level.test.systemResult")
+        player.sendMessage(Message.translation("pixelbays.rpg.level.test.systemResult")
             .param("displayName", displayName)
             .param("systemId", systemId)
             .param("startLevel", startLevel)

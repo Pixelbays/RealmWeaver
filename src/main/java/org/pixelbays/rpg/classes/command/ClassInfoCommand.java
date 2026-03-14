@@ -45,49 +45,52 @@ public class ClassInfoCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.translation("server.rpg.class.error.notFound").param("classId", classId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", classId));
             return;
         }
 
         ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
         boolean learned = classComp != null && classComp.hasLearnedClass(classId);
 
-        player.sendMessage(Message.translation("server.rpg.class.info.header").param("name", classDef.getDisplayName()));
-        player.sendMessage(Message.translation("server.rpg.class.info.description").param("description", classDef.getDescription()));
-        player.sendMessage(Message.translation("server.rpg.class.common.blank"));
+        player.sendMessage(Message.translation("pixelbays.rpg.class.info.header").param("name", classDef.getDisplayName()));
+        player.sendMessage(Message.translation("pixelbays.rpg.class.info.description").param("description", classDef.getDescription()));
+        player.sendMessage(Message.translation("pixelbays.rpg.class.common.blank"));
 
         if (learned) {
             if (classComp == null) {
-                player.sendMessage(Message.translation("server.rpg.class.info.status").param("status", "LEARNED"));
-                player.sendMessage(Message.translation("server.rpg.class.info.learnedUnknown"));
+                player.sendMessage(Message.translation("pixelbays.rpg.class.info.status")
+                        .param("status", Message.translation("pixelbays.rpg.class.status.learned")));
+                player.sendMessage(Message.translation("pixelbays.rpg.class.info.learnedUnknown"));
                 return;
             }
             ClassComponent.ClassData classData = classComp.getClassData(classId);
             boolean isPrimary = classId.equals(classComp.getPrimaryClassId());
 
-            player.sendMessage(Message.translation("server.rpg.class.info.status")
-                    .param("status", isPrimary ? "Primary" : "LEARNED"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.info.status")
+                    .param("status", Message.translation(
+                            isPrimary ? "pixelbays.rpg.class.status.primary" : "pixelbays.rpg.class.status.learned")));
             if (classData != null) {
-                player.sendMessage(Message.translation("server.rpg.class.info.learnedAt")
+                player.sendMessage(Message.translation("pixelbays.rpg.class.info.learnedAt")
                         .param("time", new java.util.Date(classData.getLearnedTime()).toString()));
             } else {
-                player.sendMessage(Message.translation("server.rpg.class.info.learnedUnknown"));
+                player.sendMessage(Message.translation("pixelbays.rpg.class.info.learnedUnknown"));
             }
         } else {
-            player.sendMessage(Message.translation("server.rpg.class.info.status").param("status", "LOCKED"));
-            player.sendMessage(Message.translation("server.rpg.class.common.blank"));
-            player.sendMessage(Message.translation("server.rpg.class.info.requirementsHeader"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.info.status")
+                    .param("status", Message.translation("pixelbays.rpg.class.status.locked")));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.common.blank"));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.info.requirementsHeader"));
 
 
             if (!classDef.getRequiredClasses().isEmpty()) {
-                player.sendMessage(Message.translation("server.rpg.class.info.requirementsClasses")
+                player.sendMessage(Message.translation("pixelbays.rpg.class.info.requirementsClasses")
                         .param("classes", String.join(", ", classDef.getRequiredClasses())));
             }
         }
 
         int abilityCount = classDef.getAbilityIds().size();
         if (abilityCount > 0) {
-            player.sendMessage(Message.translation("server.rpg.class.info.abilitiesCount")
+            player.sendMessage(Message.translation("pixelbays.rpg.class.info.abilitiesCount")
                     .param("count", Integer.toString(abilityCount)));
         }
     }

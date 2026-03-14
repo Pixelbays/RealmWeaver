@@ -44,14 +44,14 @@ public class SyncHotbarCommand extends AbstractPlayerCommand {
         AbilityBindingComponent bindingComp = store.getComponent(ref,
                 ExamplePlugin.get().getAbilityBindingComponentType());
         if (bindingComp == null || bindingComp.getHotbarBindings().isEmpty()) {
-            player.sendMessage(Message.translation("server.rpg.ability.sync.none"));
+            player.sendMessage(Message.translation("pixelbays.rpg.ability.sync.none"));
             return;
         }
 
         // Sync all hotbar icons
         ExamplePlugin.get().getHotbarIconManager().syncHotbarIcons(ref, store);
 
-        player.sendMessage(Message.translation("server.rpg.ability.sync.success")
+        player.sendMessage(Message.translation("pixelbays.rpg.ability.sync.success")
             .param("count", bindingComp.getHotbarBindings().size()));
     }
 }
