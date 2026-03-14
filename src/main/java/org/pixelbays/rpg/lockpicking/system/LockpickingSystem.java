@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.lockpicking.config.settings.LockpickingModSettings.LockpickingDifficultyTier;
 import org.pixelbays.rpg.lockpicking.component.LockpickingSessionComponent;
 import org.pixelbays.rpg.lockpicking.ui.LockpickingPage;
 
@@ -86,7 +87,7 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
 
         session.setTimeRemainingSeconds(session.getTimeRemainingSeconds() - dt);
         if (session.getTimeRemainingSeconds() <= 0f) {
-            endSession(chunk.getReferenceTo(index), store, session, false, "server.lockpicking.failed");
+            endSession(chunk.getReferenceTo(index), store, session, false, "pixelbays.rpg.lockpicking.failed");
             return;
         }
 
@@ -131,10 +132,10 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
             return;
         }
 
-        RpgModConfig.LockpickingDifficultyTier tier = resolveTier(config, difficultyTierId);
+        LockpickingDifficultyTier tier = resolveTier(config, difficultyTierId);
         if (tier == null) {
             RpgLogging.warn("Lockpicking: invalid difficulty tier '%s'", difficultyTierId);
-            sendMessage(ref, store, Message.translation("server.lockpicking.invalidTier"));
+            sendMessage(ref, store, Message.translation("pixelbays.rpg.lockpicking.invalidTier"));
             return;
         }
 
@@ -202,7 +203,7 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
             session.setCurrentPin(nextPin);
             if (nextPin >= session.getPinCount()) {
                 RpgLogging.debug("Lockpicking: success");
-                endSession(ref, store, session, true, "server.lockpicking.success");
+                endSession(ref, store, session, true, "pixelbays.rpg.lockpicking.success");
                 return;
             }
 
@@ -226,7 +227,7 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
                 }
                 RpgLogging.debug("Lockpicking: failed (mistakes=%s/%s)",
                         session.getMistakes(), session.getMaxMistakes());
-                endSession(ref, store, session, false, "server.lockpicking.failed");
+                endSession(ref, store, session, false, "pixelbays.rpg.lockpicking.failed");
                 return;
             }
         }
@@ -242,7 +243,7 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
         }
 
         RpgLogging.debug("Lockpicking: cancelled");
-        endSession(ref, store, session, false, "server.lockpicking.failed");
+        endSession(ref, store, session, false, "pixelbays.rpg.lockpicking.failed");
     }
 
     private void endSession(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store,
@@ -409,13 +410,13 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
     }
 
     @Nullable
-    private RpgModConfig.LockpickingDifficultyTier resolveTier(@Nonnull RpgModConfig config, @Nonnull String tierId) {
-        Map<String, RpgModConfig.LockpickingDifficultyTier> tiers = config.getLockpickingDifficultyTiers();
+    private LockpickingDifficultyTier resolveTier(@Nonnull RpgModConfig config, @Nonnull String tierId) {
+        Map<String, LockpickingDifficultyTier> tiers = config.getLockpickingDifficultyTiers();
         if (tiers == null || tiers.isEmpty()) {
             return null;
         }
 
-        RpgModConfig.LockpickingDifficultyTier tier = tiers.get(tierId);
+        LockpickingDifficultyTier tier = tiers.get(tierId);
         if (tier != null) {
             return tier;
         }

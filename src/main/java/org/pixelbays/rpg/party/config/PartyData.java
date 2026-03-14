@@ -5,13 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.pixelbays.rpg.global.config.RpgModConfig.PartyXpGrantingMode;
 import org.pixelbays.rpg.party.Party;
 import org.pixelbays.rpg.party.PartyMember;
 import org.pixelbays.rpg.party.PartyMemberType;
 import org.pixelbays.rpg.party.PartyRole;
 import org.pixelbays.rpg.party.PartySettings;
 import org.pixelbays.rpg.party.PartyType;
+import org.pixelbays.rpg.party.config.settings.PartyModSettings.PartyXpGrantingMode;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.AssetRegistry;

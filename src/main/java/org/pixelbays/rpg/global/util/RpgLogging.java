@@ -3,6 +3,7 @@ package org.pixelbays.rpg.global.util;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.global.config.RpgModConfig;
+import org.pixelbays.rpg.global.config.settings.GeneralModSettings.DebuggingMode;
 
 import java.util.logging.Level;
 
@@ -69,7 +70,7 @@ public final class RpgLogging {
 
 	public static boolean isDeveloperDebugEnabled() {
 		RpgModConfig config = resolveConfig();
-		return config != null && config.getDebuggingMode() == RpgModConfig.DebuggingMode.DeveloperDontUse;
+		return config != null && config.getDebuggingMode() == DebuggingMode.DeveloperDontUse;
 	}
 
 	public static boolean isPlayerLoggingEnabled() {
@@ -84,12 +85,12 @@ public final class RpgLogging {
 			return null;
 		}
 
-		RpgModConfig.DebuggingMode mode = config.getDebuggingMode();
-		if (mode == null || mode == RpgModConfig.DebuggingMode.None) {
+		DebuggingMode mode = config.getDebuggingMode();
+		if (mode == null || mode == DebuggingMode.None) {
 			return null;
 		}
 
-		if (mode == RpgModConfig.DebuggingMode.DeveloperDontUse) {
+		if (mode == DebuggingMode.DeveloperDontUse) {
 			return Level.FINEST;
 		}
 

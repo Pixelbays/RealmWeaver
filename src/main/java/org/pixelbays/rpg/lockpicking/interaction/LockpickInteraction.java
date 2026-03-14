@@ -3,6 +3,7 @@ package org.pixelbays.rpg.lockpicking.interaction;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.lockpicking.system.LockpickingSystem;
@@ -84,6 +85,12 @@ public class LockpickInteraction extends SimpleInstantInteraction {
             return;
         }
 
+        if (!ExamplePlugin.get().isLockpickingModuleEnabled()) {
+            RpgLogging.debug("LockpickInteraction: lockpicking module disabled");
+            triggerFailure(context);
+            return;
+        }
+
         if (hasKey(player.getInventory())) {
             if (consumeKey) {
                 consumeKey(player.getInventory());
@@ -92,7 +99,7 @@ public class LockpickInteraction extends SimpleInstantInteraction {
             RpgLogging.debug("LockpickInteraction: unlocked with key %s (consume=%s)",
                     keyItemId, consumeKey);
             triggerSuccess(context);
-            player.sendMessage(Message.translation("server.lockpicking.unlockedWithKey"));
+            player.sendMessage(Message.translation("pixelbays.rpg.lockpicking.unlockedWithKey"));
             return;
         }
 
@@ -100,7 +107,7 @@ public class LockpickInteraction extends SimpleInstantInteraction {
         if (lockpickTag == null || lockpickTag.isEmpty()) {
             RpgLogging.debug("LockpickInteraction: missing LockpickItemTag in config");
             triggerFailure(context);
-            player.sendMessage(Message.translation("server.lockpicking.noLockpicks"));
+            player.sendMessage(Message.translation("pixelbays.rpg.lockpicking.noLockpicks"));
             return;
         }
 
@@ -108,14 +115,14 @@ public class LockpickInteraction extends SimpleInstantInteraction {
         if (tagIndex == Integer.MIN_VALUE) {
             RpgLogging.warn("LockpickInteraction: unknown lockpick tag '%s'", lockpickTag);
             triggerFailure(context);
-            player.sendMessage(Message.translation("server.lockpicking.noLockpicks"));
+            player.sendMessage(Message.translation("pixelbays.rpg.lockpicking.noLockpicks"));
             return;
         }
 
         if (!hasLockpickWithTag(player.getInventory(), tagIndex)) {
             RpgLogging.debug("LockpickInteraction: no lockpicks found for tag '%s'", lockpickTag);
             triggerFailure(context);
-            player.sendMessage(Message.translation("server.lockpicking.noLockpicks"));
+            player.sendMessage(Message.translation("pixelbays.rpg.lockpicking.noLockpicks"));
             return;
         }
 

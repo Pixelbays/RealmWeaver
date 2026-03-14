@@ -8,6 +8,7 @@ import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition.AbilityType;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.component.ClassComponent;
+import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.util.RpgLogging;
 
 import com.hypixel.hytale.component.ArchetypeChunk;
@@ -52,6 +53,11 @@ public class PassiveAbilityTickingSystem extends EntityTickingSystem<EntityStore
             @Nonnull ArchetypeChunk<EntityStore> archetypeChunk,
             @Nonnull Store<EntityStore> store,
             @Nonnull CommandBuffer<EntityStore> commandBuffer) {
+
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        if (config == null || !config.isAbilityModuleEnabled()) {
+            return;
+        }
 
         // Get the ClassComponent for this entity (has unlocked spells)
         ClassComponent classComponent = archetypeChunk.getComponent(index, classComponentType);

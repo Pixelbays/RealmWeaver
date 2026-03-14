@@ -10,6 +10,7 @@ import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
+import org.pixelbays.rpg.leveling.config.settings.LevelingModSettings.HardcoreLossType;
 
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
@@ -50,7 +51,7 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 			return;
 		}
 
-		RpgModConfig.HardcoreLossType lossType = config.getHardcoreLossType();
+		HardcoreLossType lossType = config.getHardcoreLossType();
 		int lossPercent = clampPercent(config.getHardcoreLevelLossPercent());
 		StatSystem statSystem = ExamplePlugin.get().getStatSystem();
 
@@ -64,14 +65,14 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 			int currentLevel = levelData.getCurrentLevel();
 			int newLevel = currentLevel;
 
-			if (lossType == RpgModConfig.HardcoreLossType.ResetToZero) {
+			if (lossType == HardcoreLossType.ResetToZero) {
 				newLevel = 1;
-			} else if (lossType == RpgModConfig.HardcoreLossType.LosePercent) {
+			} else if (lossType == HardcoreLossType.LosePercent) {
 				int lossAmount = (int) Math.floor(currentLevel * (lossPercent / 100f));
 				newLevel = Math.max(1, currentLevel - lossAmount);
 			}
 
-			if (newLevel == currentLevel && lossType == RpgModConfig.HardcoreLossType.LosePercent) {
+			if (newLevel == currentLevel && lossType == HardcoreLossType.LosePercent) {
 				continue;
 			}
 
@@ -89,9 +90,9 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 		}
 
 		if (statSystem != null) {
-			if (lossType == RpgModConfig.HardcoreLossType.ResetToZero) {
+			if (lossType == HardcoreLossType.ResetToZero) {
 				statSystem.clearClassStatBonuses(ref, store);
-			} else if (lossType == RpgModConfig.HardcoreLossType.LosePercent) {
+			} else if (lossType == HardcoreLossType.LosePercent) {
 				statSystem.recalculateRaceStatBonuses(ref, store);
 			}
 		}

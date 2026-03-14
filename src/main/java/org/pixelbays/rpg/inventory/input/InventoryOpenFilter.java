@@ -3,8 +3,8 @@ package org.pixelbays.rpg.inventory.input;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.config.RpgModConfig.InventoryHandlingMode;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.inventory.config.settings.InventoryModSettings.InventoryHandlingMode;
 import org.pixelbays.rpg.inventory.ui.RpgInventoryPage;
 
 import com.hypixel.hytale.component.Ref;

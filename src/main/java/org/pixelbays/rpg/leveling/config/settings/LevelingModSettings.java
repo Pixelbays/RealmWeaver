@@ -1,0 +1,123 @@
+package org.pixelbays.rpg.leveling.config.settings;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import com.hypixel.hytale.codec.Codec;
+import com.hypixel.hytale.codec.KeyedCodec;
+import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.codec.codecs.EnumCodec;
+import com.hypixel.hytale.codec.function.FunctionCodec;
+
+@SuppressWarnings({ "deprecation", "ToArrayCallWithZeroLengthArrayArgument", "RedundantArrayCreation" })
+public class LevelingModSettings {
+
+    private static final FunctionCodec<String[], List<String>> STRING_LIST_CODEC = new FunctionCodec<>(
+            Codec.STRING_ARRAY,
+            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+            list -> list == null ? null : list.toArray(String[]::new));
+
+    public enum HardcoreLossType {
+        ResetToZero,
+        LosePercent
+    }
+
+    public static final BuilderCodec<LevelingModSettings> CODEC = BuilderCodec
+            .builder(LevelingModSettings.class, LevelingModSettings::new)
+            .append(new KeyedCodec<>("Enabled", Codec.BOOLEAN, false, true),
+                (i, s) -> i.enabled = s, i -> i.enabled)
+            .add()
+            .append(new KeyedCodec<>("RestedXpEnabled", Codec.BOOLEAN, false, true),
+                    (i, s) -> i.restedXpEnabled = s, i -> i.restedXpEnabled)
+            .add()
+            .append(new KeyedCodec<>("RestedXpBonusPercent", Codec.INTEGER, false, true),
+                    (i, s) -> i.restedXpBonusPercent = s, i -> i.restedXpBonusPercent)
+            .add()
+            .append(new KeyedCodec<>("RestedXpConsumeRatio", Codec.INTEGER, false, true),
+                    (i, s) -> i.restedXpConsumeRatio = s, i -> i.restedXpConsumeRatio)
+            .add()
+            .append(new KeyedCodec<>("RestedXpGainTags", STRING_LIST_CODEC, false, true),
+                    (i, s) -> i.restedXpGainTags = s, i -> i.restedXpGainTags)
+            .add()
+            .append(new KeyedCodec<>("HardcoreEnabled", Codec.BOOLEAN, false, true),
+                    (i, s) -> i.hardcoreEnabled = s, i -> i.hardcoreEnabled)
+            .add()
+            .append(new KeyedCodec<>("HardcoreLossType", new EnumCodec<>(HardcoreLossType.class), false, true),
+                    (i, s) -> i.hardcoreLossType = s, i -> i.hardcoreLossType)
+            .add()
+            .append(new KeyedCodec<>("HardcoreLevelLossPercent", Codec.INTEGER, false, true),
+                    (i, s) -> i.hardcoreLevelLossPercent = s, i -> i.hardcoreLevelLossPercent)
+            .add()
+            .append(new KeyedCodec<>("BaseXpMultiplier", Codec.FLOAT, false, true),
+                    (i, s) -> i.baseXpMultiplier = s, i -> i.baseXpMultiplier)
+            .add()
+            .append(new KeyedCodec<>("DefaultPlayerProfileCount", Codec.INTEGER, false, true),
+                    (i, s) -> i.defaultPlayerProfileCount = s, i -> i.defaultPlayerProfileCount)
+            .add()
+            .build();
+
+    private boolean enabled;
+    private boolean restedXpEnabled;
+    private int restedXpBonusPercent;
+    private int restedXpConsumeRatio;
+    private List<String> restedXpGainTags;
+    private boolean hardcoreEnabled;
+    private HardcoreLossType hardcoreLossType;
+    private int hardcoreLevelLossPercent;
+    private float baseXpMultiplier;
+    private int defaultPlayerProfileCount;
+
+    public LevelingModSettings() {
+        this.enabled = true;
+        this.restedXpEnabled = false;
+        this.restedXpBonusPercent = 0;
+        this.restedXpConsumeRatio = 1;
+        this.restedXpGainTags = new ArrayList<>();
+        this.hardcoreEnabled = false;
+        this.hardcoreLossType = HardcoreLossType.ResetToZero;
+        this.hardcoreLevelLossPercent = 50;
+        this.baseXpMultiplier = 1.0f;
+        this.defaultPlayerProfileCount = 3;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public boolean isRestedXpEnabled() {
+        return restedXpEnabled;
+    }
+
+    public int getRestedXpBonusPercent() {
+        return restedXpBonusPercent;
+    }
+
+    public int getRestedXpConsumeRatio() {
+        return restedXpConsumeRatio;
+    }
+
+    public List<String> getRestedXpGainTags() {
+        return restedXpGainTags;
+    }
+
+    public boolean isHardcoreEnabled() {
+        return hardcoreEnabled;
+    }
+
+    public HardcoreLossType getHardcoreLossType() {
+        return hardcoreLossType;
+    }
+
+    public int getHardcoreLevelLossPercent() {
+        return hardcoreLevelLossPercent;
+    }
+
+    public float getBaseXpMultiplier() {
+        return baseXpMultiplier;
+    }
+
+    public int getDefaultPlayerProfileCount() {
+        return defaultPlayerProfileCount;
+    }
+}

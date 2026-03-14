@@ -3,9 +3,9 @@ package org.pixelbays.rpg.global.input;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.config.RpgModConfig.AbilityControlType;
 import org.pixelbays.rpg.movement.input.ClickToMoveInputHandler;
 
 import com.hypixel.hytale.protocol.Packet;
@@ -51,6 +51,11 @@ public class AbilityInputFilter implements PlayerPacketFilter {
             return true; // Consume movement click
         }
 
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        if (config == null || !config.isAbilityModuleEnabled()) {
+            return false;
+        }
+
         // Determine which control type to use for this player
         AbilityControlType controlType = getPlayerControlType(safeRef);
         if (controlType == null) {
@@ -73,7 +78,7 @@ public class AbilityInputFilter implements PlayerPacketFilter {
         // TODO: Get player's active class and check for override
         // For now, just use global default
         RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
-        if (config != null) {
+        if (config != null && config.isAbilityModuleEnabled()) {
             return config.getAbilityControlType();
         }
 

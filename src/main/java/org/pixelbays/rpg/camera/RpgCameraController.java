@@ -5,9 +5,10 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
+import org.pixelbays.rpg.camera.config.settings.CameraModSettings.CameraSettings;
+import org.pixelbays.rpg.camera.config.settings.CameraModSettings.CameraStyle;
+import org.pixelbays.rpg.camera.config.settings.CameraModSettings.TargetingStyle;
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.config.RpgModConfig.CameraStyle;
-import org.pixelbays.rpg.global.config.RpgModConfig.TargetingStyle;
 import org.pixelbays.rpg.global.util.RpgLogging;
 
 import com.hypixel.hytale.protocol.AttachedToType;
@@ -65,11 +66,11 @@ public class RpgCameraController implements Consumer<PlayerReadyEvent> {
             case TopDown -> playerRef.getPacketHandler()
                 .writeNoCache(new SetServerCamera(ClientCameraView.Custom, true,
                     applyAttachment(buildCustom(config.getCameraSettingsTopDown(),
-                        RpgModConfig.CameraSettings.topDownDefaults()), attachedEntityId)));
+                        CameraSettings.topDownDefaults()), attachedEntityId)));
             case Isometric -> playerRef.getPacketHandler()
                 .writeNoCache(new SetServerCamera(ClientCameraView.Custom, true,
                     applyAttachment(buildCustom(config.getCameraSettingsIsometric(),
-                        RpgModConfig.CameraSettings.isometricDefaults()), attachedEntityId)));
+                        CameraSettings.isometricDefaults()), attachedEntityId)));
             default -> {
             }
         }
@@ -87,9 +88,9 @@ public class RpgCameraController implements Consumer<PlayerReadyEvent> {
         return settings;
     }
 
-    private static ServerCameraSettings buildCustom(RpgModConfig.CameraSettings settings,
-            RpgModConfig.CameraSettings fallback) {
-        RpgModConfig.CameraSettings resolved = settings != null ? settings : fallback;
+    private static ServerCameraSettings buildCustom(CameraSettings settings,
+            CameraSettings fallback) {
+        CameraSettings resolved = settings != null ? settings : fallback;
         ServerCameraSettings cameraSettings = new ServerCameraSettings();
         cameraSettings.positionLerpSpeed = resolved.getPositionLerpSpeed();
         cameraSettings.rotationLerpSpeed = resolved.getRotationLerpSpeed();

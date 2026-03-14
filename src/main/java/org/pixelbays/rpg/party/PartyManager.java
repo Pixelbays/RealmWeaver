@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.party.config.PartyData;
+import org.pixelbays.rpg.party.config.settings.PartyModSettings.PartyXpGrantingMode;
 import org.pixelbays.rpg.party.event.PartyAssistantPromotedEvent;
 import org.pixelbays.rpg.party.event.PartyCreatedEvent;
 import org.pixelbays.rpg.party.event.PartyDisbandedEvent;
@@ -309,7 +310,7 @@ public class PartyManager {
 
     private PartySettings buildSettings(PartyType type, RpgModConfig config) {
         boolean xpEnabled = config == null || config.isPartyXpEnabled();
-        var xpMode = config == null ? RpgModConfig.PartyXpGrantingMode.SplitEqualInRange : config.getPartyXpGrantingMode();
+        var xpMode = config == null ? PartyXpGrantingMode.SplitEqualInRange : config.getPartyXpGrantingMode();
         int xpRange = config == null ? 48 : config.getPartyXpRangeBlocks();
         int minMembers = config == null ? 1 : config.getPartyXpMinMembersInRange();
         boolean npcAllowed = config == null || config.isPartyNpcAllowed();

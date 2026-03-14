@@ -1,6 +1,6 @@
 package org.pixelbays.rpg.party;
 
-import org.pixelbays.rpg.global.config.RpgModConfig.PartyXpGrantingMode;
+import org.pixelbays.rpg.party.config.settings.PartyModSettings.PartyXpGrantingMode;
 
 public class PartySettings {
 
