@@ -1,0 +1,377 @@
+rpg.common.unknownError = An unknown error occurred.
+rpg.common.unmappedMessage = {text}
+rpg.common.playerNotFound = Player not found.
+rpg.common.none = None.
+
+rpg.hud.xpBar.text = XP: {current}/{next} ({remaining} to next)
+rpg.hud.xpBar.max = XP: MAX
+
+rpg.party.usage.invite = Usage: /party invite <player>
+rpg.party.usage.join = Usage: /party join <player>
+rpg.party.usage.kick = Usage: /party kick <player>
+rpg.party.usage.promote = Usage: /party promote <player> [assistant|leader]
+
+rpg.party.error.raidsDisabled = Raids are disabled.
+rpg.party.error.partiesDisabled = Parties are disabled.
+rpg.party.error.alreadyInParty = You are already in a party.
+rpg.party.error.notInPartyCreateFirst = You are not in a party. Use /party create first.
+rpg.party.error.invitePermission = Only leaders or assistants can invite players.
+rpg.party.error.targetAlreadyInParty = That player is already in a party.
+rpg.party.error.partyFull = The party is full.
+rpg.party.error.targetNotInParty = That player is not in a party.
+rpg.party.error.noInvite = You do not have an invite to that party.
+rpg.party.error.notInParty = You are not in a party.
+rpg.party.error.disbandPermission = Only the leader can disband the party.
+rpg.party.error.targetNotInYourParty = That player is not in your party.
+rpg.party.error.kickPermission = Only leaders or assistants can kick members.
+rpg.party.error.cannotKickLeader = You cannot kick the leader.
+rpg.party.error.promoteAssistantPermission = Only the leader can promote assistants.
+rpg.party.error.npcAssistant = NPCs cannot be assistants.
+rpg.party.error.transferPermission = Only the leader can transfer leadership.
+rpg.party.error.npcLeader = NPCs cannot be leaders.
+rpg.party.error.invalidType = Invalid party type. Use party or raid.
+rpg.party.error.invalidPromoteRole = Invalid role. Use assistant or leader.
+
+rpg.party.success.created = Created {type}.
+rpg.party.success.inviteSent = Invite sent.
+rpg.party.success.joined = Joined the party.
+rpg.party.success.left = You left the party.
+rpg.party.success.disbanded = Party disbanded.
+rpg.party.success.memberRemoved = Member removed.
+rpg.party.success.promotedAssistant = Member promoted to assistant.
+rpg.party.success.leadershipTransferred = Leadership transferred.
+
+rpg.party.notify.invitedBy = {player} invited you to a party.
+
+rpg.party.info.id = Party: {id}
+rpg.party.info.type = Type: {type}
+rpg.party.info.leader = Leader: {leader}
+rpg.party.info.assistants = Assistants: {assistants}
+rpg.party.info.members = Members: {members}
+rpg.party.type.party = Party
+rpg.party.type.raid = Raid
+
+rpg.party.ui.title = Party
+rpg.party.ui.rosterHeading = Roster
+rpg.party.ui.inviteButton = Invite
+rpg.party.ui.kickButton = Kick
+rpg.party.ui.promoteButton = Promote
+rpg.party.ui.leaveButton = Leave
+rpg.party.ui.rosterBody = Leader: {leader}\nAssistants: {assistants}\nMembers: {members}
+
+rpg.guild.usage.accept = Usage: /guild accept <player>
+rpg.guild.usage.apply = Usage: /guild apply <name|tag>
+rpg.guild.usage.create = Usage: /guild create <name> <tag>
+rpg.guild.usage.deny = Usage: /guild deny <player>
+rpg.guild.usage.invite = Usage: /guild invite <player>
+rpg.guild.usage.join = Usage: /guild join <name|tag>
+rpg.guild.usage.joinpolicy = Usage: /guild joinpolicy <invite|open|application>
+rpg.guild.usage.kick = Usage: /guild kick <player>
+rpg.guild.usage.roleAssign = Usage: /guild role assign <player> <role>
+rpg.guild.usage.roleCreate = Usage: /guild role create <name>
+rpg.guild.usage.roleSetPerm = Usage: /guild role setperm <role> <permission> <true|false>
+rpg.guild.usage.transfer = Usage: /guild transfer <player>
+
+rpg.guild.error.disabled = Guilds are disabled.
+rpg.guild.error.alreadyInGuild = You are already in a guild.
+rpg.guild.error.invalidName = Invalid guild name.
+rpg.guild.error.invalidTag = Invalid guild tag.
+rpg.guild.error.nameTaken = That guild name is already taken.
+rpg.guild.error.tagTaken = That guild tag is already taken.
+rpg.guild.error.notInGuildCreateFirst = You are not in a guild. Use /guild create first.
+rpg.guild.error.invitePermission = You do not have permission to invite players.
+rpg.guild.error.targetAlreadyInGuild = That player is already in a guild.
+rpg.guild.error.guildFull = The guild is full.
+rpg.guild.error.notFound = That guild was not found.
+rpg.guild.error.guildFullTarget = That guild is full.
+rpg.guild.error.requiresApplications = That guild requires applications. Use /guild apply.
+rpg.guild.error.noInvite = You do not have an invite to that guild.
+rpg.guild.error.inviteExpired = Your guild invite has expired.
+rpg.guild.error.notAcceptingApplications = That guild is not accepting applications.
+rpg.guild.error.alreadyApplied = You already applied to that guild.
+rpg.guild.error.notInGuild = You are not in a guild.
+rpg.guild.error.acceptApplicationPermission = You do not have permission to accept applications.
+rpg.guild.error.applicationNotFound = No application found for that player.
+rpg.guild.error.denyApplicationPermission = You do not have permission to deny applications.
+rpg.guild.error.disbandPermission = Only the leader can disband the guild.
+rpg.guild.error.targetNotInYourGuild = That player is not in your guild.
+rpg.guild.error.kickPermission = You do not have permission to kick members.
+rpg.guild.error.cannotKickLeader = You cannot kick the leader.
+rpg.guild.error.transferPermission = Only the leader can transfer leadership.
+rpg.guild.error.targetAlreadyLeader = That player is already the leader.
+rpg.guild.error.joinPolicyPermission = You do not have permission to change join policy.
+rpg.guild.error.manageRolesPermission = You do not have permission to manage roles.
+rpg.guild.error.invalidRoleName = Invalid role name.
+rpg.guild.error.roleNameReserved = That role name is reserved.
+rpg.guild.error.roleExists = That role already exists.
+rpg.guild.error.leaderPermsImmutable = Leader permissions cannot be changed.
+rpg.guild.error.roleNotFound = That role does not exist.
+rpg.guild.error.assignRolePermission = You do not have permission to assign roles.
+rpg.guild.error.assignLeaderPermission = Only the leader can assign the leader role.
+rpg.guild.error.cannotChangeLeaderRole = You cannot change the leader's role.
+rpg.guild.error.invalidPolicy = Invalid policy. Use invite, open, or application.
+rpg.guild.error.unknownPermission = Unknown permission.
+rpg.guild.error.enabledMustBeBoolean = Enabled must be true or false.
+
+rpg.guild.success.created = Created guild {name}.
+rpg.guild.success.inviteSent = Invite sent.
+rpg.guild.success.applicationSubmitted = Application submitted.
+rpg.guild.success.applicationAccepted = Application accepted.
+rpg.guild.success.applicationDenied = Application denied.
+rpg.guild.success.left = You left the guild.
+rpg.guild.success.disbanded = Guild disbanded.
+rpg.guild.success.memberRemoved = Member removed.
+rpg.guild.success.leadershipTransferred = Leadership transferred.
+rpg.guild.success.joinPolicyUpdated = Join policy updated.
+
+rpg.prefabs.list.header = Asset prefabs (showing {shown}):
+rpg.prefabs.list.entry = {index}. [{pack}] {key}
+rpg.prefabs.list.none = No asset prefabs found.
+rpg.prefabs.list.error = Failed to list asset prefabs.
+rpg.guild.success.roleCreated = Role created.
+rpg.guild.success.rolePermissionUpdated = Role permission updated.
+rpg.guild.success.roleAssigned = Role assigned.
+
+rpg.guild.notify.applicationAccepted = Your guild application was accepted.
+rpg.guild.notify.applicationDenied = Your guild application was denied.
+rpg.guild.notify.invitedBy = {player} invited you to a guild.
+rpg.guild.notify.kicked = You were kicked from the guild.
+rpg.guild.notify.roleUpdated = Your guild role was updated.
+rpg.guild.notify.nowLeader = You are now the guild leader.
+
+rpg.guild.info.header = Guild: {name} [{tag}]
+rpg.guild.info.leader = Leader: {leader}
+rpg.guild.info.members = Members: {count}
+rpg.guild.info.joinPolicy = Join Policy: {policy}
+rpg.guild.info.roles = Roles: {roles}
+rpg.guild.role.listEntry = {name} ({id}) - {permissions}
+rpg.guild.info.roleEntry = {name} ({id})
+rpg.guild.joinPolicy.inviteOnly = Invite Only
+rpg.guild.joinPolicy.open = Open
+rpg.guild.joinPolicy.application = Application
+
+rpg.guild.ui.title = Guild
+rpg.guild.ui.overviewHeading = Overview
+rpg.guild.ui.rosterHeading = Roster
+rpg.guild.ui.inviteButton = Invite
+rpg.guild.ui.applyButton = Apply
+rpg.guild.ui.createRoleButton = Create Role
+rpg.guild.ui.assignRoleButton = Assign Role
+rpg.guild.ui.setPermButton = Set Permission
+rpg.guild.ui.enabledLabel = Enabled
+rpg.guild.ui.overviewBody = Guild: {name} [{tag}]\nLeader: {leader}\nMembers: {members}\nJoin Policy: {policy}
+
+rpg.chat.party.message = [Party] {username}: {message}
+rpg.chat.guild.message = [Guild] [{tag}] {username}: {message}
+
+rpg.chat.error.unknownChannel = Unknown chat channel: {channel}
+rpg.chat.error.emptyMessage = You must type a message.
+rpg.chat.error.cannotSend = You cannot chat in {channel}.
+rpg.chat.error.noTargets = No targets found for {channel}.
+
+rpg.chat.usage = Usage: /chat <channel|off>
+rpg.chat.success.active = Active chat set to {channel}.
+rpg.chat.success.cleared = Active chat cleared.
+rpg.chat.info.active = Active chat: {channel}
+rpg.chat.info.none = Active chat: none
+
+rpg.ui.placeholder.playerName = Player name
+rpg.ui.placeholder.guildNameOrTag = Guild name or tag
+rpg.ui.placeholder.roleName = Role name
+rpg.ui.placeholder.roleId = Role id
+rpg.ui.placeholder.permission = Permission (e.g. INVITE)
+
+rpg.race.list.header = === Available Races ===
+rpg.race.list.none = No races registered.
+rpg.race.list.entry = {status} {name} ({id})
+rpg.race.status.selected = [Selected]
+rpg.race.status.available = [Available]
+rpg.race.status.disabled = [Disabled]
+rpg.race.error.unknown = Unknown race: {id}
+rpg.race.error.disabled = Race is disabled: {id}
+rpg.race.error.alreadySelected = You already have this race selected.
+rpg.race.error.unableToSelect = Unable to select race: {id}
+rpg.race.success.switched = Race switched: {name}
+rpg.race.success.selected = Race selected: {name}
+
+rpg.npc.debug.noRoles = No roles provided.
+rpg.npc.debug.updated = {state} RPG NPC debug for {count} NPC(s).
+
+rpg.ability.bind.usage = Usage: /bindability <slot> <abilityId|clear> or /bindability list
+rpg.ability.bind.invalidSlot = Invalid slot. Please use a slot between 1 and 9.
+rpg.ability.bind.configNotFound = Config not found.
+rpg.ability.bind.slotNotConfigured = Slot {slot} is not configured as an ability slot. Valid slots: {validSlots}
+rpg.ability.bind.cleared = Cleared ability binding for slot {slot}
+rpg.ability.bind.unknownAbility = Unknown ability: {abilityId}
+rpg.ability.bind.notLearned = You haven't learned the ability: {ability}
+rpg.ability.bind.bound = Bound {ability} to hotbar slot {slot} (key {slot})
+rpg.ability.bind.none = No ability bindings set
+rpg.ability.bind.header = === Your Ability Bindings ===
+rpg.ability.bind.entry = Slot {slot} (key {slot}): {ability}
+
+rpg.ability.sync.none = No ability bindings to sync. Use /bindability to bind abilities.
+rpg.ability.sync.success = Hotbar ability icons synced! ({count} bindings)
+
+rpg.ability.unlock.unknownAbility = Unknown ability: {abilityId}
+rpg.ability.unlock.alreadyUnlocked = Ability already unlocked: {ability}
+rpg.ability.unlock.success = Unlocked ability: {ability} ({type})
+rpg.ability.unlock.typePassive = This is a PASSIVE ability - it will run every tick!
+rpg.ability.unlock.typeToggle = This is a TOGGLE ability - use /bindability to bind it to a hotbar slot
+rpg.ability.unlock.typeActive = This is an ACTIVE ability - use /bindability to bind it to a hotbar slot
+rpg.ability.unlock.none = No abilities unlocked. Use /unlockability <abilityId> to unlock one.
+rpg.ability.unlock.header = === Unlocked Abilities ===
+rpg.ability.unlock.entry = - {ability} ({type})
+rpg.ability.type.passive = Passive
+rpg.ability.type.toggle = Toggle
+rpg.ability.type.active = Active
+rpg.ability.type.unknown = Unknown
+
+rpg.ability.trigger.noBindingData = No ability binding data. Use /bindability
+rpg.ability.trigger.noBoundSlot = No ability bound to slot {slot}. Use /bindability
+rpg.ability.trigger.notUnlocked = Ability not unlocked: {abilityId}
+rpg.ability.trigger.notFound = Ability not found: {abilityId}
+rpg.ability.trigger.error = {error}
+rpg.ability.trigger.activated = Ability activated: {name}
+rpg.ability.trigger.notImplemented = Weapon Ability: {type} (not yet implemented)
+
+rpg.level.reset.none = No level data to reset.
+rpg.level.reset.success = Successfully reset {count} level system(s)
+rpg.level.reset.cleared = All level progression data has been cleared.
+
+rpg.level.test.placeholder = Level test not implemented. Use /leveltest instead.
+rpg.level.test.status = {systemId}: Level {level} ({currentExp}/{expToNext} exp) [Stats: {stats}, Skills: {skills}]
+rpg.level.test.noSystems = No level systems registered.
+rpg.level.test.headerAll = === Level System Test (ALL) ===
+rpg.level.test.headerSingle = === Level System Test ===
+rpg.level.test.complete = === Level System Test Complete ===
+rpg.level.test.usage = Usage: /leveltest all or /leveltest <SystemId>
+rpg.level.test.systemNotFound = - {systemId}: NOT FOUND
+rpg.level.test.systemDisabled = - {systemId}: DISABLED
+rpg.level.test.systemMax = - {systemId}: level {level} (MAX)
+rpg.level.test.systemResult = - {displayName} ({systemId}): {startLevel} -> {newLevel} | exp {currentExp}/{newExpToNext}
+
+rpg.class.common.blank = " "
+
+rpg.class.error.notFound = Class not found: {classId}
+rpg.class.error.unknownClass = Unknown class: {classId}
+rpg.class.error.notAvailable = Class {classId} is not available
+rpg.class.error.alreadyLearned = Already learned class {classId}
+rpg.class.error.exclusiveLearn = Cannot learn {class} while {blockingClass} is learned
+rpg.class.error.notLearnedById = Class {classId} is not learned
+rpg.class.error.mustLearnBeforeActivating = Must learn class before activating
+rpg.class.error.cannotSwitch = Cannot switch to this class
+rpg.class.error.cannotSwitchCombat = Cannot switch to this class while in combat
+rpg.class.error.maxCombat = Maximum combat classes reached
+rpg.class.error.maxProfession = Maximum profession classes reached
+rpg.class.error.raceRequired = You must select a race before learning {class}
+rpg.class.error.raceCannotLearn = Your race cannot learn {class}
+rpg.class.error.requiresUnknownClass = Requires unknown class {classId}
+rpg.class.error.requiresLevel = Requires {class} level {level}
+rpg.class.error.requiresClass = Requires {class} class
+rpg.class.error.notLearned = You have not learned {class}
+rpg.class.error.noLevelSystem = Class has no level system configured: {classId}
+
+rpg.class.success.learned = Learned {class}
+rpg.class.success.unlearned = Unlearned {class}
+rpg.class.success.activated = Activated {class}
+
+rpg.class.info.header = === {name} ===
+rpg.class.info.description = {description}
+rpg.class.info.status = Status: {status}
+rpg.class.status.primary = Primary
+rpg.class.status.learned = Learned
+rpg.class.status.locked = Locked
+rpg.class.status.inactive = Inactive
+rpg.class.info.learnedAt = Learned: {time}
+rpg.class.info.learnedUnknown = Learned: unknown
+rpg.class.info.requirementsHeader = Requirements:
+rpg.class.info.requirementsClasses =   - Classes: {classes}
+rpg.class.info.abilitiesCount = Abilities: {count}
+
+rpg.class.list.header = === Available Classes ===
+rpg.class.list.entry.primary = [PRIMARY] {name} ({id})
+rpg.class.list.entry.learned = [LEARNED] {name} ({id})
+rpg.class.list.entry.locked = [LOCKED] {name} ({id})
+rpg.class.list.learnedAt =   Learned: {time}
+rpg.class.list.description =   {description}
+
+rpg.class.abilities.noLearnedClass = No learned class. Specify class name: /class abilities <className>
+rpg.class.abilities.header = === {name} Abilities ===
+rpg.class.abilities.none = No abilities for this class
+rpg.class.abilities.entry = - {ability}
+
+rpg.class.progress.noLearnedClass = No learned class. Specify class name: /class progress <className>
+rpg.class.progress.header = === {name} Progress ===
+rpg.class.progress.status = Status: {status}
+rpg.class.progress.levelSystem = Level System: {systemId}
+rpg.class.progress.currentLevel = Current Level: {level}
+rpg.class.progress.currentXp = Current XP: {current} / {next} ({percent}%)
+rpg.class.progress.abilities = Abilities: {abilities}
+rpg.class.progress.abilitiesNone = Abilities: none
+rpg.class.progress.baseStatBonuses = Base Stat Bonuses:
+rpg.class.progress.baseStatAdd =   +{value} {stat}
+rpg.class.progress.baseStatMult =   +{value}% {stat}
+
+rpg.class.level.invalidTarget = Level must be >= 1
+rpg.class.level.max = {class} is already at max level.
+rpg.class.level.up = Leveled up {class} to {level}.
+rpg.class.level.set = Set {class} level to {level}.
+
+rpg.class.ability.error.notFound = Ability not found: {abilityId}
+rpg.class.ability.error.notUnlocked = Ability not unlocked: {abilityId}
+rpg.class.ability.error.noChain = Ability has no interaction chain: {abilityId}
+rpg.class.ability.error.rootNotFound = Root interaction not found: {chainId}
+rpg.class.ability.error.interactionManagerMissing = Interaction manager not available for this entity.
+rpg.class.ability.success.triggered = Triggered ability: {ability} ({chainId})
+
+rpg.class.debug.line = {text}
+
+rpg.lockpicking.title = Lockpicking
+rpg.lockpicking.pin = Pin
+rpg.lockpicking.time = Time
+rpg.lockpicking.mistakes = Mistakes
+rpg.lockpicking.needle = Needle
+rpg.lockpicking.sweetSpot = Sweet Spot
+rpg.lockpicking.setPin = Set Pin
+rpg.lockpicking.cancel = Cancel
+rpg.lockpicking.noLockpicks = You need a lockpick.
+rpg.lockpicking.invalidTier = Unknown lockpicking difficulty.
+rpg.lockpicking.unlockedWithKey = Unlocked with key.
+rpg.lockpicking.failed = Lockpicking failed.
+rpg.lockpicking.success = Lock opened.
+
+# ── Talent Trees ─────────────────────────────────────────────────────────────
+rpg.class.talent.noLearnedClass = No learned class. Specify class name: /class talent info <className>
+rpg.class.talent.grant.invalidAmount = Talent point grant amount must be greater than 0.
+rpg.class.talent.grant.failed = Failed to grant talent points to {classId}.
+rpg.class.talent.grant.success = Added {amount} talent points to {classId}. Available points: {available}
+rpg.class.talent.allocate.success = Allocated a point in {treeId}/{nodeId} for {classId}.
+rpg.class.talent.refund.success = Refunded a point from {treeId}/{nodeId} for {classId}.
+rpg.class.talent.reset.success = Reset all talents for {classId}.
+rpg.class.talent.ui.opened = Opened the talent tree for {classId}.
+rpg.class.talent.summary.header = === {class} Talents ===
+rpg.class.talent.summary.points = Available points: {available} | Spent: {spent}
+rpg.class.talent.summary.none = No talent trees are defined for this class.
+rpg.class.talent.summary.tree = [{id}] {name} ({spent} pts spent, max {max})
+rpg.class.talent.summary.node =   - {name} [{id}]: {rank}/{max}
+rpg.class.talent.error.unknownTree = Unknown talent tree: {treeId}
+rpg.class.talent.error.unknownNode = Unknown talent node: {nodeId}
+rpg.class.talent.error.classDataMissing = Missing class data for {classId}.
+rpg.class.talent.error.requiresLevel = Requires level {required}. Current level: {current}.
+rpg.class.talent.error.nodeMaxRank = {nodeId} is already at max rank ({maxRank}).
+rpg.class.talent.error.prerequisiteMissing = Missing prerequisite node: {nodeId}.
+rpg.class.talent.error.noLevelSystem = This class has no level system configured.
+rpg.class.talent.error.notEnoughPoints = Not enough talent points. Available: {available}.
+rpg.class.talent.error.partialRefundsPaidMode = Partial refunds are disabled in paid reset mode. Use /class talent reset instead.
+rpg.class.talent.error.nodeNoRanks = {nodeId} has no allocated ranks.
+rpg.class.talent.error.refundBlocked = Cannot refund {nodeId} because {blockingNodeId} depends on it.
+rpg.class.talent.error.noneToReset = No talent points to reset for {classId}.
+rpg.class.talent.error.treeMaxPoints = {treeId} is already at its point cap ({maxPoints}).
+rpg.class.talent.error.exclusiveSpecBlocked = You are currently spec'd into {treeId}. Reset talents to change spec.
+
+# Talent tree UI
+rpg.talent.ui.title = Talent Trees
+rpg.talent.ui.nodesHeading = Nodes
+rpg.talent.ui.selectNode = Select a node
+rpg.talent.ui.allocate = Allocate Point
+rpg.talent.ui.reset = Reset All Talents
