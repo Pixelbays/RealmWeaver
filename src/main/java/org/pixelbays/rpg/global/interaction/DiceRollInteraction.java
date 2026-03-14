@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.rpg.global.config.RpgModConfig;
+import org.pixelbays.rpg.global.config.settings.GeneralModSettings.RollModifierRange;
 import org.pixelbays.rpg.global.system.RNGSystem;
 
 import com.hypixel.hytale.codec.Codec;
@@ -133,17 +134,17 @@ public class DiceRollInteraction extends SimpleInstantInteraction {
             return 0;
         }
 
-        Map<String, List<RpgModConfig.RollModifierRange>> modifierMap = config.getAdvantageRollModifiers();
+        Map<String, List<RollModifierRange>> modifierMap = config.getAdvantageRollModifiers();
         if (modifierMap == null) {
             return 0;
         }
 
-        List<RpgModConfig.RollModifierRange> ranges = modifierMap.get(statId);
+        List<RollModifierRange> ranges = modifierMap.get(statId);
         if (ranges == null || ranges.isEmpty()) {
             return 0;
         }
 
-        for (RpgModConfig.RollModifierRange range : ranges) {
+        for (RollModifierRange range : ranges) {
             if (range == null) {
                 continue;
             }
