@@ -804,6 +804,27 @@ public class LevelProgressionSystem {
         return true;
     }
 
+    /**
+     * Refund skill points back to a level system (e.g., on talent reset).
+     * Returns true if successful.
+     */
+    public boolean refundSkillPoints(@Nonnull Ref<EntityStore> entityRef, String systemId, int amount) {
+        if (systemId == null || systemId.isEmpty() || amount <= 0) {
+            return false;
+        }
+
+        LevelProgressionComponent levelComp = getComponent(entityRef);
+        if (levelComp == null) return false;
+
+        LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
+        if (levelData == null) return false;
+
+        levelData.setAvailableSkillPoints(levelData.getAvailableSkillPoints() + amount);
+        RpgLogging.debugDeveloper("[LevelSystem] Refunded %d skill points to %s system (now %d)",
+                amount, systemId, levelData.getAvailableSkillPoints());
+        return true;
+    }
+
     // === Bulk Operations ===
 
     /**

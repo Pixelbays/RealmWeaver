@@ -27,6 +27,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 public class ClassComponent implements Component<EntityStore>, Cloneable {
     
     // Codec for ClassData serialization
+    // Nested map codec: treeId -> (nodeId -> rank)
+    private static final MapCodec<Integer, LinkedHashMap<String, Integer>> NODE_RANK_MAP_CODEC =
+            new MapCodec<>(Codec.INTEGER, LinkedHashMap::new, false);
+    private static final MapCodec<Map<String, Integer>, LinkedHashMap<String, Map<String, Integer>>> TREE_ALLOC_CODEC =
+            new MapCodec<>(NODE_RANK_MAP_CODEC, LinkedHashMap::new, false);
+
     public static final BuilderCodec<ClassData> CLASS_DATA_CODEC = BuilderCodec
             .builder(ClassData.class, ClassData::new)
             .append(new KeyedCodec<>("ClassId", Codec.STRING), 
@@ -36,6 +42,14 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
             .append(new KeyedCodec<>("LearnedTime", Codec.LONG), 
                     (data, value) -> data.learnedTime = value,
                     data -> data.learnedTime)
+            .add()
+            .append(new KeyedCodec<>("AllocatedNodes", TREE_ALLOC_CODEC, false, true),
+                    (data, value) -> data.allocatedNodes = value,
+                    data -> data.allocatedNodes)
+            .add()
+            .append(new KeyedCodec<>("SpentTalentPoints", Codec.INTEGER, false, true),
+                    (data, value) -> data.spentTalentPoints = value,
+                    data -> data.spentTalentPoints)
             .add()
             .build();
     
@@ -157,16 +171,23 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
     public static class ClassData {
         private String classId;
         private long learnedTime;         // Timestamp when class was learned
+        // treeId -> (nodeId -> allocatedRank). Persisted.
+        private Map<String, Map<String, Integer>> allocatedNodes;
+        private int spentTalentPoints;    // Total talent points spent in this class (used to refund on reset)
         
         // Default constructor for codec
         public ClassData() {
             this.classId = "";
             this.learnedTime = System.currentTimeMillis();
+            this.allocatedNodes = new LinkedHashMap<>();
+            this.spentTalentPoints = 0;
         }
         
         public ClassData(String classId) {
             this.classId = classId;
             this.learnedTime = System.currentTimeMillis();
+            this.allocatedNodes = new LinkedHashMap<>();
+            this.spentTalentPoints = 0;
         }
         
         public String getId() {
@@ -176,10 +197,74 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
         public long getLearnedTime() {
             return learnedTime;
         }
-        
+
+        /** Get the rank of a specific node (0 = not allocated). */
+        public int getNodeRank(String treeId, String nodeId) {
+            Map<String, Integer> treeNodes = allocatedNodes.get(treeId);
+            if (treeNodes == null) return 0;
+            return treeNodes.getOrDefault(nodeId, 0);
+        }
+
+        /** Set the rank of a node (0 to remove). Returns old rank. */
+        public int setNodeRank(String treeId, String nodeId, int rank) {
+            if (rank <= 0) {
+                Map<String, Integer> treeNodes = allocatedNodes.get(treeId);
+                if (treeNodes == null) return 0;
+                int old = treeNodes.getOrDefault(nodeId, 0);
+                treeNodes.remove(nodeId);
+                if (treeNodes.isEmpty()) allocatedNodes.remove(treeId);
+                return old;
+            }
+            allocatedNodes.computeIfAbsent(treeId, k -> new LinkedHashMap<>()).put(nodeId, rank);
+            return 0;
+        }
+
+        /** Get all allocated nodes for a tree (may be null/empty). */
+        @Nullable
+        public Map<String, Integer> getTreeAllocations(String treeId) {
+            return allocatedNodes.get(treeId);
+        }
+
+        /** Get total points invested in a specific tree. */
+        public int getTreePointsSpent(String treeId) {
+            Map<String, Integer> treeNodes = allocatedNodes.get(treeId);
+            if (treeNodes == null) return 0;
+            int total = 0;
+            for (int rank : treeNodes.values()) total += rank;
+            return total;
+        }
+
+        /** Get all tree allocations (treeId -> nodeId -> rank). */
+        public Map<String, Map<String, Integer>> getAllAllocatedNodes() {
+            return allocatedNodes;
+        }
+
+        public int getSpentTalentPoints() {
+            return spentTalentPoints;
+        }
+
+        public void setSpentTalentPoints(int spentTalentPoints) {
+            this.spentTalentPoints = spentTalentPoints;
+        }
+
+        public void addSpentTalentPoints(int amount) {
+            this.spentTalentPoints += amount;
+        }
+
+        /** Remove all talent allocations from this class data (for reset). */
+        public void clearTalentAllocations() {
+            allocatedNodes.clear();
+            spentTalentPoints = 0;
+        }
+
         public ClassData copy() {
             ClassData cloned = new ClassData(this.classId);
             cloned.learnedTime = this.learnedTime;
+            cloned.spentTalentPoints = this.spentTalentPoints;
+            cloned.allocatedNodes = new LinkedHashMap<>();
+            for (Map.Entry<String, Map<String, Integer>> treeEntry : this.allocatedNodes.entrySet()) {
+                cloned.allocatedNodes.put(treeEntry.getKey(), new LinkedHashMap<>(treeEntry.getValue()));
+            }
             return cloned;
         }
     }

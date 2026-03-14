@@ -10,8 +10,8 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.config.RpgModConfig.AbilityControlType;
 import org.pixelbays.rpg.global.config.builder.AbilityRefCodec;
 import org.pixelbays.rpg.global.config.builder.LevelSystemRefCodec;
 
@@ -64,6 +64,23 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 @SuppressWarnings({ "deprecation", "ToArrayCallWithZeroLengthArrayArgument", "RedundantArrayCreation" })
 public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap<String, ClassDefinition>> {
+
+    private static final Validator<Integer> TALENT_NODE_X_VALIDATOR = new Validator<>() {
+        @Override
+        public void accept(Integer value, ValidationResults results) {
+            if (value == null) {
+                return;
+            }
+            if (value < -3 || value > 3) {
+                results.fail("Talent node PositionX must be between -3 and 3");
+            }
+        }
+
+        @Override
+        public void updateSchema(SchemaContext context, Schema target) {
+            // no-op
+        }
+    };
 
     private static final FunctionCodec<String[], List<String>> STRING_LIST_CODEC = new FunctionCodec<>(
             Codec.STRING_ARRAY,
@@ -1218,8 +1235,12 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                 .append(new KeyedCodec<>("GrantsAbilityId", ABILITY_REF_CODEC, false, true),
                         (i, s) -> i.grantsAbilityId = s, i -> i.grantsAbilityId)
                 .add()
+                .append(new KeyedCodec<>("StatModifiers", StatModifiers.CODEC, false, true),
+                        (i, s) -> i.statModifiers = s, i -> i.statModifiers)
+                .add()
                 .append(new KeyedCodec<>("PositionX", Codec.INTEGER, false, true), (i, s) -> i.positionX = s,
                         i -> i.positionX)
+                .addValidator(TALENT_NODE_X_VALIDATOR)
                 .add()
                 .append(new KeyedCodec<>("PositionY", Codec.INTEGER, false, true), (i, s) -> i.positionY = s,
                         i -> i.positionY)
@@ -1234,6 +1255,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         private int requiredLevel;
         private List<String> requiredNodes;
         private String grantsAbilityId;
+        private StatModifiers statModifiers; // Stat bonuses granted by this node (stacks per rank)
         private int positionX;
         private int positionY;
 
@@ -1246,6 +1268,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
             this.requiredLevel = 1;
             this.requiredNodes = new ArrayList<>();
             this.grantsAbilityId = "";
+            this.statModifiers = null;
             this.positionX = 0;
             this.positionY = 0;
         }
@@ -1312,6 +1335,19 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
         public void setGrantsAbilityId(String grantsAbilityId) {
             this.grantsAbilityId = grantsAbilityId;
+        }
+
+        @javax.annotation.Nullable
+        public StatModifiers getStatModifiers() {
+            return statModifiers;
+        }
+
+        public void setStatModifiers(@javax.annotation.Nullable StatModifiers statModifiers) {
+            this.statModifiers = statModifiers;
+        }
+
+        public boolean hasStatModifiers() {
+            return statModifiers != null && !statModifiers.isEmpty();
         }
 
         public int getPositionX() {
