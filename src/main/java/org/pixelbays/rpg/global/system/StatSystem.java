@@ -53,6 +53,8 @@ public class StatSystem {
     private final Map<Ref<EntityStore>, AppliedModifiers> classModifiersCache;
     // Cache of applied race modifiers by entity
     private final Map<Ref<EntityStore>, AppliedModifiers> raceModifiersCache;
+    // Cache of applied talent modifiers by entity
+    private final Map<Ref<EntityStore>, AppliedModifiers> talentModifiersCache;
 
     public StatSystem(@Nonnull ClassManagementSystem classManagementSystem,
             @Nonnull RaceManagementSystem raceManagementSystem,
@@ -63,6 +65,7 @@ public class StatSystem {
         this.levelProgressionSystem = levelProgressionSystem;
         this.classModifiersCache = new HashMap<>();
         this.raceModifiersCache = new HashMap<>();
+        this.talentModifiersCache = new HashMap<>();
 
         eventRegistry.register(PlayerConnectEvent.class, onPlayerConnect());
     }
@@ -80,6 +83,7 @@ public class StatSystem {
             if (!classInitialized) {
                 recalculateClassStatBonuses(entityRef, store);
             }
+            recalculateTalentStatBonuses(entityRef, store);
             recalculateRaceStatBonuses(entityRef, store);
             recalculateStatGrowthBonuses(entityRef, store);
         };
@@ -204,6 +208,72 @@ public class StatSystem {
         }
 
         ClassStatBonusesRecalculatedEvent.dispatch(entityRef, java.util.Set.of());
+    }
+
+    /**
+     * Recalculate and apply talent tree stat modifiers for the entity.
+     * Iterates all learned classes, looks up allocated talent nodes, and sums
+     * their StatModifiers (scaled by node rank).
+     */
+    public void recalculateTalentStatBonuses(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
+        if (classComp == null) {
+            clearTalentStatBonuses(entityRef, store);
+            return;
+        }
+
+        AppliedModifiers modifiers = new AppliedModifiers();
+
+        for (Map.Entry<String, ClassComponent.ClassData> entry : classComp.getAllLearnedClasses().entrySet()) {
+            String classId = entry.getKey();
+            ClassComponent.ClassData classData = entry.getValue();
+            ClassDefinition classDef = classManagementSystem.getClassDefinition(classId);
+            if (classDef == null || classDef.getTalentTrees() == null) {
+                continue;
+            }
+
+            for (ClassDefinition.TalentTree tree : classDef.getTalentTrees()) {
+                if (tree.getNodes() == null) {
+                    continue;
+                }
+                for (ClassDefinition.TalentNode node : tree.getNodes()) {
+                    int rank = classData.getNodeRank(tree.getTreeId(), node.getNodeId());
+                    if (rank <= 0 || !node.hasStatModifiers()) {
+                        continue;
+                    }
+                    ClassDefinition.StatModifiers nodeStats = node.getStatModifiers();
+                    for (Object2FloatMap.Entry<String> stat : nodeStats.getAdditiveModifiers().object2FloatEntrySet()) {
+                        modifiers.additiveModifiers.merge(stat.getKey(), stat.getFloatValue() * rank, Float::sum);
+                    }
+                    for (Object2FloatMap.Entry<String> stat : nodeStats.getMultiplicativeModifiers().object2FloatEntrySet()) {
+                        modifiers.multiplicativeModifiers.merge(stat.getKey(), stat.getFloatValue() * rank, Float::sum);
+                    }
+                }
+            }
+        }
+
+        AppliedModifiers oldModifiers = talentModifiersCache.get(entityRef);
+        updateModifiers(entityRef, modifiers, oldModifiers, store, "rpg_talent");
+
+        if (!modifiers.isEmpty()) {
+            talentModifiersCache.put(entityRef, modifiers);
+        } else {
+            talentModifiersCache.remove(entityRef);
+        }
+
+        RpgLogging.debugDeveloper("[StatSystem] Recalculated talent stat bonuses for entity %s", entityRef.getIndex());
+    }
+
+    /**
+     * Clear talent stat modifiers for an entity (on unlearn or full reset).
+     */
+    public void clearTalentStatBonuses(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        AppliedModifiers oldModifiers = talentModifiersCache.remove(entityRef);
+        if (oldModifiers != null) {
+            removeModifiers(entityRef, oldModifiers, store, "rpg_talent");
+        }
     }
 
     /**
