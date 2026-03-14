@@ -84,13 +84,13 @@ public class AbilitySlotsInputHandler {
             AbilityBindingComponent bindingComp = store.getComponent(entityRef,
                     ExamplePlugin.get().getAbilityBindingComponentType());
             if (bindingComp == null) {
-                playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.noBindingData"));
+                playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.noBindingData"));
                 return;
             }
 
             String abilityId = bindingComp.getAbilitySlotBinding(slotNumber);
             if (abilityId == null || abilityId.isEmpty()) {
-                playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.noBoundSlot")
+                playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.noBoundSlot")
                         .param("slot", slotNumber));
                 return;
             }
@@ -99,7 +99,7 @@ public class AbilitySlotsInputHandler {
             ClassAbilityComponent abilityComp = store.getComponent(entityRef,
                     ExamplePlugin.get().getClassAbilityComponentType());
             if (abilityComp == null || !abilityComp.hasAbility(abilityId)) {
-                playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.notUnlocked")
+                playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.notUnlocked")
                         .param("abilityId", abilityId));
                 return;
             }
@@ -107,7 +107,7 @@ public class AbilitySlotsInputHandler {
             // Resolve ability definition
             ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
             if (abilityDef == null) {
-                playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.notFound")
+                playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.notFound")
                         .param("abilityId", abilityId));
                 return;
             }
@@ -118,7 +118,7 @@ public class AbilitySlotsInputHandler {
             if (result.isFailure()) {
                 String errorMsg = result.getErrorMessage();
                 if (errorMsg != null && !errorMsg.isEmpty()) {
-                    playerComponent.sendMessage(Message.translation("server.rpg.ability.trigger.error")
+                    playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.error")
                             .param("error", errorMsg));
                 }
                 return;
