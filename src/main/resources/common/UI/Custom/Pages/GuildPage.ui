@@ -1,0 +1,184 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {}
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 820, Height: 640);
+
+  #Title {
+    Group {
+      $C.@Title {
+        @Text = %pixelbays.rpg.guild.ui.title;
+      }
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: (Full: 12);
+
+    Label #StatusLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true);
+      Anchor: (Bottom: 12);
+    }
+
+    Group #OverviewPanel {
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.guild.ui.overviewHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #OverviewLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+        Anchor: (Bottom: 6);
+      }
+    }
+
+    Group #RosterPanel {
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.guild.ui.rosterHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #RosterLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      }
+    }
+
+    Group #InviteRow {
+      LayoutMode: Left;
+      Anchor: (Height: 40, Bottom: 8);
+
+      $C.@TextField #InviteeField {
+        @Anchor = (Width: 420, Height: 40);
+        PlaceholderText: %pixelbays.rpg.ui.placeholder.playerName;
+      }
+
+      Group { FlexWeight: 1; }
+
+      TextButton #InviteButton {
+        Text: %pixelbays.rpg.guild.ui.inviteButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 40);
+      }
+    }
+
+    Group #ApplyRow {
+      LayoutMode: Left;
+      Anchor: (Height: 40, Bottom: 8);
+
+      $C.@TextField #GuildField {
+        @Anchor = (Width: 420, Height: 40);
+        PlaceholderText: %pixelbays.rpg.ui.placeholder.guildNameOrTag;
+      }
+
+      Group { FlexWeight: 1; }
+
+      TextButton #ApplyButton {
+        Text: %pixelbays.rpg.guild.ui.applyButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 40);
+      }
+    }
+
+    Group #RoleCreateRow {
+      LayoutMode: Left;
+      Anchor: (Height: 40, Bottom: 8);
+
+      $C.@TextField #RoleNameField {
+        @Anchor = (Width: 420, Height: 40);
+        PlaceholderText: %pixelbays.rpg.ui.placeholder.roleName;
+      }
+
+      Group { FlexWeight: 1; }
+
+      TextButton #CreateRoleButton {
+        Text: %pixelbays.rpg.guild.ui.createRoleButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 40);
+      }
+    }
+
+    Group #RoleAssignRow {
+      LayoutMode: Left;
+      Anchor: (Height: 40, Bottom: 8);
+
+      $C.@TextField #AssignPlayerField {
+        @Anchor = (Width: 260, Height: 40);
+        PlaceholderText: %pixelbays.rpg.ui.placeholder.playerName;
+      }
+
+      Group { Anchor: (Width: 8); }
+
+      $C.@TextField #AssignRoleField {
+        @Anchor = (Width: 260, Height: 40);
+        PlaceholderText: %pixelbays.rpg.ui.placeholder.roleId;
+      }
+
+      Group { FlexWeight: 1; }
+
+      TextButton #AssignRoleButton {
+        Text: %pixelbays.rpg.guild.ui.assignRoleButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 40);
+      }
+    }
+
+    Group #RolePermRow {
+      LayoutMode: Left;
+      Anchor: (Height: 44, Bottom: 12);
+
+      $C.@TextField #PermRoleField {
+        @Anchor = (Width: 210, Height: 44);
+        PlaceholderText: %pixelbays.rpg.ui.placeholder.roleId;
+      }
+
+      Group { Anchor: (Width: 8); }
+
+      $C.@TextField #PermNameField {
+        @Anchor = (Width: 210, Height: 44);
+        PlaceholderText: %pixelbays.rpg.ui.placeholder.permission;
+      }
+
+      Group { Anchor: (Width: 12); }
+
+      Group {
+        LayoutMode: Left;
+        Anchor: (Height: 44);
+
+        Label {
+          Text: %pixelbays.rpg.guild.ui.enabledLabel;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Right: 6);
+        }
+
+        $C.@CheckBox #PermEnabledCheck {
+          Value: false;
+          Anchor: (Top: 10);
+        }
+      }
+
+      Group { FlexWeight: 1; }
+
+      TextButton #SetPermButton {
+        Text: %pixelbays.rpg.guild.ui.setPermButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 44);
+      }
+    }
+
+  }
+}
+
+$C.@BackButton {}

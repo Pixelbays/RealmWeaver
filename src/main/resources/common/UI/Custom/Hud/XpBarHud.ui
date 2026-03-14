@@ -1,0 +1,41 @@
+$C = "../Common.ui";
+Group #PartyRoot {
+  Anchor: (Top: 36, Left: 20, Width: 248, Height: 0);
+
+  Group #PartyMembers {
+    LayoutMode: Top;
+    Anchor: (Width: 248, Height: 0);
+  }
+}
+
+Group #ResourceBars {
+    LayoutMode: Bottom;
+    Anchor: (Width: 296, Bottom: 6);
+  }
+
+Group #Root {
+  Anchor: (Top: 190, Left: 20, Width: 320, Height: 60);
+  LayoutMode: Top;
+  Padding: (Horizontal: 12, Vertical: 8);
+  Background: #000000(0.2);
+
+
+
+  Label #XpText {
+    Text: "";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true);
+    Anchor: (Height: 16, Bottom: 6);
+  }
+
+  Group #XpBar {
+    Anchor: (Width: 296, Height: 18);
+    Background: PatchStyle(Color: #000000(0.35));
+    OutlineColor: #000000(0.5);
+    OutlineSize: 1;
+
+    Group #XpFill {
+      Background: PatchStyle(Color: #ffffff(0.85));
+      Anchor: (Left: 0, Top: 0, Width: 0, Height: 18);
+    }
+  }
+}
