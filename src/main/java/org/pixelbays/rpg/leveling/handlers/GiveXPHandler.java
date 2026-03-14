@@ -3,6 +3,7 @@ package org.pixelbays.rpg.leveling.handlers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
@@ -10,6 +11,7 @@ import javax.annotation.Nonnull;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.classes.config.settings.ClassModSettings.XpRoutingMode;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.leveling.event.GiveXPEvent;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
@@ -17,9 +19,20 @@ import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.party.Party;
+import org.pixelbays.rpg.party.PartyManager;
+import org.pixelbays.rpg.party.PartyMember;
+import org.pixelbays.rpg.party.PartyMemberType;
+import org.pixelbays.rpg.party.PartySettings;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.math.vector.Vector3d;
+import com.hypixel.hytale.server.core.entity.UUIDComponent;
+import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
+import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
@@ -38,7 +51,16 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
 
     @Override
     public void accept(GiveXPEvent event) {
+        handle(event, true);
+    }
+
+    private void handle(GiveXPEvent event, boolean allowPartyShare) {
         if (!event.playerRef().isValid()) return;
+
+        RpgModConfig config = resolveConfig();
+        if (config == null || !config.isLevelingModuleEnabled()) {
+            return;
+        }
 
         if (event.amount() <= 0L) {
             return;
@@ -47,15 +69,18 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
         var store = event.playerRef().getStore();
         var levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
 
+        if (allowPartyShare && tryDistributePartyXp(event, store)) {
+            return;
+        }
+
         String rawType = event.type();
         String type = rawType == null ? "" : rawType.trim();
         String typeLower = type.isEmpty() ? "" : type.toLowerCase(Locale.ROOT);
 
-        RpgModConfig config = resolveConfig();
         List<String> xpTags = config != null ? config.getXpTags() : null;
         Object2FloatMap<String> xpTagSplits = config != null ? config.getXpTagSplits() : null;
-        RpgModConfig.XpRoutingMode routing = config != null ? config.getXpRouting()
-                : RpgModConfig.XpRoutingMode.ActiveClassOnly;
+        XpRoutingMode routing = config != null ? config.getXpRouting()
+            : XpRoutingMode.ActiveClassOnly;
 
         var classComp = store.getComponent(event.playerRef(), ClassComponent.getComponentType());
         ClassDefinition primaryClass = resolvePrimaryClass(classComp);
@@ -81,7 +106,7 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
             return;
         }
 
-        if (routing == RpgModConfig.XpRoutingMode.SplitByTag && typeLower.isEmpty()) {
+        if (routing == XpRoutingMode.SplitByTag && typeLower.isEmpty()) {
             if (!applySplitByTag(levelSystem, event.playerRef(), classComp, xpTags, xpTagSplits, expToGrant, store)) {
                 grantExperience(levelSystem, event.playerRef(), BASE_SYSTEM_ID, expToGrant, store);
             }
@@ -123,6 +148,141 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
         if (!grantToActiveClass(levelSystem, event.playerRef(), classComp, null, expToGrant, store)) {
             grantExperience(levelSystem, event.playerRef(), BASE_SYSTEM_ID, expToGrant, store);
         }
+    }
+
+    private boolean tryDistributePartyXp(@Nonnull GiveXPEvent event, @Nonnull Store<EntityStore> store) {
+        PartyManager partyManager = ExamplePlugin.get().getPartyManager();
+        if (partyManager == null) {
+            return false;
+        }
+
+        UUIDComponent uuidComponent = store.getComponent(event.playerRef(), UUIDComponent.getComponentType());
+        if (uuidComponent == null) {
+            return false;
+        }
+
+        UUID playerId = uuidComponent.getUuid();
+        Party party = partyManager.getPartyForMember(playerId);
+        if (party == null) {
+            return false;
+        }
+
+        PartySettings settings = party.getSettings();
+        if (settings == null || !settings.isXpEnabled()) {
+            return false;
+        }
+
+        List<Ref<EntityStore>> eligibleRefs = resolvePartyEligiblePlayersInRange(event.playerRef(), store, party, settings);
+        if (eligibleRefs.size() <= 1) {
+            return false;
+        }
+
+        int minMembers = Math.max(1, settings.getXpMinMembersInRange());
+        if (eligibleRefs.size() < minMembers) {
+            return false;
+        }
+
+        long total = event.amount();
+        if (total <= 0L) {
+            return true;
+        }
+
+        String type = event.type();
+
+        switch (settings.getXpGrantingMode()) {
+            case FullInRange -> {
+                for (Ref<EntityStore> ref : eligibleRefs) {
+                    handle(new GiveXPEvent(ref, total, type), false);
+                }
+            }
+            case SplitEqualInRange -> {
+                int count = eligibleRefs.size();
+                long per = total / count;
+                long remainder = total % count;
+                for (int i = 0; i < count; i++) {
+                    long share = per + (i < remainder ? 1L : 0L);
+                    if (share <= 0L) {
+                        continue;
+                    }
+                    handle(new GiveXPEvent(eligibleRefs.get(i), share, type), false);
+                }
+            }
+            default -> {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Nonnull
+    private List<Ref<EntityStore>> resolvePartyEligiblePlayersInRange(
+            @Nonnull Ref<EntityStore> sourceRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull Party party,
+            @Nonnull PartySettings settings) {
+        int rangeBlocks = settings.getXpRangeBlocks();
+        double rangeSq = rangeBlocks > 0 ? (double) rangeBlocks * (double) rangeBlocks : -1.0;
+
+        Vector3d sourcePos = null;
+        if (rangeBlocks > 0) {
+            TransformComponent sourceTransform = store.getComponent(sourceRef, TransformComponent.getComponentType());
+            if (sourceTransform == null) {
+                return new ArrayList<>();
+            }
+            sourcePos = sourceTransform.getPosition();
+        }
+
+        List<Ref<EntityStore>> eligible = new ArrayList<>();
+        for (PartyMember member : party.getMemberList()) {
+            if (member == null || member.getMemberType() != PartyMemberType.PLAYER) {
+                continue;
+            }
+
+            UUID memberId = member.getEntityId();
+            if (memberId == null) {
+                continue;
+            }
+
+            PlayerRef playerRef = Universe.get().getPlayer(memberId);
+            if (playerRef == null) {
+                continue;
+            }
+
+            Ref<EntityStore> memberRef = playerRef.getReference();
+            if (memberRef == null || !memberRef.isValid()) {
+                continue;
+            }
+
+            if (memberRef.getStore() != store) {
+                continue;
+            }
+
+            if (rangeSq >= 0.0) {
+                TransformComponent memberTransform = store.getComponent(memberRef, TransformComponent.getComponentType());
+                if (memberTransform == null) {
+                    continue;
+                }
+
+                Vector3d pos = memberTransform.getPosition();
+                double dx = pos.getX() - sourcePos.getX();
+                double dy = pos.getY() - sourcePos.getY();
+                double dz = pos.getZ() - sourcePos.getZ();
+                double distSq = dx * dx + dy * dy + dz * dz;
+                if (distSq > rangeSq) {
+                    continue;
+                }
+            }
+
+            eligible.add(memberRef);
+        }
+
+        // Ensure the source is always eligible (even if missing from party member list for any reason)
+        if (!eligible.contains(sourceRef)) {
+            eligible.add(sourceRef);
+        }
+
+        return eligible;
     }
 
     private boolean applySplitByTag(LevelProgressionSystem levelSystem,
@@ -339,7 +499,8 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
             levelSystem.initializeLevelSystem(playerRef, systemId);
         }
 
-        levelSystem.grantExperience(playerRef, systemId, amount, "event:give_xp", store, null);
+        World world = store.getExternalData().getWorld();
+        levelSystem.grantExperience(playerRef, systemId, amount, "event:give_xp", store, world);
     }
 
         private float applyExperienceModifiers(long baseExp,
