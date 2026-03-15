@@ -45,8 +45,11 @@ public class BankInfoCommand extends AbstractPlayerCommand {
             return;
         }
 
-        String playerId = String.valueOf(playerRef.getUuid());
-        List<BankAccount> characterBanks = bankManager.getBanksForOwner(BankScope.Character, playerId);
+    String playerId = String.valueOf(playerRef.getUuid());
+    String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+    List<BankAccount> characterBanks = characterOwnerId.isBlank()
+        ? List.of()
+        : bankManager.getBanksForOwner(BankScope.Character, characterOwnerId);
         List<BankAccount> accountBanks = bankManager.getBanksForOwner(BankScope.Account, playerId);
 
         player.sendMessage(Message.translation("pixelbays.rpg.bank.info.header"));

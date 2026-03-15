@@ -83,6 +83,10 @@ public class CurrencyTypeDefinition implements JsonAssetWithMap<String, DefaultA
                     (i, s) -> i.sortOrder = s, i -> i.sortOrder,
                     (i, inherited) -> i.sortOrder = inherited.sortOrder)
             .add()
+                .appendInherited(new KeyedCodec<>("AuctionHouseAllowed", Codec.BOOLEAN, false, true),
+                    (i, s) -> i.auctionHouseAllowed = s, i -> i.auctionHouseAllowed,
+                    (i, inherited) -> i.auctionHouseAllowed = inherited.auctionHouseAllowed)
+                .add()
             .appendInherited(new KeyedCodec<>("Icon", Codec.STRING, false, true),
                     (i, s) -> i.icon = (s == null || s.isEmpty()) ? null : s,
                     i -> i.icon,
@@ -154,6 +158,7 @@ public class CurrencyTypeDefinition implements JsonAssetWithMap<String, DefaultA
     private boolean enabled;
     private boolean visibleInUi;
     private int sortOrder;
+    private boolean auctionHouseAllowed;
     private String icon;
     private CurrencyStorageMode storageMode;
     private List<CurrencyScope> allowedScopes;
@@ -175,6 +180,7 @@ public class CurrencyTypeDefinition implements JsonAssetWithMap<String, DefaultA
         this.enabled = true;
         this.visibleInUi = true;
         this.sortOrder = 0;
+        this.auctionHouseAllowed = false;
         this.icon = null;
         this.storageMode = CurrencyStorageMode.NumericWallet;
         this.allowedScopes = new ArrayList<>(List.of(CurrencyScope.Character, CurrencyScope.Account, CurrencyScope.Guild));
@@ -236,6 +242,10 @@ public class CurrencyTypeDefinition implements JsonAssetWithMap<String, DefaultA
 
     public int getSortOrder() {
         return sortOrder;
+    }
+
+    public boolean isAuctionHouseAllowed() {
+        return auctionHouseAllowed;
     }
 
     @Nullable

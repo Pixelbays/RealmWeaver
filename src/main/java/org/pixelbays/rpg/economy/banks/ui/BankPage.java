@@ -165,7 +165,10 @@ public class BankPage extends CustomUIPage {
         }
 
         Map<String, String> params = new HashMap<>();
-        params.put("character", summarize(bankManager.getBanksForOwner(BankScope.Character, playerRef.getUuid().toString())));
+        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+        params.put("character", summarize(characterOwnerId.isBlank()
+            ? List.of()
+            : bankManager.getBanksForOwner(BankScope.Character, characterOwnerId)));
         params.put("account", summarize(bankManager.getBanksForOwner(BankScope.Account, playerRef.getUuid().toString())));
 
         Guild guild = guildManager.getGuildForMember(playerRef.getUuid());

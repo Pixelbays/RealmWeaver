@@ -274,12 +274,17 @@ public class BankManager {
 
     @Nonnull
     public BankActionResult getOrCreateDefaultPersonalBank(@Nonnull UUID ownerId) {
-        return getOrCreateConfiguredBank(BankScope.Character, ownerId.toString());
+        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        return getOrCreateConfiguredBank(BankScope.Character, characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId);
     }
 
     @Nonnull
     public BankActionResult getOrCreateDefaultPersonalBank(@Nonnull UUID ownerId, @Nonnull Inventory payerInventory) {
-        return getOrCreateConfiguredBank(BankScope.Character, ownerId.toString(), ownerId, payerInventory);
+        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        return getOrCreateConfiguredBank(BankScope.Character,
+                characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId,
+                ownerId,
+                payerInventory);
     }
 
     @Nonnull
@@ -322,7 +327,9 @@ public class BankManager {
     public BankActionResult getOrCreateDefaultProfessionBank(@Nonnull UUID ownerId, @Nonnull String professionId) {
         RpgModConfig config = resolveConfig();
         String bankTypeId = config == null ? "Professions" : config.getDefaultProfessionBankTypeId();
-        return getOrCreateBank(bankTypeId, createQualifiedOwnerId(ownerId.toString(), professionId));
+        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        return getOrCreateBank(bankTypeId,
+                createQualifiedOwnerId(characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId, professionId));
     }
 
     @Nonnull
@@ -335,7 +342,9 @@ public class BankManager {
         if (definition == null) {
             return BankActionResult.failure("Unknown bank type: " + bankTypeId);
         }
-        return getOrCreateBank(definition, createQualifiedOwnerId(ownerId.toString(), professionId), ownerId,
+        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        return getOrCreateBank(definition,
+            createQualifiedOwnerId(characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId, professionId), ownerId,
                 payerInventory);
     }
 
@@ -719,9 +728,13 @@ public class BankManager {
 
     @Nullable
     private String resolveBankWalletPlayerOwnerId(@Nonnull BankAccount bankAccount, @Nonnull UUID playerId) {
-        return switch (resolveBankWalletPlayerScope(bankAccount)) {
-            case Character, Account -> playerId.toString();
-            case Guild, Custom -> bankAccount.getOwnerId();
+        return switch (bankAccount.getOwnerScope()) {
+            case Character -> {
+                String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerId);
+                yield characterOwnerId.isBlank() ? playerId.toString() : characterOwnerId;
+            }
+            case Player, Account -> playerId.toString();
+            case Warband, Profession, Guild, Custom -> bankAccount.getOwnerId();
             case Global -> "global";
         };
     }
@@ -731,7 +744,11 @@ public class BankManager {
             @Nonnull String bankOwnerId,
             @Nonnull UUID payerId) {
         return switch (scope) {
-            case Character, Account -> payerId.toString();
+            case Character -> {
+                String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(payerId);
+                yield characterOwnerId.isBlank() ? payerId.toString() : characterOwnerId;
+            }
+            case Account -> payerId.toString();
             case Guild, Custom -> bankOwnerId;
             case Global -> "global";
         };

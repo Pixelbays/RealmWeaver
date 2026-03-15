@@ -117,15 +117,18 @@ public final class BankUiOpener {
             @Nonnull PlayerRef playerRef,
             @Nullable String professionId,
             @Nullable String customOwnerId) {
+        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+        String resolvedCharacterOwnerId = characterOwnerId.isBlank() ? playerRef.getUuid().toString() : characterOwnerId;
         return switch (scope) {
-            case Character, Player, Account -> playerRef.getUuid().toString();
+            case Character -> resolvedCharacterOwnerId;
+            case Player, Account -> playerRef.getUuid().toString();
             case Guild -> resolveGuildOwnerId(playerRef);
             case Warband -> customOwnerId != null && !customOwnerId.isBlank()
                     ? customOwnerId.trim()
                     : playerRef.getUuid().toString();
             case Profession -> professionId == null || professionId.isBlank()
                     ? null
-                    : BankManager.createQualifiedOwnerId(playerRef.getUuid().toString(), professionId.trim());
+                    : BankManager.createQualifiedOwnerId(resolvedCharacterOwnerId, professionId.trim());
             case Global -> customOwnerId != null && !customOwnerId.isBlank() ? customOwnerId.trim() : "global";
             case Custom -> customOwnerId == null || customOwnerId.isBlank() ? null : customOwnerId.trim();
         };

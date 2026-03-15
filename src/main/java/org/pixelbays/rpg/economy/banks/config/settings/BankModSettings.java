@@ -29,9 +29,6 @@ public class BankModSettings {
             .append(new KeyedCodec<>("DefaultProfessionBankTypeId", Codec.STRING, false, true),
                     (i, s) -> i.defaultProfessionBankTypeId = s, i -> i.defaultProfessionBankTypeId)
             .add()
-            .append(new KeyedCodec<>("AllowAssetDefinedBankTypes", Codec.BOOLEAN, false, true),
-                    (i, s) -> i.allowAssetDefinedBankTypes = s, i -> i.allowAssetDefinedBankTypes)
-            .add()
             .build();
 
     private boolean enabled;
@@ -41,7 +38,6 @@ public class BankModSettings {
     private String defaultVoidBankTypeId;
     private String defaultWarboundBankTypeId;
     private String defaultProfessionBankTypeId;
-    private boolean allowAssetDefinedBankTypes;
 
     public BankModSettings() {
         this.enabled = true;
@@ -51,7 +47,6 @@ public class BankModSettings {
         this.defaultVoidBankTypeId = "Void";
         this.defaultWarboundBankTypeId = "Warbound";
         this.defaultProfessionBankTypeId = "Professions";
-        this.allowAssetDefinedBankTypes = true;
     }
 
     public boolean isEnabled() {
@@ -80,9 +75,5 @@ public class BankModSettings {
 
     public String getDefaultProfessionBankTypeId() {
         return defaultProfessionBankTypeId;
-    }
-
-    public boolean isAllowAssetDefinedBankTypes() {
-        return allowAssetDefinedBankTypes;
     }
 }

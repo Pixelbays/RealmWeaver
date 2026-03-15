@@ -79,7 +79,8 @@ public final class CurrencyCommandUtil {
     @Nullable
     public static String resolveOwnerId(@Nonnull CurrencyScope scope, @Nonnull PlayerRef playerRef) {
         return switch (scope) {
-            case Character, Account -> String.valueOf(playerRef.getUuid());
+            case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+            case Account -> String.valueOf(playerRef.getUuid());
             case Guild -> resolveGuildOwnerId(playerRef.getUuid().toString());
             case Global -> "global";
             case Custom -> null;

@@ -14,19 +14,14 @@ public class CurrencyModSettings {
             .append(new KeyedCodec<>("PersistenceEnabled", Codec.BOOLEAN, false, true),
                     (i, s) -> i.persistenceEnabled = s, i -> i.persistenceEnabled)
             .add()
-            .append(new KeyedCodec<>("AllowAssetDefinedCurrencyTypes", Codec.BOOLEAN, false, true),
-                    (i, s) -> i.allowAssetDefinedCurrencyTypes = s, i -> i.allowAssetDefinedCurrencyTypes)
-            .add()
             .build();
 
     private boolean enabled;
     private boolean persistenceEnabled;
-    private boolean allowAssetDefinedCurrencyTypes;
 
     public CurrencyModSettings() {
         this.enabled = true;
         this.persistenceEnabled = true;
-        this.allowAssetDefinedCurrencyTypes = true;
     }
 
     public boolean isEnabled() {
@@ -37,7 +32,5 @@ public class CurrencyModSettings {
         return persistenceEnabled;
     }
 
-    public boolean isAllowAssetDefinedCurrencyTypes() {
-        return allowAssetDefinedCurrencyTypes;
-    }
+
 }
