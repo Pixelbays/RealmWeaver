@@ -3,6 +3,7 @@ package org.pixelbays.rpg.race.command;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
 import org.pixelbays.rpg.race.system.RaceSystem;
@@ -27,12 +28,14 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
 
     private final RaceManagementSystem raceManagementSystem;
     private final RaceSystem raceSystem;
+    private final ExpansionManager expansionManager;
     private final RequiredArg<String> raceIdArg;
 
     public RaceSelectCommand() {
         super("select", "Select a race");
         this.raceManagementSystem = ExamplePlugin.get().getRaceManagementSystem();
         this.raceSystem = ExamplePlugin.get().getRaceSystem();
+        this.expansionManager = ExamplePlugin.get().getExpansionManager();
         this.raceIdArg = this.withRequiredArg("raceId", "Race to select", ArgTypes.STRING);
     }
 
@@ -54,6 +57,12 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
 
         if (!raceDef.isEnabled()) {
             player.sendMessage(Message.translation("pixelbays.rpg.race.error.disabled").param("id", raceId));
+            return;
+        }
+
+        if (!expansionManager.hasAccess(playerRef, raceDef.getRequiredExpansionIds())) {
+            player.sendMessage(Message.translation("pixelbays.rpg.race.error.requiresExpansion")
+                    .param("expansions", expansionManager.describeRequirements(raceDef.getRequiredExpansionIds())));
             return;
         }
 

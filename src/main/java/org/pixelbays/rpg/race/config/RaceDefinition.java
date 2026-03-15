@@ -98,6 +98,18 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
                     i -> i.Visible,
                     (i, parent) -> i.Visible = parent.Visible)
             .add()
+                .appendInherited(new KeyedCodec<>("RequiredExpansionIds", STRING_LIST_CODEC, false, true),
+                    (i, s) -> i.requiredExpansionIds = s, i -> i.requiredExpansionIds,
+                    (i, parent) -> i.requiredExpansionIds = parent.requiredExpansionIds)
+                .add()
+                .appendInherited(new KeyedCodec<>("IsHeroRace", Codec.BOOLEAN, false, true), (i, s) -> i.IsHeroRace = s,
+                    i -> i.IsHeroRace,
+                    (i, parent) -> i.IsHeroRace = parent.IsHeroRace)
+                .add()
+                .appendInherited(new KeyedCodec<>("HeroStartingLevel", Codec.INTEGER, false, true),
+                    (i, s) -> i.HeroStartingLevel = s, i -> i.HeroStartingLevel,
+                    (i, parent) -> i.HeroStartingLevel = parent.HeroStartingLevel)
+                .add()
             .appendInherited(new KeyedCodec<>("IsHybrid", Codec.BOOLEAN, false, true), (i, s) -> i.IsHybrid = s,
                     i -> i.IsHybrid,
                     (i, parent) -> i.IsHybrid = parent.IsHybrid)
@@ -174,6 +186,9 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
     private String IconId;
     private boolean Enabled;
     private boolean Visible;
+    private List<String> requiredExpansionIds;
+    private boolean IsHeroRace;
+    private int HeroStartingLevel;
 
     // Hybrid
     private boolean IsHybrid;
@@ -208,6 +223,9 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
         this.IconId = null;
         this.Enabled = true;
         this.Visible = true;
+        this.requiredExpansionIds = new ArrayList<>();
+        this.IsHeroRace = false;
+        this.HeroStartingLevel = 1;
         this.IsHybrid = false;
         this.ParentRaces = new ArrayList<>();
         this.CompatibleHybridRaces = new ArrayList<>();
@@ -288,6 +306,22 @@ public class RaceDefinition implements JsonAssetWithMap<String, DefaultAssetMap<
 
     public void setVisible(boolean visible) {
         this.Visible = visible;
+    }
+
+    public List<String> getRequiredExpansionIds() {
+        return requiredExpansionIds == null ? new ArrayList<>() : requiredExpansionIds;
+    }
+
+    public boolean isHeroRace() {
+        return IsHeroRace;
+    }
+
+    public int getHeroStartingLevel() {
+        return Math.max(1, HeroStartingLevel);
+    }
+
+    public int getInitialCharacterLevel() {
+        return isHeroRace() ? getHeroStartingLevel() : 1;
     }
 
     public boolean isHybrid() {

@@ -3,6 +3,7 @@ package org.pixelbays.rpg.race.system;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.race.component.RaceComponent;
@@ -53,6 +54,7 @@ public class RaceSystem {
 
         applyRaceStats(entityRef, raceDef, effectiveStore);
         applyRaceAbilities(entityRef, raceDef, raceComponent);
+        applyHeroRaceStartingLevel(entityRef, raceDef, effectiveStore);
         applyCosmeticRules(raceDef);
 
         RaceChangedEvent.dispatch(entityRef, oldRaceId, raceId);
@@ -126,6 +128,28 @@ public class RaceSystem {
         if (raceDef.getAllowedCosmeticCategories() != null && !raceDef.getAllowedCosmeticCategories().isEmpty()) {
             RpgLogging.debugDeveloper("[RaceSystem] TODO: Apply AllowedCosmeticCategories for ", raceDef.getRaceId());
         }
+    }
+
+    private void applyHeroRaceStartingLevel(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull RaceDefinition raceDef,
+            @Nonnull Store<EntityStore> store) {
+        if (!raceDef.isHeroRace()) {
+            return;
+        }
+
+        var levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        if (levelSystem == null) {
+            return;
+        }
+
+        int targetLevel = raceDef.getInitialCharacterLevel();
+        int currentLevel = levelSystem.getLevel(entityRef, "Base_Character_Level");
+        if (targetLevel <= currentLevel) {
+            return;
+        }
+
+        levelSystem.addLevels(entityRef, "Base_Character_Level", targetLevel - currentLevel, store,
+                store.getExternalData().getWorld());
     }
 
     @Nonnull

@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
 import org.pixelbays.rpg.race.system.RaceSystem;
@@ -27,11 +28,13 @@ public class RaceListCommand extends AbstractPlayerCommand {
 
     private final RaceManagementSystem raceManagementSystem;
     private final RaceSystem raceSystem;
+    private final ExpansionManager expansionManager;
 
     public RaceListCommand() {
         super("list", "List all available races");
         this.raceManagementSystem = ExamplePlugin.get().getRaceManagementSystem();
         this.raceSystem = ExamplePlugin.get().getRaceSystem();
+        this.expansionManager = ExamplePlugin.get().getExpansionManager();
     }
 
     @Override
@@ -60,9 +63,14 @@ public class RaceListCommand extends AbstractPlayerCommand {
 
             String raceId = raceDef.getRaceId();
             boolean isActive = raceId != null && raceId.equals(activeRaceId);
+                boolean hasExpansionAccess = expansionManager.hasAccess(playerRef, raceDef.getRequiredExpansionIds());
                 Message status = Message.translation(isActive
                     ? "pixelbays.rpg.race.status.selected"
-                    : (raceDef.isEnabled() ? "pixelbays.rpg.race.status.available" : "pixelbays.rpg.race.status.disabled"));
+                    : (!raceDef.isEnabled()
+                        ? "pixelbays.rpg.race.status.disabled"
+                        : (hasExpansionAccess
+                            ? "pixelbays.rpg.race.status.available"
+                            : "pixelbays.rpg.race.status.expansionLocked")));
 
             String displayName = raceDef.getDisplayName() != null && !raceDef.getDisplayName().isEmpty()
                     ? raceDef.getDisplayName()
@@ -72,6 +80,10 @@ public class RaceListCommand extends AbstractPlayerCommand {
                     .param("status", status)
                     .param("name", displayName)
                     .param("id", raceId));
+                if (!hasExpansionAccess) {
+                player.sendMessage(Message.translation("pixelbays.rpg.race.list.expansionRequired")
+                    .param("expansions", expansionManager.describeRequirements(raceDef.getRequiredExpansionIds())));
+                }
         }
     }
 }
