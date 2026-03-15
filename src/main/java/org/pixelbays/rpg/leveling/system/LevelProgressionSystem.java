@@ -9,6 +9,9 @@ import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.economy.currency.CurrencyManager;
+import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
+import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
@@ -275,6 +278,31 @@ public class LevelProgressionSystem {
             levelData.addSkillPoints(rewards.getSkillPoints());
             RpgLogging.debugDeveloper("[LevelSystem] Granted %d skill points (before=%d, after=%d)",
                     rewards.getSkillPoints(), beforeSkillPoints, levelData.getAvailableSkillPoints());
+        }
+
+        // Grant currency rewards
+        if (rewards.getCurrencyRewards() != null && !rewards.getCurrencyRewards().isEmpty() && store != null) {
+            PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
+            if (playerRef != null) {
+                CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+                for (Map.Entry<String, Long> entry : rewards.getCurrencyRewards().entrySet()) {
+                    String currencyId = entry.getKey();
+                    Long amount = entry.getValue();
+                    if (currencyId == null || currencyId.isBlank() || amount == null || amount <= 0L) {
+                        continue;
+                    }
+
+                    var result = currencyManager.addBalance(CurrencyScope.Character, playerRef.getUuid().toString(),
+                            currencyId, amount.longValue());
+                    RpgLogging.debugDeveloper(
+                            "[LevelSystem] Granted currency reward: level=%d system=%s currency=%s amount=%d success=%s",
+                            newLevel, systemId, currencyId, amount, result.isSuccess());
+                }
+            } else {
+                RpgLogging.debugDeveloper(
+                        "[LevelSystem] Skipped currency rewards for non-player entity: level=%d system=%s",
+                        newLevel, systemId);
+            }
         }
 
         // Apply stat increases
@@ -582,6 +610,10 @@ public class LevelProgressionSystem {
             int level,
             @Nonnull Store<EntityStore> store,
             boolean exactLevel) {
+        if (!shouldAutoLearnClassAbilitiesOnLevelUp()) {
+            return;
+        }
+
         var classSystem = ExamplePlugin.get().getClassManagementSystem();
         java.util.List<String> classIds = classSystem.getClassesForLevelSystem(systemId);
         if (classIds.isEmpty()) {
@@ -625,6 +657,20 @@ public class LevelProgressionSystem {
                 }
             }
         }
+    }
+
+    private boolean shouldAutoLearnClassAbilitiesOnLevelUp() {
+        var assetMap = RpgModConfig.getAssetMap();
+        if (assetMap == null) {
+            return true;
+        }
+
+        RpgModConfig config = assetMap.getAsset("Default");
+        if (config == null && !assetMap.getAssetMap().isEmpty()) {
+            config = assetMap.getAssetMap().values().iterator().next();
+        }
+
+        return config == null || config.shouldAutoLearnClassAbilitiesOnLevelUp();
     }
 
     /**

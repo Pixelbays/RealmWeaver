@@ -5,9 +5,16 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
+import org.pixelbays.rpg.economy.currency.CurrencyManager;
+import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
+import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
+import org.pixelbays.rpg.economy.currency.config.CurrencyTypeDefinition;
+import org.pixelbays.rpg.economy.currency.config.CurrencyTypeRegistry;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 import org.pixelbays.rpg.leveling.config.settings.LevelingModSettings.HardcoreLossType;
@@ -17,6 +24,7 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathComponent;
 import com.hypixel.hytale.server.core.modules.entity.damage.DeathSystems;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -96,6 +104,74 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 				statSystem.recalculateRaceStatBonuses(ref, store);
 			}
 		}
+
+		applyCurrencyPenalty(ref, store, config);
+	}
+
+	private void applyCurrencyPenalty(
+			@Nonnull Ref<EntityStore> ref,
+			@Nonnull Store<EntityStore> store,
+			@Nonnull RpgModConfig config) {
+		if (!config.isHardcoreCurrencyLossEnabled()) {
+			return;
+		}
+
+		int lossPercent = clampPercent(config.getHardcoreCurrencyLossPercent());
+		if (lossPercent <= 0) {
+			return;
+		}
+
+		Player player = store.getComponent(ref, Player.getComponentType());
+		PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+		if (player == null || playerRef == null) {
+			return;
+		}
+
+		CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+		for (CurrencyScope scope : config.getHardcoreCurrencyLossScopes()) {
+			if (scope == null) {
+				continue;
+			}
+
+			String ownerId = resolveCurrencyOwnerId(scope, playerRef);
+			if (ownerId == null || ownerId.isBlank()) {
+				continue;
+			}
+
+			CurrencyAccessContext accessContext = scope == CurrencyScope.Character
+					? CurrencyAccessContext.fromInventory(player.getInventory())
+					: CurrencyAccessContext.empty();
+
+			for (CurrencyTypeDefinition definition : CurrencyTypeRegistry.getByScope(scope)) {
+				if (definition == null || !definition.isEnabled()) {
+					continue;
+				}
+
+				long balance = currencyManager.getBalance(scope, ownerId, definition.getId(), accessContext);
+				long penalty = (long) Math.floor(balance * (lossPercent / 100f));
+				if (penalty <= 0L) {
+					continue;
+				}
+
+				var result = currencyManager.spend(scope, ownerId,
+						new CurrencyAmountDefinition(definition.getId(), penalty), accessContext);
+				RpgLogging.debugDeveloper(
+						"[Hardcore] Applied currency loss: scope=%s currency=%s amount=%s success=%s entity=%s",
+						scope, definition.getId(), penalty, result.isSuccess(), ref);
+			}
+		}
+	}
+
+	private String resolveCurrencyOwnerId(@Nonnull CurrencyScope scope, @Nonnull PlayerRef playerRef) {
+		return switch (scope) {
+			case Character, Account -> playerRef.getUuid().toString();
+			case Guild -> {
+				Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
+				yield guild == null ? null : guild.getId().toString();
+			}
+			case Global -> "global";
+			case Custom -> null;
+		};
 	}
 
 	private int clampPercent(int percent) {
