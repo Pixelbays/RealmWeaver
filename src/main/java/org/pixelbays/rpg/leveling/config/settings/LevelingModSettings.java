@@ -69,9 +69,6 @@ public class LevelingModSettings {
             .append(new KeyedCodec<>("BaseXpMultiplier", Codec.FLOAT, false, true),
                     (i, s) -> i.baseXpMultiplier = s, i -> i.baseXpMultiplier)
             .add()
-            .append(new KeyedCodec<>("DefaultPlayerProfileCount", Codec.INTEGER, false, true),
-                    (i, s) -> i.defaultPlayerProfileCount = s, i -> i.defaultPlayerProfileCount)
-            .add()
             .build();
 
     private boolean enabled;
@@ -86,7 +83,6 @@ public class LevelingModSettings {
     private int hardcoreCurrencyLossPercent;
     private List<CurrencyScope> hardcoreCurrencyLossScopes;
     private float baseXpMultiplier;
-    private int defaultPlayerProfileCount;
 
     public LevelingModSettings() {
         this.enabled = true;
@@ -101,7 +97,6 @@ public class LevelingModSettings {
         this.hardcoreCurrencyLossPercent = 25;
         this.hardcoreCurrencyLossScopes = new ArrayList<>(List.of(CurrencyScope.Character));
         this.baseXpMultiplier = 1.0f;
-        this.defaultPlayerProfileCount = 3;
     }
 
     public boolean isEnabled() {
@@ -150,9 +145,5 @@ public class LevelingModSettings {
 
     public float getBaseXpMultiplier() {
         return baseXpMultiplier;
-    }
-
-    public int getDefaultPlayerProfileCount() {
-        return defaultPlayerProfileCount;
     }
 }

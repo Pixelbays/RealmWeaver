@@ -136,7 +136,7 @@ public class LevelProgressionSystem {
         LevelProgressionComponent levelComp = getOrCreateComponent(entityRef);
         LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
 
-        ensureExpToNextLevel(levelData, config);
+        ensureExpToNextLevel(entityRef, levelData, config);
 
         // Check prerequisites
         if (!checkPrerequisites(levelComp, config)) {
@@ -145,7 +145,8 @@ public class LevelProgressionSystem {
         }
 
         // Check if at max level
-        if (config.getMaxLevel() > 0 && levelData.getCurrentLevel() >= config.getMaxLevel()) {
+        int effectiveMaxLevel = getEffectiveMaxLevel(entityRef, config);
+        if (effectiveMaxLevel > 0 && levelData.getCurrentLevel() >= effectiveMaxLevel) {
             return; // Already at max level
         }
 
@@ -167,7 +168,7 @@ public class LevelProgressionSystem {
         }
 
         // Update exp required for next level
-        updateExpToNextLevel(levelData, config);
+        updateExpToNextLevel(entityRef, levelData, config);
     }
 
     /**
@@ -292,7 +293,12 @@ public class LevelProgressionSystem {
                         continue;
                     }
 
-                    var result = currencyManager.addBalance(CurrencyScope.Character, playerRef.getUuid().toString(),
+                        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+                        if (characterOwnerId.isBlank()) {
+                        continue;
+                        }
+
+                        var result = currencyManager.addBalance(CurrencyScope.Character, characterOwnerId,
                             currencyId, amount.longValue());
                     RpgLogging.debugDeveloper(
                             "[LevelSystem] Granted currency reward: level=%d system=%s currency=%s amount=%d success=%s",
@@ -346,11 +352,14 @@ public class LevelProgressionSystem {
     /**
      * Update the exp required for next level based on config
      */
-    private void updateExpToNextLevel(LevelProgressionComponent.LevelSystemData levelData, LevelSystemConfig config) {
+    private void updateExpToNextLevel(@Nullable Ref<EntityStore> entityRef,
+            LevelProgressionComponent.LevelSystemData levelData,
+            LevelSystemConfig config) {
         int nextLevel = levelData.getCurrentLevel() + 1;
+        int effectiveMaxLevel = getEffectiveMaxLevel(entityRef, config);
 
         // Check if at max level
-        if (config.getMaxLevel() > 0 && levelData.getCurrentLevel() >= config.getMaxLevel()) {
+        if (effectiveMaxLevel > 0 && levelData.getCurrentLevel() >= effectiveMaxLevel) {
             levelData.setExpToNextLevel(0); // No more levels
             return;
         }
@@ -409,14 +418,15 @@ public class LevelProgressionSystem {
         LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
 
         // Set starting level
-        levelData.setCurrentLevel(config.getStartingLevel());
+        int startingLevel = Math.max(1, Math.min(config.getStartingLevel(), getEffectiveMaxLevel(entityRef, config)));
+        levelData.setCurrentLevel(startingLevel);
         levelData.setCurrentExp(0);
 
         // Calculate exp to next level
-        updateExpToNextLevel(levelData, config);
+        updateExpToNextLevel(entityRef, levelData, config);
 
         RpgLogging.debugDeveloper("[LevelSystem] Initialized %s for entity at level %s", systemId,
-            config.getStartingLevel());
+            startingLevel);
     }
 
     /**
@@ -589,12 +599,12 @@ public class LevelProgressionSystem {
         LevelProgressionComponent.LevelSystemData levelData = levelComp.getOrCreateSystem(systemId);
 
         // Clamp level to valid range
-        int maxLevel = getEffectiveMaxLevel(config);
+        int maxLevel = getEffectiveMaxLevel(entityRef, config);
         int clampedLevel = Math.max(1, Math.min(level, maxLevel));
 
         levelData.setCurrentLevel(clampedLevel);
         levelData.setCurrentExp(0);
-        updateExpToNextLevel(levelData, config);
+        updateExpToNextLevel(entityRef, levelData, config);
 
         if (store != null) {
             unlockClassAbilitiesForLevel(entityRef, systemId, clampedLevel, store, false);
@@ -705,7 +715,7 @@ public class LevelProgressionSystem {
         int newLevel = currentLevel + levelsToAdd;
 
         // Clamp to valid range
-        int maxLevel = getEffectiveMaxLevel(config);
+        int maxLevel = getEffectiveMaxLevel(entityRef, config);
         newLevel = Math.max(1, Math.min(newLevel, maxLevel));
 
         if (newLevel > currentLevel) {
@@ -715,7 +725,7 @@ public class LevelProgressionSystem {
 
         levelData.setCurrentLevel(newLevel);
         levelData.setCurrentExp(0);
-        updateExpToNextLevel(levelData, config);
+        updateExpToNextLevel(entityRef, levelData, config);
 
         refreshClassStatsIfNeeded(entityRef, systemId, store);
     }
@@ -749,7 +759,7 @@ public class LevelProgressionSystem {
         // Manually check for level ups
         int newLevel = currentLevel;
         float remainingExp = clampedExp;
-        int maxLevel = getEffectiveMaxLevel(config);
+        int maxLevel = getEffectiveMaxLevel(entityRef, config);
 
         while (remainingExp >= levelData.getExpToNextLevel() && levelData.getExpToNextLevel() > 0
                 && newLevel < maxLevel) {
@@ -767,7 +777,7 @@ public class LevelProgressionSystem {
             processLevelUps(entityRef, systemId, currentLevel, newLevel, levelData, config, store, world);
         }
 
-        updateExpToNextLevel(levelData, config);
+        updateExpToNextLevel(entityRef, levelData, config);
 
         refreshClassStatsIfNeeded(entityRef, systemId, store);
     }
@@ -950,7 +960,7 @@ public class LevelProgressionSystem {
             return 0;
 
         int level = config.getStartingLevel();
-        int maxLevel = getEffectiveMaxLevel(config);
+        int maxLevel = getEffectiveMaxLevel(null, config);
 
         float expAccumulated = 0f;
         while (level < maxLevel) {
@@ -984,16 +994,32 @@ public class LevelProgressionSystem {
         return component;
     }
 
-    private void ensureExpToNextLevel(@Nonnull LevelProgressionComponent.LevelSystemData levelData,
+    private void ensureExpToNextLevel(@Nullable Ref<EntityStore> entityRef,
+            @Nonnull LevelProgressionComponent.LevelSystemData levelData,
             @Nonnull LevelSystemConfig config) {
-        if (levelData.getExpToNextLevel() <= 0 && (config.getMaxLevel() <= 0
-                || levelData.getCurrentLevel() < config.getMaxLevel())) {
-            updateExpToNextLevel(levelData, config);
+        int effectiveMaxLevel = getEffectiveMaxLevel(entityRef, config);
+        if (levelData.getExpToNextLevel() <= 0 && (effectiveMaxLevel <= 0
+                || levelData.getCurrentLevel() < effectiveMaxLevel)) {
+            updateExpToNextLevel(entityRef, levelData, config);
         }
     }
 
     private int getEffectiveMaxLevel(@Nonnull LevelSystemConfig config) {
         return config.getMaxLevel() > 0 ? config.getMaxLevel() : 999;
+    }
+
+    private int getEffectiveMaxLevel(@Nullable Ref<EntityStore> entityRef, @Nonnull LevelSystemConfig config) {
+        int baseMaxLevel = getEffectiveMaxLevel(config);
+        if (entityRef == null || !entityRef.isValid() || config.getMaxLevel() <= 0) {
+            return baseMaxLevel;
+        }
+
+        PlayerRef playerRef = entityRef.getStore().getComponent(entityRef, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return baseMaxLevel;
+        }
+
+        return ExamplePlugin.get().getExpansionManager().getAccessibleLevelCap(playerRef, config.getMaxLevel());
     }
 
     private void refreshClassStatsIfNeeded(@Nonnull Ref<EntityStore> entityRef,

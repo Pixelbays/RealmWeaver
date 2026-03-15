@@ -164,7 +164,8 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 
 	private String resolveCurrencyOwnerId(@Nonnull CurrencyScope scope, @Nonnull PlayerRef playerRef) {
 		return switch (scope) {
-			case Character, Account -> playerRef.getUuid().toString();
+			case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+			case Account -> playerRef.getUuid().toString();
 			case Guild -> {
 				Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
 				yield guild == null ? null : guild.getId().toString();

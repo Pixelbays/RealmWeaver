@@ -329,11 +329,6 @@ public class LevelSystemConfig implements
         if (level < 1)
             return 0;
 
-        // Check if at max level
-        if (MaxLevel > 0 && level > MaxLevel) {
-            return 0; // No exp required beyond max
-        }
-
         // Fallback to simple linear
         return 100 * level;
     }
