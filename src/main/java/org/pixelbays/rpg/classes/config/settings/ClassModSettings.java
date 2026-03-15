@@ -40,6 +40,11 @@ public class ClassModSettings {
         AllMatchingTags
     }
 
+    public enum AbilityLearningMode {
+        AutoLearnOnLevelUp,
+        TrainerRequired
+    }
+
     public static final BuilderCodec<ClassModSettings> CODEC = BuilderCodec
             .builder(ClassModSettings.class, ClassModSettings::new)
             .append(new KeyedCodec<>("Enabled", Codec.BOOLEAN, false, true),
@@ -73,6 +78,9 @@ public class ClassModSettings {
             .append(new KeyedCodec<>("RequireClassAtStart", Codec.BOOLEAN, false, true),
                     (i, s) -> i.requireClassAtStart = s, i -> i.requireClassAtStart)
             .add()
+                .append(new KeyedCodec<>("AbilityLearningMode", new EnumCodec<>(AbilityLearningMode.class), false, true),
+                    (i, s) -> i.abilityLearningMode = s, i -> i.abilityLearningMode)
+                .add()
             .build();
 
     private boolean enabled;
@@ -85,6 +93,7 @@ public class ClassModSettings {
     private int maxProfessionClasses;
     private String classSwitchingRules;
     private boolean requireClassAtStart;
+    private AbilityLearningMode abilityLearningMode;
 
     public ClassModSettings() {
         this.enabled = true;
@@ -97,6 +106,7 @@ public class ClassModSettings {
         this.maxProfessionClasses = 2;
         this.classSwitchingRules = "";
         this.requireClassAtStart = false;
+        this.abilityLearningMode = AbilityLearningMode.AutoLearnOnLevelUp;
     }
 
     public boolean isEnabled() {
@@ -137,5 +147,13 @@ public class ClassModSettings {
 
     public boolean isRequireClassAtStart() {
         return requireClassAtStart;
+    }
+
+    public AbilityLearningMode getAbilityLearningMode() {
+        return abilityLearningMode;
+    }
+
+    public boolean shouldAutoLearnAbilitiesOnLevelUp() {
+        return abilityLearningMode == AbilityLearningMode.AutoLearnOnLevelUp;
     }
 }

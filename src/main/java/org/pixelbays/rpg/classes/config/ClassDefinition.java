@@ -11,6 +11,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
+import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
+import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.config.builder.AbilityRefCodec;
 import org.pixelbays.rpg.global.config.builder.LevelSystemRefCodec;
@@ -792,6 +794,19 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     }
 
     /**
+     * Get the configured unlock entry for an ability. Returns null if not found.
+     */
+    @Nullable
+    public AbilityUnlock getAbilityUnlock(@Nonnull String abilityId) {
+        for (AbilityUnlock unlock : AbilityUnlocks) {
+            if (abilityId.equals(unlock.getAbilityId())) {
+                return unlock;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Get level milestone at a specific level (if any)
      */
     @Nullable
@@ -957,18 +972,23 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                 .append(new KeyedCodec<>("ItemRewards", STRING_LIST_CODEC, false, true),
                         (i, s) -> i.itemRewards = s, i -> i.itemRewards)
                 .add()
+                .append(new KeyedCodec<>("LearnCosts", new ArrayCodec<>(AbilityLearnCost.CODEC, AbilityLearnCost[]::new), false, true),
+                    (i, s) -> i.learnCosts = s, i -> i.learnCosts)
+                .add()
                 .build();
 
         private String abilityId;
         private int unlockLevel; // Level at which ability unlocks
         private int maxRank; // Maximum rank for this ability (0 = no ranks)
         private List<String> itemRewards; // Items rewarded when this ability unlocks
+            private AbilityLearnCost[] learnCosts; // Optional trainer-style costs to learn this ability
 
         public AbilityUnlock() {
             this.abilityId = "";
             this.unlockLevel = 1;
             this.maxRank = 0;
             this.itemRewards = new ArrayList<>();
+                this.learnCosts = new AbilityLearnCost[0];
         }
 
         public String getAbilityId() {
@@ -1001,6 +1021,77 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
         public void setItemRewards(List<String> itemRewards) {
             this.itemRewards = itemRewards;
+        }
+
+        public List<AbilityLearnCost> getLearnCosts() {
+            return learnCosts == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(learnCosts));
+        }
+
+        public void setLearnCosts(List<AbilityLearnCost> learnCosts) {
+            this.learnCosts = learnCosts == null ? new AbilityLearnCost[0] : learnCosts.toArray(AbilityLearnCost[]::new);
+        }
+
+        public boolean hasLearnCosts() {
+            return learnCosts != null && learnCosts.length > 0;
+        }
+    }
+
+    public static class AbilityLearnCost {
+        public static final BuilderCodec<AbilityLearnCost> CODEC = BuilderCodec
+                .builder(AbilityLearnCost.class, AbilityLearnCost::new)
+                .append(new KeyedCodec<>("CurrencyId", Codec.STRING, false, true),
+                        (i, s) -> i.currencyId = s, i -> i.currencyId)
+                .add()
+                .append(new KeyedCodec<>("Amount", Codec.LONG, false, true),
+                        (i, s) -> i.amount = s, i -> i.amount)
+                .add()
+                .append(new KeyedCodec<>("CurrencyScope", new EnumCodec<>(CurrencyScope.class), false, true),
+                        (i, s) -> i.currencyScope = s, i -> i.currencyScope)
+                .add()
+                .build();
+
+        private String currencyId;
+        private long amount;
+        private CurrencyScope currencyScope;
+
+        public AbilityLearnCost() {
+            this.currencyId = "";
+            this.amount = 0L;
+            this.currencyScope = CurrencyScope.Character;
+        }
+
+        public String getCurrencyId() {
+            return currencyId == null ? "" : currencyId;
+        }
+
+        public void setCurrencyId(String currencyId) {
+            this.currencyId = currencyId;
+        }
+
+        public long getAmount() {
+            return amount;
+        }
+
+        public void setAmount(long amount) {
+            this.amount = amount;
+        }
+
+        @Nonnull
+        public CurrencyScope getCurrencyScope() {
+            return currencyScope == null ? CurrencyScope.Character : currencyScope;
+        }
+
+        public void setCurrencyScope(@Nullable CurrencyScope currencyScope) {
+            this.currencyScope = currencyScope == null ? CurrencyScope.Character : currencyScope;
+        }
+
+        public boolean isFree() {
+            return amount <= 0L || getCurrencyId().isEmpty();
+        }
+
+        @Nonnull
+        public CurrencyAmountDefinition toCurrencyAmountDefinition() {
+            return new CurrencyAmountDefinition(getCurrencyId(), amount);
         }
     }
 
@@ -1138,6 +1229,9 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                 .append(new KeyedCodec<>("MaxPoints", Codec.INTEGER, false, true), (i, s) -> i.maxPoints = s,
                         i -> i.maxPoints)
                 .add()
+            .append(new KeyedCodec<>("PrerequisiteRankMode", new EnumCodec<>(TalentPrerequisiteRankMode.class), false, true),
+                (i, s) -> i.prerequisiteRankMode = s, i -> i.prerequisiteRankMode)
+            .add()
                 .append(new KeyedCodec<>("Nodes", new ArrayCodec<>(TalentNode.CODEC, TalentNode[]::new), false, true),
                         (i, s) -> i.nodes = s, i -> i.nodes)
                 .add()
@@ -1148,6 +1242,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         private String description;
         private String iconId;
         private int maxPoints;
+        private TalentPrerequisiteRankMode prerequisiteRankMode;
         private TalentNode[] nodes;
 
         public TalentTree() {
@@ -1156,6 +1251,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
             this.description = "";
             this.iconId = "";
             this.maxPoints = 0;
+            this.prerequisiteRankMode = TalentPrerequisiteRankMode.OnePoint;
             this.nodes = new TalentNode[0];
         }
 
@@ -1199,6 +1295,17 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
             this.maxPoints = maxPoints;
         }
 
+        @Nonnull
+        public TalentPrerequisiteRankMode getPrerequisiteRankMode() {
+            return prerequisiteRankMode == null ? TalentPrerequisiteRankMode.OnePoint : prerequisiteRankMode;
+        }
+
+        public void setPrerequisiteRankMode(@Nullable TalentPrerequisiteRankMode prerequisiteRankMode) {
+            this.prerequisiteRankMode = prerequisiteRankMode == null
+                    ? TalentPrerequisiteRankMode.OnePoint
+                    : prerequisiteRankMode;
+        }
+
         public TalentNode[] getNodes() {
             return nodes;
         }
@@ -1206,6 +1313,11 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         public void setNodes(TalentNode[] nodes) {
             this.nodes = nodes;
         }
+    }
+
+    public enum TalentPrerequisiteRankMode {
+        OnePoint,
+        FullRank
     }
 
     /**

@@ -1,11 +1,13 @@
 package org.pixelbays.rpg.classes.system;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.event.ClassAbilityUnlockedEvent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
@@ -13,21 +15,30 @@ import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.event.ActiveClassChangedEvent;
 import org.pixelbays.rpg.classes.event.ClassLearnedEvent;
 import org.pixelbays.rpg.classes.event.ClassUnlearnedEvent;
+import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
+import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
+import org.pixelbays.rpg.economy.currency.CurrencyManager;
+import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
+import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 import org.pixelbays.rpg.race.system.RaceSystem;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
  * System that manages class/job learning, switching, and prerequisites.
  * Integrates with LevelProgressionSystem for class leveling.
  */
+@SuppressWarnings("null")
 public class ClassManagementSystem {
     // Reference to level progression system for class leveling
     private final LevelProgressionSystem levelProgressionSystem;
@@ -120,16 +131,12 @@ public class ClassManagementSystem {
         }
         String resolvedSystemId = systemId == null ? "" : systemId;
 
-        ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
-        if (abilityComp == null) {
-            abilityComp = store.addComponent(entityRef, ClassAbilityComponent.getComponentType());
-        }
-
-        for (ClassDefinition.AbilityUnlock unlock : classDef.getAbilityUnlocksAtLevel(currentLevel)) {
-            String abilityId = unlock.getAbilityId();
-            if (abilityId != null && !abilityId.isEmpty() && !abilityComp.hasAbility(abilityId)) {
-                abilityComp.unlockAbility(abilityId, classId, 1);
-                ClassAbilityUnlockedEvent.dispatch(entityRef, classId, abilityId, 1, resolvedSystemId, false);
+        if (shouldAutoLearnAbilitiesOnLevelUp()) {
+            for (ClassDefinition.AbilityUnlock unlock : classDef.getAbilityUnlocksAtLevel(currentLevel)) {
+                String abilityId = unlock.getAbilityId();
+                if (abilityId != null && !abilityId.isEmpty()) {
+                    unlockAbility(entityRef, classId, resolvedSystemId, abilityId, store);
+                }
             }
         }
 
@@ -405,6 +412,90 @@ public class ClassManagementSystem {
     }
 
     /**
+     * Preview whether an ability can be manually learned and whether the entity can
+     * afford any configured learn costs.
+     */
+    @Nonnull
+    public ClassAbilityLearnResult previewAbilityLearn(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull String classId,
+            @Nonnull String abilityId,
+            @Nonnull Store<EntityStore> store) {
+        return validateAbilityLearn(entityRef, classId, abilityId, store, true,
+                resolveCharacterCurrencyAccessContext(entityRef, store));
+    }
+
+    /**
+     * Manually learn a class ability, optionally charging configured learn costs.
+     * This is intended for future trainer-style interactions.
+     */
+    @Nonnull
+    public ClassAbilityLearnResult learnAbility(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull String classId,
+            @Nonnull String abilityId,
+            boolean chargeLearnCosts,
+            @Nonnull Store<EntityStore> store) {
+        return learnAbility(entityRef, classId, abilityId, chargeLearnCosts, store,
+                resolveCharacterCurrencyAccessContext(entityRef, store));
+    }
+
+    /**
+     * Manually learn a class ability using an explicit character currency access
+     * context for physical-item currencies.
+     */
+    @Nonnull
+    public ClassAbilityLearnResult learnAbility(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull String classId,
+            @Nonnull String abilityId,
+            boolean chargeLearnCosts,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull CurrencyAccessContext characterCurrencyAccessContext) {
+        ClassAbilityLearnResult validation = validateAbilityLearn(entityRef, classId, abilityId, store,
+                chargeLearnCosts, characterCurrencyAccessContext);
+        if (!validation.isSuccess()) {
+            return validation;
+        }
+
+        ClassDefinition.AbilityUnlock unlock = validation.getAbilityUnlock();
+        if (unlock == null) {
+            return ClassAbilityLearnResult.failure("ERROR: Ability unlock is not configured", classId, abilityId);
+        }
+
+        if (chargeLearnCosts && unlock.hasLearnCosts()) {
+            CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+            List<ClassDefinition.AbilityLearnCost> learnCosts = sanitizeLearnCosts(unlock.getLearnCosts());
+            for (ClassDefinition.AbilityLearnCost learnCost : learnCosts) {
+                if (learnCost == null) {
+                    continue;
+                }
+                CurrencyScope scope = learnCost.getCurrencyScope();
+                String ownerId = resolveCurrencyOwnerId(scope, entityRef, store);
+                if (ownerId == null || ownerId.isBlank()) {
+                    return ClassAbilityLearnResult.failure(
+                            "ERROR: Could not resolve currency owner for scope " + scope.name(),
+                            classId,
+                            abilityId,
+                            unlock);
+                }
+                CurrencyAccessContext accessContext = scope == CurrencyScope.Character
+                        ? characterCurrencyAccessContext
+                        : CurrencyAccessContext.empty();
+                CurrencyAmountDefinition amountDefinition = learnCost.toCurrencyAmountDefinition();
+                CurrencyActionResult spendResult = currencyManager.spend(scope, ownerId, amountDefinition, accessContext);
+                if (!spendResult.isSuccess()) {
+                    return ClassAbilityLearnResult.failure(spendResult.getMessage(), classId, abilityId, unlock);
+                }
+            }
+        }
+
+        String resolvedSystemId = resolveAbilityLevelSystemId(getClassDefinition(classId));
+        if (!unlockAbility(entityRef, classId, resolvedSystemId, abilityId, store)) {
+            return ClassAbilityLearnResult.failure("ERROR: Ability is already learned", classId, abilityId, unlock);
+        }
+
+        return ClassAbilityLearnResult.success("SUCCESS: Learned ability " + abilityId, classId, abilityId, unlock);
+    }
+
+    /**
      * Ensure the entity has at least one class learned.
      *
      * @return true if a class was learned during this call
@@ -415,7 +506,7 @@ public class ClassManagementSystem {
             return false;
         }
 
-        ClassComponent resolved = getOrCreateClassComponent(entityRef, store);
+        getOrCreateClassComponent(entityRef, store);
 
         ClassDefinition startingClass = null;
         java.util.List<ClassDefinition> candidates = new java.util.ArrayList<>(getAllClassDefinitions().values());
@@ -464,6 +555,171 @@ public class ClassManagementSystem {
             component = store.addComponent(entityRef, ClassComponent.getComponentType());
         }
         return component;
+    }
+
+    @Nonnull
+    private ClassAbilityLearnResult validateAbilityLearn(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull String classId,
+            @Nonnull String abilityId,
+            @Nonnull Store<EntityStore> store,
+            boolean validateLearnCosts,
+            @Nonnull CurrencyAccessContext characterCurrencyAccessContext) {
+        ClassDefinition classDef = getClassDefinition(classId);
+        if (classDef == null) {
+            return ClassAbilityLearnResult.failure("ERROR: Unknown class: " + classId, classId, abilityId);
+        }
+        if (!classDef.isEnabled()) {
+            return ClassAbilityLearnResult.failure("ERROR: Class " + classId + " is not available", classId,
+                    abilityId);
+        }
+
+        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
+        if (classComp == null || !classComp.hasLearnedClass(classId)) {
+            return ClassAbilityLearnResult.failure("ERROR: Must learn class before learning its abilities", classId,
+                    abilityId);
+        }
+
+        ClassDefinition.AbilityUnlock unlock = classDef.getAbilityUnlock(abilityId);
+        if (unlock == null) {
+            return ClassAbilityLearnResult.failure("ERROR: Ability " + abilityId + " is not configured for class "
+                    + classId, classId, abilityId);
+        }
+
+        int currentLevel = resolveCurrentLevel(entityRef, classDef);
+        if (currentLevel < unlock.getUnlockLevel()) {
+            return ClassAbilityLearnResult.failure(
+                    "ERROR: Requires level " + unlock.getUnlockLevel() + " to learn " + abilityId,
+                    classId,
+                    abilityId,
+                    unlock);
+        }
+
+        ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
+        if (abilityComp != null && abilityComp.hasAbility(abilityId)) {
+            return ClassAbilityLearnResult.failure("ERROR: Ability is already learned", classId, abilityId, unlock);
+        }
+
+        if (validateLearnCosts && unlock.hasLearnCosts()) {
+            CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+            for (ClassDefinition.AbilityLearnCost learnCost : sanitizeLearnCosts(unlock.getLearnCosts())) {
+                if (learnCost == null) {
+                    continue;
+                }
+                CurrencyScope scope = learnCost.getCurrencyScope();
+                String ownerId = resolveCurrencyOwnerId(scope, entityRef, store);
+                if (ownerId == null || ownerId.isBlank()) {
+                    return ClassAbilityLearnResult.failure(
+                            "ERROR: Could not resolve currency owner for scope " + scope.name(),
+                            classId,
+                            abilityId,
+                            unlock);
+                }
+
+                CurrencyAccessContext accessContext = scope == CurrencyScope.Character
+                        ? characterCurrencyAccessContext
+                        : CurrencyAccessContext.empty();
+                if (!currencyManager.canAfford(scope, ownerId, learnCost.toCurrencyAmountDefinition(), accessContext)) {
+                    return ClassAbilityLearnResult.failure(
+                            "ERROR: Cannot afford learn cost for ability " + abilityId,
+                            classId,
+                            abilityId,
+                            unlock);
+                }
+            }
+        }
+
+        return ClassAbilityLearnResult.success("SUCCESS: Ability can be learned", classId, abilityId, unlock);
+    }
+
+    private boolean unlockAbility(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull String classId,
+            @Nonnull String resolvedSystemId,
+            @Nonnull String abilityId,
+            @Nonnull Store<EntityStore> store) {
+        ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
+        if (abilityComp == null) {
+            abilityComp = store.addComponent(entityRef, ClassAbilityComponent.getComponentType());
+        }
+
+        if (abilityComp.hasAbility(abilityId)) {
+            return false;
+        }
+
+        abilityComp.unlockAbility(abilityId, classId, 1);
+        ClassAbilityUnlockedEvent.dispatch(entityRef, classId, abilityId, 1, resolvedSystemId, false);
+        return true;
+    }
+
+    private boolean shouldAutoLearnAbilitiesOnLevelUp() {
+        RpgModConfig config = resolveConfig();
+        return config == null || config.shouldAutoLearnClassAbilitiesOnLevelUp();
+    }
+
+    private int resolveCurrentLevel(@Nonnull Ref<EntityStore> entityRef, @Nonnull ClassDefinition classDef) {
+        String systemId = resolveAbilityLevelSystemId(classDef);
+        if (systemId.isEmpty()) {
+            return 1;
+        }
+
+        int currentLevel = levelProgressionSystem.getLevel(entityRef, systemId);
+        return currentLevel <= 0 ? 1 : currentLevel;
+    }
+
+    @Nonnull
+    private String resolveAbilityLevelSystemId(@Nullable ClassDefinition classDef) {
+        if (classDef == null) {
+            return "";
+        }
+
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
+        return systemId == null ? "" : systemId;
+    }
+
+    @Nonnull
+    private List<ClassDefinition.AbilityLearnCost> sanitizeLearnCosts(
+            @Nullable List<ClassDefinition.AbilityLearnCost> learnCosts) {
+        List<ClassDefinition.AbilityLearnCost> resolved = new ArrayList<>();
+        if (learnCosts == null || learnCosts.isEmpty()) {
+            return resolved;
+        }
+
+        for (ClassDefinition.AbilityLearnCost learnCost : learnCosts) {
+            if (learnCost == null || learnCost.isFree()) {
+                continue;
+            }
+            resolved.add(learnCost);
+        }
+        return resolved;
+    }
+
+    @Nonnull
+    private CurrencyAccessContext resolveCharacterCurrencyAccessContext(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        Player player = store.getComponent(entityRef, Player.getComponentType());
+        if (player == null || player.getInventory() == null) {
+            return CurrencyAccessContext.empty();
+        }
+        return CurrencyAccessContext.fromInventory(player.getInventory());
+    }
+
+    @Nullable
+    private String resolveCurrencyOwnerId(@Nonnull CurrencyScope scope,
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return scope == CurrencyScope.Global ? "global" : null;
+        }
+
+        return switch (scope) {
+            case Character, Account -> playerRef.getUuid().toString();
+            case Guild -> {
+                Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
+                yield guild == null ? null : guild.getId().toString();
+            }
+            case Global -> "global";
+            case Custom -> null;
+        };
     }
 
     @Nullable

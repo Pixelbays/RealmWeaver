@@ -2,7 +2,6 @@ package org.pixelbays.rpg.classes.talent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -120,10 +119,18 @@ public class TalentSystem {
         List<String> prereqs = node.getRequiredNodes();
         if (prereqs != null) {
             for (String prereqNodeId : prereqs) {
-                // Find which tree this prereq belongs to (search all trees)
-                String prereqRank = findNodeRankInClass(classDef, classData, prereqNodeId);
-                if (prereqRank == null || Integer.parseInt(prereqRank) < 1) {
-                    return "ERROR: Prerequisite node not allocated: " + prereqNodeId;
+                ClassDefinition.TalentNode prereqNode = findNodeInClass(classDef, prereqNodeId);
+                if (prereqNode == null) {
+                    return "ERROR: Unknown prerequisite node: " + prereqNodeId;
+                }
+
+                int prereqRank = findNodeRankInClass(classDef, classData, prereqNodeId);
+                int requiredRank = tree.getPrerequisiteRankMode() == ClassDefinition.TalentPrerequisiteRankMode.FullRank
+                        ? prereqNode.getMaxRank()
+                        : 1;
+                if (prereqRank < requiredRank) {
+                    return String.format("ERROR: Prerequisite node %s requires %d/%d ranks",
+                            prereqNodeId, requiredRank, prereqNode.getMaxRank());
                 }
             }
         }
@@ -407,21 +414,29 @@ public class TalentSystem {
         return null;
     }
 
-    /**
-     * Search all trees to find the allocated rank of a node (returns null if not found in any tree).
-     * Returns the rank as a string, or null if not found.
-     */
-    @Nullable
-    private String findNodeRankInClass(@Nonnull ClassDefinition classDef,
+    private int findNodeRankInClass(@Nonnull ClassDefinition classDef,
             @Nonnull ClassComponent.ClassData classData,
             @Nonnull String nodeId) {
-        if (classDef.getTalentTrees() == null) return null;
+        if (classDef.getTalentTrees() == null) return 0;
         for (ClassDefinition.TalentTree tree : classDef.getTalentTrees()) {
             if (tree.getNodes() == null) continue;
             for (ClassDefinition.TalentNode node : tree.getNodes()) {
                 if (nodeId.equals(node.getNodeId())) {
-                    return String.valueOf(classData.getNodeRank(tree.getTreeId(), nodeId));
+                    return classData.getNodeRank(tree.getTreeId(), nodeId);
                 }
+            }
+        }
+        return 0;
+    }
+
+    @Nullable
+    private ClassDefinition.TalentNode findNodeInClass(@Nonnull ClassDefinition classDef,
+            @Nonnull String nodeId) {
+        if (classDef.getTalentTrees() == null) return null;
+        for (ClassDefinition.TalentTree tree : classDef.getTalentTrees()) {
+            ClassDefinition.TalentNode node = findNode(tree, nodeId);
+            if (node != null) {
+                return node;
             }
         }
         return null;
