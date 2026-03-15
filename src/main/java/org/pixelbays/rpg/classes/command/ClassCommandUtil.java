@@ -116,6 +116,11 @@ public final class ClassCommandUtil {
             }
         }
 
+        if (normalized.startsWith("Requires expansion access: ")) {
+            return Message.translation("pixelbays.rpg.class.error.requiresExpansion")
+                    .param("expansions", normalized.substring("Requires expansion access: ".length()));
+        }
+
         return Message.translation("pixelbays.rpg.common.unmappedMessage").param("text", normalized);
     }
 }

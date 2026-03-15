@@ -8,6 +8,7 @@ import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.expansion.ExpansionManager;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -26,10 +27,12 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 public class ClassListCommand extends AbstractPlayerCommand {
 
     private final ClassManagementSystem classSystem;
+    private final ExpansionManager expansionManager;
 
     public ClassListCommand() {
         super("list", "List all available classes");
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.expansionManager = ExamplePlugin.get().getExpansionManager();
     }
 
     @Override
@@ -54,6 +57,16 @@ public class ClassListCommand extends AbstractPlayerCommand {
             String classId = classDef.getId();
             boolean learned = classComp != null && classComp.hasLearnedClass(classId);
             boolean isPrimary = classComp != null && classId.equals(classComp.getPrimaryClassId());
+                boolean hasExpansionAccess = expansionManager.hasAccess(playerRef, classDef.getRequiredExpansionIds());
+
+                if (!hasExpansionAccess) {
+                player.sendMessage(Message.translation("pixelbays.rpg.class.list.entry.expansionLocked")
+                    .param("name", classDef.getDisplayName())
+                    .param("id", classId));
+                player.sendMessage(Message.translation("pixelbays.rpg.class.list.expansionRequired")
+                    .param("expansions", expansionManager.describeRequirements(classDef.getRequiredExpansionIds())));
+                continue;
+                }
 
             if (learned && isPrimary) {
                 player.sendMessage(Message.translation("pixelbays.rpg.class.list.entry.primary")

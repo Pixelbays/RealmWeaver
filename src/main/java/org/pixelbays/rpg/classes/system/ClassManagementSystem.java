@@ -20,6 +20,7 @@ import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
 import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
+import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
@@ -84,6 +85,15 @@ public class ClassManagementSystem {
             return "ERROR: Class " + classId + " is not available";
         }
 
+        PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
+        if (playerRef != null) {
+            ExpansionManager expansionManager = ExamplePlugin.get().getExpansionManager();
+            if (!expansionManager.hasAccess(playerRef, classDef.getRequiredExpansionIds())) {
+                return "ERROR: Requires expansion access: "
+                        + expansionManager.describeRequirements(classDef.getRequiredExpansionIds());
+            }
+        }
+
         // Get or create class component
         ClassComponent classComp = getOrCreateClassComponent(entityRef, store);
 
@@ -112,8 +122,20 @@ public class ClassManagementSystem {
         classComp.learnClass(classId);
 
         // Initialize class level system if needed
-        if (!classDef.getLevelSystemId().isEmpty() && !classDef.usesCharacterLevel()) {
-            levelProgressionSystem.initializeLevelSystem(entityRef, classDef.getLevelSystemId());
+        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
+        boolean initializedLevelSystem = false;
+        if (systemId != null && !systemId.isEmpty()
+                && !levelProgressionSystem.getAllLevelSystems(entityRef).contains(systemId)) {
+            levelProgressionSystem.initializeLevelSystem(entityRef, systemId);
+            initializedLevelSystem = true;
+        }
+
+        if (initializedLevelSystem) {
+            int initialClassLevel = classDef.getInitialClassLevel();
+            if (initialClassLevel > 1) {
+                levelProgressionSystem.addLevels(entityRef, systemId, initialClassLevel - 1, store,
+                        store.getExternalData().getWorld());
+            }
         }
 
         if (statSystem != null) {
@@ -122,7 +144,6 @@ public class ClassManagementSystem {
 
         // Unlock abilities available at current level
         int currentLevel = 1;
-        String systemId = classDef.usesCharacterLevel() ? "Base_Character_Level" : classDef.getLevelSystemId();
         if (systemId != null && !systemId.isEmpty()) {
             currentLevel = levelProgressionSystem.getLevel(entityRef, systemId);
             if (currentLevel <= 0) {
@@ -400,6 +421,11 @@ public class ClassManagementSystem {
             @Nonnull Store<EntityStore> store) {
         ClassDefinition classDef = getClassDefinition(classId);
         if (classDef == null || !classDef.isEnabled()) {
+            return false;
+        }
+
+        PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
+        if (playerRef != null && !ExamplePlugin.get().getExpansionManager().hasAccess(playerRef, classDef.getRequiredExpansionIds())) {
             return false;
         }
 
@@ -712,7 +738,8 @@ public class ClassManagementSystem {
         }
 
         return switch (scope) {
-            case Character, Account -> playerRef.getUuid().toString();
+            case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+            case Account -> playerRef.getUuid().toString();
             case Guild -> {
                 Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
                 yield guild == null ? null : guild.getId().toString();

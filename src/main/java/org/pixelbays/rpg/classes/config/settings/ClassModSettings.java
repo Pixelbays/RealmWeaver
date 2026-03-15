@@ -75,9 +75,6 @@ public class ClassModSettings {
             .append(new KeyedCodec<>("ClassSwitchingRules", Codec.STRING, false, true),
                     (i, s) -> i.classSwitchingRules = s, i -> i.classSwitchingRules)
             .add()
-            .append(new KeyedCodec<>("RequireClassAtStart", Codec.BOOLEAN, false, true),
-                    (i, s) -> i.requireClassAtStart = s, i -> i.requireClassAtStart)
-            .add()
                 .append(new KeyedCodec<>("AbilityLearningMode", new EnumCodec<>(AbilityLearningMode.class), false, true),
                     (i, s) -> i.abilityLearningMode = s, i -> i.abilityLearningMode)
                 .add()
@@ -92,7 +89,6 @@ public class ClassModSettings {
     private int maxCombatClasses;
     private int maxProfessionClasses;
     private String classSwitchingRules;
-    private boolean requireClassAtStart;
     private AbilityLearningMode abilityLearningMode;
 
     public ClassModSettings() {
@@ -105,7 +101,6 @@ public class ClassModSettings {
         this.maxCombatClasses = 1;
         this.maxProfessionClasses = 2;
         this.classSwitchingRules = "";
-        this.requireClassAtStart = false;
         this.abilityLearningMode = AbilityLearningMode.AutoLearnOnLevelUp;
     }
 
@@ -143,10 +138,6 @@ public class ClassModSettings {
 
     public String getClassSwitchingRules() {
         return classSwitchingRules;
-    }
-
-    public boolean isRequireClassAtStart() {
-        return requireClassAtStart;
     }
 
     public AbilityLearningMode getAbilityLearningMode() {

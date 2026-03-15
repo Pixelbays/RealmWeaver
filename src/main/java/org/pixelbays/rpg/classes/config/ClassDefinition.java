@@ -194,6 +194,10 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                     i -> i.Visible,
                     (i, parent) -> i.Visible = parent.Visible)
             .add()
+                .appendInherited(new KeyedCodec<>("RequiredExpansionIds", STRING_LIST_CODEC, false, true),
+                    (i, s) -> i.requiredExpansionIds = s, i -> i.requiredExpansionIds,
+                    (i, parent) -> i.requiredExpansionIds = parent.requiredExpansionIds)
+                .add()
                     .append(
                         new KeyedCodec<>("Prerequisites",
                                 new Object2IntMapCodec<>(Codec.STRING, Object2IntOpenHashMap::new), true),
@@ -225,6 +229,14 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                     (i, s) -> i.IsStartingClass = s, i -> i.IsStartingClass,
                     (i, parent) -> i.IsStartingClass = parent.IsStartingClass)
             .add()
+                .appendInherited(new KeyedCodec<>("IsHeroClass", Codec.BOOLEAN, false, true),
+                    (i, s) -> i.IsHeroClass = s, i -> i.IsHeroClass,
+                    (i, parent) -> i.IsHeroClass = parent.IsHeroClass)
+                .add()
+                .appendInherited(new KeyedCodec<>("HeroStartingLevel", Codec.INTEGER, false, true),
+                    (i, s) -> i.HeroStartingLevel = s, i -> i.HeroStartingLevel,
+                    (i, parent) -> i.HeroStartingLevel = parent.HeroStartingLevel)
+                .add()
                 .append(
                     new KeyedCodec<>("ResourceStats", STAT_ID_LIST_CODEC, false, true),
                     (i, s) -> i.ResourceStats = s,
@@ -375,6 +387,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     private String Icon; // Icon asset ID
     private boolean Enabled; // Can this class be learned?
     private boolean Visible; // Show in class selection UI?
+    private List<String> requiredExpansionIds;
     // === Inheritance ===
     private String Parent; // Parent class to extend from (e.g., "warrior" for Paladin)
 
@@ -387,6 +400,8 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     private String LevelSystemId; // Links to LevelProgressionSystem (e.g., "class_warrior")
     private boolean UsesCharacterLevel; // Use character level instead of separate class level?
     private boolean IsStartingClass; // Available from character creation?
+    private boolean IsHeroClass; // Starts above the baseline when first learned
+    private int HeroStartingLevel; // Starting level used for hero classes
 
     // === Resources ===
     private List<String> ResourceStats; // Priority list of resource stats (e.g., ["Mana", "Energy"])
@@ -416,12 +431,15 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         this.Icon = null;
         this.Enabled = true;
         this.Visible = true;
+        this.requiredExpansionIds = new ArrayList<>();
         this.Prerequisites = new Object2IntOpenHashMap<>();
         this.RequiredClasses = new ArrayList<>();
         this.ExclusiveWith = new ArrayList<>();
         this.LevelSystemId = "";
         this.UsesCharacterLevel = false;
         this.IsStartingClass = false;
+        this.IsHeroClass = false;
+        this.HeroStartingLevel = 1;
         this.ResourceStats = new ArrayList<>();
         this.BaseStatModifiers = new StatModifiers();
         this.PerLevelModifiers = new StatModifiers();
@@ -497,6 +515,10 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         this.Visible = Visible;
     }
 
+    public List<String> getRequiredExpansionIds() {
+        return requiredExpansionIds == null ? new ArrayList<>() : requiredExpansionIds;
+    }
+
     public Object2IntMap<String> getPrerequisites() {
         return Prerequisites;
     }
@@ -531,6 +553,18 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
     public void setIsStartingClass(boolean IsStartingClass) {
         this.IsStartingClass = IsStartingClass;
+    }
+
+    public boolean isHeroClass() {
+        return IsHeroClass;
+    }
+
+    public int getHeroStartingLevel() {
+        return Math.max(1, HeroStartingLevel);
+    }
+
+    public int getInitialClassLevel() {
+        return isHeroClass() ? getHeroStartingLevel() : 1;
     }
 
     public List<String> getResourceStats() {
