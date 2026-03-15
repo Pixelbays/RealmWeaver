@@ -12,6 +12,7 @@ import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.PartyMemberType;
 import org.pixelbays.rpg.party.PartyRole;
 import org.pixelbays.rpg.party.command.PartyCommandUtil;
+import org.pixelbays.rpg.party.finder.ui.GroupFinderPage;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -49,6 +50,7 @@ public class PartyPage extends CustomUIPage {
     private static final String KICK_BUTTON = "#KickButton";
     private static final String PROMOTE_BUTTON = "#PromoteButton";
     private static final String LEAVE_BUTTON = "#LeaveButton";
+    private static final String FINDER_BUTTON = "#FinderButton";
 
     private final PartyManager partyManager;
 
@@ -100,6 +102,10 @@ public class PartyPage extends CustomUIPage {
             case "Invite" -> statusMessage = handleInvite(invitee);
             case "Kick" -> statusMessage = handleKick(kickTarget);
             case "Promote" -> statusMessage = handlePromote(promoteTarget);
+            case "OpenFinder" -> {
+                player.getPageManager().openCustomPage(ref, store, new GroupFinderPage(playerRef));
+                return;
+            }
             case "Leave" -> {
                 PartyActionResult result = partyManager.leaveParty(playerRef.getUuid());
                 statusMessage = PartyCommandUtil.managerResultMessage(result.getMessage());
@@ -186,6 +192,11 @@ public class PartyPage extends CustomUIPage {
                 CustomUIEventBindingType.Activating,
                 LEAVE_BUTTON,
                 new EventData().append("Action", "Leave"));
+
+        eventBuilder.addEventBinding(
+            CustomUIEventBindingType.Activating,
+            FINDER_BUTTON,
+            new EventData().append("Action", "OpenFinder"));
     }
 
     private void appendView(@Nonnull UICommandBuilder commandBuilder, @Nullable Message statusMessage) {

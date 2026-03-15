@@ -17,6 +17,9 @@ public class PartyModSettings {
             .append(new KeyedCodec<>("Enabled", Codec.BOOLEAN, false, true),
                 (i, s) -> i.enabled = s, i -> i.enabled)
             .add()
+            .append(new KeyedCodec<>("GroupFinderEnabled", Codec.BOOLEAN, false, true),
+                (i, s) -> i.groupFinderEnabled = s, i -> i.groupFinderEnabled)
+            .add()
             .append(new KeyedCodec<>("PartyEnabled", Codec.BOOLEAN, false, true),
                     (i, s) -> i.partyEnabled = s, i -> i.partyEnabled)
             .add()
@@ -62,6 +65,7 @@ public class PartyModSettings {
             .build();
 
     private boolean enabled;
+    private boolean groupFinderEnabled;
     private boolean partyEnabled;
     private int partyMaxSize;
     private int partyMaxAssistants;
@@ -79,6 +83,7 @@ public class PartyModSettings {
 
     public PartyModSettings() {
         this.enabled = true;
+        this.groupFinderEnabled = true;
         this.partyEnabled = true;
         this.partyMaxSize = 5;
         this.partyMaxAssistants = 1;
@@ -97,6 +102,10 @@ public class PartyModSettings {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean isGroupFinderEnabled() {
+        return groupFinderEnabled;
     }
 
     public boolean isPartyEnabled() {

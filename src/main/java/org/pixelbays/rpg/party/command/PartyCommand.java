@@ -1,5 +1,7 @@
 package org.pixelbays.rpg.party.command;
 
+import org.pixelbays.rpg.party.finder.command.PartyFinderCommand;
+
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 
 /**
@@ -29,5 +31,6 @@ public class PartyCommand extends AbstractCommandCollection {
         this.addSubCommand(new PartyDisbandCommand());
         this.addSubCommand(new PartyInfoCommand());
         this.addSubCommand(new PartyUiCommand());
+        this.addSubCommand(new PartyFinderCommand());
     }
 }

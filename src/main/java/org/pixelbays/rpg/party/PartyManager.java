@@ -39,15 +39,22 @@ public class PartyManager {
     private final PartyPersistence persistence;
     private final LongSupplier currentTimeMillisSupplier;
     private final RuntimeAccess runtimeAccess;
+    private final boolean eventDispatchEnabled;
 
     public PartyManager() {
-        this(new PartyPersistence(), System::currentTimeMillis, new UniverseRuntimeAccess());
+        this(new PartyPersistence(), System::currentTimeMillis, new UniverseRuntimeAccess(), true);
     }
 
-    PartyManager(PartyPersistence persistence, LongSupplier currentTimeMillisSupplier, RuntimeAccess runtimeAccess) {
+    public PartyManager(PartyPersistence persistence, LongSupplier currentTimeMillisSupplier, RuntimeAccess runtimeAccess) {
+        this(persistence, currentTimeMillisSupplier, runtimeAccess, runtimeAccess instanceof UniverseRuntimeAccess);
+    }
+
+    public PartyManager(PartyPersistence persistence, LongSupplier currentTimeMillisSupplier, RuntimeAccess runtimeAccess,
+            boolean eventDispatchEnabled) {
         this.persistence = Objects.requireNonNull(persistence, "persistence");
         this.currentTimeMillisSupplier = Objects.requireNonNull(currentTimeMillisSupplier, "currentTimeMillisSupplier");
         this.runtimeAccess = Objects.requireNonNull(runtimeAccess, "runtimeAccess");
+        this.eventDispatchEnabled = eventDispatchEnabled;
     }
 
     public PartyActionResult createParty(UUID leaderId, PartyType type) {
@@ -68,7 +75,7 @@ public class PartyManager {
         partiesById.put(party.getId(), party);
         memberToParty.put(leaderId, party.getId());
         savePartyIfEnabled(party, config);
-        PartyCreatedEvent.dispatch(party.getId(), leaderId, type);
+        dispatchEvent(() -> PartyCreatedEvent.dispatch(party.getId(), leaderId, type));
 
         return PartyActionResult.success("Created " + type.name().toLowerCase() + ".", party);
     }
@@ -96,7 +103,7 @@ public class PartyManager {
                 party.getId(),
                 inviterId,
                 expiresAtMillis <= 0L ? 0L : now() + expiresAtMillis));
-        PartyInviteSentEvent.dispatch(party.getId(), inviterId, targetId);
+        dispatchEvent(() -> PartyInviteSentEvent.dispatch(party.getId(), inviterId, targetId));
         return PartyActionResult.success("Invite sent.", party);
     }
 
@@ -141,7 +148,7 @@ public class PartyManager {
         memberToParty.put(joinerId, party.getId());
         pendingInvites.remove(joinerId);
         savePartyIfEnabled(party, resolveConfig());
-        PartyJoinedEvent.dispatch(party.getId(), joinerId, inviterId);
+        dispatchEvent(() -> PartyJoinedEvent.dispatch(party.getId(), joinerId, inviterId));
         broadcastToPlayers(party,
                 Message.translation("pixelbays.rpg.party.notify.memberJoined")
                         .param("player", runtimeAccess.resolveDisplayName(joinerId))
@@ -165,9 +172,10 @@ public class PartyManager {
         if (wasLeader) {
             newLeaderId = handleLeaderLeave(party, memberId);
             if (newLeaderId != null) {
-                PartyLeaderChangedEvent.dispatch(party.getId(), memberId, newLeaderId);
+                UUID resolvedNewLeaderId = newLeaderId;
+                dispatchEvent(() -> PartyLeaderChangedEvent.dispatch(party.getId(), memberId, resolvedNewLeaderId));
             } else {
-                PartyDisbandedEvent.dispatch(party.getId(), memberId);
+                dispatchEvent(() -> PartyDisbandedEvent.dispatch(party.getId(), memberId));
                 disbanded = true;
             }
         } else {
@@ -184,7 +192,7 @@ public class PartyManager {
             savePartyIfEnabled(party, resolveConfig());
         }
 
-        PartyLeftEvent.dispatch(party.getId(), memberId, wasLeader);
+        dispatchEvent(() -> PartyLeftEvent.dispatch(party.getId(), memberId, wasLeader));
 
         if (disbanded) {
             broadcastToPlayers(previousMembers,
@@ -218,7 +226,7 @@ public class PartyManager {
         List<PartyMember> previousMembers = new ArrayList<>(party.getMemberList());
         removeParty(party);
         deletePartyIfEnabled(party.getId(), resolveConfig());
-        PartyDisbandedEvent.dispatch(party.getId(), leaderId);
+        dispatchEvent(() -> PartyDisbandedEvent.dispatch(party.getId(), leaderId));
         broadcastToPlayers(previousMembers,
                 Message.translation("pixelbays.rpg.party.notify.partyDisbanded")
                         .param("type", typeDisplayName(party.getType())),
@@ -243,7 +251,7 @@ public class PartyManager {
         party.removeMember(targetId);
         memberToParty.remove(targetId);
         savePartyIfEnabled(party, resolveConfig());
-        PartyMemberKickedEvent.dispatch(party.getId(), actorId, targetId);
+        dispatchEvent(() -> PartyMemberKickedEvent.dispatch(party.getId(), actorId, targetId));
         runtimeAccess.sendPlayerMessage(targetId,
                 Message.translation("pixelbays.rpg.party.notify.youWereKicked")
                         .param("type", typeDisplayName(party.getType())));
@@ -371,7 +379,7 @@ public class PartyManager {
         member.setRole(PartyRole.ASSISTANT);
         party.addAssistant(targetId);
         savePartyIfEnabled(party, resolveConfig());
-        PartyAssistantPromotedEvent.dispatch(party.getId(), actorId, targetId);
+        dispatchEvent(() -> PartyAssistantPromotedEvent.dispatch(party.getId(), actorId, targetId));
         broadcastToPlayers(party,
                 Message.translation("pixelbays.rpg.party.notify.promotedAssistant")
                         .param("player", runtimeAccess.resolveDisplayName(targetId)),
@@ -402,7 +410,7 @@ public class PartyManager {
         party.setLeaderId(targetId);
         party.removeAssistant(targetId);
         savePartyIfEnabled(party, resolveConfig());
-        PartyLeaderChangedEvent.dispatch(party.getId(), actorId, targetId);
+        dispatchEvent(() -> PartyLeaderChangedEvent.dispatch(party.getId(), actorId, targetId));
         notifyLeadershipChanged(party, targetId);
 
         return PartyActionResult.success("Leadership transferred.");
@@ -686,25 +694,36 @@ public class PartyManager {
         return currentTimeMillisSupplier.getAsLong();
     }
 
-    private RpgModConfig resolveConfig() {
-        var assetMap = RpgModConfig.getAssetMap();
-        if (assetMap == null) {
-            return null;
+    private void dispatchEvent(@Nonnull Runnable dispatcher) {
+        if (!eventDispatchEnabled) {
+            return;
         }
-
-        RpgModConfig config = assetMap.getAsset("Default");
-        if (config == null) {
-            config = assetMap.getAsset("default");
-        }
-
-        if (config == null) {
-            RpgLogging.debugDeveloper("[Party] RpgModConfig not found; using defaults.");
-        }
-
-        return config;
+        dispatcher.run();
     }
 
-    interface RuntimeAccess {
+    private RpgModConfig resolveConfig() {
+        try {
+            var assetMap = RpgModConfig.getAssetMap();
+            if (assetMap == null) {
+                return null;
+            }
+
+            RpgModConfig config = assetMap.getAsset("Default");
+            if (config == null) {
+                config = assetMap.getAsset("default");
+            }
+
+            if (config == null) {
+                RpgLogging.debugDeveloper("[Party] RpgModConfig not found; using defaults.");
+            }
+
+            return config;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    public interface RuntimeAccess {
         boolean isPlayerOnline(@Nonnull UUID playerId);
 
         void sendPlayerMessage(@Nonnull UUID playerId, @Nonnull Message message);

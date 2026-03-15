@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 
@@ -25,7 +27,7 @@ import com.hypixel.hytale.server.core.util.BsonUtil;
 
 public class PartyPersistence {
 
-    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
+    private static final Logger FALLBACK_LOGGER = Logger.getLogger(PartyPersistence.class.getName());
 
     public List<PartyData> loadAll() {
         var assetMap = PartyData.getAssetMap();
@@ -49,7 +51,7 @@ public class PartyPersistence {
         PartyData data = PartyData.fromParty(party);
         BsonValue value = PartyData.CODEC.encode(data, new ExtraInfo());
         if (!(value instanceof BsonDocument document)) {
-            LOGGER.atWarning().log("Party persistence failed: encoded data is not a document");
+            logWarning("Party persistence failed: encoded data is not a document");
             return;
         }
 
@@ -67,7 +69,7 @@ public class PartyPersistence {
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException ex) {
-            LOGGER.atWarning().withCause(ex).log("Failed to delete party file %s", filePath);
+            logWarning(ex, "Failed to delete party file %s", filePath);
         }
     }
 
@@ -75,7 +77,7 @@ public class PartyPersistence {
     private Path resolvePartyDirectory() {
         AssetPack pack = findWritablePack();
         if (pack == null) {
-            LOGGER.atWarning().log("Party persistence disabled: no writable asset pack found");
+            logWarning("Party persistence disabled: no writable asset pack found");
             return null;
         }
 
@@ -107,5 +109,32 @@ public class PartyPersistence {
         }
 
         return fallback;
+    }
+
+    private static void logWarning(String message, Object... args) {
+        HytaleLogger logger = getLogger();
+        if (logger != null) {
+            logger.atWarning().log(message, args);
+            return;
+        }
+        FALLBACK_LOGGER.log(Level.WARNING, String.format(message, args));
+    }
+
+    private static void logWarning(Throwable cause, String message, Object... args) {
+        HytaleLogger logger = getLogger();
+        if (logger != null) {
+            logger.atWarning().withCause(cause).log(message, args);
+            return;
+        }
+        FALLBACK_LOGGER.log(Level.WARNING, String.format(message, args), cause);
+    }
+
+    @Nullable
+    private static HytaleLogger getLogger() {
+        try {
+            return HytaleLogger.forEnclosingClass();
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 }
