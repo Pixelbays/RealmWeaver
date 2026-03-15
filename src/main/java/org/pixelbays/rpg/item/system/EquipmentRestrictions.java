@@ -12,6 +12,8 @@ import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.config.ClassDefinition.EquipmentRestrictions.RestrictMode;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.item.metadata.RandomizedEquipmentData;
+import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -120,15 +122,17 @@ public class EquipmentRestrictions {
 		}
 
 		if (container == inventory.getArmor()) {
-			enforceContainer(inventory, container, restrictionsList, true);
+			enforceContainer(ref, store, inventory, container, restrictionsList, true);
 		} else if (container == inventory.getHotbar()
 				|| container == inventory.getUtility()
 				|| container == inventory.getTools()) {
-			enforceContainer(inventory, container, restrictionsList, false);
+			enforceContainer(ref, store, inventory, container, restrictionsList, false);
 		}
 	}
 
-	private void enforceContainer(@Nonnull Inventory inventory,
+	private void enforceContainer(@Nonnull Ref<EntityStore> ref,
+			@Nonnull Store<EntityStore> store,
+			@Nonnull Inventory inventory,
 			@Nonnull ItemContainer container,
 			@Nonnull List<RestrictionEntry> restrictionsList,
 			boolean armorContainer) {
@@ -141,7 +145,14 @@ public class EquipmentRestrictions {
 			}
 
 			Item item = itemStack.getItem();
-			if (item == null) {
+
+			if (!meetsItemClassRequirement(ref, store, itemStack)) {
+				suppressEvents.set(true);
+				try {
+					moveRestrictedItem(inventory, container, slot);
+				} finally {
+					suppressEvents.set(false);
+				}
 				continue;
 			}
 
@@ -251,6 +262,55 @@ public class EquipmentRestrictions {
 
 		for (String value : values) {
 			if (value != null && value.equalsIgnoreCase(expected)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean meetsItemClassRequirement(@Nonnull Ref<EntityStore> ref,
+			@Nonnull Store<EntityStore> store,
+			@Nonnull ItemStack itemStack) {
+		RandomizedEquipmentData data = RandomizedEquipmentManager.getEquipmentData(itemStack);
+		if (data == null || !data.hasClassRequirement()) {
+			return true;
+		}
+
+		ClassComponent classComponent = store.getComponent(ref, ClassComponent.getComponentType());
+		if (classComponent == null) {
+			return false;
+		}
+
+		for (String classId : data.getRequiredClassIds()) {
+			if (classId == null || classId.isEmpty() || !classComponent.hasLearnedClass(classId)) {
+				continue;
+			}
+
+			if (data.getRequiredClassLevel() <= 1) {
+				return true;
+			}
+
+			ClassDefinition classDefinition = ClassDefinition.getAssetMap().getAsset(classId);
+			if (classDefinition == null) {
+				continue;
+			}
+
+			String levelSystemId = classDefinition.usesCharacterLevel()
+					? "Base_Character_Level"
+					: classDefinition.getLevelSystemId();
+			if (levelSystemId == null || levelSystemId.isEmpty()) {
+				continue;
+			}
+
+			LevelProgressionComponent levelComponent = store.getComponent(ref, LevelProgressionComponent.getComponentType());
+			if (levelComponent == null) {
+				continue;
+			}
+
+			LevelProgressionComponent.LevelSystemData levelSystemData = levelComponent.getSystem(levelSystemId);
+			int currentLevel = levelSystemData != null ? levelSystemData.getCurrentLevel() : 1;
+			if (currentLevel >= data.getRequiredClassLevel()) {
 				return true;
 			}
 		}
