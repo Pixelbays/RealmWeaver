@@ -1,17 +1,25 @@
 package org.pixelbays.rpg.lockpicking.interaction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.classes.component.ClassComponent;
+import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
+import org.pixelbays.rpg.global.config.builder.ClassRefCodec;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.lockpicking.system.LockpickingSystem;
 
 import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
+import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.protocol.Interaction;
@@ -30,6 +38,8 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 @SuppressWarnings("null")
 public class LockpickInteraction extends SimpleInstantInteraction {
+
+    private static final Codec<String> CLASS_REF_CODEC = new ClassRefCodec();
 
     @Nonnull
     public static final BuilderCodec<LockpickInteraction> LOCKPICK_CODEC = BuilderCodec.builder(
@@ -50,6 +60,12 @@ public class LockpickInteraction extends SimpleInstantInteraction {
                 .append(new KeyedCodec<>("ConsumeKey", Codec.BOOLEAN, false), (i, v) -> i.consumeKey = v,
                     i -> i.consumeKey)
             .add()
+                .append(new KeyedCodec<>("RequiredClassIds", new ArrayCodec<>(CLASS_REF_CODEC, String[]::new), false),
+                    (i, v) -> i.requiredClassIds = v, i -> i.requiredClassIds)
+            .add()
+                .append(new KeyedCodec<>("RequiredClassLevel", Codec.INTEGER, false),
+                    (i, v) -> i.requiredClassLevel = v, i -> i.requiredClassLevel)
+            .add()
             .build();
 
     private String keyItemId = "";
@@ -57,6 +73,8 @@ public class LockpickInteraction extends SimpleInstantInteraction {
     private String successInteractionId = "";
     private String failureInteractionId = "";
     private boolean consumeKey = false;
+    private String[] requiredClassIds = new String[0];
+    private int requiredClassLevel = 1;
 
     @Override
     protected void firstRun(@Nonnull InteractionType type, @Nonnull InteractionContext context,
@@ -91,10 +109,31 @@ public class LockpickInteraction extends SimpleInstantInteraction {
             return;
         }
 
+        if (!meetsClassRequirements(commandBuffer, entityRef)) {
+            RpgLogging.debug("LockpickInteraction: class requirements not met");
+            triggerFailure(context);
+            player.sendMessage(requiredClassLevel > 1
+                ? Message.translation("pixelbays.rpg.lockpicking.requiresClassLevel")
+                    .param("classes", describeRequiredClasses())
+                    .param("level", Integer.toString(requiredClassLevel))
+                : Message.translation("pixelbays.rpg.lockpicking.requiresClass")
+                    .param("classes", describeRequiredClasses()));
+            return;
+        }
+
+        if (LockpickingSystem.get().isDoorTemporarilyUnlocked(entityRef.getStore(), context.getTargetBlock())) {
+            context.getState().state = InteractionState.Finished;
+            RpgLogging.debug("LockpickInteraction: door already unlocked, bypassing mini game");
+            triggerSuccess(context);
+            return;
+        }
+
         if (hasKey(player.getInventory())) {
             if (consumeKey) {
                 consumeKey(player.getInventory());
             }
+
+            LockpickingSystem.get().registerTemporaryUnlock(entityRef.getStore(), difficultyTierId, context.getTargetBlock());
 
             RpgLogging.debug("LockpickInteraction: unlocked with key %s (consume=%s)",
                     keyItemId, consumeKey);
@@ -145,6 +184,75 @@ public class LockpickInteraction extends SimpleInstantInteraction {
                         com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction.HIT_DETAIL),
                 context.getMetaStore().getIfPresentMetaObject(
                         com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction.TARGET_SLOT));
+    }
+
+    private boolean meetsClassRequirements(@Nonnull CommandBuffer<EntityStore> commandBuffer,
+            @Nonnull Ref<EntityStore> entityRef) {
+        if (requiredClassIds == null || requiredClassIds.length == 0) {
+            return true;
+        }
+
+        ClassComponent classComponent = commandBuffer.getComponent(entityRef, ClassComponent.getComponentType());
+        if (classComponent == null) {
+            return false;
+        }
+
+        LevelProgressionComponent levelComponent = requiredClassLevel > 1
+                ? commandBuffer.getComponent(entityRef, LevelProgressionComponent.getComponentType())
+                : null;
+
+        for (String classId : requiredClassIds) {
+            if (classId == null || classId.isEmpty() || !classComponent.hasLearnedClass(classId)) {
+                continue;
+            }
+
+            if (requiredClassLevel <= 1) {
+                return true;
+            }
+
+            ClassDefinition classDefinition = ClassDefinition.getAssetMap().getAsset(classId);
+            if (classDefinition == null) {
+                continue;
+            }
+
+            String levelSystemId = classDefinition.usesCharacterLevel()
+                    ? "Base_Character_Level"
+                    : classDefinition.getLevelSystemId();
+            if (levelSystemId == null || levelSystemId.isEmpty() || levelComponent == null) {
+                continue;
+            }
+
+            LevelProgressionComponent.LevelSystemData levelSystemData = levelComponent.getSystem(levelSystemId);
+            int currentLevel = levelSystemData != null ? levelSystemData.getCurrentLevel() : 0;
+            if (currentLevel >= requiredClassLevel) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Nonnull
+    private String describeRequiredClasses() {
+        if (requiredClassIds == null || requiredClassIds.length == 0) {
+            return "";
+        }
+
+        List<String> names = new ArrayList<>();
+        for (String classId : requiredClassIds) {
+            if (classId == null || classId.isEmpty()) {
+                continue;
+            }
+
+            ClassDefinition definition = ClassDefinition.getAssetMap().getAsset(classId);
+            if (definition != null && definition.getDisplayName() != null && !definition.getDisplayName().isEmpty()) {
+                names.add(definition.getDisplayName());
+            } else {
+                names.add(classId);
+            }
+        }
+
+        return names.isEmpty() ? "" : String.join(", ", names);
     }
 
     private boolean hasKey(@Nonnull Inventory inventory) {

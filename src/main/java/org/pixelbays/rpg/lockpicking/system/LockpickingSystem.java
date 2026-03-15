@@ -3,6 +3,12 @@ package org.pixelbays.rpg.lockpicking.system;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,11 +30,15 @@ import com.hypixel.hytale.component.dependency.Dependency;
 import com.hypixel.hytale.component.dependency.RootDependency;
 import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.tick.EntityTickingSystem;
+import com.hypixel.hytale.math.util.ChunkUtil;
 import com.hypixel.hytale.math.vector.Vector4d;
+import com.hypixel.hytale.math.vector.Vector3i;
 import com.hypixel.hytale.protocol.BlockPosition;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
 import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.asset.type.blockhitbox.BlockBoundingBoxes;
+import com.hypixel.hytale.server.core.asset.type.blocktype.config.BlockType;
 import com.hypixel.hytale.server.core.entity.InteractionChain;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.InteractionManager;
@@ -39,13 +49,18 @@ import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
+import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.universe.world.chunk.WorldChunk;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.util.FillerBlockUtil;
 
 @SuppressWarnings("null")
 public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
 
     private final ComponentType<EntityStore, LockpickingSessionComponent> sessionComponentType;
+    private final Map<DoorUnlockKey, ActiveDoorUnlock> activeDoorUnlocks = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService unlockScheduler = Executors.newSingleThreadScheduledExecutor(new DoorUnlockThreadFactory());
     private ComponentType<EntityStore, Player> playerComponentType = Player.getComponentType();
 
     private ComponentType<EntityStore, Player> resolvePlayerType() {
@@ -262,10 +277,85 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
         }
 
         if (success) {
+            registerTemporaryUnlock(store, session.getDifficultyTierId(), getTargetBlock(session));
             executeInteraction(ref, store, session.getSuccessInteractionId(), session);
         } else {
             executeInteraction(ref, store, session.getFailureInteractionId(), session);
         }
+    }
+
+    public boolean isDoorTemporarilyUnlocked(@Nonnull Store<EntityStore> store, @Nullable BlockPosition targetBlock) {
+        DoorUnlockKey key = createDoorUnlockKey(store, targetBlock);
+        if (key == null) {
+            return false;
+        }
+
+        ActiveDoorUnlock unlock = activeDoorUnlocks.get(key);
+        if (unlock == null) {
+            return false;
+        }
+
+        if (unlock.expiresAtMillis <= System.currentTimeMillis()) {
+            activeDoorUnlocks.remove(key, unlock);
+            return false;
+        }
+
+        return true;
+    }
+
+    public void registerTemporaryUnlock(@Nonnull Store<EntityStore> store,
+            @Nonnull String difficultyTierId,
+            @Nullable BlockPosition targetBlock) {
+        DoorUnlockKey key = createDoorUnlockKey(store, targetBlock);
+        if (key == null) {
+            return;
+        }
+
+        RpgModConfig config = resolveConfig();
+        if (config == null) {
+            return;
+        }
+
+        LockpickingDifficultyTier tier = resolveTier(config, difficultyTierId);
+        if (tier == null) {
+            return;
+        }
+
+        int unlockSeconds = Math.max(0, tier.getDoorUnlockTime());
+        if (unlockSeconds <= 0) {
+            return;
+        }
+
+        World world = store.getExternalData().getWorld();
+
+        Vector3i blockPosition = toVector(targetBlock);
+        DoorPhysicalState originalState = getDoorState(world, blockPosition);
+        if (originalState == null) {
+            return;
+        }
+
+        ActiveDoorUnlock unlock = new ActiveDoorUnlock(
+                key,
+                world,
+                blockPosition,
+                originalState,
+                System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(unlockSeconds));
+        ActiveDoorUnlock existing = activeDoorUnlocks.putIfAbsent(key, unlock);
+        if (existing != null) {
+            return;
+        }
+
+        unlock.relockTask = unlockScheduler.schedule(() -> relockDoor(unlock), unlockSeconds, TimeUnit.SECONDS);
+    }
+
+    public void shutdown() {
+        for (ActiveDoorUnlock unlock : activeDoorUnlocks.values()) {
+            if (unlock.relockTask != null) {
+                unlock.relockTask.cancel(false);
+            }
+        }
+        activeDoorUnlocks.clear();
+        unlockScheduler.shutdownNow();
     }
 
     private void executeInteraction(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store,
@@ -350,6 +440,209 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
             session.setHitLocationW((float) hitLocation.w);
         } else {
             session.setHasHitLocation(false);
+        }
+    }
+
+    @Nullable
+    private BlockPosition getTargetBlock(@Nonnull LockpickingSessionComponent session) {
+        if (!session.hasTargetBlock()) {
+            return null;
+        }
+        return new BlockPosition(session.getTargetBlockX(), session.getTargetBlockY(), session.getTargetBlockZ());
+    }
+
+    @Nullable
+    private DoorUnlockKey createDoorUnlockKey(@Nonnull Store<EntityStore> store, @Nullable BlockPosition targetBlock) {
+        if (targetBlock == null) {
+            return null;
+        }
+        World world = store.getExternalData().getWorld();
+        return new DoorUnlockKey(world.getName(), targetBlock.x, targetBlock.y, targetBlock.z);
+    }
+
+    private void relockDoor(@Nonnull ActiveDoorUnlock unlock) {
+        if (!unlock.world.isAlive()) {
+            activeDoorUnlocks.remove(unlock.key, unlock);
+            return;
+        }
+
+        try {
+            unlock.world.execute(() -> relockDoorOnWorldThread(unlock));
+        } catch (RuntimeException ignored) {
+            activeDoorUnlocks.remove(unlock.key, unlock);
+        }
+    }
+
+    private void relockDoorOnWorldThread(@Nonnull ActiveDoorUnlock unlock) {
+        if (!activeDoorUnlocks.remove(unlock.key, unlock)) {
+            return;
+        }
+
+        DoorPhysicalState currentState = getDoorState(unlock.world, unlock.blockPosition);
+        if (currentState == null || currentState == unlock.originalState) {
+            return;
+        }
+
+        String interactionState = toInteractionState(currentState, unlock.originalState);
+        if (interactionState == null) {
+            return;
+        }
+
+        applyDoorInteractionState(unlock.world, unlock.blockPosition, interactionState);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Nullable
+    private static DoorPhysicalState getDoorState(@Nonnull World world, @Nonnull Vector3i blockPosition) {
+        BlockType blockType = world.getBlockType(blockPosition);
+        if (blockType == null || !blockType.isDoor()) {
+            return null;
+        }
+        return DoorPhysicalState.fromBlockState(blockType.getStateForBlock(blockType));
+    }
+
+    @Nonnull
+    private static Vector3i toVector(@Nonnull BlockPosition blockPosition) {
+        return new Vector3i(blockPosition.x, blockPosition.y, blockPosition.z);
+    }
+
+    @Nullable
+    private static String toInteractionState(@Nonnull DoorPhysicalState fromState, @Nonnull DoorPhysicalState toState) {
+        if (fromState == toState) {
+            return null;
+        }
+        if (toState == DoorPhysicalState.CLOSED) {
+            return fromState == DoorPhysicalState.OPENED_IN ? "CloseDoorOut" : "CloseDoorIn";
+        }
+        return toState == DoorPhysicalState.OPENED_IN ? "OpenDoorOut" : "OpenDoorIn";
+    }
+
+    private static void applyDoorInteractionState(@Nonnull World world,
+            @Nonnull Vector3i blockPosition,
+            @Nonnull String interactionState) {
+        WorldChunk chunk = world.getChunkIfInMemory(ChunkUtil.indexChunkFromBlock(blockPosition.x, blockPosition.z));
+        if (chunk == null) {
+            return;
+        }
+
+        BlockType blockType = chunk.getBlockType(blockPosition);
+        if (blockType == null) {
+            return;
+        }
+
+        int rotationIndex = getRotationIndex(chunk, blockPosition);
+        BlockBoundingBoxes oldHitbox = BlockBoundingBoxes.getAssetMap().getAsset(blockType.getHitboxTypeIndex());
+        world.setBlockInteractionState(blockPosition, blockType, interactionState);
+
+        BlockType currentBlockType = world.getBlockType(blockPosition);
+        if (currentBlockType == null) {
+            return;
+        }
+
+        BlockType newBlockType = currentBlockType.getBlockForState(interactionState);
+        if (oldHitbox != null) {
+            FillerBlockUtil.forEachFillerBlock(oldHitbox.get(rotationIndex),
+                    (x, y, z) -> world.performBlockUpdate(blockPosition.x + x, blockPosition.y + y, blockPosition.z + z));
+        }
+
+        if (newBlockType == null) {
+            return;
+        }
+
+        BlockBoundingBoxes newHitbox = BlockBoundingBoxes.getAssetMap().getAsset(newBlockType.getHitboxTypeIndex());
+        if (newHitbox == null || newHitbox == oldHitbox) {
+            return;
+        }
+
+        FillerBlockUtil.forEachFillerBlock(newHitbox.get(rotationIndex),
+                (x, y, z) -> world.performBlockUpdate(blockPosition.x + x, blockPosition.y + y, blockPosition.z + z));
+    }
+
+    @SuppressWarnings("removal")
+    private static int getRotationIndex(@Nonnull WorldChunk chunk, @Nonnull Vector3i blockPosition) {
+        return chunk.getRotationIndex(blockPosition.x, blockPosition.y, blockPosition.z);
+    }
+
+    private enum DoorPhysicalState {
+        CLOSED,
+        OPENED_IN,
+        OPENED_OUT;
+
+        @Nonnull
+        private static DoorPhysicalState fromBlockState(@Nullable String state) {
+            if (state == null) {
+                return CLOSED;
+            }
+
+            return switch (state) {
+                case "OpenDoorOut" -> OPENED_IN;
+                case "OpenDoorIn" -> OPENED_OUT;
+                default -> CLOSED;
+            };
+        }
+    }
+
+    private static final class DoorUnlockKey {
+        private final String worldName;
+        private final int x;
+        private final int y;
+        private final int z;
+
+        private DoorUnlockKey(@Nonnull String worldName, int x, int y, int z) {
+            this.worldName = worldName;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof DoorUnlockKey other)) {
+                return false;
+            }
+            return x == other.x && y == other.y && z == other.z && worldName.equals(other.worldName);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = worldName.hashCode();
+            result = 31 * result + x;
+            result = 31 * result + y;
+            result = 31 * result + z;
+            return result;
+        }
+    }
+
+    private static final class ActiveDoorUnlock {
+        private final DoorUnlockKey key;
+        private final World world;
+        private final Vector3i blockPosition;
+        private final DoorPhysicalState originalState;
+        private final long expiresAtMillis;
+        private ScheduledFuture<?> relockTask;
+
+        private ActiveDoorUnlock(@Nonnull DoorUnlockKey key,
+                @Nonnull World world,
+                @Nonnull Vector3i blockPosition,
+                @Nonnull DoorPhysicalState originalState,
+                long expiresAtMillis) {
+            this.key = key;
+            this.world = world;
+            this.blockPosition = blockPosition;
+            this.originalState = originalState;
+            this.expiresAtMillis = expiresAtMillis;
+        }
+    }
+
+    private static final class DoorUnlockThreadFactory implements ThreadFactory {
+        @Override
+        public Thread newThread(@Nonnull Runnable runnable) {
+            Thread thread = new Thread(runnable, "rpg-lockpicking-door-unlocks");
+            thread.setDaemon(true);
+            return thread;
         }
     }
 
