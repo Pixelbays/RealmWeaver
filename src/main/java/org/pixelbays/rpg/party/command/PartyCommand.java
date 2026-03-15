@@ -6,6 +6,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractComman
  * Main party command collection
  * Usage:
  *   /party create [party|raid]
+ *   /party decline
  *   /party invite <player>
  *   /party join <player>
  *   /party leave
@@ -19,6 +20,7 @@ public class PartyCommand extends AbstractCommandCollection {
     public PartyCommand() {
         super("party", "Manage your party");
         this.addSubCommand(new PartyCreateCommand());
+        this.addSubCommand(new PartyDeclineCommand());
         this.addSubCommand(new PartyInviteCommand());
         this.addSubCommand(new PartyJoinCommand());
         this.addSubCommand(new PartyLeaveCommand());

@@ -101,12 +101,6 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
     public Party toParty() {
         PartySettings partySettings = settings.toSettings();
         Party party = new Party(UUID.fromString(id), partyType, leaderId, partySettings);
-        if (assistants != null) {
-            for (UUID assistantId : assistants) {
-                party.addAssistant(assistantId);
-            }
-        }
-
         if (members != null) {
             for (PartyMemberData memberData : members) {
                 if (memberData == null) {
@@ -121,6 +115,23 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
             PartyMember leader = new PartyMember(leaderId, PartyMemberType.PLAYER, PartyRole.LEADER,
                     System.currentTimeMillis());
             party.addMember(leader);
+        } else {
+            PartyMember leader = party.getMember(leaderId);
+            leader.setRole(PartyRole.LEADER);
+            party.setLeaderId(leaderId);
+            party.removeAssistant(leaderId);
+        }
+
+        if (assistants != null) {
+            for (UUID assistantId : assistants) {
+                if (assistantId == null || assistantId.equals(leaderId) || !party.hasMember(assistantId)) {
+                    continue;
+                }
+
+                PartyMember assistant = party.getMember(assistantId);
+                assistant.setRole(PartyRole.ASSISTANT);
+                party.addAssistant(assistantId);
+            }
         }
 
         return party;
@@ -163,6 +174,9 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
                 .append(new KeyedCodec<>("MaxSize", Codec.INTEGER, false, true),
                         (i, s) -> i.maxSize = s, i -> i.maxSize)
                 .add()
+                .append(new KeyedCodec<>("MaxAssistants", Codec.INTEGER, false, true),
+                    (i, s) -> i.maxAssistants = s, i -> i.maxAssistants)
+                .add()
                 .build();
 
         private boolean xpEnabled;
@@ -171,6 +185,7 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
         private int xpMinMembersInRange;
         private boolean npcAllowed;
         private int maxSize;
+        private int maxAssistants;
 
         public PartySettingsData() {
             this.xpEnabled = true;
@@ -179,10 +194,18 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
             this.xpMinMembersInRange = 1;
             this.npcAllowed = true;
             this.maxSize = 5;
+            this.maxAssistants = 1;
         }
 
         public PartySettings toSettings() {
-            return new PartySettings(xpEnabled, xpGrantingMode, xpRangeBlocks, xpMinMembersInRange, npcAllowed, maxSize);
+            return new PartySettings(
+                    xpEnabled,
+                    xpGrantingMode,
+                    xpRangeBlocks,
+                    xpMinMembersInRange,
+                    npcAllowed,
+                    maxSize,
+                    maxAssistants);
         }
 
         public static PartySettingsData fromSettings(PartySettings settings) {
@@ -193,6 +216,7 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
             data.xpMinMembersInRange = settings.getXpMinMembersInRange();
             data.npcAllowed = settings.isNpcAllowed();
             data.maxSize = settings.getMaxSize();
+            data.maxAssistants = settings.getMaxAssistants();
             return data;
         }
     }
@@ -209,20 +233,26 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
                 .append(new KeyedCodec<>("Role", new EnumCodec<>(PartyRole.class), false, true),
                         (i, s) -> i.role = s, i -> i.role)
                 .add()
+                .append(new KeyedCodec<>("JoinedAtMillis", Codec.LONG, false, true),
+                    (i, s) -> i.joinedAtMillis = s, i -> i.joinedAtMillis)
+                .add()
                 .build();
 
         private UUID memberId;
         private PartyMemberType memberType;
         private PartyRole role;
+            private long joinedAtMillis;
 
         public PartyMemberData() {
             this.memberId = new UUID(0L, 0L);
             this.memberType = PartyMemberType.PLAYER;
             this.role = PartyRole.MEMBER;
+            this.joinedAtMillis = 0L;
         }
 
         public PartyMember toMember() {
-            return new PartyMember(memberId, memberType, role, System.currentTimeMillis());
+            return new PartyMember(memberId, memberType, role,
+                    joinedAtMillis > 0 ? joinedAtMillis : System.currentTimeMillis());
         }
 
         public static PartyMemberData fromMember(PartyMember member) {
@@ -230,6 +260,7 @@ public class PartyData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
             data.memberId = member.getEntityId();
             data.memberType = member.getMemberType();
             data.role = member.getRole();
+            data.joinedAtMillis = member.getJoinedAtMillis();
             return data;
         }
     }

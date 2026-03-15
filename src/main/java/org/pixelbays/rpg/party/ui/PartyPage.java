@@ -1,18 +1,16 @@
 package org.pixelbays.rpg.party.ui;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.plugin.ExamplePlugin;
-import org.pixelbays.rpg.party.Party;
 import org.pixelbays.rpg.party.PartyActionResult;
 import org.pixelbays.rpg.party.PartyManager;
+import org.pixelbays.rpg.party.PartyMemberType;
+import org.pixelbays.rpg.party.PartyRole;
 import org.pixelbays.rpg.party.command.PartyCommandUtil;
 
 import com.hypixel.hytale.component.Ref;
@@ -40,6 +38,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 public class PartyPage extends CustomUIPage {
 
     private static final String STATUS_LABEL = "#StatusLabel";
+    private static final String PARTY_STATUS_LABEL = "#PartyStatusLabel";
     private static final String ROSTER_LABEL = "#RosterLabel";
 
     private static final String INVITE_FIELD = "#InviteeField";
@@ -80,10 +79,6 @@ public class PartyPage extends CustomUIPage {
         String promoteTarget = extractString(rawData, "@PromoteTarget");
 
         World world = store.getExternalData().getWorld();
-        if (world == null) {
-            return;
-        }
-
         world.execute(() -> handleAction(ref, store, action, invitee, kickTarget, promoteTarget));
     }
 
@@ -101,15 +96,16 @@ public class PartyPage extends CustomUIPage {
 
         Message statusMessage = null;
 
-        if ("Invite".equals(action)) {
-            statusMessage = handleInvite(invitee);
-        } else if ("Kick".equals(action)) {
-            statusMessage = handleKick(kickTarget);
-        } else if ("Promote".equals(action)) {
-            statusMessage = handlePromote(promoteTarget);
-        } else if ("Leave".equals(action)) {
-            PartyActionResult result = partyManager.leaveParty(playerRef.getUuid());
-            statusMessage = PartyCommandUtil.managerResultMessage(result.getMessage());
+        switch (action) {
+            case "Invite" -> statusMessage = handleInvite(invitee);
+            case "Kick" -> statusMessage = handleKick(kickTarget);
+            case "Promote" -> statusMessage = handlePromote(promoteTarget);
+            case "Leave" -> {
+                PartyActionResult result = partyManager.leaveParty(playerRef.getUuid());
+                statusMessage = PartyCommandUtil.managerResultMessage(result.getMessage());
+            }
+            default -> {
+            }
         }
 
         UICommandBuilder commandBuilder = new UICommandBuilder();
@@ -199,37 +195,49 @@ public class PartyPage extends CustomUIPage {
             commandBuilder.set(STATUS_LABEL + ".Text", "");
         }
 
-        Party party = partyManager.getPartyForMember(playerRef.getUuid());
-        if (party == null) {
+        PartyUiSnapshot snapshot = partyManager.getPartyUiSnapshot(playerRef.getUuid());
+        if (snapshot == null) {
+            commandBuilder.set(PARTY_STATUS_LABEL + ".Text", "");
             commandBuilder.set(ROSTER_LABEL + ".Text", "");
             return;
         }
 
-        String leaderName = PartyCommandUtil.resolveDisplayName(party.getLeaderId());
+        Map<String, String> statusParams = new HashMap<>();
+        statusParams.put("type", snapshot.getPartyType() == org.pixelbays.rpg.party.PartyType.RAID ? "Raid" : "Party");
+        statusParams.put("size", String.valueOf(snapshot.getMemberCount()));
+        statusParams.put("max", String.valueOf(snapshot.getMaxSize()));
+        statusParams.put("role", roleDisplayName(snapshot.getViewerRole()));
+        commandBuilder.setObject(PARTY_STATUS_LABEL + ".Text",
+                LocalizableString.fromMessageId("pixelbays.rpg.party.ui.statusBody", statusParams));
 
-        List<String> assistantNames = new ArrayList<>();
-        for (UUID assistantId : party.getAssistants()) {
-            assistantNames.add(PartyCommandUtil.resolveDisplayName(assistantId));
+        StringBuilder rosterBuilder = new StringBuilder();
+        for (PartyUiSnapshot.MemberView member : snapshot.getMembers()) {
+            if (rosterBuilder.length() > 0) {
+                rosterBuilder.append("\n");
+            }
+
+            rosterBuilder.append(member.getDisplayName())
+                    .append(" (")
+                    .append(roleDisplayName(member.getRole()));
+            if (member.getMemberType() == PartyMemberType.NPC) {
+                rosterBuilder.append(", NPC");
+            }
+            if (!member.isOnline()) {
+                rosterBuilder.append(", Offline");
+            }
+            rosterBuilder.append(")");
         }
 
-        List<String> memberNames = new ArrayList<>();
-        for (UUID memberId : party.getMembers().keySet()) {
-            if (party.getLeaderId() != null && party.getLeaderId().equals(memberId)) {
-                continue;
-            }
-            if (party.getAssistants().contains(memberId)) {
-                continue;
-            }
-            memberNames.add(PartyCommandUtil.resolveDisplayName(memberId));
-        }
+        commandBuilder.set(ROSTER_LABEL + ".Text", rosterBuilder.toString());
+    }
 
-        Map<String, String> params = new HashMap<>();
-        params.put("leader", leaderName);
-        params.put("assistants", String.join(", ", assistantNames));
-        params.put("members", String.join(", ", memberNames));
-
-        commandBuilder.setObject(ROSTER_LABEL + ".Text",
-                LocalizableString.fromMessageId("pixelbays.rpg.party.ui.rosterBody", params));
+    @Nonnull
+    private static String roleDisplayName(@Nonnull PartyRole role) {
+        return switch (role) {
+            case LEADER -> "Leader";
+            case ASSISTANT -> "Assistant";
+            case MEMBER -> "Member";
+        };
     }
 
     @Nonnull

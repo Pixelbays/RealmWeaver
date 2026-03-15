@@ -10,19 +10,22 @@ public class PartySettings {
     private final int xpMinMembersInRange;
     private final boolean npcAllowed;
     private final int maxSize;
+    private final int maxAssistants;
 
     public PartySettings(boolean xpEnabled,
             PartyXpGrantingMode xpGrantingMode,
             int xpRangeBlocks,
             int xpMinMembersInRange,
             boolean npcAllowed,
-            int maxSize) {
+            int maxSize,
+            int maxAssistants) {
         this.xpEnabled = xpEnabled;
         this.xpGrantingMode = xpGrantingMode;
         this.xpRangeBlocks = xpRangeBlocks;
         this.xpMinMembersInRange = xpMinMembersInRange;
         this.npcAllowed = npcAllowed;
         this.maxSize = maxSize;
+        this.maxAssistants = maxAssistants;
     }
 
     public boolean isXpEnabled() {
@@ -47,5 +50,9 @@ public class PartySettings {
 
     public int getMaxSize() {
         return maxSize;
+    }
+
+    public int getMaxAssistants() {
+        return maxAssistants;
     }
 }

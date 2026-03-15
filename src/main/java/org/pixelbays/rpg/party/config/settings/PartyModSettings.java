@@ -23,12 +23,21 @@ public class PartyModSettings {
             .append(new KeyedCodec<>("PartyMaxSize", Codec.INTEGER, false, true),
                     (i, s) -> i.partyMaxSize = s, i -> i.partyMaxSize)
             .add()
+                .append(new KeyedCodec<>("PartyMaxAssistants", Codec.INTEGER, false, true),
+                    (i, s) -> i.partyMaxAssistants = s, i -> i.partyMaxAssistants)
+                .add()
             .append(new KeyedCodec<>("RaidEnabled", Codec.BOOLEAN, false, true),
                     (i, s) -> i.raidEnabled = s, i -> i.raidEnabled)
             .add()
             .append(new KeyedCodec<>("RaidMaxSize", Codec.INTEGER, false, true),
                     (i, s) -> i.raidMaxSize = s, i -> i.raidMaxSize)
             .add()
+                .append(new KeyedCodec<>("RaidMaxAssistants", Codec.INTEGER, false, true),
+                    (i, s) -> i.raidMaxAssistants = s, i -> i.raidMaxAssistants)
+                .add()
+                .append(new KeyedCodec<>("PartyInviteExpirySeconds", Codec.INTEGER, false, true),
+                    (i, s) -> i.partyInviteExpirySeconds = s, i -> i.partyInviteExpirySeconds)
+                .add()
             .append(new KeyedCodec<>("PartyXpEnabled", Codec.BOOLEAN, false, true),
                     (i, s) -> i.partyXpEnabled = s, i -> i.partyXpEnabled)
             .add()
@@ -55,8 +64,11 @@ public class PartyModSettings {
     private boolean enabled;
     private boolean partyEnabled;
     private int partyMaxSize;
+    private int partyMaxAssistants;
     private boolean raidEnabled;
     private int raidMaxSize;
+    private int raidMaxAssistants;
+    private int partyInviteExpirySeconds;
     private boolean partyXpEnabled;
     private PartyXpGrantingMode partyXpGrantingMode;
     private int partyXpRangeBlocks;
@@ -69,8 +81,11 @@ public class PartyModSettings {
         this.enabled = true;
         this.partyEnabled = true;
         this.partyMaxSize = 5;
+        this.partyMaxAssistants = 1;
         this.raidEnabled = true;
         this.raidMaxSize = 20;
+        this.raidMaxAssistants = 4;
+        this.partyInviteExpirySeconds = 300;
         this.partyXpEnabled = true;
         this.partyXpGrantingMode = PartyXpGrantingMode.SplitEqualInRange;
         this.partyXpRangeBlocks = 48;
@@ -92,12 +107,24 @@ public class PartyModSettings {
         return partyMaxSize;
     }
 
+    public int getPartyMaxAssistants() {
+        return partyMaxAssistants;
+    }
+
     public boolean isRaidEnabled() {
         return raidEnabled;
     }
 
     public int getRaidMaxSize() {
         return raidMaxSize;
+    }
+
+    public int getRaidMaxAssistants() {
+        return raidMaxAssistants;
+    }
+
+    public int getPartyInviteExpirySeconds() {
+        return partyInviteExpirySeconds;
     }
 
     public boolean isPartyXpEnabled() {

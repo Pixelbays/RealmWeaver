@@ -9,7 +9,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongSupplier;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.global.config.RpgModConfig;
@@ -30,7 +29,6 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
-@SuppressWarnings("null")
 public class PartyManager {
 
     private final Map<UUID, Party> partiesById = new ConcurrentHashMap<>();
@@ -92,9 +90,7 @@ public class PartyManager {
         }
 
         long expiresAtMillis = getInviteExpiryMillis(resolveConfig());
-        pendingInvites.put(targetId, new PartyInvite(
-                party.getId(),
-                inviterId,
+        pendingInvites.put(targetId, new PartyInvite(party.getId(), inviterId,
                 expiresAtMillis <= 0L ? 0L : now() + expiresAtMillis));
         PartyInviteSentEvent.dispatch(party.getId(), inviterId, targetId);
         return PartyActionResult.success("Invite sent.", party);
@@ -106,9 +102,10 @@ public class PartyManager {
             return PartyActionResult.failure("You do not have an invite to that party.");
         }
 
+        String inviteeName = runtimeAccess.resolveDisplayName(inviteeId);
         runtimeAccess.sendPlayerMessage(invite.inviterId,
                 Message.translation("pixelbays.rpg.party.notify.inviteDeclined")
-                        .param("player", runtimeAccess.resolveDisplayName(inviteeId)));
+                        .param("player", inviteeName));
         return PartyActionResult.success("Invite declined.");
     }
 
@@ -458,8 +455,7 @@ public class PartyManager {
 
         List<PartyUiSnapshot.MemberView> members = party.getMemberList().stream()
                 .sorted(Comparator.comparingInt((PartyMember member) -> roleSort(member.getRole()))
-                        .thenComparing(member -> runtimeAccess.resolveDisplayName(member.getEntityId()),
-                                String.CASE_INSENSITIVE_ORDER))
+                        .thenComparing(member -> runtimeAccess.resolveDisplayName(member.getEntityId()), String.CASE_INSENSITIVE_ORDER))
                 .map(member -> new PartyUiSnapshot.MemberView(
                         member.getEntityId(),
                         runtimeAccess.resolveDisplayName(member.getEntityId()),
@@ -669,8 +665,7 @@ public class PartyManager {
         }
     }
 
-    @Nonnull
-    private String typeDisplayName(@Nonnull PartyType type) {
+    private String typeDisplayName(PartyType type) {
         return type == PartyType.RAID ? "Raid" : "Party";
     }
 
@@ -705,21 +700,21 @@ public class PartyManager {
     }
 
     interface RuntimeAccess {
-        boolean isPlayerOnline(@Nonnull UUID playerId);
+        boolean isPlayerOnline(UUID playerId);
 
-        void sendPlayerMessage(@Nonnull UUID playerId, @Nonnull Message message);
+        void sendPlayerMessage(UUID playerId, Message message);
 
-        @Nonnull String resolveDisplayName(@Nonnull UUID entityId);
+        String resolveDisplayName(UUID entityId);
     }
 
     private static class UniverseRuntimeAccess implements RuntimeAccess {
         @Override
-        public boolean isPlayerOnline(@Nonnull UUID playerId) {
+        public boolean isPlayerOnline(UUID playerId) {
             return Universe.get().getPlayer(playerId) != null;
         }
 
         @Override
-        public void sendPlayerMessage(@Nonnull UUID playerId, @Nonnull Message message) {
+        public void sendPlayerMessage(UUID playerId, Message message) {
             PlayerRef playerRef = Universe.get().getPlayer(playerId);
             if (playerRef != null) {
                 playerRef.sendMessage(message);
@@ -727,8 +722,7 @@ public class PartyManager {
         }
 
         @Override
-        @Nonnull
-        public String resolveDisplayName(@Nonnull UUID entityId) {
+        public String resolveDisplayName(UUID entityId) {
             PlayerRef playerRef = Universe.get().getPlayer(entityId);
             if (playerRef != null) {
                 return playerRef.getUsername();

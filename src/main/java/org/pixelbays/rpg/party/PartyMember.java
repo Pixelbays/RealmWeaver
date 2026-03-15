@@ -35,4 +35,12 @@ public class PartyMember {
     public long getJoinedAtMillis() {
         return joinedAtMillis;
     }
+
+    public boolean isPlayer() {
+        return memberType == PartyMemberType.PLAYER;
+    }
+
+    public boolean isNpc() {
+        return memberType == PartyMemberType.NPC;
+    }
 }

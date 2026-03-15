@@ -85,6 +85,14 @@ public class Party {
 
     public void addMember(PartyMember member) {
         members.put(member.getEntityId(), member);
+        if (member.getRole() == PartyRole.LEADER) {
+            leaderId = member.getEntityId();
+            assistants.remove(member.getEntityId());
+        } else if (member.getRole() == PartyRole.ASSISTANT) {
+            assistants.add(member.getEntityId());
+        } else {
+            assistants.remove(member.getEntityId());
+        }
     }
 
     public void removeMember(UUID memberId) {
