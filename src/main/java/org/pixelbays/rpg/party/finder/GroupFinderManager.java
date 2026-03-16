@@ -2,9 +2,11 @@ package org.pixelbays.rpg.party.finder;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BooleanSupplier;
@@ -13,6 +15,7 @@ import java.util.function.LongSupplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.rpg.classes.config.settings.ClassModSettings;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.party.Party;
 import org.pixelbays.rpg.party.PartyActionResult;
@@ -57,7 +60,8 @@ public class GroupFinderManager {
     public GroupFinderActionResult upsertListing(@Nonnull UUID actorId,
             @Nullable String activity,
             @Nullable String description,
-            @Nullable String requirements) {
+            @Nullable String requirements,
+            @Nullable String openRoles) {
         pruneInvalidState();
         if (!isEnabled()) {
             return GroupFinderActionResult.failure("Group finder is disabled.");
@@ -73,11 +77,17 @@ public class GroupFinderManager {
             return GroupFinderActionResult.failure("Activity is required.");
         }
 
+        RoleParseResult parsedRoles = parseRoles(openRoles);
+        if (!parsedRoles.invalidRoles().isEmpty()) {
+            return GroupFinderActionResult.failure("Unknown role type: " + parsedRoles.invalidRoles().getFirst());
+        }
+
         Listing listing = new Listing(
                 managedParty.party().getId(),
                 normalizedActivity,
                 normalize(description),
                 normalize(requirements),
+            parsedRoles.roles(),
                 now());
         listingsByPartyId.put(managedParty.party().getId(), listing);
         return GroupFinderActionResult.success("Listing updated.", managedParty.party().getId());
@@ -135,10 +145,28 @@ public class GroupFinderManager {
             return GroupFinderActionResult.failure("That group is no longer recruiting.");
         }
 
+        String normalizedDesiredRole = normalize(desiredRole);
+        if (!normalizedDesiredRole.isEmpty()) {
+            String canonicalDesiredRole = canonicalRole(normalizedDesiredRole);
+            if (canonicalDesiredRole == null) {
+                return GroupFinderActionResult.failure("Unknown role type: " + normalizedDesiredRole);
+            }
+            normalizedDesiredRole = canonicalDesiredRole;
+        }
+
+        if (!listing.openRoles().isEmpty()) {
+            if (normalizedDesiredRole.isEmpty()) {
+                return GroupFinderActionResult.failure("Choose a role for this listing.");
+            }
+            if (!containsIgnoreCase(listing.openRoles(), normalizedDesiredRole)) {
+                return GroupFinderActionResult.failure("That group is not recruiting for that role.");
+            }
+        }
+
         Application application = new Application(
                 applicantId,
                 listingPartyId,
-                normalize(desiredRole),
+                normalizedDesiredRole,
                 normalize(note),
                 now());
         applicationsByApplicantId.put(applicantId, application);
@@ -311,6 +339,7 @@ public class GroupFinderManager {
                 listing.activity(),
                 listing.description(),
                 listing.requirements(),
+                listing.openRoles(),
                 party.size(),
                 maxSize(party),
                 applicantCount(listing.partyId()),
@@ -333,6 +362,7 @@ public class GroupFinderManager {
                 listing.activity(),
                 listing.description(),
                 listing.requirements(),
+                listing.openRoles(),
                 party.size(),
                 maxSize(party),
                 applications.size(),
@@ -385,6 +415,64 @@ public class GroupFinderManager {
         return enabledSupplier.getAsBoolean();
     }
 
+    @Nonnull
+    private RoleParseResult parseRoles(@Nullable String rawRoles) {
+        if (rawRoles == null || rawRoles.isBlank()) {
+            return new RoleParseResult(List.of(), List.of());
+        }
+
+        Set<String> parsedRoles = new LinkedHashSet<>();
+        List<String> invalidRoles = new ArrayList<>();
+        for (String token : rawRoles.split(",")) {
+            String normalizedToken = normalize(token);
+            if (normalizedToken.isEmpty()) {
+                continue;
+            }
+
+            String canonicalRole = canonicalRole(normalizedToken);
+            if (canonicalRole == null) {
+                invalidRoles.add(normalizedToken);
+                continue;
+            }
+            parsedRoles.add(canonicalRole);
+        }
+
+        return new RoleParseResult(new ArrayList<>(parsedRoles), invalidRoles);
+    }
+
+    @Nullable
+    private String canonicalRole(@Nullable String role) {
+        if (role == null || role.isBlank()) {
+            return null;
+        }
+
+        for (String configuredRole : getConfiguredRoleTypes()) {
+            if (configuredRole != null && configuredRole.equalsIgnoreCase(role)) {
+                return configuredRole;
+            }
+        }
+
+        return null;
+    }
+
+    @Nonnull
+    private List<String> getConfiguredRoleTypes() {
+        RpgModConfig config = resolveConfig();
+        if (config != null && !config.getClassSettings().getRoleTypes().isEmpty()) {
+            return config.getClassSettings().getRoleTypes();
+        }
+        return new ClassModSettings().getRoleTypes();
+    }
+
+    private boolean containsIgnoreCase(@Nonnull List<String> values, @Nonnull String target) {
+        for (String value : values) {
+            if (value != null && value.equalsIgnoreCase(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean isEnabledFromConfig() {
         RpgModConfig config = resolveConfig();
         return config == null || config.isGroupFinderEnabled();
@@ -417,13 +505,21 @@ public class GroupFinderManager {
         return currentTimeMillisSupplier.getAsLong();
     }
 
-    record Listing(UUID partyId, String activity, String description, String requirements, long updatedAtMillis) {
+        record Listing(UUID partyId,
+            String activity,
+            String description,
+            String requirements,
+            List<String> openRoles,
+            long updatedAtMillis) {
     }
 
     record Application(UUID applicantId, UUID partyId, String desiredRole, String note, long submittedAtMillis) {
     }
 
     record ManagedParty(UUID actorId, Party party) {
+    }
+
+    record RoleParseResult(List<String> roles, List<String> invalidRoles) {
     }
 
     interface RuntimeAccess {

@@ -1,5 +1,6 @@
 package org.pixelbays.rpg.party.finder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,6 +45,7 @@ public class GroupFinderSnapshot {
         private final String activity;
         private final String description;
         private final String requirements;
+        private final List<String> openRoles;
         private final int currentSize;
         private final int maxSize;
         private final int applicantCount;
@@ -56,6 +58,7 @@ public class GroupFinderSnapshot {
                 String activity,
                 String description,
                 String requirements,
+                List<String> openRoles,
                 int currentSize,
                 int maxSize,
                 int applicantCount,
@@ -67,6 +70,7 @@ public class GroupFinderSnapshot {
             this.activity = activity;
             this.description = description;
             this.requirements = requirements;
+            this.openRoles = List.copyOf(openRoles == null ? new ArrayList<>() : openRoles);
             this.currentSize = currentSize;
             this.maxSize = maxSize;
             this.applicantCount = applicantCount;
@@ -96,6 +100,10 @@ public class GroupFinderSnapshot {
 
         public String getRequirements() {
             return requirements;
+        }
+
+        public List<String> getOpenRoles() {
+            return openRoles;
         }
 
         public int getCurrentSize() {
@@ -128,13 +136,14 @@ public class GroupFinderSnapshot {
                 String activity,
                 String description,
                 String requirements,
+                List<String> openRoles,
                 int currentSize,
                 int maxSize,
                 int applicantCount,
                 long updatedAtMillis,
                 boolean recruiting,
                 List<ApplicationView> applications) {
-            super(partyId, partyType, leaderName, activity, description, requirements, currentSize, maxSize,
+            super(partyId, partyType, leaderName, activity, description, requirements, openRoles, currentSize, maxSize,
                     applicantCount, updatedAtMillis, recruiting);
             this.applications = List.copyOf(applications);
         }

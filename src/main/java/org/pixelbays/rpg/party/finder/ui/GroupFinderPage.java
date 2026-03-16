@@ -51,6 +51,7 @@ public class GroupFinderPage extends CustomUIPage {
     private static final String APPLICATIONS_LABEL = "#ApplicationsLabel";
 
     private static final String ACTIVITY_FIELD = "#ActivityField";
+    private static final String OPEN_ROLES_FIELD = "#OpenRolesField";
     private static final String DESCRIPTION_FIELD = "#DescriptionField";
     private static final String REQUIREMENTS_FIELD = "#RequirementsField";
     private static final String LISTING_INDEX_FIELD = "#ListingIndexField";
@@ -92,6 +93,7 @@ public class GroupFinderPage extends CustomUIPage {
         }
 
         String activity = extractString(rawData, "@Activity");
+        String openRoles = extractString(rawData, "@OpenRoles");
         String description = extractString(rawData, "@Description");
         String requirements = extractString(rawData, "@Requirements");
         String listingIndex = extractString(rawData, "@ListingIndex");
@@ -100,7 +102,7 @@ public class GroupFinderPage extends CustomUIPage {
         String applicantIndex = extractString(rawData, "@ApplicantIndex");
 
         World world = store.getExternalData().getWorld();
-        world.execute(() -> handleAction(ref, store, action, activity, description, requirements, listingIndex,
+        world.execute(() -> handleAction(ref, store, action, activity, openRoles, description, requirements, listingIndex,
                 desiredRole, applicationNote, applicantIndex));
     }
 
@@ -108,6 +110,7 @@ public class GroupFinderPage extends CustomUIPage {
             @Nonnull Store<EntityStore> store,
             @Nonnull String action,
             @Nullable String activity,
+            @Nullable String openRoles,
             @Nullable String description,
             @Nullable String requirements,
             @Nullable String listingIndex,
@@ -129,7 +132,7 @@ public class GroupFinderPage extends CustomUIPage {
         switch (action) {
             case "Refresh" -> statusMessage = Message.translation("pixelbays.rpg.groupFinder.ui.status.refreshed");
             case "SaveListing" -> statusMessage = toMessage(
-                groupFinderManager.upsertListing(playerRef.getUuid(), activity, description, requirements));
+                groupFinderManager.upsertListing(playerRef.getUuid(), activity, description, requirements, openRoles));
             case "RemoveListing" -> statusMessage = toMessage(groupFinderManager.removeListing(playerRef.getUuid()));
             case "Apply" -> {
             GroupFinderActionResult result = groupFinderManager.applyToListing(
@@ -196,6 +199,7 @@ public class GroupFinderPage extends CustomUIPage {
                 new EventData()
                         .append("Action", "SaveListing")
                         .append("@Activity", ACTIVITY_FIELD + ".Value")
+                    .append("@OpenRoles", OPEN_ROLES_FIELD + ".Value")
                         .append("@Description", DESCRIPTION_FIELD + ".Value")
                         .append("@Requirements", REQUIREMENTS_FIELD + ".Value"));
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating, REMOVE_LISTING_BUTTON,
@@ -239,8 +243,11 @@ public class GroupFinderPage extends CustomUIPage {
 
         if (ownedListing != null) {
             commandBuilder.set(ACTIVITY_FIELD + ".Value", ownedListing.getActivity());
+            commandBuilder.set(OPEN_ROLES_FIELD + ".Value", String.join(", ", ownedListing.getOpenRoles()));
             commandBuilder.set(DESCRIPTION_FIELD + ".Value", ownedListing.getDescription());
             commandBuilder.set(REQUIREMENTS_FIELD + ".Value", ownedListing.getRequirements());
+        } else {
+            commandBuilder.set(OPEN_ROLES_FIELD + ".Value", "");
         }
 
         if (clearApplicationFields) {
@@ -257,11 +264,12 @@ public class GroupFinderPage extends CustomUIPage {
         }
 
         return rawText("pixelbays.rpg.groupFinder.ui.ownedListingTemplate",
-                "Activity: {activity}\\nType: {type}\\nParty Size: {size}/{max}\\nNeeds: {requirements}\\nDescription: {description}\\nRecruiting: {recruiting}\\nUpdated: {updated}")
+            "Activity: {activity}\\nType: {type}\\nParty Size: {size}/{max}\\nOpen Roles: {roles}\\nNeeds: {requirements}\\nDescription: {description}\\nRecruiting: {recruiting}\\nUpdated: {updated}")
                 .replace("{activity}", safeText(ownedListing.getActivity()))
                 .replace("{type}", ownedListing.getPartyType().name())
                 .replace("{size}", Integer.toString(ownedListing.getCurrentSize()))
                 .replace("{max}", Integer.toString(ownedListing.getMaxSize()))
+            .replace("{roles}", formatRoles(ownedListing.getOpenRoles()))
                 .replace("{requirements}", fallbackText(ownedListing.getRequirements()))
                 .replace("{description}", fallbackText(ownedListing.getDescription()))
                 .replace("{recruiting}", ownedListing.isRecruiting()
@@ -296,6 +304,9 @@ public class GroupFinderPage extends CustomUIPage {
                     .append(listing.getCurrentSize())
                     .append("/")
                     .append(listing.getMaxSize())
+                    .append("\n")
+                    .append(rawText("pixelbays.rpg.groupFinder.ui.openRolesLabel", "Open Roles: "))
+                    .append(formatRoles(listing.getOpenRoles()))
                     .append("\n")
                     .append(rawText("pixelbays.rpg.groupFinder.ui.needsLabel", "Needs: "))
                     .append(fallbackText(listing.getRequirements()))
@@ -357,10 +368,17 @@ public class GroupFinderPage extends CustomUIPage {
 
     @Nonnull
     private Message toMessage(@Nonnull GroupFinderActionResult result) {
+        if (result.getMessage().startsWith("Unknown role type: ")) {
+            return Message.translation("pixelbays.rpg.groupFinder.error.invalidRole")
+                    .param("role", result.getMessage().substring("Unknown role type: ".length()));
+        }
+
         return switch (result.getMessage()) {
             case "Group finder is disabled." -> Message.translation("pixelbays.rpg.groupFinder.error.disabled");
             case "You must be the party leader to manage a listing." -> Message.translation("pixelbays.rpg.groupFinder.error.leaderOnly");
             case "Activity is required." -> Message.translation("pixelbays.rpg.groupFinder.error.activityRequired");
+            case "Choose a role for this listing." -> Message.translation("pixelbays.rpg.groupFinder.error.roleRequired");
+            case "That group is not recruiting for that role." -> Message.translation("pixelbays.rpg.groupFinder.error.roleUnavailable");
             case "You do not have an active listing." -> Message.translation("pixelbays.rpg.groupFinder.error.noOwnedListing");
             case "Listing updated." -> Message.translation("pixelbays.rpg.groupFinder.success.listingUpdated");
             case "Listing removed." -> Message.translation("pixelbays.rpg.groupFinder.success.listingRemoved");
@@ -377,6 +395,14 @@ public class GroupFinderPage extends CustomUIPage {
             case "Party invite sent." -> Message.translation("pixelbays.rpg.groupFinder.success.partyInviteSent");
             default -> PartyCommandUtil.managerResultMessage(result.getMessage());
         };
+    }
+
+    @Nonnull
+    private String formatRoles(@Nullable List<String> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return rawText("pixelbays.rpg.common.none", "None.");
+        }
+        return String.join(", ", roles);
     }
 
     @Nonnull
