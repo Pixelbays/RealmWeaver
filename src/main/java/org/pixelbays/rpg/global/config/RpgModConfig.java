@@ -3,6 +3,7 @@ package org.pixelbays.rpg.global.config;
 import java.util.List;
 import java.util.Map;
 
+import org.pixelbays.rpg.achievement.config.settings.AchievementModSettings;
 import org.pixelbays.rpg.ability.config.settings.AbilityModSettings;
 import org.pixelbays.rpg.camera.config.settings.CameraModSettings;
 import org.pixelbays.rpg.character.config.settings.CharacterModSettings;
@@ -60,6 +61,11 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
             .append(new KeyedCodec<>("CharacterSettings", CharacterModSettings.CODEC, false, true),
                     (i, s) -> i.characterSettings = s, i -> i.characterSettings)
             .metadata(new UIEditorSectionStart("Characters"))
+                .metadata(UIDefaultCollapsedState.UNCOLLAPSED)
+            .add()
+            .append(new KeyedCodec<>("AchievementSettings", AchievementModSettings.CODEC, false, true),
+                    (i, s) -> i.achievementSettings = s, i -> i.achievementSettings)
+            .metadata(new UIEditorSectionStart("Achievements"))
                 .metadata(UIDefaultCollapsedState.UNCOLLAPSED)
             .add()
             .append(new KeyedCodec<>("TalentSettings", TalentModSettings.CODEC, false, true),
@@ -136,6 +142,7 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
     private GeneralModSettings generalSettings;
     private ClassModSettings classSettings;
     private CharacterModSettings characterSettings;
+    private AchievementModSettings achievementSettings;
     private TalentModSettings talentSettings;
     private LevelingModSettings levelingSettings;
     private AbilityModSettings abilitySettings;
@@ -155,6 +162,7 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         this.generalSettings = new GeneralModSettings();
         this.classSettings = new ClassModSettings();
         this.characterSettings = new CharacterModSettings();
+        this.achievementSettings = new AchievementModSettings();
         this.talentSettings = new TalentModSettings();
         this.levelingSettings = new LevelingModSettings();
         this.abilitySettings = new AbilityModSettings();
@@ -197,6 +205,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public CharacterModSettings getCharacterSettings() {
         return characterSettings != null ? characterSettings : new CharacterModSettings();
+    }
+
+    public AchievementModSettings getAchievementSettings() {
+        return achievementSettings != null ? achievementSettings : new AchievementModSettings();
     }
 
     public TalentModSettings getTalentSettings() {
@@ -261,6 +273,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public boolean isCharacterModuleEnabled() {
         return getCharacterSettings().isEnabled();
+    }
+
+    public boolean isAchievementModuleEnabled() {
+        return getAchievementSettings().isEnabled();
     }
 
     public boolean isLevelingModuleEnabled() {

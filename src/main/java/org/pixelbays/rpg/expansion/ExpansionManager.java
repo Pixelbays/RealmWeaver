@@ -151,6 +151,24 @@ public class ExpansionManager {
         return data != null && data.hasUnlocked(expansionId);
     }
 
+    public boolean unlockForPlayer(@Nullable UUID playerUuid, @Nullable String expansionId) {
+        if (playerUuid == null || expansionId == null || expansionId.isBlank()) {
+            return false;
+        }
+
+        GeneralModSettings.ExpansionDefinition definition = getDefinition(expansionId);
+        if (definition == null || !definition.isEnabled()) {
+            return false;
+        }
+
+        if (isUnlocked(playerUuid, definition.getId())) {
+            return true;
+        }
+
+        unlock(playerUuid, definition.getId());
+        return true;
+    }
+
     public boolean isReleased(@Nullable GeneralModSettings.ExpansionDefinition definition) {
         return definition != null && definition.getReleaseTimeEpochMs() <= System.currentTimeMillis();
     }
