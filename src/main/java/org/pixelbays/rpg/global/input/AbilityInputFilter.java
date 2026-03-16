@@ -6,7 +6,6 @@ import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.movement.input.ClickToMoveInputHandler;
 
 import com.hypixel.hytale.protocol.Packet;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
@@ -24,13 +23,11 @@ public class AbilityInputFilter implements PlayerPacketFilter {
     private final WeaponsInputHandler weaponsHandler;
     private final HotbarInputHandler hotbarHandler;
     private final AbilitySlotsInputHandler abilitySlotsHandler;
-    private final ClickToMoveInputHandler clickToMoveHandler;
 
     public AbilityInputFilter(@Nonnull ExamplePlugin plugin) {
         this.weaponsHandler = new WeaponsInputHandler(plugin);
         this.hotbarHandler = new HotbarInputHandler(plugin);
         this.abilitySlotsHandler = new AbilitySlotsInputHandler(plugin);
-        this.clickToMoveHandler = new ClickToMoveInputHandler();
     }
 
     @Override
@@ -47,9 +44,6 @@ public class AbilityInputFilter implements PlayerPacketFilter {
         @Nonnull
         PlayerRef safeRef = playerRef;
         
-        if (clickToMoveHandler.handlePacket(safeRef, syncPacket)) {
-            return true; // Consume movement click
-        }
 
         RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
         if (config == null || !config.isAbilityModuleEnabled()) {
