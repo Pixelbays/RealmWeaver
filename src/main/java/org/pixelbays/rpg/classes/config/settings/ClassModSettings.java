@@ -50,6 +50,9 @@ public class ClassModSettings {
             .append(new KeyedCodec<>("Enabled", Codec.BOOLEAN, false, true),
                 (i, s) -> i.enabled = s, i -> i.enabled)
             .add()
+            .append(new KeyedCodec<>("RoleTypes", STRING_LIST_CODEC, false, true),
+                (i, s) -> i.roleTypes = s, i -> i.roleTypes)
+            .add()
             .append(new KeyedCodec<>("ClassMode", new EnumCodec<>(ClassMode.class), false, true),
                     (i, s) -> i.classMode = s, i -> i.classMode)
             .add()
@@ -81,6 +84,7 @@ public class ClassModSettings {
             .build();
 
     private boolean enabled;
+    private List<String> roleTypes;
     private ClassMode classMode;
     private ActiveClassMode activeClassMode;
     private XpRoutingMode xpRouting;
@@ -93,6 +97,7 @@ public class ClassModSettings {
 
     public ClassModSettings() {
         this.enabled = true;
+        this.roleTypes = new ArrayList<>(List.of("tank", "healer", "dps"));
         this.classMode = ClassMode.SingleClass;
         this.activeClassMode = ActiveClassMode.Manual;
         this.xpRouting = XpRoutingMode.ActiveClassOnly;
@@ -106,6 +111,10 @@ public class ClassModSettings {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public List<String> getRoleTypes() {
+        return roleTypes == null ? new ArrayList<>() : roleTypes;
     }
 
     public ClassMode getClassMode() {
@@ -142,6 +151,20 @@ public class ClassModSettings {
 
     public AbilityLearningMode getAbilityLearningMode() {
         return abilityLearningMode;
+    }
+
+    public boolean isDefinedRoleType(String roleType) {
+        if (roleType == null || roleType.isBlank()) {
+            return false;
+        }
+
+        for (String definedRoleType : getRoleTypes()) {
+            if (definedRoleType != null && definedRoleType.equalsIgnoreCase(roleType)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public boolean shouldAutoLearnAbilitiesOnLevelUp() {

@@ -20,7 +20,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 /**
  * /class talent reset &lt;classId&gt;
  * Resets all talent allocations for a class, refunding points per TalentSettings.ResetMode.
- * In Paid mode, this will consume the configured reset cost item from the player's inventory.
+ * In Paid mode, this will consume the configured reset currency cost.
  */
 public class ClassTalentResetCommand extends AbstractPlayerCommand {
 
@@ -45,7 +45,7 @@ public class ClassTalentResetCommand extends AbstractPlayerCommand {
         Player player = store.getComponent(ref, Player.getComponentType());
         String classId = this.classIdArg.get(ctx);
 
-        // checkItemCost=true: enforce Paid mode item consumption
+        // checkItemCost=true: enforce Paid mode currency consumption
         String result = talentSystem.resetTalents(ref, classId, CONFIG_ID, true, store);
         if (result == null) {
             player.sendMessage(Message.translation("pixelbays.rpg.class.talent.reset.success")

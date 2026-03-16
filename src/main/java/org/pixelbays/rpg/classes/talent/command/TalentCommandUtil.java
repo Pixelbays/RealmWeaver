@@ -24,6 +24,11 @@ final class TalentCommandUtil {
     private static final Pattern TREE_MAX_POINTS = Pattern.compile("ERROR: Tree (.+) is at max points \\((\\d+)\\)");
     private static final Pattern EXCLUSIVE_SPEC = Pattern.compile(
             "ERROR: You are spec'd into (.+)\\. Reset talents to change spec \\(Exclusive mode\\)\\.");
+    private static final Pattern CURRENCY_UNKNOWN = Pattern.compile("ERROR: Unknown currency type: (.+)");
+    private static final Pattern CURRENCY_DISABLED = Pattern.compile("ERROR: Currency type is disabled: (.+)");
+    private static final Pattern CURRENCY_SCOPE_UNSUPPORTED = Pattern.compile("ERROR: Currency type does not support scope: (.+)");
+    private static final Pattern CURRENCY_INSUFFICIENT = Pattern.compile("ERROR: Insufficient currency: (.+)");
+    private static final Pattern CURRENCY_SCOPE_UNAVAILABLE = Pattern.compile("ERROR: Scope is unavailable right now: (.+)");
 
     private TalentCommandUtil() {
     }
@@ -123,6 +128,36 @@ final class TalentCommandUtil {
         if (matcher.matches()) {
             return Message.translation("pixelbays.rpg.class.talent.error.exclusiveSpecBlocked")
                     .param("treeId", matcher.group(1));
+        }
+
+        matcher = CURRENCY_UNKNOWN.matcher(result);
+        if (matcher.matches()) {
+            return Message.translation("pixelbays.rpg.currency.error.unknownType")
+                    .param("type", matcher.group(1));
+        }
+
+        matcher = CURRENCY_DISABLED.matcher(result);
+        if (matcher.matches()) {
+            return Message.translation("pixelbays.rpg.currency.error.disabledType")
+                    .param("type", matcher.group(1));
+        }
+
+        matcher = CURRENCY_SCOPE_UNSUPPORTED.matcher(result);
+        if (matcher.matches()) {
+            return Message.translation("pixelbays.rpg.currency.error.unsupportedScope")
+                    .param("scope", matcher.group(1));
+        }
+
+        matcher = CURRENCY_INSUFFICIENT.matcher(result);
+        if (matcher.matches()) {
+            return Message.translation("pixelbays.rpg.currency.error.insufficient")
+                    .param("type", matcher.group(1));
+        }
+
+        matcher = CURRENCY_SCOPE_UNAVAILABLE.matcher(result);
+        if (matcher.matches()) {
+            return Message.translation("pixelbays.rpg.currency.error.scopeUnavailable")
+                    .param("scope", matcher.group(1));
         }
 
         return Message.translation("pixelbays.rpg.common.unmappedMessage").param("text", result);

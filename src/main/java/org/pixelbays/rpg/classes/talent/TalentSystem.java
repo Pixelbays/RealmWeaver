@@ -6,20 +6,29 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.config.settings.TalentModSettings;
 import org.pixelbays.rpg.classes.config.settings.TalentModSettings.TalentResetMode;
 import org.pixelbays.rpg.classes.config.settings.TalentModSettings.TalentSpecMode;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
+import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
+import org.pixelbays.rpg.economy.currency.CurrencyManager;
+import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
+import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
+import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -267,10 +276,10 @@ public class TalentSystem {
      * Reset all talent allocations for a class.
      * Behavior depends on TalentSettings.ResetMode:
      * - Free: instant full refund of all spent points
-     * - Paid: requires item (item consumption is validated here; actual removal is caller's responsibility)
+    * - Paid: requires configured currency and spends it during the reset
      * - Partial: refunds PartialRefundPercent of spent points
      *
-     * @param checkItemCost if true, validate/consume reset cost item for Paid mode
+    * @param checkItemCost if true, validate/consume reset cost for Paid mode
      * @return null on success, or an error message string
      */
     @Nullable
@@ -301,10 +310,22 @@ public class TalentSystem {
 
         // Check Paid mode cost
         if (talentSettings.getResetMode() == TalentResetMode.Paid && checkItemCost) {
-            String costItemId = talentSettings.getResetCostItemId();
-            if (costItemId != null && !costItemId.isEmpty()) {
-                // TODO: integrate with inventory to check+consume reset cost item
-                RpgLogging.debugDeveloper("[TalentSystem] TODO: check reset cost item %s for %s", costItemId, classId);
+            CurrencyAmountDefinition resetCost = talentSettings.getResetCost();
+            if (!resetCost.isFree()) {
+                CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+                String ownerId = resolveCurrencyOwnerId(CurrencyScope.Character, entityRef, store);
+                if (ownerId == null || ownerId.isBlank()) {
+                    return "ERROR: Scope is unavailable right now: Character";
+                }
+
+                CurrencyActionResult result = currencyManager.spend(
+                        CurrencyScope.Character,
+                        ownerId,
+                        resetCost,
+                        resolveCharacterCurrencyAccessContext(entityRef, store));
+                if (!result.isSuccess()) {
+                    return "ERROR: " + result.getMessage();
+                }
             }
         }
 
@@ -336,6 +357,37 @@ public class TalentSystem {
         RpgLogging.debugDeveloper("[TalentSystem] %s reset talents for class=%s (spent=%d, refunded=%d)",
                 entityRef.getIndex(), classId, spent, refundAmount);
         return null;
+    }
+
+    @Nonnull
+    private CurrencyAccessContext resolveCharacterCurrencyAccessContext(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        Player player = store.getComponent(entityRef, Player.getComponentType());
+        if (player == null || player.getInventory() == null) {
+            return CurrencyAccessContext.empty();
+        }
+        return CurrencyAccessContext.fromInventory(player.getInventory());
+    }
+
+    @Nullable
+    private String resolveCurrencyOwnerId(@Nonnull CurrencyScope scope,
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return scope == CurrencyScope.Global ? "global" : null;
+        }
+
+        return switch (scope) {
+            case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+            case Account -> playerRef.getUuid().toString();
+            case Guild -> {
+                Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
+                yield guild == null ? null : guild.getId().toString();
+            }
+            case Global -> "global";
+            case Custom -> null;
+        };
     }
 
     // ── Info ─────────────────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
+import org.pixelbays.rpg.global.config.builder.CurrencyRefCodec;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
 import com.hypixel.hytale.assetstore.AssetRegistry;
@@ -421,7 +422,7 @@ public class BankTypeDefinition implements JsonAssetWithMap<String, DefaultAsset
             .append(new KeyedCodec<>("CurrencyScope", new EnumCodec<>(CurrencyScope.class), false, true),
                 (i, s) -> i.currencyScope = s, i -> i.currencyScope)
             .add()
-                .append(new KeyedCodec<>("CurrencyId", Codec.STRING, false, true),
+            .append(new KeyedCodec<>("CurrencyId", new CurrencyRefCodec(), false, true),
                         (i, s) -> i.currencyId = s, i -> i.currencyId)
                 .add()
                 .append(new KeyedCodec<>("Amount", Codec.INTEGER, false, true),

@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,6 +17,7 @@ import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.config.builder.AbilityRefCodec;
+import org.pixelbays.rpg.global.config.builder.CurrencyRefCodec;
 import org.pixelbays.rpg.global.config.builder.LevelSystemRefCodec;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
@@ -102,6 +105,11 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
     private static final FunctionCodec<String[], List<String>> CLASS_ID_LIST_CODEC = new FunctionCodec<>(
             new ArrayCodec<>(CLASS_REF_CODEC, String[]::new),
+            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+            list -> list == null ? null : list.toArray(String[]::new));
+
+        private static final FunctionCodec<String[], List<String>> ROLE_ID_LIST_CODEC = new FunctionCodec<>(
+            Codec.STRING_ARRAY,
             arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
             list -> list == null ? null : list.toArray(String[]::new));
 
@@ -217,6 +225,10 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                     (i, s) -> i.ExclusiveWith = s, i -> i.ExclusiveWith,
                     (i, parent) -> i.ExclusiveWith = parent.ExclusiveWith)
             .add()
+                .appendInherited(new KeyedCodec<>("Roles", ROLE_ID_LIST_CODEC, false, true),
+                    (i, s) -> i.Roles = s, i -> i.Roles,
+                    (i, parent) -> i.Roles = parent.Roles)
+                .add()
                 .appendInherited(new KeyedCodec<>("LevelSystemId", LEVEL_SYSTEM_REF_CODEC, false, true),
                     (i, s) -> i.LevelSystemId = s, i -> i.LevelSystemId,
                     (i, parent) -> i.LevelSystemId = parent.LevelSystemId)
@@ -395,6 +407,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     private Object2IntMap<String> Prerequisites; // Required class levels (e.g., "warrior": 10)
     private List<String> RequiredClasses; // Must have learned these classes first
     private List<String> ExclusiveWith; // Cannot have these classes simultaneously
+    private List<String> Roles; // High-level combat/support roles this class can fill
 
     // === Leveling Integration ===
     private String LevelSystemId; // Links to LevelProgressionSystem (e.g., "class_warrior")
@@ -435,6 +448,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         this.Prerequisites = new Object2IntOpenHashMap<>();
         this.RequiredClasses = new ArrayList<>();
         this.ExclusiveWith = new ArrayList<>();
+        this.Roles = new ArrayList<>();
         this.LevelSystemId = "";
         this.UsesCharacterLevel = false;
         this.IsStartingClass = false;
@@ -533,6 +547,73 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
     public List<String> getExclusiveWith() {
         return ExclusiveWith;
+    }
+
+    public List<String> getRoles() {
+        return Roles == null ? new ArrayList<>() : Roles;
+    }
+
+    public void setRoles(@Nullable List<String> roles) {
+        this.Roles = roles == null ? new ArrayList<>() : roles;
+    }
+
+    @Nullable
+    public TalentTree getTalentTree(@Nullable String treeId) {
+        if (treeId == null || treeId.isBlank() || TalentTrees == null) {
+            return null;
+        }
+
+        for (TalentTree tree : TalentTrees) {
+            if (tree != null && treeId.equalsIgnoreCase(tree.getTreeId())) {
+                return tree;
+            }
+        }
+
+        return null;
+    }
+
+    @Nonnull
+    public List<String> getEffectiveRoles(@Nullable String treeId) {
+        LinkedHashSet<String> effectiveRoles = new LinkedHashSet<>();
+        appendRoleIds(effectiveRoles, getRoles());
+
+        TalentTree tree = getTalentTree(treeId);
+        if (tree != null) {
+            appendRoleIds(effectiveRoles, tree.getRoles());
+        }
+
+        return new ArrayList<>(effectiveRoles);
+    }
+
+    public boolean hasRole(@Nullable String roleId) {
+        return containsRole(getRoles(), roleId);
+    }
+
+    private static void appendRoleIds(@Nonnull Set<String> target, @Nullable List<String> roles) {
+        if (roles == null || roles.isEmpty()) {
+            return;
+        }
+
+        for (String role : roles) {
+            if (role == null || role.isBlank()) {
+                continue;
+            }
+            target.add(role);
+        }
+    }
+
+    private static boolean containsRole(@Nullable List<String> roles, @Nullable String roleId) {
+        if (roleId == null || roleId.isBlank() || roles == null || roles.isEmpty()) {
+            return false;
+        }
+
+        for (String role : roles) {
+            if (role != null && role.equalsIgnoreCase(roleId)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public String getLevelSystemId() {
@@ -1073,7 +1154,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     public static class AbilityLearnCost {
         public static final BuilderCodec<AbilityLearnCost> CODEC = BuilderCodec
                 .builder(AbilityLearnCost.class, AbilityLearnCost::new)
-                .append(new KeyedCodec<>("CurrencyId", Codec.STRING, false, true),
+            .append(new KeyedCodec<>("CurrencyId", new CurrencyRefCodec(), false, true),
                         (i, s) -> i.currencyId = s, i -> i.currencyId)
                 .add()
                 .append(new KeyedCodec<>("Amount", Codec.LONG, false, true),
@@ -1260,6 +1341,9 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                 .add()
                 .append(new KeyedCodec<>("Icon", Codec.STRING, false, true), (i, s) -> i.iconId = s, i -> i.iconId)
                 .add()
+                .append(new KeyedCodec<>("Roles", ROLE_ID_LIST_CODEC, false, true), (i, s) -> i.roles = s,
+                    i -> i.roles)
+                .add()
                 .append(new KeyedCodec<>("MaxPoints", Codec.INTEGER, false, true), (i, s) -> i.maxPoints = s,
                         i -> i.maxPoints)
                 .add()
@@ -1275,6 +1359,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         private String displayName;
         private String description;
         private String iconId;
+        private List<String> roles;
         private int maxPoints;
         private TalentPrerequisiteRankMode prerequisiteRankMode;
         private TalentNode[] nodes;
@@ -1284,6 +1369,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
             this.displayName = "";
             this.description = "";
             this.iconId = "";
+            this.roles = new ArrayList<>();
             this.maxPoints = 0;
             this.prerequisiteRankMode = TalentPrerequisiteRankMode.OnePoint;
             this.nodes = new TalentNode[0];
@@ -1319,6 +1405,18 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
         public void setIconId(String iconId) {
             this.iconId = iconId;
+        }
+
+        public List<String> getRoles() {
+            return roles == null ? new ArrayList<>() : roles;
+        }
+
+        public void setRoles(@Nullable List<String> roles) {
+            this.roles = roles == null ? new ArrayList<>() : roles;
+        }
+
+        public boolean hasRole(@Nullable String roleId) {
+            return containsRole(getRoles(), roleId);
         }
 
         public int getMaxPoints() {

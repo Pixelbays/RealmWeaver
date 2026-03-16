@@ -1,5 +1,7 @@
 package org.pixelbays.rpg.classes.config.settings;
 
+import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
+
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
@@ -30,8 +32,8 @@ public class TalentModSettings {
             .append(new KeyedCodec<>("ResetMode", new EnumCodec<>(TalentResetMode.class), false, true),
                     (i, s) -> i.resetMode = s, i -> i.resetMode)
             .add()
-            .append(new KeyedCodec<>("ResetCostItemId", Codec.STRING, false, true),
-                    (i, s) -> i.resetCostItemId = s, i -> i.resetCostItemId)
+                .append(new KeyedCodec<>("ResetCost", CurrencyAmountDefinition.CODEC, false, true),
+                    (i, s) -> i.resetCost = s, i -> i.resetCost)
             .add()
             .append(new KeyedCodec<>("PartialRefundPercent", Codec.FLOAT, false, true),
                     (i, s) -> i.partialRefundPercent = s, i -> i.partialRefundPercent)
@@ -41,14 +43,14 @@ public class TalentModSettings {
     private boolean enabled;
     private TalentSpecMode specMode;
     private TalentResetMode resetMode;
-    private String resetCostItemId;
+    private CurrencyAmountDefinition resetCost;
     private float partialRefundPercent;
 
     public TalentModSettings() {
         this.enabled = true;
         this.specMode = TalentSpecMode.Free;
         this.resetMode = TalentResetMode.Free;
-        this.resetCostItemId = "";
+        this.resetCost = new CurrencyAmountDefinition();
         this.partialRefundPercent = 1.0f;
     }
 
@@ -72,12 +74,12 @@ public class TalentModSettings {
         this.resetMode = resetMode;
     }
 
-    public String getResetCostItemId() {
-        return resetCostItemId;
+    public CurrencyAmountDefinition getResetCost() {
+        return resetCost == null ? new CurrencyAmountDefinition() : resetCost;
     }
 
-    public void setResetCostItemId(String resetCostItemId) {
-        this.resetCostItemId = resetCostItemId;
+    public void setResetCost(CurrencyAmountDefinition resetCost) {
+        this.resetCost = resetCost;
     }
 
     public float getPartialRefundPercent() {

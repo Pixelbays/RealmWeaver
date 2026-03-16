@@ -152,6 +152,10 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
             }
         }
 
+        if (!classDef.getRoles().isEmpty()) {
+            lines.add("Roles: " + String.join(", ", classDef.getRoles()));
+        }
+
         if (!classDef.getLevelMilestones().isEmpty()) {
             lines.add("LevelMilestones: " + classDef.getLevelMilestones().size());
             for (ClassDefinition.LevelMilestone milestone : classDef.getLevelMilestones()) {
@@ -164,6 +168,11 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
 
         if (!classDef.getTalentTrees().isEmpty()) {
             lines.add("TalentTrees: " + classDef.getTalentTrees().size());
+            for (ClassDefinition.TalentTree tree : classDef.getTalentTrees()) {
+                if (tree != null && !tree.getRoles().isEmpty()) {
+                    lines.add("  - " + tree.getTreeId() + " roles: " + String.join(", ", tree.getRoles()));
+                }
+            }
         }
 
         ClassDefinition.ClassSwitchingRules switching = classDef.getSwitchingRules();
