@@ -20,6 +20,7 @@ import org.pixelbays.rpg.item.config.settings.ItemModSettings;
 import org.pixelbays.rpg.leveling.config.settings.LevelingModSettings;
 import org.pixelbays.rpg.lockpicking.config.settings.LockpickingModSettings;
 import org.pixelbays.rpg.mail.config.settings.MailModSettings;
+import org.pixelbays.rpg.npc.config.settings.NpcModSettings;
 import org.pixelbays.rpg.party.config.settings.PartyModSettings;
 
 import com.hypixel.hytale.assetstore.AssetExtraInfo;
@@ -36,7 +37,7 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 
 /**
- * Master configuration for the RPG mod.
+ * Master configuration for Realmweaver.
  * Loaded from /Server/RpgModConfig/{ConfigName}.json
  */
 public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<String, RpgModConfig>> {
@@ -103,6 +104,11 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
             .metadata(new UIEditorSectionStart("Guilds"))
                 .metadata(UIDefaultCollapsedState.UNCOLLAPSED)
             .add()
+            .append(new KeyedCodec<>("NpcSettings", NpcModSettings.CODEC, false, true),
+                    (i, s) -> i.npcSettings = s, i -> i.npcSettings)
+            .metadata(new UIEditorSectionStart("NPCs"))
+                .metadata(UIDefaultCollapsedState.UNCOLLAPSED)
+            .add()
             .append(new KeyedCodec<>("CameraSettings", CameraModSettings.CODEC, false, true),
                     (i, s) -> i.cameraSettings = s, i -> i.cameraSettings)
             .metadata(new UIEditorSectionStart("Camera"))
@@ -150,6 +156,7 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
     private ItemModSettings itemSettings;
     private PartyModSettings partySettings;
     private GuildModSettings guildSettings;
+    private NpcModSettings npcSettings;
     private CameraModSettings cameraSettings;
     private BankModSettings bankSettings;
     private CurrencyModSettings currencySettings;
@@ -170,6 +177,7 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         this.itemSettings = new ItemModSettings();
         this.partySettings = new PartyModSettings();
         this.guildSettings = new GuildModSettings();
+        this.npcSettings = new NpcModSettings();
         this.cameraSettings = new CameraModSettings();
         this.bankSettings = new BankModSettings();
         this.currencySettings = new CurrencyModSettings();
@@ -239,6 +247,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         return guildSettings != null ? guildSettings : new GuildModSettings();
     }
 
+    public NpcModSettings getNpcSettings() {
+        return npcSettings != null ? npcSettings : new NpcModSettings();
+    }
+
     public CameraModSettings getCameraSettings() {
         return cameraSettings != null ? cameraSettings : new CameraModSettings();
     }
@@ -299,6 +311,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         return getGuildSettings().isEnabled();
     }
 
+    public boolean isNpcModuleEnabled() {
+        return getNpcSettings().isEnabled();
+    }
+
     public boolean isCameraModuleEnabled() {
         return getCameraSettings().isEnabled();
     }
@@ -321,6 +337,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public boolean isLockpickingModuleEnabled() {
         return getLockpickingSettings().isEnabled();
+    }
+
+    public boolean isNpcThreatEnabled() {
+        return isNpcModuleEnabled() && getNpcSettings().isThreatEnabled();
     }
 
     public ClassModSettings.ClassMode getClassMode() {
@@ -532,6 +552,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public int getGuildPersistenceIntervalSeconds() {
         return getGuildSettings().getGuildPersistenceIntervalSeconds();
+    }
+
+    public float getNpcThreatLookbackSeconds() {
+        return getNpcSettings().getThreatLookbackSeconds();
     }
 
     public int getMaxCombatClasses() {
