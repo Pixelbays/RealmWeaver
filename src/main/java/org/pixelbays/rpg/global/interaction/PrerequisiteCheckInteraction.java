@@ -3,7 +3,6 @@ package org.pixelbays.rpg.global.interaction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,7 +64,7 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 			PrerequisiteCheckInteraction.class,
 			PrerequisiteCheckInteraction::new,
 			SimpleInstantInteraction.CODEC)
-			.documentation("Checks optional class, race, level, achievement, party, and raid requirements before allowing the interaction chain to continue.")
+			.documentation("Checks optional class, race, expansion, level, achievement, party, and raid requirements before allowing the interaction chain to continue.")
 			.append(new KeyedCodec<>("RequiredClassIds", CLASS_LIST_CODEC, false),
 					(i, v) -> i.requiredClassIds = v,
 					i -> i.requiredClassIds)
@@ -77,6 +76,10 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 			.append(new KeyedCodec<>("RequiredRaceIds", RACE_LIST_CODEC, false),
 					(i, v) -> i.requiredRaceIds = v,
 					i -> i.requiredRaceIds)
+			.add()
+			.append(new KeyedCodec<>("RequiredExpansionIds", STRING_LIST_CODEC, false),
+					(i, v) -> i.requiredExpansionIds = v,
+					i -> i.requiredExpansionIds)
 			.add()
 			.append(new KeyedCodec<>("RequiredLevel", Codec.INTEGER, false),
 					(i, v) -> i.requiredLevel = v,
@@ -115,6 +118,7 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 	private List<String> requiredClassIds = new ArrayList<>();
 	private int requiredClassLevel = 0;
 	private List<String> requiredRaceIds = new ArrayList<>();
+	private List<String> requiredExpansionIds = new ArrayList<>();
 	private int requiredLevel = 0;
 	private String requiredLevelSystemId = "";
 	private List<String> requiredAchievementIds = new ArrayList<>();
@@ -179,11 +183,18 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 		if (!requiredRaceIds.isEmpty()) {
 			String currentRaceId = raceComponent == null ? "" : raceComponent.getRaceId();
 			boolean raceMatched = requiredRaceIds.stream()
-					.filter(id -> id != null && !id.isBlank())
-					.anyMatch(id -> id.equalsIgnoreCase(currentRaceId));
+					.filter(requiredRaceId -> requiredRaceId != null && !requiredRaceId.isBlank())
+					.anyMatch(requiredRaceId -> requiredRaceId.equalsIgnoreCase(currentRaceId));
 			if (!raceMatched) {
 				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.race")
 						.param("races", describeRaces(requiredRaceIds)));
+			}
+		}
+
+		if (!requiredExpansionIds.isEmpty()) {
+			if (playerRef == null || !ExamplePlugin.get().getExpansionManager().hasAccess(playerRef, requiredExpansionIds)) {
+				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.expansion")
+						.param("expansions", describeExpansions(requiredExpansionIds)));
 			}
 		}
 
@@ -310,38 +321,43 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 
 	@Nonnull
 	private String describeClasses(@Nonnull List<String> classIds) {
-		return joinDisplayNames(classIds, id -> {
-			ClassDefinition definition = ClassDefinition.getAssetMap() == null ? null : ClassDefinition.getAssetMap().getAsset(id);
-			return definition == null ? id : definition.getDisplayName();
+		return joinDisplayNames(classIds, classId -> {
+			ClassDefinition definition = ClassDefinition.getAssetMap() == null ? null : ClassDefinition.getAssetMap().getAsset(classId);
+			return definition == null ? classId : definition.getDisplayName();
 		});
 	}
 
 	@Nonnull
 	private String describeRaces(@Nonnull List<String> raceIds) {
-		return joinDisplayNames(raceIds, id -> {
-			RaceDefinition definition = RaceDefinition.getAssetMap() == null ? null : RaceDefinition.getAssetMap().getAsset(id);
-			return definition == null ? id : definition.getDisplayName();
+		return joinDisplayNames(raceIds, raceId -> {
+			RaceDefinition definition = RaceDefinition.getAssetMap() == null ? null : RaceDefinition.getAssetMap().getAsset(raceId);
+			return definition == null ? raceId : definition.getDisplayName();
 		});
 	}
 
 	@Nonnull
+	private String describeExpansions(@Nonnull List<String> expansionIds) {
+		return ExamplePlugin.get().getExpansionManager().describeRequirements(expansionIds);
+	}
+
+	@Nonnull
 	private String describeAchievements(@Nonnull List<String> achievementIds) {
-		return joinDisplayNames(achievementIds, id -> {
+		return joinDisplayNames(achievementIds, achievementId -> {
 			AchievementDefinition definition = AchievementDefinition.getAssetMap() == null
 					? null
-					: AchievementDefinition.getAssetMap().getAsset(id);
-			return definition == null ? id : definition.getDisplayName();
+					: AchievementDefinition.getAssetMap().getAsset(achievementId);
+			return definition == null ? achievementId : definition.getDisplayName();
 		});
 	}
 
 	@Nonnull
 	private String joinDisplayNames(@Nonnull List<String> ids, @Nonnull java.util.function.Function<String, String> resolver) {
 		List<String> names = new ArrayList<>();
-		for (String id : ids) {
-			if (id == null || id.isBlank()) {
+		for (String value : ids) {
+			if (value == null || value.isBlank()) {
 				continue;
 			}
-			names.add(resolver.apply(id));
+			names.add(resolver.apply(value));
 		}
 		return names.isEmpty() ? "Unknown" : String.join(", ", names);
 	}
