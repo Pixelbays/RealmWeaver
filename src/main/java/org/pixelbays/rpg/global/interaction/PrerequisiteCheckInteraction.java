@@ -29,6 +29,7 @@ import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
 import com.hypixel.hytale.codec.function.FunctionCodec;
+import com.hypixel.hytale.component.Component;
 import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -346,7 +347,7 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 	}
 
 	@Nullable
-	private <T> T getComponent(@Nullable CommandBuffer<EntityStore> commandBuffer,
+	private <T extends Component<EntityStore>> T getComponent(@Nullable CommandBuffer<EntityStore> commandBuffer,
 			@Nonnull Store<EntityStore> store,
 			@Nonnull Ref<EntityStore> entityRef,
 			@Nonnull com.hypixel.hytale.component.ComponentType<EntityStore, T> componentType) {
