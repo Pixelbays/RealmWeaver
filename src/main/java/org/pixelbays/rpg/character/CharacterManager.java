@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.achievement.component.AchievementComponent;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.character.config.CharacterRosterData;
@@ -313,6 +314,9 @@ public final class CharacterManager {
         saveActiveCharacter(playerRef.getUuid(), ref, store);
         applyProfileToPlayer(target, ref, store);
         activeCharacterIds.put(playerRef.getUuid(), target.getCharacterId());
+        if (ExamplePlugin.get().getAchievementSystem() != null) {
+            ExamplePlugin.get().getAchievementSystem().synchronizeEntityAchievements(ref, store);
+        }
         roster.setSelectedCharacterId(target.getCharacterId());
         target.setLastPlayedEpochMs(System.currentTimeMillis());
         persistRoster(roster);
@@ -630,6 +634,7 @@ public final class CharacterManager {
         profile.setClassProgression(classComponent);
         profile.setClassAbilities(classAbilities);
         profile.setAbilityBindings(new AbilityBindingComponent());
+        profile.setAchievementProgress(new AchievementComponent());
         profile.setStatSnapshot(new EntityStatMap());
         profile.setInventorySnapshot(new Inventory());
         return profile;
@@ -721,6 +726,7 @@ public final class CharacterManager {
         RaceComponent raceComponent = store.getComponent(ref, RaceComponent.getComponentType());
         ClassAbilityComponent classAbilities = store.getComponent(ref, ClassAbilityComponent.getComponentType());
         AbilityBindingComponent abilityBindings = store.getComponent(ref, AbilityBindingComponent.getComponentType());
+        AchievementComponent achievementProgress = store.getComponent(ref, AchievementComponent.getComponentType());
         EntityStatMap statMap = store.getComponent(ref, EntityStatMap.getComponentType());
         TransformComponent transformComponent = store.getComponent(ref, TransformComponent.getComponentType());
         Player player = store.getComponent(ref, Player.getComponentType());
@@ -730,6 +736,7 @@ public final class CharacterManager {
         profile.setRaceProgression(raceComponent == null ? new RaceComponent() : (RaceComponent) raceComponent.clone());
         profile.setClassAbilities(classAbilities == null ? new ClassAbilityComponent() : classAbilities.clone());
         profile.setAbilityBindings(abilityBindings == null ? new AbilityBindingComponent() : (AbilityBindingComponent) abilityBindings.clone());
+        profile.setAchievementProgress(achievementProgress == null ? new AchievementComponent() : (AchievementComponent) achievementProgress.clone());
         profile.setStatSnapshot(statMap == null ? new EntityStatMap() : statMap.clone());
         profile.setSavedWorldName(store.getExternalData().getWorld() == null ? "" : store.getExternalData().getWorld().getName());
         profile.setSavedTransform(transformComponent == null ? new TransformComponent() : transformComponent.clone());
@@ -751,6 +758,7 @@ public final class CharacterManager {
         store.putComponent(ref, RaceComponent.getComponentType(), (RaceComponent) profile.getRaceProgression().clone());
         store.putComponent(ref, ClassAbilityComponent.getComponentType(), profile.getClassAbilities().clone());
         store.putComponent(ref, AbilityBindingComponent.getComponentType(), (AbilityBindingComponent) profile.getAbilityBindings().clone());
+        store.putComponent(ref, AchievementComponent.getComponentType(), (AchievementComponent) profile.getAchievementProgress().clone());
         store.putComponent(ref, EntityStatMap.getComponentType(), profile.getStatSnapshot().clone());
 
         Player player = store.getComponent(ref, Player.getComponentType());
@@ -1109,6 +1117,20 @@ public final class CharacterManager {
     private CharacterModSettings getSettings() {
         RpgModConfig config = resolveConfig();
         return config == null ? new CharacterModSettings() : config.getCharacterSettings();
+    }
+
+    @Nonnull
+    public AchievementComponent getOrCreateAccountAchievementProgress(@Nonnull UUID accountId, @Nullable String username) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        return roster.getAccountAchievementProgress();
+    }
+
+    public void saveAccountAchievementProgress(@Nonnull UUID accountId,
+            @Nullable String username,
+            @Nonnull AchievementComponent achievementComponent) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        roster.setAccountAchievementProgress(achievementComponent);
+        persistRoster(roster);
     }
 
     private void persistRoster(@Nonnull CharacterRosterData roster) {

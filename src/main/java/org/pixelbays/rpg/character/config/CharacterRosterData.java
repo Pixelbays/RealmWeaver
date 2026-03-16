@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.rpg.achievement.component.AchievementComponent;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
@@ -54,6 +55,9 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
             .append(new KeyedCodec<>("SelectedCharacterId", Codec.STRING, false, true),
                     (i, s) -> i.selectedCharacterId = s, i -> i.selectedCharacterId)
             .add()
+                .append(new KeyedCodec<>("AccountAchievementProgress", AchievementComponent.CODEC, false, true),
+                    (i, s) -> i.accountAchievementProgress = s, i -> i.accountAchievementProgress)
+                .add()
                 .append(new KeyedCodec<>("RecoveryHistoryEpochMs", LONG_LIST_CODEC, false, true),
                     (i, s) -> i.recoveryHistoryEpochMs = s, i -> i.recoveryHistoryEpochMs)
                 .add()
@@ -68,6 +72,7 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
     private String id;
     private String accountUsername;
     private String selectedCharacterId;
+    private AchievementComponent accountAchievementProgress;
     private List<Long> recoveryHistoryEpochMs;
     private List<CharacterProfileData> profiles;
 
@@ -76,6 +81,7 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
         this.id = "";
         this.accountUsername = "";
         this.selectedCharacterId = "";
+        this.accountAchievementProgress = new AchievementComponent();
         this.recoveryHistoryEpochMs = new ArrayList<>();
         this.profiles = new ArrayList<>();
     }
@@ -125,6 +131,21 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
 
     public void setSelectedCharacterId(@Nullable String selectedCharacterId) {
         this.selectedCharacterId = selectedCharacterId == null ? "" : selectedCharacterId;
+    }
+
+    @Nonnull
+    public AchievementComponent getAccountAchievementProgress() {
+        if (accountAchievementProgress == null) {
+            accountAchievementProgress = new AchievementComponent();
+        }
+        AchievementComponent progress = accountAchievementProgress;
+        return progress == null ? new AchievementComponent() : progress;
+    }
+
+    public void setAccountAchievementProgress(@Nullable AchievementComponent accountAchievementProgress) {
+        this.accountAchievementProgress = accountAchievementProgress == null
+                ? new AchievementComponent()
+                : (AchievementComponent) accountAchievementProgress.clone();
     }
 
     @Nonnull
@@ -225,6 +246,9 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
                 .append(new KeyedCodec<>("AbilityBindings", AbilityBindingComponent.CODEC, false, true),
                         (i, s) -> i.abilityBindings = s, i -> i.abilityBindings)
                 .add()
+                .append(new KeyedCodec<>("AchievementProgress", AchievementComponent.CODEC, false, true),
+                    (i, s) -> i.achievementProgress = s, i -> i.achievementProgress)
+                .add()
                 .append(new KeyedCodec<>("StatSnapshot", EntityStatMap.CODEC, false, true),
                     (i, s) -> i.statSnapshot = s, i -> i.statSnapshot)
                 .add()
@@ -261,6 +285,7 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
         private RaceComponent raceProgression;
         private ClassAbilityComponent classAbilities;
         private AbilityBindingComponent abilityBindings;
+        private AchievementComponent achievementProgress;
         private EntityStatMap statSnapshot;
         private String savedWorldName;
         private TransformComponent savedTransform;
@@ -283,6 +308,7 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
             this.raceProgression = new RaceComponent();
             this.classAbilities = new ClassAbilityComponent();
             this.abilityBindings = new AbilityBindingComponent();
+            this.achievementProgress = new AchievementComponent();
             this.statSnapshot = new EntityStatMap();
             this.savedWorldName = "";
             this.savedTransform = new TransformComponent();
@@ -406,6 +432,21 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
         }
 
         @Nonnull
+        public AchievementComponent getAchievementProgress() {
+            if (achievementProgress == null) {
+                achievementProgress = new AchievementComponent();
+            }
+            AchievementComponent progress = achievementProgress;
+            return progress == null ? new AchievementComponent() : progress;
+        }
+
+        public void setAchievementProgress(@Nullable AchievementComponent achievementProgress) {
+            this.achievementProgress = achievementProgress == null
+                    ? new AchievementComponent()
+                    : (AchievementComponent) achievementProgress.clone();
+        }
+
+        @Nonnull
         public EntityStatMap getStatSnapshot() {
             return statSnapshot == null ? new EntityStatMap() : statSnapshot;
         }
@@ -481,6 +522,7 @@ public class CharacterRosterData implements JsonAssetWithMap<String, DefaultAsse
             copy.raceProgression = (RaceComponent) getRaceProgression().clone();
             copy.classAbilities = getClassAbilities().clone();
             copy.abilityBindings = (AbilityBindingComponent) getAbilityBindings().clone();
+            copy.achievementProgress = (AchievementComponent) getAchievementProgress().clone();
             copy.statSnapshot = getStatSnapshot().clone();
             copy.savedWorldName = getSavedWorldName();
             copy.savedTransform = getSavedTransform().clone();
