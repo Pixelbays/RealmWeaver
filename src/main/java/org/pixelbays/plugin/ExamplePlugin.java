@@ -1,7 +1,14 @@
 package org.pixelbays.plugin;
 
-import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
+import org.pixelbays.rpg.achievement.component.AchievementComponent;
+import org.pixelbays.rpg.achievement.config.AchievementDefinition;
+import org.pixelbays.rpg.achievement.event.AchievementUnlockedEvent;
+import org.pixelbays.rpg.achievement.system.AchievementSystem;
 import org.pixelbays.rpg.ability.command.BindAbilityCommand;
 import org.pixelbays.rpg.ability.command.SyncHotbarCommand;
 import org.pixelbays.rpg.ability.command.UnlockAbilityCommand;
@@ -20,13 +27,38 @@ import org.pixelbays.rpg.ability.interaction.EmpowerAbilityInteraction;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.ability.system.HotbarAbilityIconManager;
 import org.pixelbays.rpg.camera.RpgCameraController;
+import org.pixelbays.rpg.chat.ChatManager;
+import org.pixelbays.rpg.chat.GuildChatChannel;
+import org.pixelbays.rpg.chat.PartyChatChannel;
+import org.pixelbays.rpg.chat.command.ChatCommand;
+import org.pixelbays.rpg.character.CharacterManager;
+import org.pixelbays.rpg.character.command.CharacterCommand;
+import org.pixelbays.rpg.character.config.CharacterRosterData;
 import org.pixelbays.rpg.classes.command.ClassCommand;
 import org.pixelbays.rpg.classes.component.ClassComponent;
+import org.pixelbays.rpg.classes.talent.TalentSystem;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.event.ActiveClassChangedEvent;
 import org.pixelbays.rpg.classes.event.ClassLearnedEvent;
 import org.pixelbays.rpg.classes.event.ClassUnlearnedEvent;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.economy.auctions.AuctionHouseManager;
+import org.pixelbays.rpg.economy.auctions.config.AuctionData;
+import org.pixelbays.rpg.economy.banks.BankManager;
+import org.pixelbays.rpg.economy.banks.command.BankCommand;
+import org.pixelbays.rpg.economy.banks.config.BankData;
+import org.pixelbays.rpg.economy.banks.config.BankTypeDefinition;
+import org.pixelbays.rpg.economy.currency.CurrencyManager;
+import org.pixelbays.rpg.economy.currency.CurrencyWalletData;
+import org.pixelbays.rpg.economy.currency.command.CurrencyCommand;
+import org.pixelbays.rpg.economy.currency.config.CurrencyItemDropContainer;
+import org.pixelbays.rpg.economy.currency.config.CurrencyTypeDefinition;
+import org.pixelbays.rpg.economy.currency.event.GiveCurrencyEvent;
+import org.pixelbays.rpg.economy.currency.handler.GiveCurrencyHandler;
+import org.pixelbays.rpg.economy.currency.system.CurrencyDeathDropSystem;
+import org.pixelbays.rpg.economy.banks.interaction.OpenBankInteraction;
+import org.pixelbays.rpg.expansion.ExpansionManager;
+import org.pixelbays.rpg.expansion.ExpansionUnlockData;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.event.ClassStatBonusesRecalculatedEvent;
 import org.pixelbays.rpg.global.event.RaceStatBonusesRecalculatedEvent;
@@ -35,6 +67,13 @@ import org.pixelbays.rpg.global.event.StatIncreasesAppliedEvent;
 import org.pixelbays.rpg.global.input.AbilityInputFilter;
 import org.pixelbays.rpg.global.interaction.DiceRollInteraction;
 import org.pixelbays.rpg.global.interaction.ForceTargetInteraction;
+import org.pixelbays.rpg.global.interaction.GrantAchievementProgressInteraction;
+import org.pixelbays.rpg.global.interaction.PrerequisiteCheckInteraction;
+import org.pixelbays.rpg.global.interaction.SendMailInteraction;
+import org.pixelbays.rpg.global.interaction.UnlockAchievementInteraction;
+import org.pixelbays.rpg.global.interaction.UnlockClassInteraction;
+import org.pixelbays.rpg.global.interaction.UnlockExpansionInteraction;
+import org.pixelbays.rpg.global.interaction.UnlockRaceInteraction;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.system.XpDeathDropSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
@@ -55,7 +94,11 @@ import org.pixelbays.rpg.guild.event.GuildMemberKickedEvent;
 import org.pixelbays.rpg.guild.event.GuildRoleAssignedEvent;
 import org.pixelbays.rpg.guild.event.GuildRoleCreatedEvent;
 import org.pixelbays.rpg.guild.event.GuildRolePermissionChangedEvent;
+import org.pixelbays.rpg.hud.XpBarHudService;
+import org.pixelbays.rpg.hud.XpBarHudUpdateSystem;
+import org.pixelbays.rpg.item.config.RandomizedEquipmentDefinition;
 import org.pixelbays.rpg.item.system.EquipmentRestrictions;
+import org.pixelbays.rpg.item.system.RandomizedEquipmentManager;
 import org.pixelbays.rpg.inventory.input.InventoryOpenFilter;
 import org.pixelbays.rpg.inventory.system.InventoryHandlingSystem;
 import org.pixelbays.rpg.leveling.command.LevelTestCommand;
@@ -76,6 +119,10 @@ import org.pixelbays.rpg.lockpicking.component.LockpickingSessionComponent;
 import org.pixelbays.rpg.lockpicking.input.LockpickingInputFilter;
 import org.pixelbays.rpg.lockpicking.interaction.LockpickInteraction;
 import org.pixelbays.rpg.lockpicking.system.LockpickingSystem;
+import org.pixelbays.rpg.mail.MailManager;
+import org.pixelbays.rpg.mail.command.MailCommand;
+import org.pixelbays.rpg.mail.config.MailData;
+import org.pixelbays.rpg.mail.interaction.OpenMailInteraction;
 import org.pixelbays.rpg.npc.command.NpcRpgDebugCommand;
 import org.pixelbays.rpg.npc.component.NpcRpgDebugComponent;
 import org.pixelbays.rpg.npc.component.NpcRpgSetupComponent;
@@ -94,6 +141,7 @@ import org.pixelbays.rpg.party.event.PartyJoinedEvent;
 import org.pixelbays.rpg.party.event.PartyLeaderChangedEvent;
 import org.pixelbays.rpg.party.event.PartyLeftEvent;
 import org.pixelbays.rpg.party.event.PartyMemberKickedEvent;
+import org.pixelbays.rpg.party.finder.GroupFinderManager;
 import org.pixelbays.rpg.race.command.RaceCommand;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
@@ -103,18 +151,26 @@ import org.pixelbays.rpg.race.system.RaceManagementSystem;
 import org.pixelbays.rpg.race.system.RaceSystem;
 
 import com.hypixel.hytale.assetstore.AssetRegistry;
+import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
+import com.hypixel.hytale.assetstore.event.RemovedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.assetstore.map.IndexedLookupTableAssetMap;
 import com.hypixel.hytale.component.ComponentType;
+import com.hypixel.hytale.server.core.command.system.AbstractCommand;
+import com.hypixel.hytale.server.core.command.system.CommandRegistration;
 import com.hypixel.hytale.server.core.asset.HytaleAssetStore;
 import com.hypixel.hytale.server.core.asset.type.item.config.container.ItemDropContainer;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
 import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
+import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.hypixel.hytale.server.core.plugin.PluginState;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
@@ -137,9 +193,22 @@ public class ExamplePlugin extends JavaPlugin {
         @SuppressWarnings("unused")
         private RestedXpSystem restedXpSystem;
         private EquipmentRestrictions equipmentRestrictions;
+        private RandomizedEquipmentManager randomizedEquipmentManager;
         private PartyManager partyManager;
+        private GroupFinderManager groupFinderManager;
         private GuildManager guildManager;
+        private AuctionHouseManager auctionHouseManager;
+        private BankManager bankManager;
+        private CurrencyManager currencyManager;
+        private ExpansionManager expansionManager;
+        private MailManager mailManager;
+        private CharacterManager characterManager;
+        private TalentSystem talentSystem;
+        private AchievementSystem achievementSystem;
+        private ChatManager chatManager;
+        private XpBarHudService xpBarHudService;
 
+        private ComponentType<EntityStore, AchievementComponent> achievementComponentType;
         private ComponentType<EntityStore, LevelProgressionComponent> levelProgressionComponentType;
         private ComponentType<EntityStore, ClassComponent> classComponentType;
         private ComponentType<EntityStore, ClassAbilityComponent> classAbilityComponentType;
@@ -155,6 +224,22 @@ public class ExamplePlugin extends JavaPlugin {
         private PacketFilter inventoryOpenFilter;
         private PacketFilter lockpickingInputFilter;
         private LockpickingSystem lockpickingSystem;
+        private CommandRegistration raceCommandRegistration;
+        private CommandRegistration npcRpgDebugCommandRegistration;
+        private CommandRegistration testLevelCommandRegistration;
+        private CommandRegistration levelTestCommandRegistration;
+        private CommandRegistration resetLevelCommandRegistration;
+        private CommandRegistration classCommandRegistration;
+        private CommandRegistration partyCommandRegistration;
+        private CommandRegistration guildCommandRegistration;
+        private CommandRegistration characterCommandRegistration;
+        private CommandRegistration bankCommandRegistration;
+        private CommandRegistration currencyCommandRegistration;
+        private CommandRegistration mailCommandRegistration;
+        private CommandRegistration chatCommandRegistration;
+        private CommandRegistration bindAbilityCommandRegistration;
+        private CommandRegistration syncHotbarCommandRegistration;
+        private CommandRegistration unlockAbilityCommandRegistration;
 
         public ExamplePlugin(@Nonnull JavaPluginInit init) {
                 super(init);
@@ -166,6 +251,31 @@ public class ExamplePlugin extends JavaPlugin {
         @Override
         protected void setup() {
                 RpgLogging.debugDeveloper("Setting up RPG MOD plugin %s", this.getName());
+
+                registerAssetStores();
+                registerComponents();
+                registerConfigReloadHooks();
+
+                RpgModConfig config = resolveModConfig();
+                ModuleFlags moduleFlags = resolveModuleFlags(config);
+                logModuleEnablement(moduleFlags);
+
+                registerCoreEventHandlers();
+                initializeProgressionSystems();
+                registerHudSystems();
+                initializeGameplayManagers();
+                registerPlayerLifecycleHandlers();
+                registerGameplaySystems();
+                registerNpcSystems();
+                registerCustomCodecs();
+                registerOptionalSystems(moduleFlags);
+                registerAlwaysAvailableCommands();
+                reconcileDynamicRegistrations(config);
+
+                RpgLogging.debugDeveloper("RPG MOD setup complete!");
+        }
+
+        private void registerAssetStores() {
 
                 // Register asset stores for classes and class abilities
                 AssetRegistry.register(
@@ -180,11 +290,60 @@ public class ExamplePlugin extends JavaPlugin {
                                                 .setCodec(PartyData.CODEC)
                                                 .setKeyFunction(PartyData::getId)
                                                 .build());
+
                 AssetRegistry.register(
                                 HytaleAssetStore.builder(GuildData.class, new DefaultAssetMap<>())
                                                 .setPath("GuildData")
                                                 .setCodec(GuildData.CODEC)
                                                 .setKeyFunction(GuildData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(AuctionData.class, new DefaultAssetMap<>())
+                                                .setPath("AuctionData")
+                                                .setCodec(AuctionData.CODEC)
+                                                .setKeyFunction(AuctionData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(BankData.class, new DefaultAssetMap<>())
+                                                .setPath("BankData")
+                                                .setCodec(BankData.CODEC)
+                                                .setKeyFunction(BankData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(BankTypeDefinition.class, new DefaultAssetMap<>())
+                                                .setPath("Banks/Types")
+                                                .setCodec(BankTypeDefinition.CODEC)
+                                                .setKeyFunction(BankTypeDefinition::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(CurrencyWalletData.class, new DefaultAssetMap<>())
+                                                .setPath("CurrencyData")
+                                                .setCodec(CurrencyWalletData.CODEC)
+                                                .setKeyFunction(CurrencyWalletData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(ExpansionUnlockData.class, new DefaultAssetMap<>())
+                                                .setPath("ExpansionData")
+                                                .setCodec(ExpansionUnlockData.CODEC)
+                                                .setKeyFunction(ExpansionUnlockData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(MailData.class, new DefaultAssetMap<>())
+                                                .setPath("MailData")
+                                                .setCodec(MailData.CODEC)
+                                                .setKeyFunction(MailData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(CurrencyTypeDefinition.class, new DefaultAssetMap<>())
+                                                .setPath("Currencies/Types")
+                                                .setCodec(CurrencyTypeDefinition.CODEC)
+                                                .setKeyFunction(CurrencyTypeDefinition::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(AchievementDefinition.class, new DefaultAssetMap<>())
+                                                .setPath("Achievements")
+                                                .setCodec(AchievementDefinition.CODEC)
+                                                .setKeyFunction(AchievementDefinition::getId)
                                                 .build());
                 AssetRegistry.register(
                                 HytaleAssetStore.builder(ExpCurveDefinition.class, new DefaultAssetMap<>())
@@ -204,6 +363,14 @@ public class ExamplePlugin extends JavaPlugin {
                                                 .setPath("Classes")
                                                 .setCodec(ClassDefinition.CODEC)
                                                 .setKeyFunction(ClassDefinition::getId)
+                                                .loadsAfter(EntityStatType.class)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(RandomizedEquipmentDefinition.class, new DefaultAssetMap<>())
+                                                .setPath("Item/RandomizedEquipment")
+                                                .setCodec(RandomizedEquipmentDefinition.CODEC)
+                                                .setKeyFunction(RandomizedEquipmentDefinition::getId)
+                                                .loadsAfter(EntityStatType.class)
                                                 .build());
                 AssetRegistry.register(
                                 HytaleAssetStore.builder(AbilityQuality.class,
@@ -234,6 +401,16 @@ public class ExamplePlugin extends JavaPlugin {
                                                 .setCodec(RaceDefinition.CODEC)
                                                 .setKeyFunction(RaceDefinition::getId)
                                                 .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(CharacterRosterData.class, new DefaultAssetMap<>())
+                                                .setPath("CharacterData")
+                                                .setCodec(CharacterRosterData.CODEC)
+                                                .setKeyFunction(CharacterRosterData::getId)
+                                                .loadsAfter(EntityStatType.class)
+                                                .build());
+        }
+
+        private void registerComponents() {
 
                 // Register components with ECS (with Codec for persistence)
                 this.levelProgressionComponentType = this.getEntityStoreRegistry()
@@ -241,6 +418,12 @@ public class ExamplePlugin extends JavaPlugin {
                                                 LevelProgressionComponent.class,
                                                 "LevelProgression",
                                                 LevelProgressionComponent.CODEC);
+
+                this.achievementComponentType = this.getEntityStoreRegistry()
+                                .registerComponent(
+                                                AchievementComponent.class,
+                                                "AchievementProgress",
+                                                AchievementComponent.CODEC);
 
                 this.classComponentType = this.getEntityStoreRegistry()
                                 .registerComponent(
@@ -299,12 +482,46 @@ public class ExamplePlugin extends JavaPlugin {
 
                 RpgLogging.debugDeveloper(
                                 "Registered LevelProgressionComponent, ClassComponent, ClassAbilityComponent, AbilityEmpowerComponent, RaceComponent, AbilityBindingComponent, and AbilityTriggerBlockComponent");
+        }
+
+        private void registerConfigReloadHooks() {
+
+                this.getEventRegistry().register(LoadedAssetsEvent.class, RpgModConfig.class, this::onRpgModConfigLoaded);
+                this.getEventRegistry().register(RemovedAssetsEvent.class, RpgModConfig.class, this::onRpgModConfigRemoved);
+        }
+
+        private void logModuleEnablement(@Nonnull ModuleFlags moduleFlags) {
+                RpgLogging.debugDeveloper(
+                                "Module enablement: class=%s character=%s achievement=%s talent=%s leveling=%s ability=%s inventory=%s party=%s guild=%s camera=%s bank=%s currency=%s auction=%s mail=%s lockpicking=%s",
+                                moduleFlags.classModuleEnabled(),
+                                moduleFlags.characterModuleEnabled(),
+                                moduleFlags.achievementModuleEnabled(),
+                                moduleFlags.talentModuleEnabled(),
+                                moduleFlags.levelingModuleEnabled(),
+                                moduleFlags.abilityModuleEnabled(),
+                                moduleFlags.inventoryModuleEnabled(),
+                                moduleFlags.partyModuleEnabled(),
+                                moduleFlags.guildModuleEnabled(),
+                                moduleFlags.cameraModuleEnabled(),
+                                moduleFlags.bankModuleEnabled(),
+                                moduleFlags.currencyModuleEnabled(),
+                                moduleFlags.auctionHouseModuleEnabled(),
+                                moduleFlags.mailModuleEnabled(),
+                                moduleFlags.lockpickingModuleEnabled());
+        }
+
+        private void registerCoreEventHandlers() {
 
                 this.getEventRegistry().register(GiveXPEvent.class, new GiveXPHandler());
+                this.getEventRegistry().register(GiveCurrencyEvent.class, new GiveCurrencyHandler());
                 this.getEventRegistry().register(LevelUpEvent.class, new LevelUpHandler());
                 this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, new RpgCameraController());
                 new InventoryHandlingSystem().register(this.getEventRegistry());
                 registerRpgEventHooks();
+        }
+
+        private void initializeProgressionSystems() {
+
                 // Initialize level progression system
                 this.levelSystem = new LevelProgressionSystem(this.getEventRegistry());
                 this.restedXpSystem = new RestedXpSystem(this.getEventRegistry());
@@ -321,9 +538,52 @@ public class ExamplePlugin extends JavaPlugin {
                                 this.getEventRegistry());
                 this.classManagementSystem.setStatSystem(this.statSystem);
                 this.levelSystem.setStatSystem(this.statSystem);
+                this.talentSystem = new TalentSystem(this.classManagementSystem, this.levelSystem);
+                this.talentSystem.setStatSystem(this.statSystem);
+        }
 
+        private void registerHudSystems() {
+
+                this.xpBarHudService = new XpBarHudService(this.levelSystem);
+                this.getEntityStoreRegistry().registerSystem(new XpBarHudUpdateSystem(0.2f, this.xpBarHudService));
+                this.getEventRegistry().registerGlobal(PlayerReadyEvent.class,
+                                event -> this.xpBarHudService.ensureAndUpdate(event.getPlayerRef(), event.getPlayerRef().getStore()));
+                this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class,
+                                event -> this.xpBarHudService.remove(event.getPlayerRef().getUuid()));
+                this.getEventRegistry().register(ActiveClassChangedEvent.class,
+                                event -> this.xpBarHudService.ensureAndUpdate(event.entityRef(), event.entityRef().getStore()));
+        }
+
+        private void initializeGameplayManagers() {
                 this.partyManager = new PartyManager();
+                this.groupFinderManager = new GroupFinderManager(this.partyManager);
                 this.guildManager = new GuildManager();
+                this.auctionHouseManager = new AuctionHouseManager();
+                this.bankManager = new BankManager();
+                this.currencyManager = new CurrencyManager();
+                this.expansionManager = new ExpansionManager();
+                this.mailManager = new MailManager();
+                this.characterManager = new CharacterManager();
+                this.achievementSystem = new AchievementSystem(this.characterManager, this.currencyManager);
+                this.achievementSystem.register();
+
+                this.chatManager = new ChatManager();
+                this.chatManager.registerChannel(new PartyChatChannel(this.partyManager));
+                this.chatManager.registerChannel(new GuildChatChannel(this.guildManager));
+        }
+
+        private void registerPlayerLifecycleHandlers() {
+
+                this.getEventRegistry().registerAsyncGlobal(PlayerChatEvent.class, this.chatManager.asAsyncHandler());
+                this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class,
+                                event -> this.chatManager.clearActiveChannel(event.getPlayerRef().getUuid()));
+                this.getEventRegistry().registerGlobal(PlayerReadyEvent.class,
+                                event -> this.characterManager.handlePlayerReady(event));
+                this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class,
+                                event -> this.characterManager.handlePlayerDisconnect(event));
+        }
+
+        private void registerGameplaySystems() {
 
                 // Register passive ability ticking system (for passive and toggle abilities)
                 this.getEntityStoreRegistry().registerSystem(
@@ -335,8 +595,6 @@ public class ExamplePlugin extends JavaPlugin {
 
                 this.lockpickingSystem = new LockpickingSystem(this.lockpickingSessionComponentType);
                 this.getEntityStoreRegistry().registerSystem(this.lockpickingSystem);
-                this.lockpickingInputFilter = PacketAdapters.registerInbound(new LockpickingInputFilter());
-                RpgLogging.debugDeveloper("Registered lockpicking input packet filter");
 
                 // Initialize remaining race systems
                 this.raceSystem = new RaceSystem(this.raceManagementSystem);
@@ -345,6 +603,13 @@ public class ExamplePlugin extends JavaPlugin {
 
                 // Register NPC death XP drop system
                 this.getEntityStoreRegistry().registerSystem(new XpDeathDropSystem());
+                this.getEntityStoreRegistry().registerSystem(new CurrencyDeathDropSystem());
+
+                // Register hardcore death handler
+                this.getEntityStoreRegistry().registerSystem(new org.pixelbays.rpg.leveling.handlers.HardcoreHandler());
+        }
+
+        private void registerNpcSystems() {
 
                 NPCPlugin npcPlugin = NPCPlugin.get();
                 if (npcPlugin == null) {
@@ -357,10 +622,9 @@ public class ExamplePlugin extends JavaPlugin {
                         this.getEntityStoreRegistry().registerSystem(
                                         new NpcRpgDebugOverlaySystem(NPCEntity.getComponentType(), this.npcRpgDebugComponentType));
                 }
+        }
 
-
-                // Register hardcore death handler
-                this.getEntityStoreRegistry().registerSystem(new org.pixelbays.rpg.leveling.handlers.HardcoreHandler());
+        private void registerCustomCodecs() {
 
                 // Register custom interactions for RPG abilities
                 Interaction.CODEC.register("ForceTarget", ForceTargetInteraction.class,
@@ -371,54 +635,67 @@ public class ExamplePlugin extends JavaPlugin {
                                 EmpowerAbilityInteraction.CODEC);
                 Interaction.CODEC.register("Lockpicking", LockpickInteraction.class,
                                 LockpickInteraction.LOCKPICK_CODEC);
+                Interaction.CODEC.register("OpenBankUi", OpenBankInteraction.class,
+                                OpenBankInteraction.CODEC);
+                Interaction.CODEC.register("OpenMailUi", OpenMailInteraction.class,
+                                OpenMailInteraction.CODEC);
+                Interaction.CODEC.register("PrerequisiteCheck", PrerequisiteCheckInteraction.class,
+                                PrerequisiteCheckInteraction.CODEC);
+                Interaction.CODEC.register("UnlockAchievement", UnlockAchievementInteraction.class,
+                                UnlockAchievementInteraction.CODEC);
+                Interaction.CODEC.register("GrantAchievementProgress", GrantAchievementProgressInteraction.class,
+                                GrantAchievementProgressInteraction.CODEC);
+                Interaction.CODEC.register("UnlockExpansion", UnlockExpansionInteraction.class,
+                                UnlockExpansionInteraction.CODEC);
+                Interaction.CODEC.register("UnlockRace", UnlockRaceInteraction.class,
+                                UnlockRaceInteraction.CODEC);
+                Interaction.CODEC.register("UnlockClass", UnlockClassInteraction.class,
+                                UnlockClassInteraction.CODEC);
+                Interaction.CODEC.register("SendMail", SendMailInteraction.class,
+                                SendMailInteraction.CODEC);
 
                 // Register custom item drop containers
                 ItemDropContainer.CODEC.register("Exp", ExpItemDropContainer.class, ExpItemDropContainer.CODEC);
+                ItemDropContainer.CODEC.register("Currency", CurrencyItemDropContainer.class, CurrencyItemDropContainer.CODEC);
+        }
+
+        private void registerOptionalSystems(@Nonnull ModuleFlags moduleFlags) {
 
                 // Register equipment restriction system
-                this.equipmentRestrictions = new EquipmentRestrictions(this.classManagementSystem);
-                this.equipmentRestrictions.register(this.getEventRegistry());
+                if (moduleFlags.classModuleEnabled()) {
+                        this.equipmentRestrictions = new EquipmentRestrictions(this.classManagementSystem);
+                        this.equipmentRestrictions.register(this.getEventRegistry());
+                }
+
+                this.randomizedEquipmentManager = new RandomizedEquipmentManager();
+                this.randomizedEquipmentManager.register(this.getEventRegistry());
 
                 // Register class level milestone rewards listener
-                new org.pixelbays.rpg.classes.integration.LevelMilestone()
-                                .register(this.getEventRegistry());
+                if (moduleFlags.classModuleEnabled() && moduleFlags.levelingModuleEnabled()) {
+                        new org.pixelbays.rpg.classes.integration.LevelMilestone()
+                                        .register(this.getEventRegistry());
+                }
 
                 RpgLogging.debugDeveloper("Initialized Class/Job System with test data");
+        }
 
-                // Register commands
-                this.getCommandRegistry().registerCommand(new TestLevelCommand());
-                this.getCommandRegistry().registerCommand(new LevelTestCommand());
-                this.getCommandRegistry().registerCommand(new ResetLevelCommand());
-                this.getCommandRegistry().registerCommand(new ClassCommand());
-                this.getCommandRegistry().registerCommand(new RaceCommand());
-                this.getCommandRegistry().registerCommand(new PartyCommand());
-                this.getCommandRegistry().registerCommand(new GuildCommand());
-                this.getCommandRegistry().registerCommand(new BindAbilityCommand());
-                this.getCommandRegistry().registerCommand(new SyncHotbarCommand());
-                this.getCommandRegistry().registerCommand(new UnlockAbilityCommand());
-                this.getCommandRegistry().registerCommand(new NpcRpgDebugCommand());
+        private void registerAlwaysAvailableCommands() {
 
-                this.partyManager.loadFromAssets();
-                this.guildManager.loadFromAssets();
-
-                // Register ability input packet filter
-                AbilityInputFilter abilityFilter = new AbilityInputFilter(this);
-                this.abilityInputFilter = PacketAdapters.registerInbound(abilityFilter);
-                RpgLogging.debugDeveloper("Registered ability input packet filter");
-
-                InventoryOpenFilter inventoryFilter = new InventoryOpenFilter();
-                this.inventoryOpenFilter = PacketAdapters.registerInbound(inventoryFilter);
-                RpgModConfig inventoryConfig = org.pixelbays.rpg.inventory.input.InventoryOpenFilter
-                                .resolveConfigForLog();
-                RpgLogging.debugDeveloper(
-                                "Registered inventory open packet filter (handling=%s)",
-                                inventoryConfig != null ? inventoryConfig.getInventoryHandling() : "unknown");
-
-                RpgLogging.debugDeveloper("RPG MOD setup complete!");
+                this.raceCommandRegistration = refreshCommand(this.raceCommandRegistration, true, RaceCommand::new);
+                this.npcRpgDebugCommandRegistration = refreshCommand(this.npcRpgDebugCommandRegistration, true,
+                                NpcRpgDebugCommand::new);
+        }
+        
+        @Override
+        protected void start() {
+                reconcilePersistenceBackedManagers(resolveModConfig());
         }
 
         @Override
         protected void shutdown() {
+                if (this.lockpickingSystem != null) {
+                        this.lockpickingSystem.shutdown();
+                }
                 // Deregister packet filter
                 if (this.abilityInputFilter != null) {
                         PacketAdapters.deregisterInbound(this.abilityInputFilter);
@@ -432,6 +709,22 @@ public class ExamplePlugin extends JavaPlugin {
                         PacketAdapters.deregisterInbound(this.lockpickingInputFilter);
                         RpgLogging.debugDeveloper("Deregistered lockpicking input packet filter");
                 }
+                unregisterCommand(this.raceCommandRegistration);
+                unregisterCommand(this.npcRpgDebugCommandRegistration);
+                unregisterCommand(this.testLevelCommandRegistration);
+                unregisterCommand(this.levelTestCommandRegistration);
+                unregisterCommand(this.resetLevelCommandRegistration);
+                unregisterCommand(this.classCommandRegistration);
+                unregisterCommand(this.partyCommandRegistration);
+                unregisterCommand(this.guildCommandRegistration);
+                unregisterCommand(this.characterCommandRegistration);
+                unregisterCommand(this.bankCommandRegistration);
+                unregisterCommand(this.currencyCommandRegistration);
+                unregisterCommand(this.mailCommandRegistration);
+                unregisterCommand(this.chatCommandRegistration);
+                unregisterCommand(this.bindAbilityCommandRegistration);
+                unregisterCommand(this.syncHotbarCommandRegistration);
+                unregisterCommand(this.unlockAbilityCommandRegistration);
         }
 
         @Nonnull
@@ -480,8 +773,63 @@ public class ExamplePlugin extends JavaPlugin {
         }
 
         @Nonnull
+        public GroupFinderManager getGroupFinderManager() {
+                return groupFinderManager;
+        }
+
+        @Nonnull
         public GuildManager getGuildManager() {
                 return guildManager;
+        }
+
+        @Nonnull
+        public BankManager getBankManager() {
+                return bankManager;
+        }
+
+        @Nonnull
+        public AuctionHouseManager getAuctionHouseManager() {
+                return auctionHouseManager;
+        }
+
+        @Nonnull
+        public CurrencyManager getCurrencyManager() {
+                return currencyManager;
+        }
+
+        @Nonnull
+        public ExpansionManager getExpansionManager() {
+                return expansionManager;
+        }
+
+        @Nonnull
+        public MailManager getMailManager() {
+                return mailManager;
+        }
+
+        @Nonnull
+        public CharacterManager getCharacterManager() {
+                return characterManager;
+        }
+
+        @Nonnull
+        public ChatManager getChatManager() {
+                return chatManager;
+        }
+
+        @Nonnull
+        public AchievementSystem getAchievementSystem() {
+                return achievementSystem;
+        }
+
+        @Nonnull
+        public TalentSystem getTalentSystem() {
+                return talentSystem;
+        }
+
+        @Nonnull
+        public ComponentType<EntityStore, AchievementComponent> getAchievementComponentType() {
+                return achievementComponentType;
         }
 
         @Nonnull
@@ -532,6 +880,11 @@ public class ExamplePlugin extends JavaPlugin {
                 return lockpickingSystem;
         }
 
+        public boolean isLockpickingModuleEnabled() {
+                RpgModConfig config = resolveModConfig();
+                return isModuleEnabled(config, config != null ? config.getLockpickingSettings().isEnabled() : null);
+        }
+
         @Nonnull
         public ComponentType<EntityStore, AbilityTriggerBlockComponent> getAbilityTriggerBlockComponentType() {
                 return abilityTriggerBlockComponentType;
@@ -552,6 +905,7 @@ public class ExamplePlugin extends JavaPlugin {
                 registerNoop(ClassStatBonusesRecalculatedEvent.class);
                 registerNoop(RaceStatBonusesRecalculatedEvent.class);
                 registerNoop(LevelRewardsAppliedEvent.class);
+                registerNoop(AchievementUnlockedEvent.class);
                 registerNoop(PartyCreatedEvent.class);
                 registerNoop(PartyInviteSentEvent.class);
                 registerNoop(PartyJoinedEvent.class);
@@ -579,6 +933,240 @@ public class ExamplePlugin extends JavaPlugin {
         private <T extends com.hypixel.hytale.event.IBaseEvent<Void>> void registerNoop(Class<T> eventType) {
                 this.getEventRegistry().register(eventType, event -> {
                 });
+        }
+
+        @Nullable
+        private RpgModConfig resolveModConfig() {
+                return RpgModConfig.getAssetMap().getAsset("default");
+        }
+
+        private boolean isModuleEnabled(@Nullable RpgModConfig config, @Nullable Boolean enabled) {
+                if (config == null || enabled == null) {
+                        return true;
+                }
+                return enabled;
+        }
+
+        private void onRpgModConfigChanged() {
+                RpgModConfig config = resolveModConfig();
+                reconcileDynamicRegistrations(config);
+        }
+
+        @SuppressWarnings("unused")
+        private void onRpgModConfigLoaded(
+                        @Nonnull LoadedAssetsEvent<String, RpgModConfig, DefaultAssetMap<String, RpgModConfig>> ignoredEvent) {
+                onRpgModConfigChanged();
+        }
+
+        @SuppressWarnings("unused")
+        private void onRpgModConfigRemoved(
+                        @Nonnull RemovedAssetsEvent<String, RpgModConfig, DefaultAssetMap<String, RpgModConfig>> ignoredEvent) {
+                onRpgModConfigChanged();
+        }
+
+        private void reconcileDynamicRegistrations(@Nullable RpgModConfig config) {
+                ModuleFlags moduleFlags = resolveModuleFlags(config);
+
+                this.testLevelCommandRegistration = refreshCommand(
+                                this.testLevelCommandRegistration,
+                                moduleFlags.levelingModuleEnabled(),
+                                TestLevelCommand::new);
+                this.levelTestCommandRegistration = refreshCommand(
+                                this.levelTestCommandRegistration,
+                                moduleFlags.levelingModuleEnabled(),
+                                LevelTestCommand::new);
+                this.resetLevelCommandRegistration = refreshCommand(
+                                this.resetLevelCommandRegistration,
+                                moduleFlags.levelingModuleEnabled(),
+                                ResetLevelCommand::new);
+                this.classCommandRegistration = refreshCommand(
+                                this.classCommandRegistration,
+                                moduleFlags.classModuleEnabled(),
+                                ClassCommand::new);
+                this.partyCommandRegistration = refreshCommand(
+                                this.partyCommandRegistration,
+                                moduleFlags.partyModuleEnabled(),
+                                PartyCommand::new);
+                this.guildCommandRegistration = refreshCommand(
+                                this.guildCommandRegistration,
+                                moduleFlags.guildModuleEnabled(),
+                                GuildCommand::new);
+                this.characterCommandRegistration = refreshCommand(
+                                this.characterCommandRegistration,
+                                moduleFlags.characterModuleEnabled(),
+                                CharacterCommand::new);
+                this.bankCommandRegistration = refreshCommand(
+                                this.bankCommandRegistration,
+                                moduleFlags.bankModuleEnabled(),
+                                BankCommand::new);
+                this.currencyCommandRegistration = refreshCommand(
+                                this.currencyCommandRegistration,
+                                moduleFlags.currencyModuleEnabled(),
+                                CurrencyCommand::new);
+                this.mailCommandRegistration = refreshCommand(
+                                this.mailCommandRegistration,
+                                moduleFlags.mailModuleEnabled(),
+                                MailCommand::new);
+                this.chatCommandRegistration = refreshCommand(
+                                this.chatCommandRegistration,
+                                moduleFlags.chatModuleEnabled(),
+                                ChatCommand::new);
+                this.bindAbilityCommandRegistration = refreshCommand(
+                                this.bindAbilityCommandRegistration,
+                                moduleFlags.abilityModuleEnabled(),
+                                BindAbilityCommand::new);
+                this.syncHotbarCommandRegistration = refreshCommand(
+                                this.syncHotbarCommandRegistration,
+                                moduleFlags.abilityModuleEnabled(),
+                                SyncHotbarCommand::new);
+                this.unlockAbilityCommandRegistration = refreshCommand(
+                                this.unlockAbilityCommandRegistration,
+                                moduleFlags.abilityModuleEnabled(),
+                                UnlockAbilityCommand::new);
+
+                if (this.getState() != PluginState.SETUP) {
+                        reconcilePersistenceBackedManagers(moduleFlags);
+                }
+
+                reconcileInboundFilters(moduleFlags);
+        }
+
+        private void reconcilePersistenceBackedManagers(@Nullable RpgModConfig config) {
+                reconcilePersistenceBackedManagers(resolveModuleFlags(config));
+        }
+
+        private void reconcilePersistenceBackedManagers(@Nonnull ModuleFlags moduleFlags) {
+
+                this.expansionManager.loadFromAssets();
+
+                if (moduleFlags.partyModuleEnabled()) {
+                        this.partyManager.loadFromAssets();
+                }
+                if (moduleFlags.guildModuleEnabled()) {
+                        this.guildManager.loadFromAssets();
+                }
+                if (moduleFlags.characterModuleEnabled()) {
+                        this.characterManager.loadFromAssets();
+                } else {
+                        this.characterManager.clear();
+                }
+                if (moduleFlags.auctionHouseModuleEnabled()) {
+                        this.auctionHouseManager.loadFromAssets();
+                } else {
+                        this.auctionHouseManager.clear();
+                }
+                if (moduleFlags.bankModuleEnabled()) {
+                        this.bankManager.loadFromAssets();
+                } else {
+                        this.bankManager.clear();
+                }
+                if (moduleFlags.currencyModuleEnabled()) {
+                        this.currencyManager.loadFromAssets();
+                } else {
+                        this.currencyManager.clear();
+                }
+                if (moduleFlags.mailModuleEnabled()) {
+                        this.mailManager.loadFromAssets();
+                } else {
+                        this.mailManager.clear();
+                }
+        }
+
+        private void reconcileInboundFilters(@Nonnull ModuleFlags moduleFlags) {
+                if (moduleFlags.abilityModuleEnabled()) {
+                        if (this.abilityInputFilter == null) {
+                                this.abilityInputFilter = PacketAdapters.registerInbound(new AbilityInputFilter(this));
+                                RpgLogging.debugDeveloper("Registered ability input packet filter");
+                        }
+                } else if (this.abilityInputFilter != null) {
+                        PacketAdapters.deregisterInbound(this.abilityInputFilter);
+                        this.abilityInputFilter = null;
+                        RpgLogging.debugDeveloper("Deregistered ability input packet filter");
+                }
+
+                if (moduleFlags.inventoryModuleEnabled()) {
+                        if (this.inventoryOpenFilter == null) {
+                                this.inventoryOpenFilter = PacketAdapters.registerInbound(new InventoryOpenFilter());
+                                RpgModConfig inventoryConfig = InventoryOpenFilter.resolveConfigForLog();
+                                RpgLogging.debugDeveloper(
+                                                "Registered inventory open packet filter (handling=%s)",
+                                                inventoryConfig != null ? inventoryConfig.getInventoryHandling() : "unknown");
+                        }
+                } else if (this.inventoryOpenFilter != null) {
+                        PacketAdapters.deregisterInbound(this.inventoryOpenFilter);
+                        this.inventoryOpenFilter = null;
+                        RpgLogging.debugDeveloper("Deregistered inventory open packet filter");
+                }
+
+                if (moduleFlags.lockpickingModuleEnabled()) {
+                        if (this.lockpickingInputFilter == null) {
+                                this.lockpickingInputFilter = PacketAdapters.registerInbound(new LockpickingInputFilter());
+                                RpgLogging.debugDeveloper("Registered lockpicking input packet filter");
+                        }
+                } else if (this.lockpickingInputFilter != null) {
+                        PacketAdapters.deregisterInbound(this.lockpickingInputFilter);
+                        this.lockpickingInputFilter = null;
+                        RpgLogging.debugDeveloper("Deregistered lockpicking input packet filter");
+                }
+        }
+
+        private CommandRegistration refreshCommand(@Nullable CommandRegistration registration, boolean enabled,
+                        @Nonnull Supplier<? extends AbstractCommand> supplier) {
+                if (registration != null) {
+                        registration.unregister();
+                }
+                if (!enabled) {
+                        return null;
+                }
+                return this.getCommandRegistry().registerCommand(supplier.get());
+        }
+
+        private void unregisterCommand(@Nullable CommandRegistration registration) {
+                if (registration != null) {
+                        registration.unregister();
+                }
+        }
+
+        private ModuleFlags resolveModuleFlags(@Nullable RpgModConfig config) {
+                return new ModuleFlags(
+                                isModuleEnabled(config, config != null ? config.getClassSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getCharacterSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getAchievementSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getTalentSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getLevelingSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getAbilitySettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getInventorySettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getPartySettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getGuildSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getCameraSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getBankSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getCurrencySettings().isEnabled() : null),
+                                isModuleEnabled(config,
+                                                config != null ? config.getAuctionHouseSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getMailSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.getLockpickingSettings().isEnabled() : null));
+        }
+
+        private record ModuleFlags(
+                        boolean classModuleEnabled,
+                        boolean characterModuleEnabled,
+                        boolean achievementModuleEnabled,
+                        boolean talentModuleEnabled,
+                        boolean levelingModuleEnabled,
+                        boolean abilityModuleEnabled,
+                        boolean inventoryModuleEnabled,
+                        boolean partyModuleEnabled,
+                        boolean guildModuleEnabled,
+                        boolean cameraModuleEnabled,
+                        boolean bankModuleEnabled,
+                        boolean currencyModuleEnabled,
+                        boolean auctionHouseModuleEnabled,
+                        boolean mailModuleEnabled,
+                        boolean lockpickingModuleEnabled) {
+
+                private boolean chatModuleEnabled() {
+                        return this.partyModuleEnabled || this.guildModuleEnabled;
+                }
         }
 
 }
