@@ -1,35 +1,13 @@
 package org.pixelbays.rpg.global.interaction;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
-import org.pixelbays.rpg.achievement.component.AchievementComponent;
-import org.pixelbays.rpg.achievement.config.AchievementDefinition;
-import org.pixelbays.rpg.character.CharacterManager;
-import org.pixelbays.rpg.classes.component.ClassComponent;
-import org.pixelbays.rpg.classes.config.ClassDefinition;
-import org.pixelbays.rpg.global.config.builder.ClassRefCodec;
-import org.pixelbays.rpg.global.config.builder.LevelSystemRefCodec;
-import org.pixelbays.rpg.global.config.builder.RaceRefCodec;
-import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
-import org.pixelbays.rpg.party.Party;
-import org.pixelbays.rpg.party.PartyManager;
-import org.pixelbays.rpg.party.PartyType;
-import org.pixelbays.rpg.race.component.RaceComponent;
-import org.pixelbays.rpg.race.config.RaceDefinition;
+import org.pixelbays.rpg.global.prereq.PrerequisiteEvaluator;
+import org.pixelbays.rpg.global.prereq.PrerequisiteRequirements;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
 import com.hypixel.hytale.codec.builder.BuilderCodec;
-import com.hypixel.hytale.codec.codecs.array.ArrayCodec;
-import com.hypixel.hytale.codec.function.FunctionCodec;
-import com.hypixel.hytale.component.Component;
-import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.protocol.InteractionState;
@@ -44,70 +22,55 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 @SuppressWarnings({ "FieldHidesSuperclassField", "null" })
 public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 
-	private static final FunctionCodec<String[], List<String>> CLASS_LIST_CODEC = new FunctionCodec<>(
-			new ArrayCodec<>(new ClassRefCodec(), String[]::new),
-			values -> values == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(values)),
-			values -> values == null ? new String[0] : values.toArray(String[]::new));
-
-	private static final FunctionCodec<String[], List<String>> RACE_LIST_CODEC = new FunctionCodec<>(
-			new ArrayCodec<>(new RaceRefCodec(), String[]::new),
-			values -> values == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(values)),
-			values -> values == null ? new String[0] : values.toArray(String[]::new));
-
-	private static final FunctionCodec<String[], List<String>> STRING_LIST_CODEC = new FunctionCodec<>(
-			new ArrayCodec<>(Codec.STRING, String[]::new),
-			values -> values == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(values)),
-			values -> values == null ? new String[0] : values.toArray(String[]::new));
-
 	@Nonnull
-	public static final BuilderCodec<PrerequisiteCheckInteraction> CODEC = BuilderCodec.builder(
+	public static final BuilderCodec<PrerequisiteCheckInteraction> PREREQUISITE_CHECK_CODEC = BuilderCodec.builder(
 			PrerequisiteCheckInteraction.class,
 			PrerequisiteCheckInteraction::new,
 			SimpleInstantInteraction.CODEC)
 			.documentation("Checks optional class, race, expansion, level, achievement, party, and raid requirements before allowing the interaction chain to continue.")
-			.append(new KeyedCodec<>("RequiredClassIds", CLASS_LIST_CODEC, false),
-					(i, v) -> i.requiredClassIds = v,
-					i -> i.requiredClassIds)
+			.append(new KeyedCodec<>("RequiredClassIds", PrerequisiteRequirements.CLASS_LIST_CODEC, false),
+					(i, v) -> i.prerequisites.setRequiredClassIds(v),
+					i -> i.prerequisites.getRequiredClassIds())
 			.add()
 			.append(new KeyedCodec<>("RequiredClassLevel", Codec.INTEGER, false),
-					(i, v) -> i.requiredClassLevel = v,
-					i -> i.requiredClassLevel)
+					(i, v) -> i.prerequisites.setRequiredClassLevel(v),
+					i -> i.prerequisites.getRequiredClassLevel())
 			.add()
-			.append(new KeyedCodec<>("RequiredRaceIds", RACE_LIST_CODEC, false),
-					(i, v) -> i.requiredRaceIds = v,
-					i -> i.requiredRaceIds)
+			.append(new KeyedCodec<>("RequiredRaceIds", PrerequisiteRequirements.RACE_LIST_CODEC, false),
+					(i, v) -> i.prerequisites.setRequiredRaceIds(v),
+					i -> i.prerequisites.getRequiredRaceIds())
 			.add()
-			.append(new KeyedCodec<>("RequiredExpansionIds", STRING_LIST_CODEC, false),
-					(i, v) -> i.requiredExpansionIds = v,
-					i -> i.requiredExpansionIds)
+			.append(new KeyedCodec<>("RequiredExpansionIds", PrerequisiteRequirements.STRING_LIST_CODEC, false),
+					(i, v) -> i.prerequisites.setRequiredExpansionIds(v),
+					i -> i.prerequisites.getRequiredExpansionIds())
 			.add()
 			.append(new KeyedCodec<>("RequiredLevel", Codec.INTEGER, false),
-					(i, v) -> i.requiredLevel = v,
-					i -> i.requiredLevel)
+					(i, v) -> i.prerequisites.setRequiredLevel(v),
+					i -> i.prerequisites.getRequiredLevel())
 			.add()
-			.append(new KeyedCodec<>("RequiredLevelSystemId", new LevelSystemRefCodec(), false),
-					(i, v) -> i.requiredLevelSystemId = v,
-					i -> i.requiredLevelSystemId)
+			.append(new KeyedCodec<>("RequiredLevelSystemId", new org.pixelbays.rpg.global.config.builder.LevelSystemRefCodec(), false),
+					(i, v) -> i.prerequisites.setRequiredLevelSystemId(v),
+					i -> i.prerequisites.getRequiredLevelSystemId())
 			.add()
-			.append(new KeyedCodec<>("RequiredAchievementIds", STRING_LIST_CODEC, false),
-					(i, v) -> i.requiredAchievementIds = v,
-					i -> i.requiredAchievementIds)
+			.append(new KeyedCodec<>("RequiredAchievementIds", PrerequisiteRequirements.STRING_LIST_CODEC, false),
+					(i, v) -> i.prerequisites.setRequiredAchievementIds(v),
+					i -> i.prerequisites.getRequiredAchievementIds())
 			.add()
 			.append(new KeyedCodec<>("RequireParty", Codec.BOOLEAN, false),
-					(i, v) -> i.requireParty = v,
-					i -> i.requireParty)
+					(i, v) -> i.prerequisites.setRequireParty(v),
+					i -> i.prerequisites.isRequireParty())
 			.add()
 			.append(new KeyedCodec<>("RequiredPartyCount", Codec.INTEGER, false),
-					(i, v) -> i.requiredPartyCount = v,
-					i -> i.requiredPartyCount)
+					(i, v) -> i.prerequisites.setRequiredPartyCount(v),
+					i -> i.prerequisites.getRequiredPartyCount())
 			.add()
 			.append(new KeyedCodec<>("RequireRaid", Codec.BOOLEAN, false),
-					(i, v) -> i.requireRaid = v,
-					i -> i.requireRaid)
+					(i, v) -> i.prerequisites.setRequireRaid(v),
+					i -> i.prerequisites.isRequireRaid())
 			.add()
 			.append(new KeyedCodec<>("RequiredRaidCount", Codec.INTEGER, false),
-					(i, v) -> i.requiredRaidCount = v,
-					i -> i.requiredRaidCount)
+					(i, v) -> i.prerequisites.setRequiredRaidCount(v),
+					i -> i.prerequisites.getRequiredRaidCount())
 			.add()
 			.append(new KeyedCodec<>("SendFailureMessage", Codec.BOOLEAN, false),
 					(i, v) -> i.sendFailureMessage = v,
@@ -115,17 +78,7 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 			.add()
 			.build();
 
-	private List<String> requiredClassIds = new ArrayList<>();
-	private int requiredClassLevel = 0;
-	private List<String> requiredRaceIds = new ArrayList<>();
-	private List<String> requiredExpansionIds = new ArrayList<>();
-	private int requiredLevel = 0;
-	private String requiredLevelSystemId = "";
-	private List<String> requiredAchievementIds = new ArrayList<>();
-	private boolean requireParty = false;
-	private int requiredPartyCount = 0;
-	private boolean requireRaid = false;
-	private int requiredRaidCount = 0;
+	private PrerequisiteRequirements prerequisites = new PrerequisiteRequirements();
 	private boolean sendFailureMessage = true;
 
 	@Override
@@ -134,248 +87,21 @@ public class PrerequisiteCheckInteraction extends SimpleInstantInteraction {
 			@Nonnull CooldownHandler cooldownHandler) {
 		Store<EntityStore> store = InteractionPlayerUtil.resolveStore(context);
 		Ref<EntityStore> entityRef = InteractionPlayerUtil.getEntityRef(context);
+		PlayerRef playerRef = InteractionPlayerUtil.resolvePlayerRef(context);
 		if (store == null || entityRef == null) {
 			context.getState().state = InteractionState.Failed;
 			return;
 		}
 
-		FailureResult failure = evaluateFailure(context, store, entityRef);
+		Message failure = PrerequisiteEvaluator.evaluateFailure(prerequisites, context.getCommandBuffer(), store, entityRef, playerRef);
 		if (failure == null) {
 			context.getState().state = InteractionState.Finished;
 			return;
 		}
 
-		if (sendFailureMessage && failure.message() != null) {
-			InteractionPlayerUtil.sendMessage(context, failure.message());
+		if (sendFailureMessage) {
+			InteractionPlayerUtil.sendMessage(context, failure);
 		}
 		context.getState().state = InteractionState.Failed;
-	}
-
-	@Nullable
-	private FailureResult evaluateFailure(@Nonnull InteractionContext context,
-			@Nonnull Store<EntityStore> store,
-			@Nonnull Ref<EntityStore> entityRef) {
-		CommandBuffer<EntityStore> commandBuffer = context.getCommandBuffer();
-		ClassComponent classComponent = getComponent(commandBuffer, store, entityRef, ClassComponent.getComponentType());
-		RaceComponent raceComponent = getComponent(commandBuffer, store, entityRef, RaceComponent.getComponentType());
-		LevelProgressionComponent levelComponent = getComponent(commandBuffer, store, entityRef,
-				LevelProgressionComponent.getComponentType());
-		PlayerRef playerRef = InteractionPlayerUtil.resolvePlayerRef(context);
-
-		if (!requiredClassIds.isEmpty()) {
-			if (classComponent == null) {
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.class")
-						.param("classes", describeClasses(requiredClassIds)));
-			}
-
-			String matchedClassId = findMatchingClass(classComponent, levelComponent);
-			if (matchedClassId == null) {
-				if (requiredClassLevel > 0) {
-					return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.classLevel")
-							.param("classes", describeClasses(requiredClassIds))
-							.param("level", requiredClassLevel));
-				}
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.class")
-						.param("classes", describeClasses(requiredClassIds)));
-			}
-		}
-
-		if (!requiredRaceIds.isEmpty()) {
-			String currentRaceId = raceComponent == null ? "" : raceComponent.getRaceId();
-			boolean raceMatched = requiredRaceIds.stream()
-					.filter(requiredRaceId -> requiredRaceId != null && !requiredRaceId.isBlank())
-					.anyMatch(requiredRaceId -> requiredRaceId.equalsIgnoreCase(currentRaceId));
-			if (!raceMatched) {
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.race")
-						.param("races", describeRaces(requiredRaceIds)));
-			}
-		}
-
-		if (!requiredExpansionIds.isEmpty()) {
-			if (playerRef == null || !ExamplePlugin.get().getExpansionManager().hasAccess(playerRef, requiredExpansionIds)) {
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.expansion")
-						.param("expansions", describeExpansions(requiredExpansionIds)));
-			}
-		}
-
-		if (requiredLevel > 0) {
-			int currentLevel = resolveCurrentLevel(levelComponent);
-			if (currentLevel < requiredLevel) {
-				String levelSystemId = getEffectiveLevelSystemId();
-				if (!levelSystemId.equals("Base_Character_Level")) {
-					return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.levelSystem")
-							.param("system", levelSystemId)
-							.param("level", requiredLevel));
-				}
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.level")
-						.param("level", requiredLevel));
-			}
-		}
-
-		if (!requiredAchievementIds.isEmpty()) {
-			if (playerRef == null || !hasRequiredAchievements(store, entityRef, playerRef)) {
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.achievement")
-						.param("achievements", describeAchievements(requiredAchievementIds)));
-			}
-		}
-
-		PartyManager partyManager = ExamplePlugin.get().getPartyManager();
-		Party party = playerRef == null || partyManager == null ? null : partyManager.getPartyForMember(playerRef.getUuid());
-
-		if (requireParty || requiredPartyCount > 0) {
-			if (party == null || party.getType() != PartyType.PARTY) {
-				if (requiredPartyCount > 1) {
-					return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.partyCount")
-							.param("count", Math.max(1, requiredPartyCount)));
-				}
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.party"));
-			}
-			if (requiredPartyCount > 0 && party.size() < requiredPartyCount) {
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.partyCount")
-						.param("count", requiredPartyCount));
-			}
-		}
-
-		if (requireRaid || requiredRaidCount > 0) {
-			if (party == null || party.getType() != PartyType.RAID) {
-				if (requiredRaidCount > 1) {
-					return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.raidCount")
-							.param("count", Math.max(1, requiredRaidCount)));
-				}
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.raid"));
-			}
-			if (requiredRaidCount > 0 && party.size() < requiredRaidCount) {
-				return new FailureResult(Message.translation("pixelbays.rpg.interaction.prereq.raidCount")
-						.param("count", requiredRaidCount));
-			}
-		}
-
-		return null;
-	}
-
-	@Nullable
-	private String findMatchingClass(@Nonnull ClassComponent classComponent,
-			@Nullable LevelProgressionComponent levelComponent) {
-		for (String classId : requiredClassIds) {
-			if (classId == null || classId.isBlank() || !classComponent.hasLearnedClass(classId)) {
-				continue;
-			}
-
-			if (requiredClassLevel <= 0) {
-				return classId;
-			}
-
-			ClassDefinition definition = ClassDefinition.getAssetMap().getAsset(classId);
-			if (definition == null || levelComponent == null) {
-				continue;
-			}
-
-			String levelSystemId = definition.usesCharacterLevel() ? "Base_Character_Level" : definition.getLevelSystemId();
-			LevelProgressionComponent.LevelSystemData levelData = levelComponent.getSystem(levelSystemId);
-			int currentLevel = levelData == null ? 1 : levelData.getCurrentLevel();
-			if (currentLevel >= requiredClassLevel) {
-				return classId;
-			}
-		}
-		return null;
-	}
-
-	private int resolveCurrentLevel(@Nullable LevelProgressionComponent levelComponent) {
-		if (levelComponent == null) {
-			return 0;
-		}
-		LevelProgressionComponent.LevelSystemData levelData = levelComponent.getSystem(getEffectiveLevelSystemId());
-		return levelData == null ? 0 : levelData.getCurrentLevel();
-	}
-
-	@Nonnull
-	private String getEffectiveLevelSystemId() {
-		return requiredLevelSystemId == null || requiredLevelSystemId.isBlank()
-				? "Base_Character_Level"
-				: requiredLevelSystemId;
-	}
-
-	private boolean hasRequiredAchievements(@Nonnull Store<EntityStore> store,
-			@Nonnull Ref<EntityStore> entityRef,
-			@Nonnull PlayerRef playerRef) {
-		AchievementComponent characterState = store.getComponent(entityRef, AchievementComponent.getComponentType());
-		CharacterManager characterManager = ExamplePlugin.get().getCharacterManager();
-		AchievementComponent accountState = characterManager == null
-				? null
-				: characterManager.getOrCreateAccountAchievementProgress(playerRef.getUuid(), playerRef.getUsername());
-
-		for (String achievementId : requiredAchievementIds) {
-			if (achievementId == null || achievementId.isBlank()) {
-				continue;
-			}
-			AchievementDefinition definition = AchievementDefinition.getAssetMap() == null
-					? null
-					: AchievementDefinition.getAssetMap().getAsset(achievementId);
-			AchievementComponent targetState = definition != null && definition.isAccountWide() ? accountState : characterState;
-			if (targetState == null || !targetState.isUnlocked(achievementId)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	@Nonnull
-	private String describeClasses(@Nonnull List<String> classIds) {
-		return joinDisplayNames(classIds, classId -> {
-			ClassDefinition definition = ClassDefinition.getAssetMap() == null ? null : ClassDefinition.getAssetMap().getAsset(classId);
-			return definition == null ? classId : definition.getDisplayName();
-		});
-	}
-
-	@Nonnull
-	private String describeRaces(@Nonnull List<String> raceIds) {
-		return joinDisplayNames(raceIds, raceId -> {
-			RaceDefinition definition = RaceDefinition.getAssetMap() == null ? null : RaceDefinition.getAssetMap().getAsset(raceId);
-			return definition == null ? raceId : definition.getDisplayName();
-		});
-	}
-
-	@Nonnull
-	private String describeExpansions(@Nonnull List<String> expansionIds) {
-		return ExamplePlugin.get().getExpansionManager().describeRequirements(expansionIds);
-	}
-
-	@Nonnull
-	private String describeAchievements(@Nonnull List<String> achievementIds) {
-		return joinDisplayNames(achievementIds, achievementId -> {
-			AchievementDefinition definition = AchievementDefinition.getAssetMap() == null
-					? null
-					: AchievementDefinition.getAssetMap().getAsset(achievementId);
-			return definition == null ? achievementId : definition.getDisplayName();
-		});
-	}
-
-	@Nonnull
-	private String joinDisplayNames(@Nonnull List<String> ids, @Nonnull java.util.function.Function<String, String> resolver) {
-		List<String> names = new ArrayList<>();
-		for (String value : ids) {
-			if (value == null || value.isBlank()) {
-				continue;
-			}
-			names.add(resolver.apply(value));
-		}
-		return names.isEmpty() ? "Unknown" : String.join(", ", names);
-	}
-
-	@Nullable
-	private <T extends Component<EntityStore>> T getComponent(@Nullable CommandBuffer<EntityStore> commandBuffer,
-			@Nonnull Store<EntityStore> store,
-			@Nonnull Ref<EntityStore> entityRef,
-			@Nonnull com.hypixel.hytale.component.ComponentType<EntityStore, T> componentType) {
-		if (commandBuffer != null) {
-			T component = commandBuffer.getComponent(entityRef, componentType);
-			if (component != null) {
-				return component;
-			}
-		}
-		return store.getComponent(entityRef, componentType);
-	}
-
-	private record FailureResult(@Nullable Message message) {
 	}
 }
