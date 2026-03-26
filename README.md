@@ -1,97 +1,179 @@
-# Hytale Example Plugin
+# Realmweaver
 
-An example project that can build and run plugins for the game Hytale!
+Realmweaver is a data-driven MMO/RPG framework mod for Hytale. It combines character identity, progression, abilities, social tooling, economy systems, UI flows, and content authoring hooks into one cohesive server-side package.
 
-> **⚠️ Warning: Early Access**    
-> The game Hytale is in early access, and so is this project! Features may be
-> incomplete, unstable, or change frequently. Please be patient and understanding as development
-> continues.
+> **⚠️ Early access warning**  
+> Hytale is still evolving, and so is Realmweaver. Systems are already substantial, but some feature areas are still maturing or awaiting polish.
 
-## Introduction
-This project contains a Gradle project that can be imported into IDEA and used
-as the foundation for custom Hytale plugins. The template will add the Hytale
-server to your classpath and create a run configuration that can be used to
-run your plugin on the server. It can also be used to build a sharable JAR file
-that contains your plugin.
+## What Realmweaver is
 
-## Requirements
-Please ensure all the requirements are met before getting started.
+Realmweaver is not a single mechanic. It is a modular RPG stack built around Hytale's ECS architecture, JSON assets, and custom UI flow.
 
-1. Download Hytale using the official launcher.
-2. Have Intellij IDEA installed. Community edition is fine.
-3. Download Java 25 and set it as the SDK in IDEA.
+Current implemented or active feature areas include:
 
-Currently this template only supports Windows!
+- character roster and character select flow
+- race definitions and race-based stat or ability hooks
+- reusable leveling systems and progression tracks
+- classes, class switching, class prerequisites, and talent trees
+- data-driven abilities with hotbar bindings, global cooldowns, and interaction chains
+- party, group finder, guild, and channel chat systems
+- currencies, banks, auction house, and mail
+- lockpicking UI and packet-driven gameplay input
+- XP HUD updates and NPC RPG support hooks
 
-## Configuring Template
-It is important to configure the project before using it as a template. Doing
-this before importing the project will help avoid running into caching issues
-later on.
+## Why use Realmweaver
 
-### 1: Project Name
-Set the name of the project in `settings.gradle`. This should be the name of
-your plugin. We recommend capitalizing your project name and avoiding 
-whitespace and most special characters. This will be used as the base name for
-any files produced by Gradle, like the sharable JAR file.
+### 1. It gives you an MMO foundation instead of a single feature
+Realmweaver already covers the core loops most RPG or MMO-style Hytale servers need: identity, progression, social play, and economy.
 
-### 2: Gradle Properties
-Review the properties defined in `gradle.properties`. You should change the 
-`maven_group` to match your project. You should also change the `version`
-property before making a new release, or set up CI/CD to automate it.
+### 2. It is data-driven first
+Classes, races, abilities, currencies, banks, and much of the gameplay tuning live in assets under [src/main/resources/Server](src/main/resources/Server). That makes it easier to extend content without rewriting core logic.
 
-### 3: Manifest
-The manifest file provides important information about your plugin to Hytale.
-You should update every property in this file to reflect your project. The 
-most important property to set is `Main` which tells the game which class
-file to load as the entry point for your plugin. The file can be found at 
-`src/main/resources/manifest.json`.
+### 3. It is modular and live-configurable
+Major systems are toggled through [src/main/resources/Server/RpgModConfig/Default.json](src/main/resources/Server/RpgModConfig/Default.json), and the plugin reconciles dynamic registrations when config assets reload.
 
-**This template has configured Gradle to automatically update the `Version` and
-`IncludesAssetPack` property to reflect your Gradle properties every time you 
-run the game in development, or build the plugin. This is a workaround to allow
-the in-game asset editor to be used when working on your project.**
+### 4. It supports real multiplayer server design
+Realmweaver is built around parties, guilds, shared progression flows, account-vs-character ownership, and service systems like mail and banking.
 
-## Importing into IDEA
-When opening the project in IDEA it should automatically create the
-`HytaleServer` run configuration and a `./run` folder. When you run the game it
-will generate all the relevant files in there. It will also load the default 
-assets from the games.
+### 5. It is built for expansion
+The project already contains entitlement hooks, class and race gating, reusable level systems, interaction-driven unlocks, and early scaffolding for future encounter or profession systems.
 
-**If you do not see the `HytaleServer` run configuration, you may need to open
-the dropdown or click `Edit Configurations...` once to unhide it.**
+## What's possible with Realmweaver
 
-## Connecting to Server
-Once the server is running in IDEA you should be able to connect to 
-`Local Server` using your standard Hytale client. If the server does not show
-up automatically, add the IP as `127.0.0.1` manually.
+Realmweaver can support servers and experiences such as:
 
-### You MUST authenticate your test server!
-In order to connect to the test server, you must authenticate it with Hytale.
-This is done by running the `auth login device` command in the server terminal.
-This command will print a URL that you can use to authenticate the server using
-your Hytale account. Once authenticated, you can run the 
-`auth persistence Encrypted` command to keep your server authenticated after 
-restarting it. 
+- class-based adventure realms with race identity and talent builds
+- multiplayer co-op progression servers with parties, raids, and guild play
+- social sandbox realms with persistent mail, banking, and player economy tools
+- progression-heavy survival servers with layered class, race, and stat systems
+- live-service content models with unlockable expansions, new classes, and new ability packs
+- NPC-driven service hubs for training, class unlocks, progression rewards, or lockpicking gameplay
 
-**Never share your encrypted auth file!**
+Because the systems are asset-driven, Realmweaver is suited to both handcrafted content and long-term live content pipelines.
 
-If you are unable to run commands from the IDEA terminal, you can also run the 
-command from code like this. Make sure to remove the code after your server is
-authenticated.
+## Asset pack ecosystem
 
-```java
-    @Override
-    protected void start() {
-        CommandManager.get().handleCommand(ConsoleSender.INSTANCE, "auth login device");
-    }
-```
+Realmweaver can also be positioned as a core framework with themed asset packs built on top of it.
 
+Recommended naming format:
 
-## Verifying The Example Plugin
-You can verify the Example plugin has loaded by running the `/test` command 
-in game. It will print the name and version of your plugin. This is for 
-demonstration purposes, and should **NOT** be included in your final build.
+**Realmweaver: Asset Pack Name**
 
-The example plugin also includes a recipe defined by an asset pack. This recipe
-allows you to craft 10 dirt into 1 dirt using the crafting window. This is also
-an example and should not be removed before you release the plugin.
+This makes it clear that Realmweaver is the systems backbone, while each asset pack defines the world theme, presentation, and content flavor.
+
+Example starter packs:
+
+- **Realmweaver: MMAnywhere** — a basic framework example for a traditional MMO-style realm
+- **Realmweaver: Space Forged** — a space-themed variant showing how the same framework can support a very different world fantasy
+
+This gives Realmweaver room to grow as both a single mod and a broader product family.
+
+## Core design pillars
+
+### Character identity
+Players can move through a multi-character account model with creation, selection, deletion recovery, race-specific setup, and character-centric progression.
+
+### Progression depth
+The mod supports multiple level tracks, class milestones, talent trees, race hooks, and authored ability unlocks.
+
+### Social persistence
+Parties, guilds, routed chat, and shared-service systems help turn a collection of mechanics into an actual multiplayer world framework.
+
+### Economy infrastructure
+Currencies, banks, auction house flow, and mail provide the service layer needed for a deeper server economy.
+
+### Content authoring flexibility
+Much of the gameplay surface is built around JSON assets and reusable interaction chains, so designers can author new content with less Java churn.
+
+### Asset pack scalability
+The same framework can support multiple branded content packs, making it practical to launch one foundation and then ship very different realm experiences on top of it.
+
+## Project architecture
+
+The composition root is [src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java). It registers:
+
+- asset stores
+- ECS components
+- gameplay systems
+- managers and commands
+- packet filters and custom interactions
+- HUD and UI wiring
+
+Important paths:
+
+- [src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java)
+- [src/main/java/org/pixelbays/rpg](src/main/java/org/pixelbays/rpg)
+- [src/main/resources/Server](src/main/resources/Server)
+- [src/main/resources/Common/UI/Custom/Pages](src/main/resources/Common/UI/Custom/Pages)
+- [wiki/Home.md](wiki/Home.md)
+- [docs/Realmweaver-Marketing-Guide.md](docs/Realmweaver-Marketing-Guide.md)
+
+## Current maturity snapshot
+
+Broadly mature systems:
+
+- characters
+- leveling
+- classes
+- talent trees
+
+- abilities
+- parties
+- guilds
+- currencies
+- banks
+- mail
+
+Functional but still evolving:
+
+- auction house
+- lockpicking
+- NPC RPG hooks
+- inventory overrides
+- randomized equipment
+- NPC using abilities
+
+Planned or earlier-stage areas:
+
+- professions and gathering loops
+- instance and encounter framework
+- broader camera or movement tooling
+- more presentation polish for character creation and selection
+- instanced content, worlds, zones
+
+## Build and run
+
+### Requirements
+
+1. Hytale installed through the official launcher
+2. Java 25
+3. Windows environment
+
+### Build the plugin
+
+Use the workspace task `build plugin`.
+
+### Build and deploy to your local Hytale Mods folder
+
+Use the workspace task `build and deploy`.
+
+### Dev server notes
+
+The Gradle setup resolves `HytaleServer.jar` from the local Hytale installation and supports running the server with the included asset pack. `processResources` updates the plugin manifest version and `IncludesAssetPack` values during builds.
+
+## Learn more
+
+Start with these pages:
+
+- [wiki/Home.md](wiki/Home.md)
+- [wiki/Systems-Overview.md](wiki/Systems-Overview.md)
+- [wiki/Progression-and-Character-Systems.md](wiki/Progression-and-Character-Systems.md)
+- [wiki/Social-and-Economy-Systems.md](wiki/Social-and-Economy-Systems.md)
+- [wiki/UI-Input-and-Content-Pipeline.md](wiki/UI-Input-and-Content-Pipeline.md)
+- [docs/Realmweaver-Marketing-Guide.md](docs/Realmweaver-Marketing-Guide.md)
+
+## Positioning summary
+
+Realmweaver is best described as a Hytale MMO/RPG framework that already ships with meaningful progression, social, and economy foundations. It is suited to creators who want to build a realm with identity, persistence, and room to grow.
+
+It can also be presented as the base framework for a family of themed asset packs, such as **Realmweaver: MMAnywhere** and **Realmweaver: Space Forged**.
