@@ -103,6 +103,11 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
             arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
             list -> list == null ? null : list.toArray(String[]::new));
 
+            private static final FunctionCodec<ResourceDisplayDefinition[], List<ResourceDisplayDefinition>> RESOURCE_DISPLAY_LIST_CODEC = new FunctionCodec<>(
+                new ArrayCodec<>(ResourceDisplayDefinition.CODEC, ResourceDisplayDefinition[]::new),
+                arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+                list -> list == null ? null : list.toArray(ResourceDisplayDefinition[]::new));
+
     private static final FunctionCodec<String[], List<String>> CLASS_ID_LIST_CODEC = new FunctionCodec<>(
             new ArrayCodec<>(CLASS_REF_CODEC, String[]::new),
             arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
@@ -254,6 +259,11 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                     (i, s) -> i.ResourceStats = s,
                     i -> i.ResourceStats)
             .add()
+                .append(
+                    new KeyedCodec<>("ResourceDisplays", RESOURCE_DISPLAY_LIST_CODEC, false, true),
+                    (i, s) -> i.ResourceDisplays = s,
+                    i -> i.ResourceDisplays)
+                .add()
             .appendInherited(new KeyedCodec<>("BaseStatModifiers", StatModifiers.CODEC, false, true),
                     (i, s) -> i.BaseStatModifiers = s, i -> i.BaseStatModifiers,
                     (i, parent) -> i.BaseStatModifiers = parent.BaseStatModifiers)
@@ -341,6 +351,94 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         }
     }
 
+    public enum ResourceDisplayMode {
+        BAR,
+        CHARGES
+    }
+
+    public static final class ResourceDisplayDefinition {
+
+        public static final BuilderCodec<ResourceDisplayDefinition> CODEC = BuilderCodec
+                .builder(ResourceDisplayDefinition.class, ResourceDisplayDefinition::new)
+                .append(new KeyedCodec<>("StatId", ENTITY_STAT_REF_CODEC),
+                        (i, s) -> i.statId = s,
+                        i -> i.statId)
+                .add()
+                .append(new KeyedCodec<>("Label", Codec.STRING, false, true),
+                        (i, s) -> i.label = s,
+                        i -> i.label)
+                .add()
+                .append(new KeyedCodec<>("DisplayMode", new EnumCodec<>(ResourceDisplayMode.class), false, true),
+                        (i, s) -> i.displayMode = s,
+                        i -> i.displayMode)
+                .add()
+                .append(new KeyedCodec<>("MaxCharges", Codec.INTEGER, false, true),
+                        (i, s) -> i.maxCharges = s,
+                        i -> i.maxCharges)
+                .add()
+                .append(new KeyedCodec<>("FillColor", Codec.STRING, false, true),
+                        (i, s) -> i.fillColor = s,
+                        i -> i.fillColor)
+                .add()
+                .append(new KeyedCodec<>("Asset", Codec.STRING, false, true),
+                    (i, s) -> i.asset = s,
+                    i -> i.asset)
+                .add()
+                .build();
+
+        private String statId;
+        private String label;
+        private ResourceDisplayMode displayMode;
+        private int maxCharges;
+        private String fillColor;
+        private String asset;
+
+        public ResourceDisplayDefinition() {
+            this.statId = "";
+            this.label = "";
+            this.displayMode = ResourceDisplayMode.BAR;
+            this.maxCharges = 0;
+            this.fillColor = "";
+            this.asset = "";
+        }
+
+        @Nonnull
+        public static ResourceDisplayDefinition legacy(@Nonnull String statId) {
+            ResourceDisplayDefinition definition = new ResourceDisplayDefinition();
+            definition.statId = statId;
+            return definition;
+        }
+
+        @Nonnull
+        public String getStatId() {
+            return statId == null ? "" : statId;
+        }
+
+        @Nullable
+        public String getLabel() {
+            return label;
+        }
+
+        @Nonnull
+        public ResourceDisplayMode getDisplayMode() {
+            return displayMode == null ? ResourceDisplayMode.BAR : displayMode;
+        }
+
+        public int getMaxCharges() {
+            return maxCharges;
+        }
+
+        @Nullable
+        public String getFillColor() {
+            return fillColor;
+        }
+
+        @Nullable
+        public String getAsset() {
+            return asset;
+        }
+    }
+
     private static final class ClassRefCodec implements ValidatableCodec<String> {
         @Nonnull
         @SuppressWarnings("null")
@@ -418,6 +516,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
     // === Resources ===
     private List<String> ResourceStats; // Priority list of resource stats (e.g., ["Mana", "Energy"])
+    private List<ResourceDisplayDefinition> ResourceDisplays; // Explicit HUD display config for class resources
 
     // === Stat Bonuses ===
     private StatModifiers BaseStatModifiers; // Stat bonuses when class is active
@@ -455,6 +554,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         this.IsHeroClass = false;
         this.HeroStartingLevel = 1;
         this.ResourceStats = new ArrayList<>();
+        this.ResourceDisplays = new ArrayList<>();
         this.BaseStatModifiers = new StatModifiers();
         this.PerLevelModifiers = new StatModifiers();
         this.equipmentRestrictions = new EquipmentRestrictions();
@@ -650,6 +750,29 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
     public List<String> getResourceStats() {
         return ResourceStats;
+    }
+
+    public List<ResourceDisplayDefinition> getResourceDisplays() {
+        return ResourceDisplays;
+    }
+
+    public List<ResourceDisplayDefinition> getResolvedResourceDisplays() {
+        if (ResourceDisplays != null && !ResourceDisplays.isEmpty()) {
+            return ResourceDisplays;
+        }
+
+        if (ResourceStats == null || ResourceStats.isEmpty()) {
+            return List.of();
+        }
+
+        ArrayList<ResourceDisplayDefinition> resolved = new ArrayList<>(ResourceStats.size());
+        for (String statId : ResourceStats) {
+            if (statId == null || statId.isBlank()) {
+                continue;
+            }
+            resolved.add(ResourceDisplayDefinition.legacy(statId));
+        }
+        return resolved;
     }
 
     public Map<String, List<String>> getTags() {
