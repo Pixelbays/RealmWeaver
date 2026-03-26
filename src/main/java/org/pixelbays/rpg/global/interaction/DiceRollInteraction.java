@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.rpg.global.config.RpgModConfig;
-import org.pixelbays.rpg.global.config.settings.GeneralModSettings.RollModifierRange;
+import org.pixelbays.rpg.global.config.settings.StatModSettings.RollModifierRange;
 import org.pixelbays.rpg.global.system.RNGSystem;
 
 import com.hypixel.hytale.codec.Codec;
