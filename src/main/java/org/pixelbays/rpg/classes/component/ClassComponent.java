@@ -73,7 +73,7 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      * Check if player has learned a specific class
      */
     public boolean hasLearnedClass(String classId) {
-        return learnedClasses.containsKey(classId);
+        return findLearnedClassKey(classId) != null;
     }
     
     /**
@@ -81,7 +81,8 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      */
     @Nullable
     public ClassData getClassData(String classId) {
-        return learnedClasses.get(classId);
+        String resolvedClassId = findLearnedClassKey(classId);
+        return resolvedClassId == null ? null : learnedClasses.get(resolvedClassId);
     }
     
     /**
@@ -106,7 +107,8 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      * Move a learned class to the primary position.
      */
     public void prioritizeClass(String classId) {
-        if (classId == null || classId.isEmpty() || !learnedClasses.containsKey(classId)) {
+        String resolvedClassId = findLearnedClassKey(classId);
+        if (resolvedClassId == null) {
             return;
         }
 
@@ -114,9 +116,9 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
             return;
         }
 
-        ClassData data = learnedClasses.remove(classId);
+        ClassData data = learnedClasses.remove(resolvedClassId);
         LinkedHashMap<String, ClassData> reordered = new LinkedHashMap<>();
-        reordered.put(classId, data);
+        reordered.put(resolvedClassId, data);
         reordered.putAll(learnedClasses);
         learnedClasses.clear();
         learnedClasses.putAll(reordered);
@@ -136,7 +138,8 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      */
     @Nullable
     public ClassData unlearnClass(String classId) {
-        return learnedClasses.remove(classId);
+        String resolvedClassId = findLearnedClassKey(classId);
+        return resolvedClassId == null ? null : learnedClasses.remove(resolvedClassId);
     }
     
     /**
@@ -144,6 +147,25 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      */
     public Map<String, ClassData> getAllLearnedClasses() {
         return learnedClasses;
+    }
+
+    @Nullable
+    private String findLearnedClassKey(@Nullable String classId) {
+        if (classId == null || classId.isEmpty()) {
+            return null;
+        }
+
+        if (learnedClasses.containsKey(classId)) {
+            return classId;
+        }
+
+        for (String learnedClassId : learnedClasses.keySet()) {
+            if (learnedClassId != null && learnedClassId.equalsIgnoreCase(classId)) {
+                return learnedClassId;
+            }
+        }
+
+        return null;
     }
 
     /**

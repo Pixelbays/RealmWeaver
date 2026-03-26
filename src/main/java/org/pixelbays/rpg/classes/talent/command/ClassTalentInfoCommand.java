@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.classes.talent.TalentSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -26,11 +27,13 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 public class ClassTalentInfoCommand extends AbstractPlayerCommand {
 
     private final TalentSystem talentSystem;
+    private final ClassManagementSystem classSystem;
     private final RequiredArg<String> classIdArg;
 
     public ClassTalentInfoCommand() {
         super("info", "View talent tree allocation summary");
         this.talentSystem = ExamplePlugin.get().getTalentSystem();
+        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.classIdArg = null;
         this.addUsageVariant(new ClassTalentInfoCommand("View talent tree allocation summary"));
     }
@@ -38,6 +41,7 @@ public class ClassTalentInfoCommand extends AbstractPlayerCommand {
     private ClassTalentInfoCommand(String description) {
         super(description);
         this.talentSystem = ExamplePlugin.get().getTalentSystem();
+        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.classIdArg = this.withRequiredArg("classId", "The class to inspect", ArgTypes.STRING);
     }
 
@@ -52,7 +56,12 @@ public class ClassTalentInfoCommand extends AbstractPlayerCommand {
 
         String classId;
         if (this.classIdArg != null) {
-            classId = this.classIdArg.get(ctx);
+            String requestedClassId = this.classIdArg.get(ctx);
+            classId = classSystem.resolveClassId(requestedClassId);
+            if (classId == null) {
+                player.sendMessage(Message.translation("pixelbays.rpg.class.error.unknownClass").param("classId", requestedClassId));
+                return;
+            }
         } else {
             ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
             String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
@@ -63,7 +72,7 @@ public class ClassTalentInfoCommand extends AbstractPlayerCommand {
             classId = primaryClassId;
         }
 
-        ClassDefinition classDef = ExamplePlugin.get().getClassManagementSystem().getClassDefinition(classId);
+        ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
             player.sendMessage(Message.translation("pixelbays.rpg.class.error.unknownClass").param("classId", classId));
             return;

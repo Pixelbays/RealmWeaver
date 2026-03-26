@@ -58,7 +58,12 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
 
         String classId;
         if (this.classNameArg != null) {
-            classId = this.classNameArg.get(ctx);
+            String requestedClassId = this.classNameArg.get(ctx);
+            classId = classSystem.resolveClassId(requestedClassId);
+            if (classId == null) {
+                player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", requestedClassId));
+                return;
+            }
         } else {
             String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
             if (primaryClassId == null || primaryClassId.isEmpty()) {

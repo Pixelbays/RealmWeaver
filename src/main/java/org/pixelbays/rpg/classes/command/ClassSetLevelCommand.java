@@ -45,7 +45,12 @@ public class ClassSetLevelCommand extends AbstractPlayerCommand {
             @Nonnull PlayerRef playerRef,
             @Nonnull World world) {
         Player player = store.getComponent(ref, Player.getComponentType());
-        String classId = this.classNameArg.get(ctx);
+        String requestedClassId = this.classNameArg.get(ctx);
+        String classId = classSystem.resolveClassId(requestedClassId);
+        if (classId == null) {
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", requestedClassId));
+            return;
+        }
         int targetLevel = this.levelArg.get(ctx);
 
         if (targetLevel < 1) {
@@ -55,7 +60,7 @@ public class ClassSetLevelCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", classId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", requestedClassId));
             return;
         }
 

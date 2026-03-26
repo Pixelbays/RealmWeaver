@@ -41,11 +41,16 @@ public class ClassInfoCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        String classId = this.classNameArg.get(ctx);
+        String requestedClassId = this.classNameArg.get(ctx);
+        String classId = classSystem.resolveClassId(requestedClassId);
+        if (classId == null) {
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", requestedClassId));
+            return;
+        }
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", classId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.notFound").param("classId", requestedClassId));
             return;
         }
 

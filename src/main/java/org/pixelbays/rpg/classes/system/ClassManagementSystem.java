@@ -1,8 +1,10 @@
 package org.pixelbays.rpg.classes.system;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,8 +63,39 @@ public class ClassManagementSystem {
     /**
      * Get class definition from asset store
      */
-    public ClassDefinition getClassDefinition(String classId) {
-        return ClassDefinition.getAssetMap().getAsset(classId);
+    public ClassDefinition getClassDefinition(@Nullable String classId) {
+        if (classId == null || classId.isBlank()) {
+            return null;
+        }
+
+        var assetMap = ClassDefinition.getAssetMap();
+        if (assetMap == null) {
+            return null;
+        }
+
+        ClassDefinition directMatch = assetMap.getAsset(classId);
+        if (directMatch != null) {
+            return directMatch;
+        }
+
+        for (ClassDefinition classDefinition : assetMap.getAssetMap().values()) {
+            if (classDefinition == null) {
+                continue;
+            }
+
+            if (classId.equalsIgnoreCase(classDefinition.getId())
+                    || classId.equalsIgnoreCase(classDefinition.getDisplayName())) {
+                return classDefinition;
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public String resolveClassId(@Nullable String classId) {
+        ClassDefinition classDefinition = getClassDefinition(classId);
+        return classDefinition == null ? null : classDefinition.getId();
     }
 
     /**
@@ -75,11 +108,15 @@ public class ClassManagementSystem {
      */
     public String learnClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
+        pruneUnknownClasses(entityRef, store);
+
+        String resolvedClassId = resolveClassId(classId);
         // Get class definition
-        ClassDefinition classDef = getClassDefinition(classId);
-        if (classDef == null) {
+        ClassDefinition classDef = getClassDefinition(resolvedClassId == null ? classId : resolvedClassId);
+        if (classDef == null || resolvedClassId == null) {
             return "ERROR: Unknown class: " + classId;
         }
+        classId = resolvedClassId;
 
         if (!classDef.isEnabled()) {
             return "ERROR: Class " + classId + " is not available";
@@ -177,13 +214,25 @@ public class ClassManagementSystem {
      */
     public String unlearnClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
-        ClassDefinition classDef = getClassDefinition(classId);
-        if (classDef == null) {
-            return "ERROR: Unknown class: " + classId;
+        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
+        if (classComp == null) {
+            return "ERROR: Class " + classId + " is not learned";
         }
 
-        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
-        if (classComp == null || !classComp.hasLearnedClass(classId)) {
+        String resolvedClassId = resolveClassId(classId);
+        ClassDefinition classDef = getClassDefinition(resolvedClassId == null ? classId : resolvedClassId);
+        if (classDef == null || resolvedClassId == null) {
+            if (!classComp.hasLearnedClass(classId)) {
+                return "ERROR: Unknown class: " + classId;
+            }
+
+            removeClassState(entityRef, classComp, classId, store);
+            RpgLogging.debugDeveloper("[ClassSystem] Entity unlearned unknown class: %s", classId);
+            return "SUCCESS: Unlearned " + classId;
+        }
+        classId = resolvedClassId;
+
+        if (!classComp.hasLearnedClass(classId)) {
             return "ERROR: Class " + classId + " is not learned";
         }
 
@@ -212,18 +261,7 @@ public class ClassManagementSystem {
             }
         }
 
-        // Remove class data
-        classComp.unlearnClass(classId);
-
-        // Remove all abilities from this class
-        ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
-        if (abilityComp != null) {
-            abilityComp.removeAbilitiesForClass(classId);
-        }
-
-        if (statSystem != null) {
-            statSystem.recalculateClassStatBonuses(entityRef, store);
-        }
+        removeClassState(entityRef, classComp, classId, store);
 
         ClassUnlearnedEvent.dispatch(entityRef, classId);
 
@@ -241,10 +279,14 @@ public class ClassManagementSystem {
      */
     public String setActiveClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
-        ClassDefinition classDef = getClassDefinition(classId);
-        if (classDef == null) {
+        pruneUnknownClasses(entityRef, store);
+
+        String resolvedClassId = resolveClassId(classId);
+        ClassDefinition classDef = getClassDefinition(resolvedClassId == null ? classId : resolvedClassId);
+        if (classDef == null || resolvedClassId == null) {
             return "ERROR: Unknown class: " + classId;
         }
+        classId = resolvedClassId;
 
         ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
@@ -419,10 +461,14 @@ public class ClassManagementSystem {
      */
     public boolean canLearnClass(@Nonnull Ref<EntityStore> entityRef, String classId,
             @Nonnull Store<EntityStore> store) {
-        ClassDefinition classDef = getClassDefinition(classId);
-        if (classDef == null || !classDef.isEnabled()) {
+        pruneUnknownClasses(entityRef, store);
+
+        String resolvedClassId = resolveClassId(classId);
+        ClassDefinition classDef = getClassDefinition(resolvedClassId == null ? classId : resolvedClassId);
+        if (classDef == null || resolvedClassId == null || !classDef.isEnabled()) {
             return false;
         }
+        classId = resolvedClassId;
 
         PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
         if (playerRef != null && !ExamplePlugin.get().getExpansionManager().hasAccess(playerRef, classDef.getRequiredExpansionIds())) {
@@ -481,6 +527,8 @@ public class ClassManagementSystem {
             return validation;
         }
 
+        classId = validation.getClassId();
+
         ClassDefinition.AbilityUnlock unlock = validation.getAbilityUnlock();
         if (unlock == null) {
             return ClassAbilityLearnResult.failure("ERROR: Ability unlock is not configured", classId, abilityId);
@@ -527,8 +575,10 @@ public class ClassManagementSystem {
      * @return true if a class was learned during this call
      */
     public boolean ensureStartingClass(@Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store) {
+        pruneUnknownClasses(entityRef, store);
+
         ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
-        if (classComp != null && !classComp.getLearnedClassIds().isEmpty()) {
+        if (hasKnownLearnedClasses(classComp)) {
             return false;
         }
 
@@ -590,10 +640,14 @@ public class ClassManagementSystem {
             @Nonnull Store<EntityStore> store,
             boolean validateLearnCosts,
             @Nonnull CurrencyAccessContext characterCurrencyAccessContext) {
-        ClassDefinition classDef = getClassDefinition(classId);
-        if (classDef == null) {
+        pruneUnknownClasses(entityRef, store);
+
+        String resolvedClassId = resolveClassId(classId);
+        ClassDefinition classDef = getClassDefinition(resolvedClassId == null ? classId : resolvedClassId);
+        if (classDef == null || resolvedClassId == null) {
             return ClassAbilityLearnResult.failure("ERROR: Unknown class: " + classId, classId, abilityId);
         }
+        classId = resolvedClassId;
         if (!classDef.isEnabled()) {
             return ClassAbilityLearnResult.failure("ERROR: Class " + classId + " is not available", classId,
                     abilityId);
@@ -823,5 +877,75 @@ public class ClassManagementSystem {
         }
 
         return null;
+    }
+
+    public boolean hasKnownLearnedClasses(@Nullable ClassComponent classComp) {
+        return getPrimaryKnownClassId(classComp) != null;
+    }
+
+    @Nullable
+    public String getPrimaryKnownClassId(@Nullable ClassComponent classComp) {
+        if (classComp == null) {
+            return null;
+        }
+
+        for (String classId : classComp.getLearnedClassIds()) {
+            if (isKnownEnabledClassId(classId)) {
+                return classId;
+            }
+        }
+
+        return null;
+    }
+
+    @Nonnull
+    public Set<String> pruneUnknownClasses(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
+        if (classComp == null || classComp.getLearnedClassIds().isEmpty()) {
+            return java.util.Set.of();
+        }
+
+        Set<String> removedClassIds = new LinkedHashSet<>();
+        for (String classId : classComp.getLearnedClassIds()) {
+            if (isKnownEnabledClassId(classId)) {
+                continue;
+            }
+            removedClassIds.add(classId);
+        }
+
+        if (removedClassIds.isEmpty()) {
+            return java.util.Set.of();
+        }
+
+        for (String classId : removedClassIds) {
+            removeClassState(entityRef, classComp, classId, store);
+        }
+
+        RpgLogging.debugDeveloper("[ClassSystem] Pruned unknown/disabled classes for %s: %s",
+                entityRef.getIndex(), removedClassIds);
+        return removedClassIds;
+    }
+
+    public boolean isKnownEnabledClassId(@Nullable String classId) {
+        ClassDefinition classDefinition = getClassDefinition(classId);
+        return classDefinition != null && classDefinition.isEnabled();
+    }
+
+    private void removeClassState(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull ClassComponent classComp,
+            @Nonnull String classId,
+            @Nonnull Store<EntityStore> store) {
+        classComp.unlearnClass(classId);
+
+        ClassAbilityComponent abilityComp = store.getComponent(entityRef, ClassAbilityComponent.getComponentType());
+        if (abilityComp != null) {
+            abilityComp.removeAbilitiesForClass(classId);
+        }
+
+        if (statSystem != null) {
+            statSystem.recalculateClassStatBonuses(entityRef, store);
+            statSystem.recalculateTalentStatBonuses(entityRef, store);
+        }
     }
 }

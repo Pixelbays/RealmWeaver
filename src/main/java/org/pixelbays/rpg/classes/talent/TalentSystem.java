@@ -63,6 +63,10 @@ public class TalentSystem {
      * level system.
      */
     public int getAvailablePoints(@Nonnull Ref<EntityStore> entityRef, @Nonnull String classId) {
+        String resolvedClassId = classManagementSystem.resolveClassId(classId);
+        if (resolvedClassId != null) {
+            classId = resolvedClassId;
+        }
         ClassDefinition classDef = classManagementSystem.getClassDefinition(classId);
         if (classDef == null) return 0;
         String systemId = resolveSystemId(classDef);
@@ -84,6 +88,10 @@ public class TalentSystem {
             @Nonnull String nodeId,
             @Nonnull String configId,
             @Nonnull Store<EntityStore> store) {
+        String resolvedClassId = classManagementSystem.resolveClassId(classId);
+        if (resolvedClassId != null) {
+            classId = resolvedClassId;
+        }
 
         ClassDefinition classDef = classManagementSystem.getClassDefinition(classId);
         if (classDef == null) {
@@ -200,6 +208,10 @@ public class TalentSystem {
             @Nonnull String nodeId,
             @Nonnull String configId,
             @Nonnull Store<EntityStore> store) {
+        String resolvedClassId = classManagementSystem.resolveClassId(classId);
+        if (resolvedClassId != null) {
+            classId = resolvedClassId;
+        }
 
         RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
         TalentModSettings talentSettings = config != null ? config.getTalentSettings() : new TalentModSettings();
@@ -288,6 +300,10 @@ public class TalentSystem {
             @Nonnull String configId,
             boolean checkItemCost,
             @Nonnull Store<EntityStore> store) {
+        String resolvedClassId = classManagementSystem.resolveClassId(classId);
+        if (resolvedClassId != null) {
+            classId = resolvedClassId;
+        }
 
         ClassDefinition classDef = classManagementSystem.getClassDefinition(classId);
         if (classDef == null) return "ERROR: Unknown class: " + classId;
@@ -400,6 +416,11 @@ public class TalentSystem {
             @Nonnull String classId,
             @Nonnull Store<EntityStore> store) {
         List<String> lines = new ArrayList<>();
+
+        String resolvedClassId = classManagementSystem.resolveClassId(classId);
+        if (resolvedClassId != null) {
+            classId = resolvedClassId;
+        }
 
         ClassDefinition classDef = classManagementSystem.getClassDefinition(classId);
         if (classDef == null) {

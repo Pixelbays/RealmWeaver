@@ -47,7 +47,8 @@ public class ClassTalentGrantCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        String classId = this.classIdArg.get(ctx);
+        String requestedClassId = this.classIdArg.get(ctx);
+        String classId = classSystem.resolveClassId(requestedClassId);
         int amount = this.amountArg.get(ctx);
 
         if (amount <= 0) {
@@ -57,7 +58,7 @@ public class ClassTalentGrantCommand extends AbstractPlayerCommand {
 
         ClassDefinition classDef = classSystem.getClassDefinition(classId);
         if (classDef == null) {
-            player.sendMessage(Message.translation("pixelbays.rpg.class.error.unknownClass").param("classId", classId));
+            player.sendMessage(Message.translation("pixelbays.rpg.class.error.unknownClass").param("classId", requestedClassId));
             return;
         }
 
