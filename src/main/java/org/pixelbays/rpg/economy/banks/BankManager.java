@@ -248,11 +248,11 @@ public class BankManager {
 
     @Nonnull
     public BankActionResult getOrCreateConfiguredBank(@Nonnull BankScope scope, @Nonnull String ownerId) {
-        String bankTypeId = resolveConfiguredBankTypeId(scope);
-        if (bankTypeId == null || bankTypeId.isBlank()) {
-            return BankActionResult.failure("No configured bank type for scope " + scope.name() + '.');
+        BankTypeDefinition definition = resolveDefaultBankType(scope);
+        if (definition == null) {
+            return BankActionResult.failure("No default bank type available for scope " + scope.name() + '.');
         }
-        return getOrCreateBank(bankTypeId, ownerId);
+        return getOrCreateBank(definition, ownerId);
     }
 
     @Nonnull
@@ -260,14 +260,9 @@ public class BankManager {
             @Nonnull String ownerId,
             @Nonnull UUID payerId,
             @Nonnull Inventory payerInventory) {
-        String bankTypeId = resolveConfiguredBankTypeId(scope);
-        if (bankTypeId == null || bankTypeId.isBlank()) {
-            return BankActionResult.failure("No configured bank type for scope " + scope.name() + '.');
-        }
-
-        BankTypeDefinition definition = BankTypeRegistry.get(bankTypeId);
+        BankTypeDefinition definition = resolveDefaultBankType(scope);
         if (definition == null) {
-            return BankActionResult.failure("Unknown bank type: " + bankTypeId);
+            return BankActionResult.failure("No default bank type available for scope " + scope.name() + '.');
         }
         return getOrCreateBank(definition, ownerId, payerId, payerInventory);
     }
@@ -311,24 +306,30 @@ public class BankManager {
 
     @Nonnull
     public BankActionResult getOrCreateDefaultVoidBank(@Nonnull String ownerId) {
-        RpgModConfig config = resolveConfig();
-        String bankTypeId = config == null ? "Void" : config.getDefaultVoidBankTypeId();
-        return getOrCreateBank(bankTypeId, ownerId);
+        BankTypeDefinition definition = resolveDefaultVoidBankType();
+        if (definition == null) {
+            return BankActionResult.failure("No default void bank type available.");
+        }
+        return getOrCreateBank(definition, ownerId);
     }
 
     @Nonnull
     public BankActionResult getOrCreateDefaultWarboundBank(@Nonnull String warbandId) {
-        RpgModConfig config = resolveConfig();
-        String bankTypeId = config == null ? "Warbound" : config.getDefaultWarboundBankTypeId();
-        return getOrCreateBank(bankTypeId, warbandId);
+        BankTypeDefinition definition = resolveDefaultBankType(BankScope.Warband);
+        if (definition == null) {
+            return BankActionResult.failure("No default bank type available for scope " + BankScope.Warband.name() + '.');
+        }
+        return getOrCreateBank(definition, warbandId);
     }
 
     @Nonnull
     public BankActionResult getOrCreateDefaultProfessionBank(@Nonnull UUID ownerId, @Nonnull String professionId) {
-        RpgModConfig config = resolveConfig();
-        String bankTypeId = config == null ? "Professions" : config.getDefaultProfessionBankTypeId();
+        BankTypeDefinition definition = resolveDefaultBankType(BankScope.Profession);
+        if (definition == null) {
+            return BankActionResult.failure("No default bank type available for scope " + BankScope.Profession.name() + '.');
+        }
         String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
-        return getOrCreateBank(bankTypeId,
+        return getOrCreateBank(definition,
                 createQualifiedOwnerId(characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId, professionId));
     }
 
@@ -336,11 +337,9 @@ public class BankManager {
     public BankActionResult getOrCreateDefaultProfessionBank(@Nonnull UUID ownerId,
             @Nonnull String professionId,
             @Nonnull Inventory payerInventory) {
-        RpgModConfig config = resolveConfig();
-        String bankTypeId = config == null ? "Professions" : config.getDefaultProfessionBankTypeId();
-        BankTypeDefinition definition = BankTypeRegistry.get(bankTypeId);
+        BankTypeDefinition definition = resolveDefaultBankType(BankScope.Profession);
         if (definition == null) {
-            return BankActionResult.failure("Unknown bank type: " + bankTypeId);
+            return BankActionResult.failure("No default bank type available for scope " + BankScope.Profession.name() + '.');
         }
         String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
         return getOrCreateBank(definition,
@@ -857,25 +856,18 @@ public class BankManager {
     }
 
     @Nullable
-    private String resolveConfiguredBankTypeId(@Nonnull BankScope scope) {
-        RpgModConfig config = resolveConfig();
-        if (config == null) {
-            return switch (scope) {
-                case Account -> "Account";
-                case Guild -> "Guild";
-                case Warband -> "Warbound";
-                case Profession -> "Professions";
-                case Character, Player, Custom, Global -> "Personal";
-            };
-        }
+    private BankTypeDefinition resolveDefaultBankType(@Nonnull BankScope scope) {
+        return BankTypeRegistry.getFirstByScope(scope);
+    }
 
-        return switch (scope) {
-            case Account -> config.getDefaultAccountBankTypeId();
-            case Guild -> config.getDefaultGuildBankTypeId();
-            case Warband -> config.getDefaultWarboundBankTypeId();
-            case Profession -> config.getDefaultProfessionBankTypeId();
-            case Character, Player, Custom, Global -> config.getDefaultPersonalBankTypeId();
-        };
+    @Nullable
+    private BankTypeDefinition resolveDefaultVoidBankType() {
+        for (BankTypeDefinition definition : BankTypeRegistry.getEnabled()) {
+            if (definition != null && definition.getStorageMode() == BankTypeDefinition.BankStorageMode.Void) {
+                return definition;
+            }
+        }
+        return null;
     }
 
     private boolean isPersistenceEnabled() {
