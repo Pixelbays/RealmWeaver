@@ -1,14 +1,12 @@
 package org.pixelbays.plugin;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.rpg.achievement.component.AchievementComponent;
-import org.pixelbays.rpg.achievement.config.AchievementDefinition;
-import org.pixelbays.rpg.achievement.event.AchievementUnlockedEvent;
-import org.pixelbays.rpg.achievement.system.AchievementSystem;
 import org.pixelbays.rpg.ability.command.BindAbilityCommand;
 import org.pixelbays.rpg.ability.command.SyncHotbarCommand;
 import org.pixelbays.rpg.ability.command.UnlockAbilityCommand;
@@ -16,38 +14,47 @@ import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.component.AbilityEmpowerComponent;
 import org.pixelbays.rpg.ability.component.AbilityTriggerBlockComponent;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
+import org.pixelbays.rpg.ability.config.AbilityCategory;
+import org.pixelbays.rpg.ability.config.AbilityQuality;
+import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.event.AbilityTriggerFailedEvent;
 import org.pixelbays.rpg.ability.event.AbilityTriggeredEvent;
 import org.pixelbays.rpg.ability.event.BlockAbilityTriggerEvent;
 import org.pixelbays.rpg.ability.event.ClassAbilityUnlockedEvent;
-import org.pixelbays.rpg.ability.config.AbilityCategory;
-import org.pixelbays.rpg.ability.config.AbilityQuality;
-import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.interaction.EmpowerAbilityInteraction;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.ability.system.HotbarAbilityIconManager;
+import org.pixelbays.rpg.achievement.component.AchievementComponent;
+import org.pixelbays.rpg.achievement.config.AchievementDefinition;
+import org.pixelbays.rpg.achievement.event.AchievementUnlockedEvent;
+import org.pixelbays.rpg.achievement.system.AchievementSystem;
 import org.pixelbays.rpg.camera.RpgCameraController;
-import org.pixelbays.rpg.chat.ChatManager;
-import org.pixelbays.rpg.chat.GuildChatChannel;
-import org.pixelbays.rpg.chat.PartyChatChannel;
-import org.pixelbays.rpg.chat.command.ChatCommand;
 import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.character.command.CharacterCommand;
 import org.pixelbays.rpg.character.config.CharacterRosterData;
+import org.pixelbays.rpg.character.input.CharacterLobbyInputFilter;
+import org.pixelbays.rpg.character.token.CharacterTokenDefinition;
+import org.pixelbays.rpg.chat.ChatManager;
+import org.pixelbays.rpg.chat.GuildChatChannel;
+import org.pixelbays.rpg.chat.PartyChatChannel;
+import org.pixelbays.rpg.chat.config.settings.ChatChannelDefinition;
+import org.pixelbays.rpg.chat.config.settings.ChatModSettings;
+import org.pixelbays.rpg.chat.command.ChatCommand;
 import org.pixelbays.rpg.classes.command.ClassCommand;
 import org.pixelbays.rpg.classes.component.ClassComponent;
-import org.pixelbays.rpg.classes.talent.TalentSystem;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.event.ActiveClassChangedEvent;
 import org.pixelbays.rpg.classes.event.ClassLearnedEvent;
 import org.pixelbays.rpg.classes.event.ClassUnlearnedEvent;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.classes.talent.TalentSystem;
 import org.pixelbays.rpg.economy.auctions.AuctionHouseManager;
 import org.pixelbays.rpg.economy.auctions.config.AuctionData;
 import org.pixelbays.rpg.economy.banks.BankManager;
 import org.pixelbays.rpg.economy.banks.command.BankCommand;
 import org.pixelbays.rpg.economy.banks.config.BankData;
 import org.pixelbays.rpg.economy.banks.config.BankTypeDefinition;
+import org.pixelbays.rpg.economy.banks.interaction.OpenBankInteraction;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
 import org.pixelbays.rpg.economy.currency.CurrencyWalletData;
 import org.pixelbays.rpg.economy.currency.command.CurrencyCommand;
@@ -55,8 +62,8 @@ import org.pixelbays.rpg.economy.currency.config.CurrencyItemDropContainer;
 import org.pixelbays.rpg.economy.currency.config.CurrencyTypeDefinition;
 import org.pixelbays.rpg.economy.currency.event.GiveCurrencyEvent;
 import org.pixelbays.rpg.economy.currency.handler.GiveCurrencyHandler;
+import org.pixelbays.rpg.economy.currency.interaction.ModifyCurrencyInteraction;
 import org.pixelbays.rpg.economy.currency.system.CurrencyDeathDropSystem;
-import org.pixelbays.rpg.economy.banks.interaction.OpenBankInteraction;
 import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.expansion.ExpansionUnlockData;
 import org.pixelbays.rpg.global.config.RpgModConfig;
@@ -86,8 +93,8 @@ import org.pixelbays.rpg.guild.event.GuildApplicationSubmittedEvent;
 import org.pixelbays.rpg.guild.event.GuildCreatedEvent;
 import org.pixelbays.rpg.guild.event.GuildDisbandedEvent;
 import org.pixelbays.rpg.guild.event.GuildInviteSentEvent;
-import org.pixelbays.rpg.guild.event.GuildJoinedEvent;
 import org.pixelbays.rpg.guild.event.GuildJoinPolicyChangedEvent;
+import org.pixelbays.rpg.guild.event.GuildJoinedEvent;
 import org.pixelbays.rpg.guild.event.GuildLeaderChangedEvent;
 import org.pixelbays.rpg.guild.event.GuildLeftEvent;
 import org.pixelbays.rpg.guild.event.GuildMemberKickedEvent;
@@ -96,11 +103,11 @@ import org.pixelbays.rpg.guild.event.GuildRoleCreatedEvent;
 import org.pixelbays.rpg.guild.event.GuildRolePermissionChangedEvent;
 import org.pixelbays.rpg.hud.XpBarHudService;
 import org.pixelbays.rpg.hud.XpBarHudUpdateSystem;
+import org.pixelbays.rpg.inventory.input.InventoryOpenFilter;
+import org.pixelbays.rpg.inventory.system.InventoryHandlingSystem;
 import org.pixelbays.rpg.item.config.RandomizedEquipmentDefinition;
 import org.pixelbays.rpg.item.system.EquipmentRestrictions;
 import org.pixelbays.rpg.item.system.RandomizedEquipmentManager;
-import org.pixelbays.rpg.inventory.input.InventoryOpenFilter;
-import org.pixelbays.rpg.inventory.system.InventoryHandlingSystem;
 import org.pixelbays.rpg.leveling.command.LevelTestCommand;
 import org.pixelbays.rpg.leveling.command.ResetLevelCommand;
 import org.pixelbays.rpg.leveling.command.TestLevelCommand;
@@ -126,10 +133,13 @@ import org.pixelbays.rpg.mail.interaction.OpenMailInteraction;
 import org.pixelbays.rpg.npc.command.NpcRpgDebugCommand;
 import org.pixelbays.rpg.npc.component.NpcRpgDebugComponent;
 import org.pixelbays.rpg.npc.component.NpcRpgSetupComponent;
+import org.pixelbays.rpg.npc.component.NpcThreatComponent;
 import org.pixelbays.rpg.npc.corecomponents.builders.BuilderActionRpgCastAbility;
 import org.pixelbays.rpg.npc.corecomponents.builders.BuilderActionRpgSetup;
 import org.pixelbays.rpg.npc.system.NpcRpgDebugOverlaySystem;
 import org.pixelbays.rpg.npc.system.NpcRpgSetupSystem;
+import org.pixelbays.rpg.npc.system.NpcThreatDamageSystem;
+import org.pixelbays.rpg.npc.system.NpcThreatMaintenanceSystem;
 import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.command.PartyCommand;
 import org.pixelbays.rpg.party.config.PartyData;
@@ -149,6 +159,10 @@ import org.pixelbays.rpg.race.event.RaceAbilityUnlockedEvent;
 import org.pixelbays.rpg.race.event.RaceChangedEvent;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
 import org.pixelbays.rpg.race.system.RaceSystem;
+import org.pixelbays.rpg.world.WorldTravelManager;
+import org.pixelbays.rpg.world.command.TravelRouteCommand;
+import org.pixelbays.rpg.world.config.WorldRouteDefinition;
+import org.pixelbays.rpg.world.interaction.TravelRouteInteraction;
 
 import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
@@ -156,12 +170,12 @@ import com.hypixel.hytale.assetstore.event.RemovedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.assetstore.map.IndexedLookupTableAssetMap;
 import com.hypixel.hytale.component.ComponentType;
-import com.hypixel.hytale.server.core.command.system.AbstractCommand;
-import com.hypixel.hytale.server.core.command.system.CommandRegistration;
 import com.hypixel.hytale.server.core.asset.HytaleAssetStore;
 import com.hypixel.hytale.server.core.asset.type.item.config.container.ItemDropContainer;
-import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
+import com.hypixel.hytale.server.core.command.system.AbstractCommand;
+import com.hypixel.hytale.server.core.command.system.CommandRegistration;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
+import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.io.adapter.PacketAdapters;
 import com.hypixel.hytale.server.core.io.adapter.PacketFilter;
@@ -176,7 +190,7 @@ import com.hypixel.hytale.server.npc.NPCPlugin;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
 
 /**
- * RPG Mod Plugin - Adds MMO/RPG progression systems to Hytale
+ * Realmweaver - Adds data-driven MMO/RPG progression systems to Hytale.
  */
 @SuppressWarnings("null")
 public class ExamplePlugin extends JavaPlugin {
@@ -207,6 +221,7 @@ public class ExamplePlugin extends JavaPlugin {
         private AchievementSystem achievementSystem;
         private ChatManager chatManager;
         private XpBarHudService xpBarHudService;
+        private WorldTravelManager worldTravelManager;
 
         private ComponentType<EntityStore, AchievementComponent> achievementComponentType;
         private ComponentType<EntityStore, LevelProgressionComponent> levelProgressionComponentType;
@@ -218,9 +233,11 @@ public class ExamplePlugin extends JavaPlugin {
         private ComponentType<EntityStore, AbilityTriggerBlockComponent> abilityTriggerBlockComponentType;
         private ComponentType<EntityStore, NpcRpgDebugComponent> npcRpgDebugComponentType;
         private ComponentType<EntityStore, NpcRpgSetupComponent> npcRpgSetupComponentType;
+        private ComponentType<EntityStore, NpcThreatComponent> npcThreatComponentType;
         private ComponentType<EntityStore, LockpickingSessionComponent> lockpickingSessionComponentType;
 
         private PacketFilter abilityInputFilter;
+        private PacketFilter characterLobbyInputFilter;
         private PacketFilter inventoryOpenFilter;
         private PacketFilter lockpickingInputFilter;
         private LockpickingSystem lockpickingSystem;
@@ -240,6 +257,7 @@ public class ExamplePlugin extends JavaPlugin {
         private CommandRegistration bindAbilityCommandRegistration;
         private CommandRegistration syncHotbarCommandRegistration;
         private CommandRegistration unlockAbilityCommandRegistration;
+        private CommandRegistration travelRouteCommandRegistration;
 
         public ExamplePlugin(@Nonnull JavaPluginInit init) {
                 super(init);
@@ -250,7 +268,7 @@ public class ExamplePlugin extends JavaPlugin {
 
         @Override
         protected void setup() {
-                RpgLogging.debugDeveloper("Setting up RPG MOD plugin %s", this.getName());
+                RpgLogging.debugDeveloper("Setting up Realmweaver plugin %s", this.getName());
 
                 registerAssetStores();
                 registerComponents();
@@ -272,7 +290,7 @@ public class ExamplePlugin extends JavaPlugin {
                 registerAlwaysAvailableCommands();
                 reconcileDynamicRegistrations(config);
 
-                RpgLogging.debugDeveloper("RPG MOD setup complete!");
+                RpgLogging.debugDeveloper("Realmweaver setup complete!");
         }
 
         private void registerAssetStores() {
@@ -283,6 +301,12 @@ public class ExamplePlugin extends JavaPlugin {
                                         .setPath("RpgModConfig")
                                                 .setCodec(RpgModConfig.CODEC)
                                                 .setKeyFunction(RpgModConfig::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(WorldRouteDefinition.class, new DefaultAssetMap<>())
+                                                .setPath("WorldRoutes")
+                                                .setCodec(WorldRouteDefinition.CODEC)
+                                                .setKeyFunction(WorldRouteDefinition::getId)
                                                 .build());
                 AssetRegistry.register(
                                 HytaleAssetStore.builder(PartyData.class, new DefaultAssetMap<>())
@@ -408,6 +432,12 @@ public class ExamplePlugin extends JavaPlugin {
                                                 .setKeyFunction(CharacterRosterData::getId)
                                                 .loadsAfter(EntityStatType.class)
                                                 .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(CharacterTokenDefinition.class, new DefaultAssetMap<>())
+                                                .setPath("CharacterTokens")
+                                                .setCodec(CharacterTokenDefinition.CODEC)
+                                                .setKeyFunction(CharacterTokenDefinition::getId)
+                                                .build());
         }
 
         private void registerComponents() {
@@ -480,6 +510,12 @@ public class ExamplePlugin extends JavaPlugin {
                                                 "NpcRpgSetup",
                                                 NpcRpgSetupComponent.CODEC);
 
+                this.npcThreatComponentType = this.getEntityStoreRegistry()
+                                .registerComponent(
+                                                NpcThreatComponent.class,
+                                                "NpcThreat",
+                                                NpcThreatComponent.CODEC);
+
                 RpgLogging.debugDeveloper(
                                 "Registered LevelProgressionComponent, ClassComponent, ClassAbilityComponent, AbilityEmpowerComponent, RaceComponent, AbilityBindingComponent, and AbilityTriggerBlockComponent");
         }
@@ -492,7 +528,7 @@ public class ExamplePlugin extends JavaPlugin {
 
         private void logModuleEnablement(@Nonnull ModuleFlags moduleFlags) {
                 RpgLogging.debugDeveloper(
-                                "Module enablement: class=%s character=%s achievement=%s talent=%s leveling=%s ability=%s inventory=%s party=%s guild=%s camera=%s bank=%s currency=%s auction=%s mail=%s lockpicking=%s",
+                                "Module enablement: class=%s character=%s achievement=%s talent=%s leveling=%s ability=%s inventory=%s party=%s guild=%s chat=%s camera=%s bank=%s currency=%s auction=%s mail=%s lockpicking=%s",
                                 moduleFlags.classModuleEnabled(),
                                 moduleFlags.characterModuleEnabled(),
                                 moduleFlags.achievementModuleEnabled(),
@@ -502,6 +538,7 @@ public class ExamplePlugin extends JavaPlugin {
                                 moduleFlags.inventoryModuleEnabled(),
                                 moduleFlags.partyModuleEnabled(),
                                 moduleFlags.guildModuleEnabled(),
+                                moduleFlags.chatModuleEnabled(),
                                 moduleFlags.cameraModuleEnabled(),
                                 moduleFlags.bankModuleEnabled(),
                                 moduleFlags.currencyModuleEnabled(),
@@ -564,12 +601,12 @@ public class ExamplePlugin extends JavaPlugin {
                 this.expansionManager = new ExpansionManager();
                 this.mailManager = new MailManager();
                 this.characterManager = new CharacterManager();
+                this.worldTravelManager = new WorldTravelManager();
                 this.achievementSystem = new AchievementSystem(this.characterManager, this.currencyManager);
                 this.achievementSystem.register();
 
                 this.chatManager = new ChatManager();
-                this.chatManager.registerChannel(new PartyChatChannel(this.partyManager));
-                this.chatManager.registerChannel(new GuildChatChannel(this.guildManager));
+                reconcileChatChannels(resolveModConfig());
         }
 
         private void registerPlayerLifecycleHandlers() {
@@ -620,6 +657,10 @@ public class ExamplePlugin extends JavaPlugin {
                         this.getEntityStoreRegistry().registerSystem(
                                         new NpcRpgSetupSystem(this.npcRpgSetupComponentType));
                         this.getEntityStoreRegistry().registerSystem(
+                                        new NpcThreatDamageSystem(this.npcThreatComponentType));
+                        this.getEntityStoreRegistry().registerSystem(
+                                        new NpcThreatMaintenanceSystem(this.npcThreatComponentType));
+                        this.getEntityStoreRegistry().registerSystem(
                                         new NpcRpgDebugOverlaySystem(NPCEntity.getComponentType(), this.npcRpgDebugComponentType));
                 }
         }
@@ -639,8 +680,10 @@ public class ExamplePlugin extends JavaPlugin {
                                 OpenBankInteraction.CODEC);
                 Interaction.CODEC.register("OpenMailUi", OpenMailInteraction.class,
                                 OpenMailInteraction.CODEC);
+                Interaction.CODEC.register("ModifyCurrency", ModifyCurrencyInteraction.class,
+                                ModifyCurrencyInteraction.CODEC);
                 Interaction.CODEC.register("PrerequisiteCheck", PrerequisiteCheckInteraction.class,
-                                PrerequisiteCheckInteraction.CODEC);
+                                PrerequisiteCheckInteraction.PREREQUISITE_CHECK_CODEC);
                 Interaction.CODEC.register("UnlockAchievement", UnlockAchievementInteraction.class,
                                 UnlockAchievementInteraction.CODEC);
                 Interaction.CODEC.register("GrantAchievementProgress", GrantAchievementProgressInteraction.class,
@@ -653,6 +696,8 @@ public class ExamplePlugin extends JavaPlugin {
                                 UnlockClassInteraction.CODEC);
                 Interaction.CODEC.register("SendMail", SendMailInteraction.class,
                                 SendMailInteraction.CODEC);
+                Interaction.CODEC.register("TravelRoute", TravelRouteInteraction.class,
+                                TravelRouteInteraction.CODEC);
 
                 // Register custom item drop containers
                 ItemDropContainer.CODEC.register("Exp", ExpItemDropContainer.class, ExpItemDropContainer.CODEC);
@@ -700,6 +745,10 @@ public class ExamplePlugin extends JavaPlugin {
                 if (this.abilityInputFilter != null) {
                         PacketAdapters.deregisterInbound(this.abilityInputFilter);
                         RpgLogging.debugDeveloper("Deregistered ability input packet filter");
+                }
+                if (this.characterLobbyInputFilter != null) {
+                        PacketAdapters.deregisterInbound(this.characterLobbyInputFilter);
+                        RpgLogging.debugDeveloper("Deregistered character lobby input packet filter");
                 }
                 if (this.inventoryOpenFilter != null) {
                         PacketAdapters.deregisterInbound(this.inventoryOpenFilter);
@@ -813,6 +862,11 @@ public class ExamplePlugin extends JavaPlugin {
         }
 
         @Nonnull
+        public WorldTravelManager getWorldTravelManager() {
+                return worldTravelManager;
+        }
+
+        @Nonnull
         public ChatManager getChatManager() {
                 return chatManager;
         }
@@ -868,6 +922,10 @@ public class ExamplePlugin extends JavaPlugin {
 
         public ComponentType<EntityStore, NpcRpgDebugComponent> getNpcRpgDebugComponentType() {
                 return npcRpgDebugComponentType;
+        }
+
+        public ComponentType<EntityStore, NpcThreatComponent> getNpcThreatComponentType() {
+                return npcThreatComponentType;
         }
 
         @Nonnull
@@ -967,6 +1025,8 @@ public class ExamplePlugin extends JavaPlugin {
         private void reconcileDynamicRegistrations(@Nullable RpgModConfig config) {
                 ModuleFlags moduleFlags = resolveModuleFlags(config);
 
+                reconcileChatChannels(config);
+
                 this.testLevelCommandRegistration = refreshCommand(
                                 this.testLevelCommandRegistration,
                                 moduleFlags.levelingModuleEnabled(),
@@ -1023,6 +1083,10 @@ public class ExamplePlugin extends JavaPlugin {
                                 this.unlockAbilityCommandRegistration,
                                 moduleFlags.abilityModuleEnabled(),
                                 UnlockAbilityCommand::new);
+                this.travelRouteCommandRegistration = refreshCommand(
+                                this.travelRouteCommandRegistration,
+                                config != null && config.getWorldSettings().isEnabled() && config.getWorldSettings().isAllowTravelCommands(),
+                                TravelRouteCommand::new);
 
                 if (this.getState() != PluginState.SETUP) {
                         reconcilePersistenceBackedManagers(moduleFlags);
@@ -1084,6 +1148,18 @@ public class ExamplePlugin extends JavaPlugin {
                         RpgLogging.debugDeveloper("Deregistered ability input packet filter");
                 }
 
+                if (moduleFlags.characterModuleEnabled()) {
+                        if (this.characterLobbyInputFilter == null) {
+                                this.characterLobbyInputFilter = PacketAdapters
+                                                .registerInbound(new CharacterLobbyInputFilter());
+                                RpgLogging.debugDeveloper("Registered character lobby input packet filter");
+                        }
+                } else if (this.characterLobbyInputFilter != null) {
+                        PacketAdapters.deregisterInbound(this.characterLobbyInputFilter);
+                        this.characterLobbyInputFilter = null;
+                        RpgLogging.debugDeveloper("Deregistered character lobby input packet filter");
+                }
+
                 if (moduleFlags.inventoryModuleEnabled()) {
                         if (this.inventoryOpenFilter == null) {
                                 this.inventoryOpenFilter = PacketAdapters.registerInbound(new InventoryOpenFilter());
@@ -1127,6 +1203,44 @@ public class ExamplePlugin extends JavaPlugin {
                 }
         }
 
+        private void reconcileChatChannels(@Nullable RpgModConfig config) {
+                if (this.chatManager == null) {
+                        return;
+                }
+
+                ChatModSettings chatSettings = config != null ? config.getChatSettings() : new ChatModSettings();
+                if (!chatSettings.isEnabled()) {
+                        this.chatManager.replaceChannels(List.of());
+                        return;
+                }
+
+                List<org.pixelbays.rpg.chat.ChatChannel> channels = new ArrayList<>();
+                for (ChatChannelDefinition definition : chatSettings.getChannels()) {
+                        org.pixelbays.rpg.chat.ChatChannel channel = createConfiguredChatChannel(definition);
+                        if (channel != null) {
+                                channels.add(channel);
+                        }
+                }
+
+                try {
+                        this.chatManager.replaceChannels(channels);
+                } catch (RuntimeException ex) {
+                        RpgLogging.error(ex, "Failed to rebuild chat channels from RPGModConfig");
+                }
+        }
+
+        @Nullable
+        private org.pixelbays.rpg.chat.ChatChannel createConfiguredChatChannel(@Nullable ChatChannelDefinition definition) {
+                if (definition == null || !definition.isEnabled()) {
+                        return null;
+                }
+
+                return switch (definition.getType()) {
+                        case Party -> new PartyChatChannel(this.partyManager, definition);
+                        case Guild -> new GuildChatChannel(this.guildManager, definition);
+                };
+        }
+
         private ModuleFlags resolveModuleFlags(@Nullable RpgModConfig config) {
                 return new ModuleFlags(
                                 isModuleEnabled(config, config != null ? config.getClassSettings().isEnabled() : null),
@@ -1138,6 +1252,7 @@ public class ExamplePlugin extends JavaPlugin {
                                 isModuleEnabled(config, config != null ? config.getInventorySettings().isEnabled() : null),
                                 isModuleEnabled(config, config != null ? config.getPartySettings().isEnabled() : null),
                                 isModuleEnabled(config, config != null ? config.getGuildSettings().isEnabled() : null),
+                                isModuleEnabled(config, config != null ? config.isChatModuleEnabled() : null),
                                 isModuleEnabled(config, config != null ? config.getCameraSettings().isEnabled() : null),
                                 isModuleEnabled(config, config != null ? config.getBankSettings().isEnabled() : null),
                                 isModuleEnabled(config, config != null ? config.getCurrencySettings().isEnabled() : null),
@@ -1157,16 +1272,13 @@ public class ExamplePlugin extends JavaPlugin {
                         boolean inventoryModuleEnabled,
                         boolean partyModuleEnabled,
                         boolean guildModuleEnabled,
+                        boolean chatModuleEnabled,
                         boolean cameraModuleEnabled,
                         boolean bankModuleEnabled,
                         boolean currencyModuleEnabled,
                         boolean auctionHouseModuleEnabled,
                         boolean mailModuleEnabled,
                         boolean lockpickingModuleEnabled) {
-
-                private boolean chatModuleEnabled() {
-                        return this.partyModuleEnabled || this.guildModuleEnabled;
-                }
         }
 
 }

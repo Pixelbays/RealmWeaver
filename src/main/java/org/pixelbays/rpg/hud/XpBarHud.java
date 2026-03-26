@@ -1,6 +1,5 @@
 package org.pixelbays.rpg.hud;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +24,8 @@ public class XpBarHud extends CustomUIHud {
 
     public static final int RESOURCE_BAR_HEIGHT = 12;
     public static final int RESOURCE_BAR_GAP = 4;
+    public static final int RESOURCE_CHARGE_GAP = 3;
+    public static final int RESOURCE_CHARGE_ASSET_SIZE = RESOURCE_BAR_HEIGHT;
 
     public static final int RESOURCE_LABEL_WIDTH = 72;
     public static final int RESOURCE_LABEL_GAP = 6;
@@ -60,12 +61,14 @@ public class XpBarHud extends CustomUIHud {
     private int lastRemaining = Integer.MIN_VALUE;
     private boolean lastMax = false;
 
-    private List<String> lastResourceStatIds = Collections.emptyList();
-    private int[] lastResourceFillWidths = null;
+    private String lastResourceLayoutSignature = "";
+    private List<ResourceBarData> lastResourceLayout = Collections.emptyList();
+    private int[] lastResourceStates = new int[0];
 
     private String lastPartyLayoutSignature = "";
     private int[] lastPartyFillWidths = new int[0];
     private String[] lastPartyValueTexts = new String[0];
+    private boolean progressHidden = false;
 
     public XpBarHud(@Nonnull PlayerRef playerRef) {
         super(playerRef);
@@ -76,14 +79,43 @@ public class XpBarHud extends CustomUIHud {
         cmd.append("Hud/XpBarHud.ui");
     }
 
+    public enum ResourceDisplayMode {
+        BAR,
+        CHARGES
+    }
+
     public static final class ResourceBarData {
         @Nonnull
         public final String statId;
+        @Nonnull
+        public final String label;
+        @Nonnull
+        public final ResourceDisplayMode displayMode;
+        @Nonnull
+        public final String fillColor;
+        @Nonnull
+        public final String assetPath;
         public final float ratio;
+        public final int currentCharges;
+        public final int maxCharges;
 
-        public ResourceBarData(@Nonnull String statId, float ratio) {
+        public ResourceBarData(
+                @Nonnull String statId,
+                @Nonnull String label,
+                @Nonnull ResourceDisplayMode displayMode,
+                @Nonnull String fillColor,
+                @Nonnull String assetPath,
+                float ratio,
+                int currentCharges,
+                int maxCharges) {
             this.statId = Objects.requireNonNull(statId, "statId");
+            this.label = Objects.requireNonNull(label, "label");
+            this.displayMode = Objects.requireNonNull(displayMode, "displayMode");
+            this.fillColor = Objects.requireNonNull(fillColor, "fillColor");
+            this.assetPath = Objects.requireNonNull(assetPath, "assetPath");
             this.ratio = ratio;
+            this.currentCharges = currentCharges;
+            this.maxCharges = maxCharges;
         }
     }
 
@@ -140,12 +172,13 @@ public class XpBarHud extends CustomUIHud {
 
     public void updateResources(@Nonnull List<ResourceBarData> bars) {
         if (bars.isEmpty()) {
-            if (lastResourceStatIds.isEmpty()) {
+            if (lastResourceLayoutSignature.isEmpty()) {
                 return;
             }
 
-            lastResourceStatIds = Collections.emptyList();
-            lastResourceFillWidths = null;
+            lastResourceLayoutSignature = "";
+            lastResourceLayout = Collections.emptyList();
+            lastResourceStates = new int[0];
 
             UICommandBuilder cmd = new UICommandBuilder();
             cmd.clear("#ResourceBars");
@@ -154,46 +187,58 @@ public class XpBarHud extends CustomUIHud {
             return;
         }
 
-        List<String> statIds = new ArrayList<>(bars.size());
-        for (ResourceBarData bar : bars) {
-            statIds.add(bar.statId);
-        }
-
-        boolean idsChanged = !statIds.equals(lastResourceStatIds);
-        if (idsChanged) {
-            lastResourceStatIds = List.copyOf(statIds);
-            lastResourceFillWidths = new int[bars.size()];
-            for (int i = 0; i < lastResourceFillWidths.length; i++) {
-                lastResourceFillWidths[i] = -1;
+        String layoutSignature = buildResourceLayoutSignature(bars);
+        boolean layoutChanged = !layoutSignature.equals(lastResourceLayoutSignature);
+        if (layoutChanged) {
+            lastResourceLayoutSignature = layoutSignature;
+            lastResourceLayout = List.copyOf(bars);
+            lastResourceStates = new int[bars.size()];
+            for (int i = 0; i < lastResourceStates.length; i++) {
+                lastResourceStates[i] = -1;
             }
 
             UICommandBuilder cmd = new UICommandBuilder();
-            rebuildResourceBars(cmd, lastResourceStatIds);
-            applyRootHeight(cmd, computeRootHeight(lastResourceStatIds.size()));
+            rebuildResourceBars(cmd, lastResourceLayout);
+            applyRootHeight(cmd, computeRootHeight(lastResourceLayout));
             update(false, cmd);
+        } else if (lastResourceStates.length != bars.size()) {
+            lastResourceStates = new int[bars.size()];
+            for (int i = 0; i < lastResourceStates.length; i++) {
+                lastResourceStates[i] = -1;
+            }
         }
 
         UICommandBuilder cmd = null;
         for (int i = 0; i < bars.size(); i++) {
             ResourceBarData bar = bars.get(i);
-            float ratio = bar.ratio;
-            if (ratio < 0f) {
-                ratio = 0f;
-            } else if (ratio > 1f) {
-                ratio = 1f;
-            }
+            switch (bar.displayMode) {
+                case CHARGES -> {
+                    int filledCharges = clampChargeCount(bar.currentCharges, bar.maxCharges);
+                    if (i < lastResourceStates.length && filledCharges == lastResourceStates[i]) {
+                        continue;
+                    }
 
-            int fillWidth = Math.round(RESOURCE_TRACK_WIDTH * ratio);
-            if (lastResourceFillWidths != null && i < lastResourceFillWidths.length && fillWidth == lastResourceFillWidths[i]) {
-                continue;
-            }
+                    if (cmd == null) {
+                        cmd = new UICommandBuilder();
+                    }
 
-            if (cmd == null) {
-                cmd = new UICommandBuilder();
-            }
+                    lastResourceStates[i] = filledCharges;
+                    applyResourceChargeFillState(cmd, i, bar.maxCharges, filledCharges, usesChargeAsset(bar));
+                }
+                case BAR -> {
+                    int fillWidth = Math.round(RESOURCE_TRACK_WIDTH * clampRatio(bar.ratio));
+                    if (i < lastResourceStates.length && fillWidth == lastResourceStates[i]) {
+                        continue;
+                    }
 
-            lastResourceFillWidths[i] = fillWidth;
-            applyResourceFillWidth(cmd, i, fillWidth);
+                    if (cmd == null) {
+                        cmd = new UICommandBuilder();
+                    }
+
+                    lastResourceStates[i] = fillWidth;
+                    applyResourceFillWidth(cmd, i, fillWidth);
+                }
+            }
         }
 
         if (cmd != null) {
@@ -295,6 +340,7 @@ public class XpBarHud extends CustomUIHud {
         lastRemaining = Integer.MIN_VALUE;
 
         UICommandBuilder cmd = new UICommandBuilder();
+        ensureProgressVisible(cmd);
         applyFillWidth(cmd, BAR_WIDTH);
         cmd.set(SELECTOR_TEXT, labelPrefix + " Lv " + level + " — XP: MAX");
         update(false, cmd);
@@ -307,13 +353,7 @@ public class XpBarHud extends CustomUIHud {
             int current,
             int next,
             int remaining) {
-        float clamped = ratio;
-        if (clamped < 0f) {
-            clamped = 0f;
-        } else if (clamped > 1f) {
-            clamped = 1f;
-        }
-
+        float clamped = clampRatio(ratio);
         int fillWidth = Math.round(BAR_WIDTH * clamped);
 
         if (!lastMax
@@ -335,9 +375,31 @@ public class XpBarHud extends CustomUIHud {
         lastRemaining = remaining;
 
         UICommandBuilder cmd = new UICommandBuilder();
+        ensureProgressVisible(cmd);
         applyFillWidth(cmd, fillWidth);
         cmd.set(SELECTOR_TEXT,
                 labelPrefix + " Lv " + level + " — XP: " + current + "/" + next + " (" + remaining + " to next)");
+        update(false, cmd);
+    }
+
+    public void hideProgress() {
+        if (progressHidden) {
+            return;
+        }
+
+        progressHidden = true;
+        lastMax = false;
+        lastLabelPrefix = null;
+        lastLevel = Integer.MIN_VALUE;
+        lastFillWidth = -1;
+        lastCurrent = Integer.MIN_VALUE;
+        lastNext = Integer.MIN_VALUE;
+        lastRemaining = Integer.MIN_VALUE;
+
+        UICommandBuilder cmd = new UICommandBuilder();
+        applyHiddenRoot(cmd);
+        applyFillWidth(cmd, 0);
+        cmd.set(SELECTOR_TEXT, "");
         update(false, cmd);
     }
 
@@ -353,13 +415,16 @@ public class XpBarHud extends CustomUIHud {
         cmd.setObject(SELECTOR_FILL_ANCHOR, fillAnchor);
     }
 
-    private static int computeRootHeight(int resourceCount) {
-        if (resourceCount <= 0) {
+    private static int computeRootHeight(@Nonnull List<ResourceBarData> bars) {
+        if (bars.isEmpty()) {
             return ROOT_BASE_HEIGHT;
         }
 
-        int perBar = RESOURCE_BAR_HEIGHT + RESOURCE_BAR_GAP;
-        return ROOT_BASE_HEIGHT + (resourceCount * perBar);
+        int height = ROOT_BASE_HEIGHT;
+        for (int i = 0; i < bars.size(); i++) {
+            height += RESOURCE_BAR_HEIGHT + RESOURCE_BAR_GAP;
+        }
+        return height;
     }
 
     private static int computePartyRootHeight(@Nonnull List<PartyMemberHudData> members) {
@@ -383,6 +448,24 @@ public class XpBarHud extends CustomUIHud {
         cmd.setObject(SELECTOR_ROOT_ANCHOR, rootAnchor);
     }
 
+    private void ensureProgressVisible(@Nonnull UICommandBuilder cmd) {
+        if (!progressHidden) {
+            return;
+        }
+
+        progressHidden = false;
+        applyRootHeight(cmd, computeRootHeight(lastResourceLayout));
+    }
+
+    private static void applyHiddenRoot(@Nonnull UICommandBuilder cmd) {
+        Anchor rootAnchor = new Anchor();
+        rootAnchor.setTop(Value.of(-10_000));
+        rootAnchor.setLeft(Value.of(-10_000));
+        rootAnchor.setWidth(Value.of(0));
+        rootAnchor.setHeight(Value.of(0));
+        cmd.setObject(SELECTOR_ROOT_ANCHOR, rootAnchor);
+    }
+
     private static void applyPartyRootHeight(@Nonnull UICommandBuilder cmd, int height) {
         Anchor rootAnchor = new Anchor();
         rootAnchor.setTop(Value.of(PARTY_ROOT_TOP));
@@ -392,38 +475,84 @@ public class XpBarHud extends CustomUIHud {
         cmd.setObject(SELECTOR_PARTY_ROOT_ANCHOR, rootAnchor);
     }
 
-    private static void rebuildResourceBars(@Nonnull UICommandBuilder cmd, @Nonnull List<String> statIds) {
+    private static void rebuildResourceBars(@Nonnull UICommandBuilder cmd, @Nonnull List<ResourceBarData> bars) {
         cmd.clear("#ResourceBars");
 
-        for (int i = 0; i < statIds.size(); i++) {
-            String statId = statIds.get(i);
+        for (int i = 0; i < bars.size(); i++) {
+            ResourceBarData bar = bars.get(i);
+            boolean useChargeAsset = usesChargeAsset(bar);
 
             String barId = "ResBar" + i;
             String labelId = "ResLabel" + i;
             String trackId = "ResTrack" + i;
             String fillId = "ResFill" + i;
+            int trackWidth = bar.displayMode == ResourceDisplayMode.CHARGES && useChargeAsset
+                    ? computeChargeTrackWidth(bar.maxCharges, true)
+                    : RESOURCE_TRACK_WIDTH;
 
-            StringBuilder ui = new StringBuilder(512);
+            StringBuilder ui = new StringBuilder(1024);
             ui.append("Group #").append(barId).append(" {\n");
             ui.append("  LayoutMode: Left;\n");
-            ui.append("  Anchor: (Width: 296, Height: ").append(RESOURCE_BAR_HEIGHT).append(", Bottom: ").append(RESOURCE_BAR_GAP).append(");\n");
-            ui.append("\n");
+            ui.append("  Anchor: (Width: 296, Height: ").append(RESOURCE_BAR_HEIGHT)
+                    .append(", Bottom: ").append(RESOURCE_BAR_GAP).append(");\n\n");
+
             ui.append("  Label #").append(labelId).append(" {\n");
-            ui.append("    Text: \"").append(escapeUiString(statId)).append("\";\n");
-            ui.append("    Anchor: (Width: ").append(RESOURCE_LABEL_WIDTH).append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(", Right: ").append(RESOURCE_LABEL_GAP).append(");\n");
+            ui.append("    Text: \"").append(escapeUiString(bar.label)).append("\";\n");
+            ui.append("    Anchor: (Width: ").append(RESOURCE_LABEL_WIDTH)
+                    .append(", Height: ").append(RESOURCE_BAR_HEIGHT)
+                    .append(", Right: ").append(RESOURCE_LABEL_GAP).append(");\n");
             ui.append("    Style: (FontSize: 10, RenderBold: true);\n");
-            ui.append("  }\n");
-            ui.append("\n");
+            ui.append("  }\n\n");
+
             ui.append("  Group #").append(trackId).append(" {\n");
-            ui.append("    Anchor: (Width: ").append(RESOURCE_TRACK_WIDTH).append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
-            ui.append("    Background: PatchStyle(Color: #000000(0.35));\n");
-            ui.append("    OutlineColor: #000000(0.5);\n");
-            ui.append("    OutlineSize: 1;\n");
-            ui.append("\n");
-            ui.append("    Group #").append(fillId).append(" {\n");
-            ui.append("      Background: PatchStyle(Color: #ffffff(0.85));\n");
-            ui.append("      Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
-            ui.append("    }\n");
+            ui.append("    Anchor: (Width: ").append(trackWidth)
+                    .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+            if (!useChargeAsset) {
+                ui.append("    Background: PatchStyle(Color: #000000(0.35));\n");
+                ui.append("    OutlineColor: #000000(0.5);\n");
+                ui.append("    OutlineSize: 1;\n");
+            }
+
+            if (bar.displayMode == ResourceDisplayMode.CHARGES) {
+                int safeMaxCharges = Math.max(1, bar.maxCharges);
+                int chargeWidth = computeChargeSegmentWidth(safeMaxCharges, useChargeAsset);
+                ui.append("    LayoutMode: Left;\n\n");
+                for (int chargeIndex = 0; chargeIndex < safeMaxCharges; chargeIndex++) {
+                    ui.append("    Group #ResChargeSlot").append(i).append('_').append(chargeIndex).append(" {\n");
+                    ui.append("      Anchor: (Width: ").append(chargeWidth)
+                            .append(", Height: ").append(RESOURCE_BAR_HEIGHT);
+                    if (chargeIndex < safeMaxCharges - 1) {
+                        ui.append(", Right: ").append(RESOURCE_CHARGE_GAP);
+                    }
+                    ui.append(");\n");
+                    if (!useChargeAsset) {
+                        ui.append("      Background: PatchStyle(Color: #000000(0.45));\n");
+                        ui.append("      OutlineColor: #000000(0.65);\n");
+                        ui.append("      OutlineSize: 1;\n\n");
+                    } else {
+                        ui.append("\n");
+                    }
+
+                    ui.append("      Group #ResChargeFill").append(i).append('_').append(chargeIndex).append(" {\n");
+                    if (useChargeAsset) {
+                        ui.append("        Background: (TexturePath: \"")
+                                .append(escapeUiString(bar.assetPath))
+                                .append("\");\n");
+                    } else {
+                        ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
+                    }
+                    ui.append("        Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+                    ui.append("      }\n");
+                    ui.append("    }\n");
+                }
+            } else {
+                ui.append("\n");
+                ui.append("    Group #").append(fillId).append(" {\n");
+                ui.append("      Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.85));\n");
+                ui.append("      Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+                ui.append("    }\n");
+            }
+
             ui.append("  }\n");
             ui.append("}\n");
 
@@ -431,7 +560,7 @@ public class XpBarHud extends CustomUIHud {
         }
     }
 
-        private static void rebuildPartyMembers(@Nonnull UICommandBuilder cmd, @Nonnull List<PartyMemberHudData> members) {
+    private static void rebuildPartyMembers(@Nonnull UICommandBuilder cmd, @Nonnull List<PartyMemberHudData> members) {
         cmd.clear("#PartyMembers");
 
         for (int memberIndex = 0; memberIndex < members.size(); memberIndex++) {
@@ -447,7 +576,7 @@ public class XpBarHud extends CustomUIHud {
             ui.append("Group #").append(entryId).append(" {\n");
             ui.append("  LayoutMode: Top;\n");
             ui.append("  Anchor: (Width: ").append(PARTY_ENTRY_WIDTH).append(", Height: ").append(entryHeight)
-                .append(", Bottom: ").append(PARTY_ENTRY_GAP).append(");\n");
+                    .append(", Bottom: ").append(PARTY_ENTRY_GAP).append(");\n");
             ui.append("  Padding: (Full: ").append(PARTY_ENTRY_PADDING).append(");\n");
             ui.append("  Background: PatchStyle(Color: #000000(0.32));\n");
             ui.append("  OutlineColor: ").append(member.accentColor).append("(0.95);\n");
@@ -456,7 +585,7 @@ public class XpBarHud extends CustomUIHud {
             ui.append("  Group #PartyHeader").append(memberIndex).append(" {\n");
             ui.append("    LayoutMode: Left;\n");
             ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ").append(PARTY_HEADER_HEIGHT)
-                .append(", Bottom: ").append(PARTY_HEADER_GAP).append(");\n\n");
+                    .append(", Bottom: ").append(PARTY_HEADER_GAP).append(");\n\n");
 
             ui.append("    Group #").append(accentId).append(" {\n");
             ui.append("      Background: PatchStyle(Color: ").append(member.accentColor).append("(0.95));\n");
@@ -479,59 +608,59 @@ public class XpBarHud extends CustomUIHud {
             ui.append("  }\n\n");
 
             for (int barIndex = 0; barIndex < member.bars.size(); barIndex++) {
-            PartyStatBarData bar = member.bars.get(barIndex);
-            String labelId = "PartyBarLabel" + memberIndex + "_" + barIndex;
-            String valueId = "PartyBarValue" + memberIndex + "_" + barIndex;
-            String trackId = "PartyBarTrack" + memberIndex + "_" + barIndex;
-            String fillId = "PartyBarFill" + memberIndex + "_" + barIndex;
+                PartyStatBarData bar = member.bars.get(barIndex);
+                String labelId = "PartyBarLabel" + memberIndex + "_" + barIndex;
+                String valueId = "PartyBarValue" + memberIndex + "_" + barIndex;
+                String trackId = "PartyBarTrack" + memberIndex + "_" + barIndex;
+                String fillId = "PartyBarFill" + memberIndex + "_" + barIndex;
 
-            ui.append("  Group #PartyBarBlock").append(memberIndex).append("_").append(barIndex).append(" {\n");
-            ui.append("    LayoutMode: Top;\n");
-            ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ")
-                .append(PARTY_BAR_LABEL_HEIGHT + PARTY_BAR_LABEL_GAP + PARTY_BAR_TRACK_HEIGHT)
-                .append(", Bottom: ").append(PARTY_BAR_GAP).append(");\n\n");
+                ui.append("  Group #PartyBarBlock").append(memberIndex).append("_").append(barIndex).append(" {\n");
+                ui.append("    LayoutMode: Top;\n");
+                ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ")
+                        .append(PARTY_BAR_LABEL_HEIGHT + PARTY_BAR_LABEL_GAP + PARTY_BAR_TRACK_HEIGHT)
+                        .append(", Bottom: ").append(PARTY_BAR_GAP).append(");\n\n");
 
-            ui.append("    Group #PartyBarHeader").append(memberIndex).append("_").append(barIndex).append(" {\n");
-            ui.append("      LayoutMode: Left;\n");
-            ui.append("      Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ").append(PARTY_BAR_LABEL_HEIGHT)
-                .append(", Bottom: ").append(PARTY_BAR_LABEL_GAP).append(");\n\n");
+                ui.append("    Group #PartyBarHeader").append(memberIndex).append("_").append(barIndex).append(" {\n");
+                ui.append("      LayoutMode: Left;\n");
+                ui.append("      Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ").append(PARTY_BAR_LABEL_HEIGHT)
+                        .append(", Bottom: ").append(PARTY_BAR_LABEL_GAP).append(");\n\n");
 
-            ui.append("      Label #").append(labelId).append(" {\n");
-            ui.append("        Text: \"").append(escapeUiString(bar.label)).append("\";\n");
-            ui.append("        Anchor: (Width: ").append(PARTY_BAR_LABEL_WIDTH).append(", Height: ").append(PARTY_BAR_LABEL_HEIGHT)
-                .append(");\n");
-            ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
-            ui.append("      }\n\n");
+                ui.append("      Label #").append(labelId).append(" {\n");
+                ui.append("        Text: \"").append(escapeUiString(bar.label)).append("\";\n");
+                ui.append("        Anchor: (Width: ").append(PARTY_BAR_LABEL_WIDTH).append(", Height: ").append(PARTY_BAR_LABEL_HEIGHT)
+                        .append(");\n");
+                ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
+                ui.append("      }\n\n");
 
-            ui.append("      Group { FlexWeight: 1; }\n\n");
+                ui.append("      Group { FlexWeight: 1; }\n\n");
 
-            ui.append("      Label #").append(valueId).append(" {\n");
-            ui.append("        Text: \"").append(escapeUiString(bar.valueText)).append("\";\n");
-            ui.append("        Anchor: (Width: ").append(PARTY_BAR_VALUE_WIDTH).append(", Height: ").append(PARTY_BAR_LABEL_HEIGHT)
-                .append(");\n");
-            ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
-            ui.append("      }\n");
-            ui.append("    }\n\n");
+                ui.append("      Label #").append(valueId).append(" {\n");
+                ui.append("        Text: \"").append(escapeUiString(bar.valueText)).append("\";\n");
+                ui.append("        Anchor: (Width: ").append(PARTY_BAR_VALUE_WIDTH).append(", Height: ").append(PARTY_BAR_LABEL_HEIGHT)
+                        .append(");\n");
+                ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
+                ui.append("      }\n");
+                ui.append("    }\n\n");
 
-            ui.append("    Group #").append(trackId).append(" {\n");
-            ui.append("      Anchor: (Width: ").append(PARTY_BAR_TRACK_WIDTH).append(", Height: ").append(PARTY_BAR_TRACK_HEIGHT)
-                .append(");\n");
-            ui.append("      Background: PatchStyle(Color: #000000(0.52));\n");
-            ui.append("      OutlineColor: #000000(0.65);\n");
-            ui.append("      OutlineSize: 1;\n\n");
+                ui.append("    Group #").append(trackId).append(" {\n");
+                ui.append("      Anchor: (Width: ").append(PARTY_BAR_TRACK_WIDTH).append(", Height: ").append(PARTY_BAR_TRACK_HEIGHT)
+                        .append(");\n");
+                ui.append("      Background: PatchStyle(Color: #000000(0.52));\n");
+                ui.append("      OutlineColor: #000000(0.65);\n");
+                ui.append("      OutlineSize: 1;\n\n");
 
-            ui.append("      Group #").append(fillId).append(" {\n");
-            ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
-            ui.append("        Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
-            ui.append("      }\n");
-            ui.append("    }\n");
-            ui.append("  }\n\n");
+                ui.append("      Group #").append(fillId).append(" {\n");
+                ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
+                ui.append("        Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
+                ui.append("      }\n");
+                ui.append("    }\n");
+                ui.append("  }\n\n");
             }
 
             ui.append("}\n");
             cmd.appendInline("#PartyMembers", ui.toString());
         }
-        }
+    }
 
     private static void applyResourceFillWidth(@Nonnull UICommandBuilder cmd, int index, int fillWidth) {
         int clamped = Math.max(0, Math.min(RESOURCE_TRACK_WIDTH, fillWidth));
@@ -543,6 +672,50 @@ public class XpBarHud extends CustomUIHud {
         fillAnchor.setHeight(Value.of(RESOURCE_BAR_HEIGHT));
 
         cmd.setObject("#ResFill" + index + ".Anchor", fillAnchor);
+    }
+
+    private static void applyResourceChargeFillState(
+            @Nonnull UICommandBuilder cmd,
+            int resourceIndex,
+            int maxCharges,
+            int filledCharges,
+            boolean useChargeAsset) {
+        int safeMaxCharges = Math.max(1, maxCharges);
+        int safeFilledCharges = clampChargeCount(filledCharges, safeMaxCharges);
+        int chargeWidth = computeChargeSegmentWidth(safeMaxCharges, useChargeAsset);
+
+        for (int chargeIndex = 0; chargeIndex < safeMaxCharges; chargeIndex++) {
+            Anchor fillAnchor = new Anchor();
+            fillAnchor.setLeft(Value.of(0));
+            fillAnchor.setTop(Value.of(0));
+            fillAnchor.setWidth(Value.of(chargeIndex < safeFilledCharges ? chargeWidth : 0));
+            fillAnchor.setHeight(Value.of(RESOURCE_BAR_HEIGHT));
+            cmd.setObject(resourceChargeFillSelector(resourceIndex, chargeIndex), fillAnchor);
+        }
+    }
+
+    @Nonnull
+    private static String resourceChargeFillSelector(int resourceIndex, int chargeIndex) {
+        return "#ResChargeFill" + resourceIndex + "_" + chargeIndex + ".Anchor";
+    }
+
+    private static int computeChargeSegmentWidth(int maxCharges, boolean useChargeAsset) {
+        int safeMaxCharges = Math.max(1, maxCharges);
+        if (useChargeAsset) {
+            return RESOURCE_CHARGE_ASSET_SIZE;
+        }
+        int totalGapWidth = Math.max(0, safeMaxCharges - 1) * RESOURCE_CHARGE_GAP;
+        return Math.max(1, (RESOURCE_TRACK_WIDTH - totalGapWidth) / safeMaxCharges);
+    }
+
+    private static int computeChargeTrackWidth(int maxCharges, boolean useChargeAsset) {
+        int safeMaxCharges = Math.max(1, maxCharges);
+        return (safeMaxCharges * computeChargeSegmentWidth(safeMaxCharges, useChargeAsset))
+                + (Math.max(0, safeMaxCharges - 1) * RESOURCE_CHARGE_GAP);
+    }
+
+    private static int clampChargeCount(int currentCharges, int maxCharges) {
+        return Math.max(0, Math.min(Math.max(1, maxCharges), currentCharges));
     }
 
     private static void applyPartyBarFillWidth(@Nonnull UICommandBuilder cmd, int memberIndex, int barIndex, int fillWidth) {
@@ -582,6 +755,30 @@ public class XpBarHud extends CustomUIHud {
             total += member.bars.size();
         }
         return total;
+    }
+
+    @Nonnull
+    private static String buildResourceLayoutSignature(@Nonnull List<ResourceBarData> bars) {
+        StringBuilder signature = new StringBuilder(bars.size() * 64);
+        for (ResourceBarData bar : bars) {
+            signature.append(bar.statId)
+                    .append('|')
+                    .append(bar.label)
+                    .append('|')
+                    .append(bar.displayMode)
+                    .append('|')
+                    .append(bar.maxCharges)
+                    .append('|')
+                    .append(bar.fillColor)
+                    .append('|')
+                    .append(bar.assetPath)
+                    .append(';');
+        }
+        return signature.toString();
+    }
+
+    private static boolean usesChargeAsset(@Nonnull ResourceBarData bar) {
+        return bar.displayMode == ResourceDisplayMode.CHARGES && !bar.assetPath.isBlank();
     }
 
     @Nonnull

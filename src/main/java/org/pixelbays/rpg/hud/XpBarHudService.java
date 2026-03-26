@@ -12,6 +12,9 @@ import javax.annotation.Nullable;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.classes.config.ClassDefinition.ResourceDisplayDefinition;
+import org.pixelbays.rpg.classes.config.ClassDefinition.ResourceDisplayMode;
+import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.party.Party;
 import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.PartyMember;
@@ -72,12 +75,19 @@ public class XpBarHudService {
             hudManager.setCustomHud(playerRef, hud);
         }
 
-        String systemId = resolveActiveClassSystemId(ref, store);
+        String activeClassId = resolveActiveClassId(ref, store);
 
         hud.updateResources(resolveResourceBars(ref, store));
         hud.updatePartyMembers(resolvePartyMembers(playerRef));
 
-        String labelPrefix = resolveActiveClassLabel(ref, store, systemId);
+        if (activeClassId == null || activeClassId.isBlank()) {
+            hud.hideProgress();
+            return;
+        }
+
+        String systemId = resolveActiveClassSystemId(activeClassId);
+
+        String labelPrefix = resolveActiveClassLabel(activeClassId, systemId);
         int level = levelSystem.getLevel(ref, systemId);
         if (level <= 0) {
             level = 1;
@@ -104,7 +114,7 @@ public class XpBarHudService {
             @Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store) {
         ClassComponent classComp = store.getComponent(ref, ClassComponent.getComponentType());
-        String activeClassId = classComp != null ? classComp.getPrimaryClassId() : null;
+        String activeClassId = getClassManagementSystem().getPrimaryKnownClassId(classComp);
 
         if (activeClassId == null || activeClassId.isEmpty()) {
             return java.util.List.of();
@@ -115,8 +125,8 @@ public class XpBarHudService {
             return java.util.List.of();
         }
 
-        java.util.List<String> resourceStats = classDef.getResourceStats();
-        if (resourceStats == null || resourceStats.isEmpty()) {
+        java.util.List<ResourceDisplayDefinition> resourceDisplays = classDef.getResolvedResourceDisplays();
+        if (resourceDisplays == null || resourceDisplays.isEmpty()) {
             return java.util.List.of();
         }
 
@@ -125,9 +135,14 @@ public class XpBarHudService {
             return java.util.List.of();
         }
 
-        java.util.ArrayList<XpBarHud.ResourceBarData> result = new java.util.ArrayList<>(resourceStats.size());
-        for (String statId : resourceStats) {
-            if (statId == null || statId.isBlank()) {
+        java.util.ArrayList<XpBarHud.ResourceBarData> result = new java.util.ArrayList<>(resourceDisplays.size());
+        for (ResourceDisplayDefinition resourceDisplay : resourceDisplays) {
+            if (resourceDisplay == null) {
+                continue;
+            }
+
+            String statId = resourceDisplay.getStatId();
+            if (statId.isBlank()) {
                 continue;
             }
 
@@ -137,7 +152,38 @@ public class XpBarHudService {
                 continue;
             }
 
-            result.add(new XpBarHud.ResourceBarData(statId, value.asPercentage()));
+            String label = resolveResourceLabel(resourceDisplay, statId);
+            String fillColor = resolveResourceFillColor(resourceDisplay, statId);
+            String assetPath = resolveResourceAssetPath(resourceDisplay);
+            if (resourceDisplay.getDisplayMode() == ResourceDisplayMode.CHARGES) {
+                int maxCharges = resolveChargeCapacity(resourceDisplay, value);
+                if (maxCharges <= 0) {
+                    continue;
+                }
+
+                int currentCharges = Math.max(0,
+                        Math.min(maxCharges, (int) Math.floor(Math.max(0f, value.get()) + 0.0001f)));
+                result.add(new XpBarHud.ResourceBarData(
+                        statId,
+                        label,
+                        XpBarHud.ResourceDisplayMode.CHARGES,
+                        fillColor,
+                    assetPath,
+                        0f,
+                        currentCharges,
+                        maxCharges));
+                continue;
+            }
+
+            result.add(new XpBarHud.ResourceBarData(
+                    statId,
+                    label,
+                    XpBarHud.ResourceDisplayMode.BAR,
+                    fillColor,
+                    assetPath,
+                    value.asPercentage(),
+                    0,
+                    0));
         }
 
         return result;
@@ -146,9 +192,6 @@ public class XpBarHudService {
     @Nonnull
     private static List<XpBarHud.PartyMemberHudData> resolvePartyMembers(@Nonnull PlayerRef viewerRef) {
         PartyManager partyManager = ExamplePlugin.get().getPartyManager();
-        if (partyManager == null) {
-            return List.of();
-        }
 
         Party party = partyManager.getPartyForMember(viewerRef.getUuid());
         if (party == null) {
@@ -156,7 +199,7 @@ public class XpBarHudService {
         }
 
         List<PartyMember> sortedMembers = new ArrayList<>(party.getMemberList());
-    UUID viewerWorldId = viewerRef.getWorldUuid();
+        UUID viewerWorldId = viewerRef.getWorldUuid();
         sortedMembers.sort(Comparator
                 .comparingInt((PartyMember member) -> roleSortOrder(member.getRole()))
                 .thenComparingLong(PartyMember::getJoinedAtMillis)
@@ -184,9 +227,6 @@ public class XpBarHudService {
             }
 
             Store<EntityStore> memberStore = memberEntity.getStore();
-            if (memberStore == null) {
-                continue;
-            }
 
             EntityStatMap statMap = memberStore.getComponent(memberEntity, EntityStatMap.getComponentType());
             if (statMap == null) {
@@ -194,7 +234,7 @@ public class XpBarHudService {
             }
 
             ClassComponent classComponent = memberStore.getComponent(memberEntity, ClassComponent.getComponentType());
-            String activeClassId = classComponent != null ? classComponent.getPrimaryClassId() : null;
+            String activeClassId = getClassManagementSystem().getPrimaryKnownClassId(classComponent);
             ClassDefinition classDefinition = activeClassId == null || activeClassId.isBlank()
                     ? null
                     : getClassDefinition(activeClassId);
@@ -233,12 +273,54 @@ public class XpBarHudService {
         return result;
     }
 
-    @Nonnull
-    private static String resolveActiveClassSystemId(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
+    @Nullable
+    private static String resolveActiveClassId(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         ClassComponent classComp = store.getComponent(ref, ClassComponent.getComponentType());
-        String activeClassId = classComp != null ? classComp.getPrimaryClassId() : null;
+        return getClassManagementSystem().getPrimaryKnownClassId(classComp);
+    }
 
-        if (activeClassId == null || activeClassId.isEmpty()) {
+    @Nonnull
+    private static String resolveResourceLabel(
+            @Nonnull ResourceDisplayDefinition resourceDisplay,
+            @Nonnull String statId) {
+        String label = resourceDisplay.getLabel();
+        if (label != null && !label.isBlank()) {
+            return label;
+        }
+        return humanizeIdentifier(statId);
+    }
+
+    @Nonnull
+    private static String resolveResourceFillColor(
+            @Nonnull ResourceDisplayDefinition resourceDisplay,
+            @Nonnull String statId) {
+        String fillColor = resourceDisplay.getFillColor();
+        if (fillColor != null && !fillColor.isBlank()) {
+            return fillColor;
+        }
+        return resolveStatColor(statId);
+    }
+
+    @Nonnull
+    private static String resolveResourceAssetPath(@Nonnull ResourceDisplayDefinition resourceDisplay) {
+        String assetPath = resourceDisplay.getAsset();
+        return assetPath == null ? "" : assetPath.trim();
+    }
+
+    private static int resolveChargeCapacity(
+            @Nonnull ResourceDisplayDefinition resourceDisplay,
+            @Nonnull EntityStatValue value) {
+        if (resourceDisplay.getMaxCharges() > 0) {
+            return resourceDisplay.getMaxCharges();
+        }
+
+        float maxValue = Math.max(0f, value.getMax());
+        return Math.max(0, (int) Math.ceil(maxValue));
+    }
+
+    @Nonnull
+    private static String resolveActiveClassSystemId(@Nonnull String activeClassId) {
+        if (activeClassId.isEmpty()) {
             return BASE_SYSTEM_ID;
         }
 
@@ -375,13 +457,9 @@ public class XpBarHudService {
 
     @Nonnull
     private String resolveActiveClassLabel(
-            @Nonnull Ref<EntityStore> ref,
-            @Nonnull Store<EntityStore> store,
+            @Nonnull String activeClassId,
             @Nonnull String resolvedSystemId) {
-        ClassComponent classComp = store.getComponent(ref, ClassComponent.getComponentType());
-        String activeClassId = classComp != null ? classComp.getPrimaryClassId() : null;
-
-        if (activeClassId != null && !activeClassId.isEmpty()) {
+        if (!activeClassId.isEmpty()) {
             ClassDefinition classDef = getClassDefinition(activeClassId);
             if (classDef != null) {
                 String display = classDef.getDisplayName();
@@ -418,5 +496,10 @@ public class XpBarHudService {
 
         // Be forgiving about case on IDs.
         return map.getAsset(classId.toLowerCase());
+    }
+
+    @Nonnull
+    private static ClassManagementSystem getClassManagementSystem() {
+        return ExamplePlugin.get().getClassManagementSystem();
     }
 }
