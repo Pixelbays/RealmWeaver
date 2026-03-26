@@ -1,0 +1,27 @@
+{
+  "Interactions": [
+    {
+      "Type": "ApplyForce",
+      "RunTime": 0.25,
+      "Duration": 0.25,
+      "Direction": {
+        "X": 0,
+        "Y": 0.18,
+        "Z": -1
+      },
+      "AdjustVertical": true,
+      "Force": 19,
+      "WaitForCollision": false,
+      "Effects": {
+        "MovementEffects": {
+          "DisableAll": true
+        }
+      },
+      "RaycastMode": "FollowLook"
+    }
+  ],
+  "Cooldown": {
+    "Id": "RPG_Ghostline_Dash",
+    "Cooldown": 10.0
+  }
+}

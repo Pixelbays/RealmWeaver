@@ -1,0 +1,22 @@
+{
+  "Parent": "BaseRaceAbility",
+  "Categories": [
+    "Race",
+    "Passive"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.race_elf_trance.name",
+    "Description": "pixelbays.rpg.abilities.race_elf_trance.description"
+  },
+  "AbilityType": "Passive",
+  "GlobalCooldown": 0.0,
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {},
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Elves recover focus faster when out of combat."
+}

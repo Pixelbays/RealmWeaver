@@ -1,0 +1,20 @@
+{
+    "Parent": "Base",
+    "DisplayName": "Pulse Bits",
+    "Description": "Cut pulse-copper chips traded in salvage camps, rail towns, and day-to-day frontier markets.",
+    "SortOrder": 10,
+    "AllowedScopes": [
+        "Character",
+        "Account"
+    ],
+    "Conversions": [
+        {
+            "Enabled": true,
+            "AutoConvert": true,
+            "TargetCurrencyId": "ConcordScrip",
+            "SourceAmount": 100,
+            "TargetAmount": 1,
+            "Note": "Bundle low-value pulse bits into settlement-backed scrip."
+        }
+    ]
+}

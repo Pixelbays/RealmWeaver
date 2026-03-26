@@ -1,0 +1,9 @@
+{
+  "Type": "OpenBankUi",
+  "BankTypeIds": [
+    "Personal",
+    "Guild"
+  ],
+  "MenuTitle": "Bank Services",
+  "OpenSelectionWhenTypeMissing": false
+}

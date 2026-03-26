@@ -1,0 +1,37 @@
+{
+  "Categories": [
+    "EchoWarden"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.echo_pulse.name",
+    "Description": "pixelbays.rpg.abilities.echo_pulse.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Echo_Pulse"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Restore your own health through tuned resonance.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Wand",
+  "SoundEventId": "Heal",
+  "Particles": [
+    {
+      "SystemId": "RPG_EchoPulse_ShieldTimed",
+      "TargetNodeName": "head",
+      "DetachedFromModel": false,
+      "PositionOffset": {
+        "Y": 1
+      },
+      "Color": "#ff0000"
+    }
+  ],
+  "ParticleDurationSeconds": 3
+}

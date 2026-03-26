@@ -1,0 +1,13 @@
+{
+  "Enabled": true,
+  "DisplayName": "Sunflare Expanse",
+  "Description": "Ride the transit spine into the red-gold salvage frontier.",
+  "DestinationType": "World",
+  "TargetWorldName": "Sunflare_Expanse",
+  "TravelAudience": "Self",
+  "RequireLeaderForGroupTravel": false,
+  "PersonalReturnPoint": true,
+  "Prerequisites": {
+    "RequiredLevel": 1
+  }
+}

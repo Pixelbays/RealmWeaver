@@ -1,0 +1,12 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Concord Scrip",
+  "Description": "Charter Concord trade notes accepted in most defended outposts, shipping depots, and formal markets across Veyra Null.",
+  "SortOrder": 20,
+  "AuctionHouseAllowed": true,
+  "AllowedScopes": [
+    "Character",
+    "Account",
+    "Guild"
+  ]
+}

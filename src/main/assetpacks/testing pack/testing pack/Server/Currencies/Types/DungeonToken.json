@@ -1,0 +1,13 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Dungeon Token",
+  "Description": "Physical item-backed currency that reads from carried items.",
+  "SortOrder": 20,
+  "StorageMode": "PhysicalItem",
+  "AllowedScopes": [
+    "Character"
+  ],
+  "AcceptedItemTags": [
+    "DungeonToken"
+  ]
+}

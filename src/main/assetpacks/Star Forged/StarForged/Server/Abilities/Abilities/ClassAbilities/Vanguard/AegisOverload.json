@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "Vanguard"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.aegis_overload.name",
+    "Description": "pixelbays.rpg.abilities.aegis_overload.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Aegis_Overload"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Restore your footing with a stabilizing reactor surge.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace"
+}

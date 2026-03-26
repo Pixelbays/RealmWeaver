@@ -1,0 +1,24 @@
+{
+  "DisplayName": "Lineage Awakened",
+  "Description": "Select a race for one of your characters.",
+  "NameTranslationKey": "pixelbays.rpg.achievement.definition.lineageAwakened.name",
+  "DescriptionTranslationKey": "pixelbays.rpg.achievement.definition.lineageAwakened.description",
+  "Category": "Race",
+  "Points": 5,
+  "Criteria": [
+    {
+      "Id": "choose_race",
+      "Type": "ChangeRace",
+      "TargetValue": 1
+    }
+  ],
+  "Reward": {
+    "Notification": {
+      "PrimaryMessage": "Achievement Unlocked",
+      "SecondaryMessage": "{name}"
+    }
+  },
+  "AccountWide": true,
+  "Hidden": false,
+  "IconId": "Common.Icons.CharacterCreator.Race"
+}

@@ -3,6 +3,10 @@ plugins {
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.3'
 }
 
+repositories {
+    mavenCentral()
+}
+
 ext {
     hytaleHome = "${System.getProperty("user.home")}/AppData/Roaming/Hytale"
 }
@@ -30,6 +34,15 @@ javadoc {
 // the official launcher for now.
 dependencies {
     implementation(files("$hytaleHome/install/$patchline/package/game/latest/Server/HytaleServer.jar"))
+    
+    // JUnit Jupiter for testing
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // Create the working directory to run the server if it does not already exist.
@@ -41,24 +54,7 @@ if (!serverRunDir.exists()) {
 // Updates the manifest.json file with the latest properties defined in the
 // build.properties file. Currently we update the version and if packs are
 // included with the plugin.
-tasks.register('updatePluginManifest') {
-    def manifestFile = file('src/main/resources/manifest.json')
-    doLast {
-        if (!manifestFile.exists()) {
-            throw new GradleException("Could not find manifest.json at ${manifestFile.path}!")
-        }
-        def manifestJson = new groovy.json.JsonSlurper().parseText(manifestFile.text)
-        manifestJson.Version = version
-        manifestJson.IncludesAssetPack = includes_pack.toBoolean()
-        manifestFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(manifestJson))
-    }
-}
 
-// Makes sure the plugin manifest is up to date.
-tasks.named('processResources') {
-    dependsOn 'updatePluginManifest'
-    exclude 'Server/Drops/NPCs/**'
-}
 
 // Creates a run configuration in IDEA that will run the Hytale server with
 // your plugin and the default assets.
@@ -89,6 +85,10 @@ tasks.register('runServer', JavaExec) {
     if (load_user_mods.toBoolean()) {
         args += "--mods=$hytaleHome/UserData/Mods"
     }
+    if (asset_dir_pack_name != null && !asset_dir_pack_name.isEmpty()) {
+        args += "--mods=$projectDir/src/main/assetpacks/$asset_dir_pack_name"
+    }
+    println "Running Hytale server with arguments: ${args.join(' ')}"
     workingDir = serverRunDir
     standardInput = System.in
 }

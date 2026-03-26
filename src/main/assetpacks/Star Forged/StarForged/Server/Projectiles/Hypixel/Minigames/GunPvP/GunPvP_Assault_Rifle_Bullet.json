@@ -1,0 +1,25 @@
+{
+  "Appearance": "Eye_Void_Blast",
+  "Radius": 0.1,
+  "Height": 0,
+  "DepthShot": 0.7,
+  "PitchAdjustShot": false,
+  "SticksVertically": true,
+  "MuzzleVelocity": 300,
+  "TerminalVelocity": 300,
+  "Gravity": 10,
+  "Bounciness": 0,
+  "ImpactSlowdown": 0,
+  "TimeToLive": 50,
+  "Damage": 10,
+  "DeathEffectsOnHit": true,
+  "DeadTime": 0.1,
+  "DeadTimeMiss": 0,
+  "DeathParticles": {
+    "SystemId": "Laser_Impact",
+    "Scale": 0.5
+  },
+  "VerticalCenterShot": 0,
+  "HorizontalCenterShot": 0,
+  "DeathSoundEventId": "laser_shot"
+}

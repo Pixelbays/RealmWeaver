@@ -1,0 +1,226 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {}
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 1180, Height: 720);
+
+  #Title {
+    Group {
+      $C.@Title {
+        @Text = %pixelbays.rpg.character.creator.title;
+      }
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: (Full: 14);
+
+    Label #ModeLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true);
+      Anchor: (Bottom: 8);
+    }
+
+    Label #StatusLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, TextColor: #ff6666);
+      Anchor: (Bottom: 10);
+    }
+
+    Group #MainRow {
+      LayoutMode: Left;
+      Anchor: (Height: 584, Bottom: 12);
+
+      Group #LeftPanel {
+        LayoutMode: Top;
+        Anchor: (Width: 340, Height: 584, Right: 12);
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.categoriesHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #CategoryColumns {
+          LayoutMode: Left;
+          Anchor: (Height: 320, Bottom: 10);
+
+          Group #CategoryListLeft {
+            LayoutMode: Top;
+            Anchor: (Width: 164, Height: 320, Right: 12);
+          }
+
+          Group #CategoryListRight {
+            LayoutMode: Top;
+            Anchor: (Width: 164, Height: 320);
+          }
+        }
+
+        Label #CategoryHeadingLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        $C.@TextField #SearchField {
+          @Anchor = (Height: 38, Bottom: 8);
+          PlaceholderText: %pixelbays.rpg.character.creator.searchPlaceholder;
+        }
+
+        Group #OptionList {
+          LayoutMode: Top;
+          Anchor: (Height: 118, Bottom: 8);
+        }
+
+        Group #PagingRow {
+          LayoutMode: Left;
+          Anchor: (Height: 40);
+
+          TextButton #PrevButton {
+            Text: "";
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 80, Height: 40, Right: 8);
+          }
+
+          Label #PagingLabel {
+            Text: "";
+            Style: (...$C.@DefaultLabelStyle, FontSize: 13, HorizontalAlignment: Center, VerticalAlignment: Center);
+            Anchor: (Right: 8);
+            FlexWeight: 1;
+          }
+
+          TextButton #NextButton {
+            Text: "";
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 80, Height: 40);
+          }
+        }
+      }
+
+      Group #CenterPanel {
+        LayoutMode: Top;
+        Anchor: (Width: 388, Height: 584, Right: 12);
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.previewHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.previewSubheading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 12);
+        }
+
+        CharacterPreviewComponent #PreviewArea {
+          Anchor: (Height: 402, Bottom: 12);
+          Background: PatchStyle(Color: #1a1a1a80);
+          OutlineColor: #59779cff;
+          OutlineSize: 1;
+        }
+
+        TextButton #RandomizeButton {
+          Text: %pixelbays.rpg.character.creator.randomizeButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Height: 44);
+        }
+      }
+
+      Group #RightPanel {
+        LayoutMode: Top;
+        Anchor: (Width: 416, Height: 584);
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.characterInfoHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.characterInfoSubheading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 12);
+        }
+
+        $C.@TextField #NameField {
+          @Anchor = (Height: 38, Bottom: 8);
+          PlaceholderText: %pixelbays.rpg.character.creator.namePlaceholder;
+        }
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.raceHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+          Anchor: (Bottom: 4);
+        }
+
+        Label #RaceSelectionLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #RaceList {
+          LayoutMode: Top;
+          Anchor: (Height: 88, Bottom: 8);
+        }
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.classHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+          Anchor: (Bottom: 4);
+        }
+
+        Label #ClassSelectionLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #ClassList {
+          LayoutMode: Top;
+          Anchor: (Height: 104, Bottom: 10);
+        }
+
+        Label {
+          Text: %pixelbays.rpg.character.creator.summaryHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        Label #SummaryLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Height: 52, Bottom: 10);
+        }
+
+        Group { FlexWeight: 1; }
+
+        Label #CostLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true);
+          Anchor: (Bottom: 12);
+        }
+
+        Group #ActionRow {
+          LayoutMode: Left;
+          Anchor: (Height: 44);
+
+          TextButton #BackButton {
+            Text: %pixelbays.rpg.character.creator.backButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 202, Height: 44, Right: 8);
+          }
+
+          TextButton #ConfirmButton {
+            Text: %pixelbays.rpg.character.creator.confirmButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 206, Height: 44);
+          }
+        }
+      }
+    }
+  }
+}

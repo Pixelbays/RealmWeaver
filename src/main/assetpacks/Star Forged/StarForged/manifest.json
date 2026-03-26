@@ -1,0 +1,29 @@
+{
+    "Group": "pixelbays",
+    "Name": "Realmweaver StarForged",
+    "Version": "0.0.7",
+    "Description": "Realmweaver Star Forged, a frontier sci-fantasy asset pack for the Realmweaver RPG framework.",
+    "Authors": [
+        {
+            "Name": "Heru",
+            "Email": "",
+            "Url": ""
+        }
+    ],
+    "Website": "",
+    "ServerVersion": "2026.02.19-1a311a592",
+    "Dependencies": {
+        "pixelbays:Realmweaver": "*"
+    },
+    "OptionalDependencies": {
+        
+    },
+    "LoadBefore": {
+        
+    },
+    "DisabledByDefault": false,
+    "IncludesAssetPack": true,
+    "SubPlugins": [
+        
+    ]
+}

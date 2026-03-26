@@ -1,0 +1,24 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Silver",
+  "Description": "Secondary currency that rolls up into gold.",
+  "SortOrder": 9,
+  "AuctionHouseAllowed": true,
+  "StorageMode": "NumericWallet",
+  "AllowedScopes": [
+    "Character",
+    "Account",
+    "Guild",
+    "Custom"
+  ],
+  "Conversions": [
+    {
+      "Enabled": true,
+      "AutoConvert": true,
+      "TargetCurrencyId": "Gold",
+      "SourceAmount": 100,
+      "TargetAmount": 1,
+      "Note": "100 silver becomes 1 gold"
+    }
+  ]
+}

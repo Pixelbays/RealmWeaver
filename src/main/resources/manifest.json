@@ -1,15 +1,15 @@
 {
     "Group": "pixelbays",
-    "Name": "RPG Mod Test",
-    "Version": "0.0.6",
-    "Description": "RPG mod Test",
+    "Name": "RealmweaverCore",
+    "Version": "0.0.7",
+    "Description": "A data-driven MMO/RPG framework for Hytale with characters, classes, abilities, social systems, and economy features.",
     "Authors": [
         {
             "Name": "HeruEdhel"
         }
     ],
     "Website": "",
-    "ServerVersion": "*",
+    "ServerVersion": "2026.02.19-1a311a592",
     "Dependencies": {
         
     },

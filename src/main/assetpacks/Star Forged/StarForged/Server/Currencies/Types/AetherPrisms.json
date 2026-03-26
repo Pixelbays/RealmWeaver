@@ -1,0 +1,12 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Aether Prisms",
+  "Description": "High-value aetherglass prisms refined from rare relic finds and used for elite contracts, relic bidding, and premium exchange.",
+  "SortOrder": 50,
+  "AuctionHouseAllowed": true,
+  "AllowedScopes": [
+    "Character",
+    "Account",
+    "Guild"
+  ]
+}

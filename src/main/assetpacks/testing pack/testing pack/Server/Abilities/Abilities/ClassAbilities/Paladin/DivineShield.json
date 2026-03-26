@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "Paladin",
+    "Holy"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.paladin_divine_shield.name",
+    "Description": "pixelbays.rpg.abilities.paladin_divine_shield.description"
+  },
+  "AbilityType": "Active",
+  "GlobalCooldown": 12.0,
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Divine_Shield"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Grant yourself a short defensive blessing."
+}

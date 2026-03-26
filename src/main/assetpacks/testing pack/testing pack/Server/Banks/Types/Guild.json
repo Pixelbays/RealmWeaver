@@ -1,0 +1,44 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Guild Bank",
+  "Description": "Shared guild storage with permission-gated access.",
+  "Scope": "Guild",
+  "RequiredPermission": "USE_GUILD_BANK",
+  "DefaultSlotCount": 42,
+  "MaxSlotCountPerTab": 84,
+  "DefaultTabCount": 2,
+  "MaxTabs": 8,
+  "Tabs": [
+    {
+      "Id": "Operations",
+      "DisplayName": "Operations",
+      "Description": "Consumables and tools for guild activities.",
+      "SlotCount": 42,
+      "UnlockByDefault": true
+    },
+    {
+      "Id": "Treasury",
+      "DisplayName": "Treasury",
+      "Description": "High-value items and shared resources.",
+      "SlotCount": 42,
+      "UnlockByDefault": true
+    },
+    {
+      "Id": "Crafting",
+      "DisplayName": "Crafting",
+      "Description": "Guild crafting stockpile.",
+      "SlotCount": 42,
+      "UnlockByDefault": false,
+      "AllowedItemTags": [
+        "material",
+        "reagent"
+      ],
+      "UnlockCost": {
+        "Tier": 3,
+        "CurrencyId": "gold",
+        "Amount": 5000,
+        "Note": "Unlock guild crafting tab"
+      }
+    }
+  ]
+}

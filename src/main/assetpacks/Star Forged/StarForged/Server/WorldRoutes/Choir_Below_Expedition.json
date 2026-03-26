@@ -1,0 +1,15 @@
+{
+  "Enabled": true,
+  "DisplayName": "Choir Below Expedition",
+  "Description": "Deploy your group into a sealed Forge Choir vault beneath the crust.",
+  "DestinationType": "InstanceTemplate",
+  "InstanceTemplateId": "Choir_Below_Expedition",
+  "TravelAudience": "GroupMembers",
+  "RequireLeaderForGroupTravel": true,
+  "PersonalReturnPoint": true,
+  "Prerequisites": {
+    "RequireParty": true,
+    "RequiredPartyCount": 3,
+    "RequiredLevel": 20
+  }
+}

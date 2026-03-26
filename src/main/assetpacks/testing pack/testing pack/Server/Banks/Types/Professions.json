@@ -1,0 +1,40 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Profession Bank",
+  "Description": "Profession-scoped storage for trade skill reagents and outputs.",
+  "Scope": "Profession",
+  "StorageMode": "ReagentsOnly",
+  "RemoteAccessAllowed": true,
+  "DefaultSlotCount": 36,
+  "MaxSlotCountPerTab": 72,
+  "DefaultTabCount": 2,
+  "MaxTabs": 6,
+  "AllowedItemTags": [
+    "profession",
+    "material",
+    "reagent"
+  ],
+  "Tabs": [
+    {
+      "Id": "Reagents",
+      "DisplayName": "Reagents",
+      "Description": "Raw gathering and crafting reagents.",
+      "SlotCount": 36,
+      "UnlockByDefault": true,
+      "AllowedItemTags": [
+        "reagent",
+        "material"
+      ]
+    },
+    {
+      "Id": "Projects",
+      "DisplayName": "Projects",
+      "Description": "Reserved materials for active profession work orders.",
+      "SlotCount": 36,
+      "UnlockByDefault": true,
+      "AllowedItemTags": [
+        "profession"
+      ]
+    }
+  ]
+}

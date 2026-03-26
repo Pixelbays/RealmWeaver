@@ -1,0 +1,48 @@
+{
+  "displayName": "Echobound",
+  "description": "Sensitive attuners who hear patterns in the ruined systems of Veyra Null.",
+  "iconId": "",
+  "enabled": true,
+  "visible": true,
+  "isHybrid": false,
+  "parentRaces": [
+    "base_race"
+  ],
+  "compatibleHybridRaces": [],
+  "incompatibleHybridRaces": [],
+  "minSize": 0.96,
+  "maxSize": 1.04,
+  "startingStats": {
+    "Health": 100,
+    "Stamina": 50,
+    "Mana": 30
+  },
+  "statModifiers": {
+    "additiveModifiers": {
+      "Mana": 10,
+      "Health": 5
+    },
+    "multiplicativeModifiers": {}
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "EchoSense",
+      "abilityType": "Race",
+      "unlockType": "Starting",
+      "requiredLevel": 1
+    }
+  ],
+  "abilityIds": [
+    "EchoSense"
+  ],
+  "allowedCosmeticCategories": [
+    "Hair",
+    "Face",
+    "Body"
+  ],
+  "allowedCosmeticIds": [],
+  "notAllowedCosmeticCategories": [],
+  "notAllowedCosmeticIds": [],
+  "inheritanceRules": {
+  }
+}

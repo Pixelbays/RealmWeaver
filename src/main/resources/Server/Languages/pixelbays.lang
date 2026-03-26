@@ -1,0 +1,821 @@
+rpg.common.unknownError = An unknown error occurred.
+rpg.common.unmappedMessage = {text}
+rpg.common.playerNotFound = Player not found.
+rpg.common.none = None.
+
+rpg.hud.xpBar.text = XP: {current}/{next} ({remaining} to next)
+rpg.hud.xpBar.max = XP: MAX
+
+rpg.achievement.notify.primary = Achievement Unlocked
+rpg.achievement.notify.secondary = {points} achievement points
+rpg.achievement.title.primary = Achievement Unlocked
+rpg.achievement.title.secondary = {name}
+rpg.achievement.chat.unlocked = Achievement unlocked: {name} ({points} points)
+rpg.achievement.definition.firstSteps.name = First Steps
+rpg.achievement.definition.firstSteps.description = Reach level 2 on your character.
+rpg.achievement.definition.choosePath.name = Choose Your Path
+rpg.achievement.definition.choosePath.description = Learn your first class.
+rpg.achievement.definition.lineageAwakened.name = Lineage Awakened
+rpg.achievement.definition.lineageAwakened.description = Select a race for one of your characters.
+rpg.achievement.definition.firstPower.name = First Power
+rpg.achievement.definition.firstPower.description = Unlock your first class ability.
+rpg.achievement.title.awakened = Awakened
+
+rpg.interaction.prereq.class = Requires class: {classes}
+rpg.interaction.prereq.classLevel = Requires one of these classes at level {level}: {classes}
+rpg.interaction.prereq.race = Requires race: {races}
+rpg.interaction.prereq.expansion = Requires expansion access: {expansions}
+rpg.interaction.prereq.level = Requires level {level}
+rpg.interaction.prereq.levelSystem = Requires {system} level {level}
+rpg.interaction.prereq.achievement = Requires achievement: {achievements}
+rpg.interaction.prereq.party = Requires being in a party.
+rpg.interaction.prereq.partyCount = Requires a party with at least {count} members.
+rpg.interaction.prereq.raid = Requires being in a raid.
+rpg.interaction.prereq.raidCount = Requires a raid with at least {count} members.
+
+rpg.world.travel.error.systemDisabled = World travel is disabled.
+rpg.world.travel.error.routeNotFound = Unknown travel route: {route}
+rpg.world.travel.error.routeDisabled = Travel route is disabled: {route}
+rpg.world.travel.error.modeBlocked = Route {route} is not allowed while world mode is {mode}.
+rpg.world.travel.error.destinationWorldMissing = Route {route} could not find destination world: {world}
+rpg.world.travel.error.instanceMissing = Route {route} could not find instance template: {instance}
+rpg.world.travel.error.requiresGroup = Route {route} requires a group.
+rpg.world.travel.error.leaderRequired = Only the group leader can use route {route}.
+rpg.world.travel.error.groupMemberFailed = Group member failed route requirements: {player}
+rpg.world.travel.error.noTargets = No valid players were found for route {route}.
+rpg.world.travel.success.self = Traveling to {route}.
+rpg.world.travel.success.group = Traveling group to {route} ({count} players).
+rpg.world.travel.list.none = No enabled world routes found.
+rpg.world.travel.list.header = Available world routes:
+rpg.world.travel.list.entry = - {routeId}: {name} [{type}]
+
+rpg.ability.error.cooldown = {ability} is on cooldown for {time}s more.
+
+rpg.party.usage.invite = Usage: /party invite <player>
+rpg.party.usage.join = Usage: /party join <player>
+rpg.party.usage.decline = Usage: /party decline
+rpg.party.usage.kick = Usage: /party kick <player>
+rpg.party.usage.promote = Usage: /party promote <player> [assistant|leader]
+
+rpg.party.error.raidsDisabled = Raids are disabled.
+rpg.party.error.partiesDisabled = Parties are disabled.
+rpg.party.error.alreadyInParty = You are already in a party.
+rpg.party.error.notInPartyCreateFirst = You are not in a party. Use /party create first.
+rpg.party.error.invitePermission = Only leaders or assistants can invite players.
+rpg.party.error.targetAlreadyInParty = That player is already in a party.
+rpg.party.error.partyFull = The party is full.
+rpg.party.error.inviteExpired = Your party invite has expired.
+rpg.party.error.targetNotInParty = That player is not in a party.
+rpg.party.error.noInvite = You do not have an invite to that party.
+rpg.party.error.notInParty = You are not in a party.
+rpg.party.error.disbandPermission = Only the leader can disband the party.
+rpg.party.error.targetNotInYourParty = That player is not in your party.
+rpg.party.error.npcManagePermission = Only leaders or assistants can manage NPC members.
+rpg.party.error.npcNotAllowed = This party does not allow NPC members.
+rpg.party.error.npcAlreadyInParty = That NPC is already in a party.
+rpg.party.error.npcNotInParty = That NPC is not in your party.
+rpg.party.error.kickPermission = Only leaders or assistants can kick members.
+rpg.party.error.cannotKickLeader = You cannot kick the leader.
+rpg.party.error.promoteAssistantPermission = Only the leader can promote assistants.
+rpg.party.error.partyAssistantLimit = This party already has the maximum assistants.
+rpg.party.error.raidAssistantLimit = This raid already has the maximum assistants.
+rpg.party.error.npcAssistant = NPCs cannot be assistants.
+rpg.party.error.transferPermission = Only the leader can transfer leadership.
+rpg.party.error.npcLeader = NPCs cannot be leaders.
+rpg.party.error.invalidType = Invalid party type. Use party or raid.
+rpg.party.error.invalidPromoteRole = Invalid role. Use assistant or leader.
+
+rpg.party.success.created = Created {type}.
+rpg.party.success.inviteSent = Invite sent.
+rpg.party.success.inviteDeclined = Invite declined.
+rpg.party.success.joined = Joined the party.
+rpg.party.success.left = You left the party.
+rpg.party.success.disbanded = Party disbanded.
+rpg.party.success.memberRemoved = Member removed.
+rpg.party.success.npcAdded = NPC member added.
+rpg.party.success.npcRemoved = NPC member removed.
+rpg.party.success.promotedAssistant = Member promoted to assistant.
+rpg.party.success.leadershipTransferred = Leadership transferred.
+
+rpg.party.notify.invitedBy = {player} invited you to a party.
+rpg.party.notify.inviteDeclined = {player} declined the party invite.
+rpg.party.notify.memberJoined = {player} joined the {type}.
+rpg.party.notify.memberLeft = {player} left the {type}.
+rpg.party.notify.memberKicked = {actor} removed {player} from the {type}.
+rpg.party.notify.youWereKicked = You were removed from the {type}.
+rpg.party.notify.promotedAssistant = {player} is now an assistant.
+rpg.party.notify.leadershipTransferred = {player} is now the leader of the {type}.
+rpg.party.notify.partyDisbanded = The {type} was disbanded.
+rpg.party.notify.nowLeader = You are now the leader of the {type}.
+rpg.party.notify.npcJoined = {npc} joined the {type}.
+rpg.party.notify.npcLeft = {npc} left the {type}.
+
+rpg.party.info.id = Party: {id}
+rpg.party.info.type = Type: {type}
+rpg.party.info.leader = Leader: {leader}
+rpg.party.info.assistants = Assistants: {assistants}
+rpg.party.info.members = Members: {members}
+rpg.party.info.size = Size: {size}/{max}
+rpg.party.type.party = Party
+rpg.party.type.raid = Raid
+
+rpg.party.ui.title = Party
+rpg.party.ui.statusHeading = Status
+rpg.party.ui.rosterHeading = Roster
+rpg.party.ui.inviteButton = Invite
+rpg.party.ui.kickButton = Kick
+rpg.party.ui.promoteButton = Promote
+rpg.party.ui.finderButton = Group Finder
+rpg.party.ui.leaveButton = Leave
+rpg.party.ui.statusBody = Type: {type}\nMembers: {size}/{max}\nYour Role: {role}
+rpg.party.ui.rosterBody = Leader: {leader}\nAssistants: {assistants}\nMembers: {members}
+
+rpg.groupFinder.error.disabled = Group finder is disabled.
+rpg.groupFinder.error.leaderOnly = Only the party leader can manage a group finder listing.
+rpg.groupFinder.error.activityRequired = Enter an activity before listing the group.
+rpg.groupFinder.error.invalidRole = Unknown role type: {role}
+rpg.groupFinder.error.noOwnedListing = You do not have an active listing.
+rpg.groupFinder.error.alreadyApplied = You already have an active application.
+rpg.groupFinder.error.listingNotFound = That listing does not exist.
+rpg.groupFinder.error.ownListing = You cannot apply to your own party listing.
+rpg.groupFinder.error.notRecruiting = That group is no longer recruiting.
+rpg.groupFinder.error.roleRequired = Choose one of the roles this group is recruiting for.
+rpg.groupFinder.error.roleUnavailable = That group is not recruiting for that role.
+rpg.groupFinder.error.noApplication = You do not have an active application.
+rpg.groupFinder.error.applicationNotFound = No application found for that player.
+
+rpg.groupFinder.success.listingUpdated = Group finder listing updated.
+rpg.groupFinder.success.listingRemoved = Group finder listing removed.
+rpg.groupFinder.success.applicationSubmitted = Application submitted.
+rpg.groupFinder.success.applicationWithdrawn = Application withdrawn.
+rpg.groupFinder.success.applicationRejected = Applicant rejected.
+rpg.groupFinder.success.partyInviteSent = Party invite sent.
+
+rpg.groupFinder.notify.newApplicant = {player} applied to your {activity} listing.
+rpg.groupFinder.notify.applicationRejected = Your application for {activity} was rejected.
+rpg.groupFinder.notify.applicationInvited = {leader} invited you to join their {activity} group.
+
+rpg.groupFinder.ui.title = Group Finder
+rpg.groupFinder.ui.status.refreshed = Group finder refreshed.
+rpg.groupFinder.ui.myListingHeading = Your Listing
+rpg.groupFinder.ui.myApplicationHeading = Your Application
+rpg.groupFinder.ui.listingsHeading = Open Groups
+rpg.groupFinder.ui.applicationsHeading = Pending Applicants
+rpg.groupFinder.ui.activityPlaceholder = Activity
+rpg.groupFinder.ui.openRolesPlaceholder = Open roles (tank, healer, dps)
+rpg.groupFinder.ui.descriptionPlaceholder = Description
+rpg.groupFinder.ui.requirementsPlaceholder = What you still need
+rpg.groupFinder.ui.listingIndexPlaceholder = Listing #
+rpg.groupFinder.ui.desiredRolePlaceholder = Desired role
+rpg.groupFinder.ui.applicationNotePlaceholder = Application note
+rpg.groupFinder.ui.applicantIndexPlaceholder = Applicant #
+rpg.groupFinder.ui.saveListingButton = Save Listing
+rpg.groupFinder.ui.removeListingButton = Remove Listing
+rpg.groupFinder.ui.applyButton = Apply
+rpg.groupFinder.ui.withdrawButton = Withdraw
+rpg.groupFinder.ui.inviteApplicantButton = Invite Applicant
+rpg.groupFinder.ui.rejectApplicantButton = Reject Applicant
+rpg.groupFinder.ui.refreshButton = Refresh
+rpg.groupFinder.ui.backButton = Back to Party
+rpg.groupFinder.ui.noOwnedListing = You do not currently lead a listed group.
+rpg.groupFinder.ui.ownedListingTemplate = Activity: {activity}\nType: {type}\nParty Size: {size}/{max}\nOpen Roles: {roles}\nNeeds: {requirements}\nDescription: {description}\nRecruiting: {recruiting}\nUpdated: {updated}
+rpg.groupFinder.ui.recruitingYes = Yes
+rpg.groupFinder.ui.recruitingNo = No
+rpg.groupFinder.ui.emptyListings = No groups are currently listed.
+rpg.groupFinder.ui.leaderLabel = Leader: 
+rpg.groupFinder.ui.partySizeLabel = Party Size: 
+rpg.groupFinder.ui.openRolesLabel = Open Roles: 
+rpg.groupFinder.ui.needsLabel = Needs: 
+rpg.groupFinder.ui.descriptionLabel = Description: 
+rpg.groupFinder.ui.applicantsLabel = Applicants: 
+rpg.groupFinder.ui.updatedLabel = Updated: 
+rpg.groupFinder.ui.noApplication = You do not have an active application.
+rpg.groupFinder.ui.currentApplicationTemplate = Activity: {activity}\nDesired Role: {role}\nNote: {note}\nSubmitted: {submitted}
+rpg.groupFinder.ui.noApplicants = No pending applicants.
+rpg.groupFinder.ui.desiredRoleLabel = Desired Role: 
+rpg.groupFinder.ui.noteLabel = Note: 
+rpg.groupFinder.ui.submittedLabel = Submitted: 
+
+rpg.expansion.list.header = Expansions:
+rpg.expansion.list.none = No expansions are configured.
+rpg.expansion.list.entry = [{status}] {name} ({id}) - {price} - {release}
+rpg.expansion.list.description =   {description}
+rpg.expansion.list.website =   Website: {url}
+rpg.expansion.status.available = Available
+rpg.expansion.status.owned = Owned
+rpg.expansion.status.ownedPending = Owned / Pending Release
+rpg.expansion.status.free = Free
+rpg.expansion.status.unreleased = Unreleased
+rpg.expansion.status.disabled = Disabled
+rpg.expansion.status.granted = Permission Granted
+rpg.expansion.price.free = Free
+rpg.expansion.price.amount = {amount} {currency} ({scope})
+rpg.expansion.release.live = Live
+rpg.expansion.release.at = Releases: {time}
+rpg.expansion.unlock.success = Unlocked expansion {name}.
+rpg.expansion.unlock.alreadyOwned = You have already unlocked {name}.
+rpg.expansion.unlock.freeAccess = {name} does not require purchase.
+rpg.expansion.unlock.freeNotLive = {name} does not require purchase, but it is not released yet. Release time: {time}
+rpg.expansion.unlock.permissionGranted = You already have access to {name} through permissions.
+rpg.expansion.error.unknown = Unknown expansion: {id}
+rpg.expansion.error.disabled = Expansion {name} is disabled.
+rpg.expansion.error.currencyDisabled = Currency purchases are disabled.
+rpg.expansion.error.invalidScope = Expansion {name} uses an unsupported purchase scope.
+rpg.expansion.error.scopeUnavailable = Unable to resolve the {scope} wallet for this purchase.
+
+rpg.class.error.requiresExpansion = Requires expansion access: {expansions}
+rpg.class.list.entry.expansionLocked = [Expansion Locked] {name} ({id})
+rpg.class.list.expansionRequired = Requires: {expansions}
+
+rpg.race.error.requiresExpansion = Requires expansion access: {expansions}
+rpg.race.status.expansionLocked = Expansion Locked
+rpg.race.list.expansionRequired = Requires: {expansions}
+
+rpg.guild.usage.accept = Usage: /guild accept <player>
+rpg.guild.usage.apply = Usage: /guild apply <name|tag>
+rpg.guild.usage.create = Usage: /guild create <name> <tag>
+rpg.guild.usage.deny = Usage: /guild deny <player>
+rpg.guild.usage.invite = Usage: /guild invite <player>
+rpg.guild.usage.join = Usage: /guild join <name|tag>
+rpg.guild.usage.joinpolicy = Usage: /guild joinpolicy <invite|open|application>
+rpg.guild.usage.kick = Usage: /guild kick <player>
+rpg.guild.usage.roleAssign = Usage: /guild role assign <player> <role>
+rpg.guild.usage.roleCreate = Usage: /guild role create <name>
+rpg.guild.usage.roleSetPerm = Usage: /guild role setperm <role> <permission> <true|false>
+rpg.guild.usage.transfer = Usage: /guild transfer <player>
+
+rpg.guild.error.disabled = Guilds are disabled.
+rpg.guild.error.alreadyInGuild = You are already in a guild.
+rpg.guild.error.invalidName = Invalid guild name.
+rpg.guild.error.invalidTag = Invalid guild tag.
+rpg.guild.error.nameTaken = That guild name is already taken.
+rpg.guild.error.tagTaken = That guild tag is already taken.
+rpg.guild.error.notInGuildCreateFirst = You are not in a guild. Use /guild create first.
+rpg.guild.error.invitePermission = You do not have permission to invite players.
+rpg.guild.error.targetAlreadyInGuild = That player is already in a guild.
+rpg.guild.error.guildFull = The guild is full.
+rpg.guild.error.notFound = That guild was not found.
+rpg.guild.error.guildFullTarget = That guild is full.
+rpg.guild.error.requiresApplications = That guild requires applications. Use /guild apply.
+rpg.guild.error.noInvite = You do not have an invite to that guild.
+rpg.guild.error.inviteExpired = Your guild invite has expired.
+rpg.guild.error.notAcceptingApplications = That guild is not accepting applications.
+rpg.guild.error.alreadyApplied = You already applied to that guild.
+rpg.guild.error.notInGuild = You are not in a guild.
+rpg.guild.error.acceptApplicationPermission = You do not have permission to accept applications.
+rpg.guild.error.applicationNotFound = No application found for that player.
+rpg.guild.error.denyApplicationPermission = You do not have permission to deny applications.
+rpg.guild.error.disbandPermission = Only the leader can disband the guild.
+rpg.guild.error.targetNotInYourGuild = That player is not in your guild.
+rpg.guild.error.kickPermission = You do not have permission to kick members.
+rpg.guild.error.cannotKickLeader = You cannot kick the leader.
+rpg.guild.error.transferPermission = Only the leader can transfer leadership.
+rpg.guild.error.targetAlreadyLeader = That player is already the leader.
+rpg.guild.error.joinPolicyPermission = You do not have permission to change join policy.
+rpg.guild.error.manageRolesPermission = You do not have permission to manage roles.
+rpg.guild.error.invalidRoleName = Invalid role name.
+rpg.guild.error.roleNameReserved = That role name is reserved.
+rpg.guild.error.roleExists = That role already exists.
+rpg.guild.error.leaderPermsImmutable = Leader permissions cannot be changed.
+rpg.guild.error.roleNotFound = That role does not exist.
+rpg.guild.error.assignRolePermission = You do not have permission to assign roles.
+rpg.guild.error.assignLeaderPermission = Only the leader can assign the leader role.
+rpg.guild.error.cannotChangeLeaderRole = You cannot change the leader's role.
+rpg.guild.error.invalidPolicy = Invalid policy. Use invite, open, or application.
+rpg.guild.error.unknownPermission = Unknown permission.
+rpg.guild.error.enabledMustBeBoolean = Enabled must be true or false.
+
+rpg.guild.success.created = Created guild {name}.
+rpg.guild.success.inviteSent = Invite sent.
+rpg.guild.success.applicationSubmitted = Application submitted.
+rpg.guild.success.applicationAccepted = Application accepted.
+rpg.guild.success.applicationDenied = Application denied.
+
+rpg.character.error.systemDisabled = Character system is disabled.
+rpg.character.error.creationDisabled = Character creation is disabled.
+rpg.character.error.logoutDisabled = Logout to character select is disabled.
+rpg.character.error.logoutPending = Logout is already pending.
+rpg.character.error.maxSlots = You have reached the maximum number of character slots.
+rpg.character.error.idRequired = Character id is required.
+rpg.character.error.notFound = Character not found.
+rpg.character.error.pendingRecovery = Character is pending recovery and cannot be selected.
+rpg.character.error.deletionDisabled = Character deletion is disabled.
+rpg.character.error.recoveryDisabled = Soft-delete recovery is disabled.
+rpg.character.error.recoveryLimitReached = You have reached the character recovery limit for the current window.
+rpg.character.error.notDeleted = Character is not deleted.
+rpg.character.error.recoveryExpired = Recovery window has expired.
+rpg.character.error.nameRequired = Character name is required.
+rpg.character.error.nameTooShort = Character name is too short.
+rpg.character.error.nameTooLong = Character name is too long.
+rpg.character.error.nameReserved = Character name is reserved.
+rpg.character.error.nameTaken = Character name is already taken.
+rpg.character.error.duplicateOwnedName = You already have a character with that name.
+rpg.character.error.raceRequired = Race is required.
+rpg.character.error.unknownRace = Unknown race.
+rpg.character.error.classRequired = Starter class is required.
+rpg.character.error.unknownClass = Unknown starter class.
+rpg.character.error.classNotAllowed = Starter class is not allowed.
+
+rpg.character.success.loggedOutToSelect = Logged out to character select.
+rpg.character.success.logoutTimerStarted = Logout timer started.
+rpg.character.success.created = Character created.
+rpg.character.success.selected = Character selected.
+rpg.character.success.deleted = Character deleted.
+rpg.character.success.markedForRecovery = Character marked for recovery.
+rpg.character.success.recovered = Character recovered.
+
+rpg.character.token.info.header = Account character tokens:
+rpg.character.token.info.entry = {token}: {balance}
+rpg.character.token.info.none = No character tokens are configured for this account.
+rpg.character.token.error.unknownType = Unknown token type: {token}
+rpg.character.token.error.disabledType = Token type is disabled: {token}
+rpg.character.token.error.invalidAmount = Amount must be zero or greater.
+rpg.character.token.error.insufficient = Not enough {token} tokens.
+rpg.character.token.success.added = Updated {token}. Balance: {balance}
+rpg.character.token.success.removed = Updated {token}. Balance: {balance}
+rpg.character.token.success.set = Updated {token}. Balance: {balance}
+rpg.character.token.success.spent = Updated {token}. Balance: {balance}
+rpg.character.token.notify.changed = Your {token} balance is now {balance}.
+
+rpg.character.ui.title = Character Select
+rpg.character.ui.previewHeading = Selected Hero
+rpg.character.ui.previewSubheading = Choose a character, review the current loadout, then enter the world.
+rpg.character.ui.settingsHeading = Session
+rpg.character.ui.tokensHeading = Account Tokens
+rpg.character.ui.tokensEmpty = No account tokens configured.
+rpg.character.ui.rosterHeading = Characters
+rpg.character.ui.rosterSubheading = Your account roster
+rpg.character.ui.detailsHeading = Selected Character Details
+rpg.character.ui.createSubheading = Open the full character creator to define identity, race, class, and appearance.
+rpg.character.ui.characterIdPlaceholder = Enter character id
+rpg.character.ui.refreshButton = Refresh
+rpg.character.ui.selectButton = Select
+rpg.character.ui.enterWorldButton = Enter World
+rpg.character.ui.deleteButton = Delete
+rpg.character.ui.recoverButton = Recover
+rpg.character.ui.createHeading = Create Character
+rpg.character.ui.namePlaceholder = Character name
+rpg.character.ui.racePlaceholder = Race id
+rpg.character.ui.classPlaceholder = Starter class id
+rpg.character.ui.createButton = Create
+rpg.character.ui.openCreatorButton = Create New Character
+
+rpg.character.creator.title = Character Creator
+rpg.character.creator.modeCreate = Create New Character
+rpg.character.creator.modeBarber = Barber Shop
+rpg.character.creator.identityHeading = Identity
+rpg.character.creator.searchHeading = Search Options
+rpg.character.creator.searchPlaceholder = Search by name or asset id
+rpg.character.creator.categoriesHeading = Categories
+rpg.character.creator.randomizeButton = Randomize Look
+rpg.character.creator.backButton = Back
+rpg.character.creator.confirmCreate = Create Character
+rpg.character.creator.confirmBarber = Apply Changes
+rpg.character.creator.prevButton = Previous
+rpg.character.creator.nextButton = Next
+rpg.character.creator.noneOption = None
+rpg.character.creator.creationCostFree = Creation Cost: Free
+rpg.character.creator.barberCostFree = Barber Cost: Free
+
+rpg.character.appearance.category.body = Body
+rpg.character.appearance.category.underwear = Underwear
+rpg.character.appearance.category.face = Face
+rpg.character.appearance.category.eyes = Eyes
+rpg.character.appearance.category.ears = Ears
+rpg.character.appearance.category.mouth = Mouth
+rpg.character.appearance.category.facialHair = Facial Hair
+rpg.character.appearance.category.haircut = Haircut
+rpg.character.appearance.category.eyebrows = Eyebrows
+rpg.character.appearance.category.pants = Pants
+rpg.character.appearance.category.overpants = Overpants
+rpg.character.appearance.category.undertop = Undertop
+rpg.character.appearance.category.overtop = Overtop
+rpg.character.appearance.category.shoes = Shoes
+rpg.character.appearance.category.headAccessory = Head Accessory
+rpg.character.appearance.category.faceAccessory = Face Accessory
+rpg.character.appearance.category.earAccessory = Ear Accessory
+rpg.character.appearance.category.skinFeature = Skin Feature
+rpg.character.appearance.category.gloves = Gloves
+rpg.character.appearance.category.cape = Cape
+rpg.guild.success.left = You left the guild.
+rpg.guild.success.disbanded = Guild disbanded.
+rpg.guild.success.memberRemoved = Member removed.
+rpg.guild.success.leadershipTransferred = Leadership transferred.
+rpg.guild.success.joinPolicyUpdated = Join policy updated.
+
+rpg.prefabs.list.header = Asset prefabs (showing {shown}):
+rpg.prefabs.list.entry = {index}. [{pack}] {key}
+rpg.prefabs.list.none = No asset prefabs found.
+rpg.prefabs.list.error = Failed to list asset prefabs.
+rpg.guild.success.roleCreated = Role created.
+rpg.guild.success.rolePermissionUpdated = Role permission updated.
+rpg.guild.success.roleAssigned = Role assigned.
+rpg.guild.success.focusSet = Active guild context updated.
+rpg.guild.success.focusAlreadySet = That guild is already your active guild.
+
+rpg.guild.notify.applicationAccepted = Your guild application was accepted.
+rpg.guild.notify.applicationDenied = Your guild application was denied.
+rpg.guild.notify.invitedBy = {player} invited you to a guild.
+rpg.guild.notify.kicked = You were kicked from the guild.
+rpg.guild.notify.roleUpdated = Your guild role was updated.
+rpg.guild.notify.nowLeader = You are now the guild leader.
+
+rpg.guild.info.header = Guild: {name} [{tag}]
+rpg.guild.info.leader = Leader: {leader}
+rpg.guild.info.members = Members: {count}
+rpg.guild.info.joinPolicy = Join Policy: {policy}
+rpg.guild.info.roles = Roles: {roles}
+rpg.guild.role.listEntry = {name} ({id}) - {permissions}
+rpg.guild.info.roleEntry = {name} ({id})
+rpg.guild.joinPolicy.inviteOnly = Invite Only
+rpg.guild.joinPolicy.open = Open
+rpg.guild.joinPolicy.application = Application
+rpg.guild.error.membershipLimit = You have reached your guild membership limit.
+rpg.guild.error.alreadyInTargetGuild = You are already in that guild.
+rpg.guild.error.notYourGuild = That guild is not part of your memberships.
+
+rpg.guild.ui.title = Guild
+rpg.guild.ui.overviewHeading = Overview
+rpg.guild.ui.rosterHeading = Roster
+rpg.guild.ui.inviteButton = Invite
+rpg.guild.ui.applyButton = Apply
+rpg.guild.ui.createRoleButton = Create Role
+rpg.guild.ui.assignRoleButton = Assign Role
+rpg.guild.ui.setPermButton = Set Permission
+rpg.guild.ui.enabledLabel = Enabled
+rpg.guild.ui.overviewBody = Guild: {name} [{tag}]\nLeader: {leader}\nMembers: {members}\nJoin Policy: {policy}
+
+rpg.bank.info.header = === Banks ===
+rpg.bank.info.character = Character Banks: {banks}
+rpg.bank.info.account = Account Banks: {banks}
+rpg.bank.info.guild = Guild Banks: {banks}
+
+rpg.bank.success.loaded = Loaded existing bank.
+rpg.bank.success.created = Created bank.
+rpg.bank.success.tabUnlocked = Unlocked bank tab.
+rpg.bank.success.currencyDeposited = Deposited currency into the bank.
+rpg.bank.success.currencyWithdrew = Withdrew currency from the bank.
+
+rpg.bank.error.ownerRequired = Owner id is required.
+rpg.bank.error.unknownBankType = Unknown bank type: {type}
+rpg.bank.error.bankTypeDisabled = Bank type is disabled: {type}
+rpg.bank.error.noConfiguredType = No configured bank type for scope {scope}.
+rpg.bank.error.professionRequired = Enter a profession id first.
+rpg.bank.error.insufficientCost = You cannot afford this bank cost: {cost}
+rpg.bank.error.noLockedTabs = No more bank tabs are available to unlock.
+rpg.bank.error.currencyStorageUnavailable = This bank type cannot store wallet currencies.
+rpg.bank.error.currencyAmountRequired = Enter an amount greater than zero.
+rpg.bank.error.currencySourceUnavailable = No valid currency source is available for this bank.
+rpg.bank.error.currencyTypeUnsupported = This bank cannot store currency type: {type}
+rpg.bank.error.currencyStorageFull = The bank is full for currency type: {type}
+rpg.bank.error.currencyStoredInsufficient = The bank does not have enough stored {type}.
+rpg.bank.error.currencyDestinationFull = You cannot hold more of currency type: {type}
+
+rpg.bank.scope.character = Character
+rpg.bank.scope.player = Player
+rpg.bank.scope.account = Account
+rpg.bank.scope.guild = Guild
+rpg.bank.scope.warband = Warband
+rpg.bank.scope.profession = Profession
+rpg.bank.scope.global = Global
+rpg.bank.scope.custom = Custom
+
+rpg.bank.ui.title = Banks
+rpg.bank.ui.overviewHeading = Available Banks
+rpg.bank.ui.personalLabel = Personal / Character Bank
+rpg.bank.ui.accountLabel = Account Bank
+rpg.bank.ui.guildLabel = Guild Bank
+rpg.bank.ui.personalButton = Open or Create Personal
+rpg.bank.ui.accountButton = Open or Create Account
+rpg.bank.ui.guildButton = Open or Create Guild
+rpg.bank.ui.professionButton = Open Profession Bank
+rpg.bank.ui.professionPlaceholder = Profession id (e.g. woodworking)
+rpg.bank.ui.overviewBody = Character: {character}\nAccount: {account}\nGuild: {guild}\nProfession: {profession}
+
+rpg.bank.storage.title = Bank Storage
+rpg.bank.storage.help = Click any slot to move a stack. Right-click moves one item.
+rpg.bank.storage.bankGridLabel = Bank Tab
+rpg.bank.storage.playerStorageLabel = Inventory Storage
+rpg.bank.storage.hotbarLabel = Hotbar
+rpg.bank.storage.unlock.none = All available bank tabs are already unlocked.
+rpg.bank.storage.unlock.unavailableButton = No Unlock Available
+rpg.bank.storage.unlock.freeCost = Free
+rpg.bank.storage.unlock.cost = Next tab: {tab} • Cost: {cost}
+rpg.bank.storage.unlock.button = Unlock {tab}
+rpg.bank.storage.currency.heading = Stored Currencies
+rpg.bank.storage.currency.unavailable = This bank does not support wallet currency storage. Use item tabs for physical currencies.
+rpg.bank.storage.currency.none = No wallet-backed currencies are configured for bank storage.
+rpg.bank.storage.currency.idPlaceholder = Currency id (e.g. gold)
+rpg.bank.storage.currency.amountPlaceholder = Amount
+rpg.bank.storage.currency.depositButton = Deposit Currency
+rpg.bank.storage.currency.withdrawButton = Withdraw Currency
+rpg.bank.selector.title = Bank Services
+
+rpg.currency.usage.add = Usage: /currency add <character|account|guild> <currencyId> <amount>
+rpg.currency.usage.normalize = Usage: /currency normalize <character|account|guild>
+rpg.currency.usage.remove = Usage: /currency remove <character|account|guild> <currencyId> <amount>
+rpg.currency.usage.set = Usage: /currency set <character|account|guild> <currencyId> <amount>
+rpg.currency.usage.ui = Usage: /currency ui
+
+rpg.currency.info.header = === Currencies ===
+rpg.currency.info.scope = {scope}: {entries}
+
+rpg.currency.success.added = Updated {currency}. New balance: {balance}
+rpg.currency.success.normalized = Normalized currency conversions for {scope}.
+rpg.currency.success.normalizeNoChange = No conversions were needed for {scope}.
+rpg.currency.success.removed = Updated {currency}. New balance: {balance}
+rpg.currency.success.set = Set {currency} to {balance}
+
+rpg.currency.ui.title = Currency Wallets
+rpg.currency.ui.refreshButton = Refresh
+rpg.currency.ui.normalizeCharacterButton = Normalize Character
+rpg.currency.ui.normalizeAccountButton = Normalize Account
+rpg.currency.ui.normalizeGuildButton = Normalize Guild
+rpg.currency.ui.conversionsHeading = Auto Conversion Rules
+rpg.currency.ui.characterHeading = Character Scope
+rpg.currency.ui.accountHeading = Account Scope
+rpg.currency.ui.guildHeading = Guild Scope
+rpg.currency.ui.status.refreshed = Currency UI refreshed.
+
+rpg.currency.error.ownerRequired = Owner id is required.
+rpg.currency.error.amountNonNegative = Amount must be zero or greater.
+rpg.currency.error.unknownType = Unknown currency type: {type}
+rpg.currency.error.disabledType = Currency type is disabled: {type}
+rpg.currency.error.unsupportedScope = Currency type does not support scope: {scope}
+rpg.currency.error.directModifyNotAllowed = Currency type cannot be modified directly: {type}
+rpg.currency.error.insufficient = Not enough currency: {type}
+rpg.currency.error.scopeUnavailable = Scope is unavailable right now: {scope}
+
+rpg.currency.scope.character = Character
+rpg.currency.scope.account = Account
+rpg.currency.scope.guild = Guild
+rpg.currency.scope.global = Global
+rpg.currency.scope.custom = Custom
+
+rpg.chat.party.message = [Party] {username}: {message}
+rpg.chat.guild.message = [Guild] [{tag}] {username}: {message}
+
+rpg.chat.error.unknownChannel = Unknown chat channel: {channel}
+rpg.chat.error.emptyMessage = You must type a message.
+rpg.chat.error.cannotSend = You cannot chat in {channel}.
+rpg.chat.error.noTargets = No targets found for {channel}.
+
+rpg.chat.usage = Usage: /chat <channel|off>
+rpg.chat.success.active = Active chat set to {channel}.
+rpg.chat.success.cleared = Active chat cleared.
+rpg.chat.info.active = Active chat: {channel}
+rpg.chat.info.none = Active chat: none
+
+rpg.ui.placeholder.playerName = Player name
+rpg.ui.placeholder.guildNameOrTag = Guild name or tag
+rpg.ui.placeholder.roleName = Role name
+rpg.ui.placeholder.roleId = Role id
+rpg.ui.placeholder.permission = Permission (e.g. INVITE)
+
+rpg.race.list.header = === Available Races ===
+rpg.race.list.none = No races registered.
+rpg.race.list.entry = {status} {name} ({id})
+rpg.race.status.selected = [Selected]
+rpg.race.status.available = [Available]
+rpg.race.status.disabled = [Disabled]
+rpg.race.error.unknown = Unknown race: {id}
+rpg.race.error.disabled = Race is disabled: {id}
+rpg.race.error.alreadySelected = You already have this race selected.
+rpg.race.error.unableToSelect = Unable to select race: {id}
+rpg.race.success.switched = Race switched: {name}
+rpg.race.success.selected = Race selected: {name}
+
+rpg.npc.debug.noRoles = No roles provided.
+rpg.npc.debug.updated = {state} RPG NPC debug for {count} NPC(s).
+
+rpg.ability.bind.usage = Usage: /bindability <slot> <abilityId|clear> or /bindability list
+rpg.ability.bind.invalidSlot = Invalid slot. Please use a slot between 1 and 9.
+rpg.ability.bind.configNotFound = Config not found.
+rpg.ability.bind.slotNotConfigured = Slot {slot} is not configured as an ability slot. Valid slots: {validSlots}
+rpg.ability.bind.cleared = Cleared ability binding for slot {slot}
+rpg.ability.bind.unknownAbility = Unknown ability: {abilityId}
+rpg.ability.bind.notLearned = You haven't learned the ability: {ability}
+rpg.ability.bind.bound = Bound {ability} to hotbar slot {slot} (key {slot})
+rpg.ability.bind.none = No ability bindings set
+rpg.ability.bind.header = === Your Ability Bindings ===
+rpg.ability.bind.entry = Slot {slot} (key {slot}): {ability}
+
+rpg.ability.sync.none = No ability bindings to sync. Use /bindability to bind abilities.
+rpg.ability.sync.success = Hotbar ability icons synced! ({count} bindings)
+
+rpg.ability.unlock.unknownAbility = Unknown ability: {abilityId}
+rpg.ability.unlock.alreadyUnlocked = Ability already unlocked: {ability}
+rpg.ability.unlock.success = Unlocked ability: {ability} ({type})
+rpg.ability.unlock.typePassive = This is a PASSIVE ability - it will run every tick!
+rpg.ability.unlock.typeToggle = This is a TOGGLE ability - use /bindability to bind it to a hotbar slot
+rpg.ability.unlock.typeActive = This is an ACTIVE ability - use /bindability to bind it to a hotbar slot
+rpg.ability.unlock.none = No abilities unlocked. Use /unlockability <abilityId> to unlock one.
+rpg.ability.unlock.header = === Unlocked Abilities ===
+rpg.ability.unlock.entry = - {ability} ({type})
+rpg.ability.type.passive = Passive
+rpg.ability.type.toggle = Toggle
+rpg.ability.type.active = Active
+rpg.ability.type.unknown = Unknown
+
+rpg.ability.trigger.noBindingData = No ability binding data. Use /bindability
+rpg.ability.trigger.noBoundSlot = No ability bound to slot {slot}. Use /bindability
+rpg.ability.trigger.notUnlocked = Ability not unlocked: {abilityId}
+rpg.ability.trigger.notFound = Ability not found: {abilityId}
+rpg.ability.trigger.error = {error}
+rpg.ability.trigger.activated = Ability activated: {name}
+rpg.ability.trigger.notImplemented = Weapon Ability: {type} (not yet implemented)
+
+rpg.level.reset.none = No level data to reset.
+rpg.level.reset.success = Successfully reset {count} level system(s)
+rpg.level.reset.cleared = All level progression data has been cleared.
+
+rpg.level.test.placeholder = Level test not implemented. Use /leveltest instead.
+rpg.level.test.status = {systemId}: Level {level} ({currentExp}/{expToNext} exp) [Stats: {stats}, Skills: {skills}]
+rpg.level.test.noSystems = No level systems registered.
+rpg.level.test.headerAll = === Level System Test (ALL) ===
+rpg.level.test.headerSingle = === Level System Test ===
+rpg.level.test.complete = === Level System Test Complete ===
+rpg.level.test.usage = Usage: /leveltest all or /leveltest <SystemId>
+rpg.level.test.systemNotFound = - {systemId}: NOT FOUND
+rpg.level.test.systemDisabled = - {systemId}: DISABLED
+rpg.level.test.systemMax = - {systemId}: level {level} (MAX)
+rpg.level.test.systemResult = - {displayName} ({systemId}): {startLevel} -> {newLevel} | exp {currentExp}/{newExpToNext}
+
+rpg.class.common.blank = " "
+
+rpg.class.error.notFound = Class not found: {classId}
+rpg.class.error.unknownClass = Unknown class: {classId}
+rpg.class.error.notAvailable = Class {classId} is not available
+rpg.class.error.alreadyLearned = Already learned class {classId}
+rpg.class.error.exclusiveLearn = Cannot learn {class} while {blockingClass} is learned
+rpg.class.error.notLearnedById = Class {classId} is not learned
+rpg.class.error.mustLearnBeforeActivating = Must learn class before activating
+rpg.class.error.cannotSwitch = Cannot switch to this class
+rpg.class.error.cannotSwitchCombat = Cannot switch to this class while in combat
+rpg.class.error.maxCombat = Maximum combat classes reached
+rpg.class.error.maxProfession = Maximum profession classes reached
+rpg.class.error.raceRequired = You must select a race before learning {class}
+rpg.class.error.raceCannotLearn = Your race cannot learn {class}
+rpg.class.error.requiresUnknownClass = Requires unknown class {classId}
+rpg.class.error.requiresLevel = Requires {class} level {level}
+rpg.class.error.requiresClass = Requires {class} class
+rpg.class.error.notLearned = You have not learned {class}
+rpg.class.error.noLevelSystem = Class has no level system configured: {classId}
+
+rpg.class.success.learned = Learned {class}
+rpg.class.success.unlearned = Unlearned {class}
+rpg.class.success.activated = Activated {class}
+
+rpg.class.info.header = === {name} ===
+rpg.class.info.description = {description}
+rpg.class.info.status = Status: {status}
+rpg.class.status.primary = Primary
+rpg.class.status.learned = Learned
+rpg.class.status.locked = Locked
+rpg.class.status.inactive = Inactive
+rpg.class.info.learnedAt = Learned: {time}
+rpg.class.info.learnedUnknown = Learned: unknown
+rpg.class.info.requirementsHeader = Requirements:
+rpg.class.info.requirementsClasses =   - Classes: {classes}
+rpg.class.info.abilitiesCount = Abilities: {count}
+
+rpg.class.list.header = === Available Classes ===
+rpg.class.list.entry.primary = [PRIMARY] {name} ({id})
+rpg.class.list.entry.learned = [LEARNED] {name} ({id})
+rpg.class.list.entry.locked = [LOCKED] {name} ({id})
+rpg.class.list.learnedAt =   Learned: {time}
+rpg.class.list.description =   {description}
+
+rpg.class.abilities.noLearnedClass = No learned class. Specify class name: /class abilities <className>
+rpg.class.abilities.header = === {name} Abilities ===
+rpg.class.abilities.none = No abilities for this class
+rpg.class.abilities.entry = - {ability}
+
+rpg.class.progress.noLearnedClass = No learned class. Specify class name: /class progress <className>
+rpg.class.progress.header = === {name} Progress ===
+rpg.class.progress.status = Status: {status}
+rpg.class.progress.levelSystem = Level System: {systemId}
+rpg.class.progress.currentLevel = Current Level: {level}
+rpg.class.progress.currentXp = Current XP: {current} / {next} ({percent}%)
+rpg.class.progress.abilities = Abilities: {abilities}
+rpg.class.progress.abilitiesNone = Abilities: none
+rpg.class.progress.baseStatBonuses = Base Stat Bonuses:
+rpg.class.progress.baseStatAdd =   +{value} {stat}
+rpg.class.progress.baseStatMult =   +{value}% {stat}
+
+rpg.class.level.invalidTarget = Level must be >= 1
+rpg.class.level.max = {class} is already at max level.
+rpg.class.level.up = Leveled up {class} to {level}.
+rpg.class.level.set = Set {class} level to {level}.
+
+rpg.class.ability.error.notFound = Ability not found: {abilityId}
+rpg.class.ability.error.notUnlocked = Ability not unlocked: {abilityId}
+rpg.class.ability.error.noChain = Ability has no interaction chain: {abilityId}
+rpg.class.ability.error.rootNotFound = Root interaction not found: {chainId}
+rpg.class.ability.error.interactionManagerMissing = Interaction manager not available for this entity.
+rpg.class.ability.success.triggered = Triggered ability: {ability} ({chainId})
+
+rpg.class.debug.line = {text}
+
+rpg.lockpicking.title = Lockpicking
+rpg.lockpicking.pin = Pin
+rpg.lockpicking.time = Time
+rpg.lockpicking.mistakes = Mistakes
+rpg.lockpicking.needle = Needle
+rpg.lockpicking.sweetSpot = Sweet Spot
+rpg.lockpicking.setPin = Set Pin
+rpg.lockpicking.cancel = Cancel
+rpg.lockpicking.noLockpicks = You need a lockpick.
+rpg.lockpicking.requiresClass = Requires one of these classes: {classes}
+rpg.lockpicking.requiresClassLevel = Requires one of these classes at level {level}: {classes}
+rpg.lockpicking.invalidTier = Unknown lockpicking difficulty.
+rpg.lockpicking.unlockedWithKey = Unlocked with key.
+rpg.lockpicking.failed = Lockpicking failed.
+rpg.lockpicking.success = Lock opened.
+
+# ── Talent Trees ─────────────────────────────────────────────────────────────
+rpg.class.talent.noLearnedClass = No learned class. Specify class name: /class talent info <className>
+rpg.class.talent.grant.invalidAmount = Talent point grant amount must be greater than 0.
+rpg.class.talent.grant.failed = Failed to grant talent points to {classId}.
+rpg.class.talent.grant.success = Added {amount} talent points to {classId}. Available points: {available}
+rpg.class.talent.allocate.success = Allocated a point in {treeId}/{nodeId} for {classId}.
+rpg.class.talent.refund.success = Refunded a point from {treeId}/{nodeId} for {classId}.
+rpg.class.talent.reset.success = Reset all talents for {classId}.
+rpg.class.talent.ui.opened = Opened the talent tree for {classId}.
+rpg.class.talent.summary.header = === {class} Talents ===
+rpg.class.talent.summary.points = Available points: {available} | Spent: {spent}
+rpg.class.talent.summary.none = No talent trees are defined for this class.
+rpg.class.talent.summary.tree = [{id}] {name} ({spent} pts spent, max {max})
+rpg.class.talent.summary.node =   - {name} [{id}]: {rank}/{max}
+rpg.class.talent.error.unknownTree = Unknown talent tree: {treeId}
+rpg.class.talent.error.unknownNode = Unknown talent node: {nodeId}
+rpg.class.talent.error.classDataMissing = Missing class data for {classId}.
+rpg.class.talent.error.requiresLevel = Requires level {required}. Current level: {current}.
+rpg.class.talent.error.nodeMaxRank = {nodeId} is already at max rank ({maxRank}).
+rpg.class.talent.error.prerequisiteMissing = Missing prerequisite node: {nodeId}.
+rpg.class.talent.error.noLevelSystem = This class has no level system configured.
+rpg.class.talent.error.notEnoughPoints = Not enough talent points. Available: {available}.
+rpg.class.talent.error.partialRefundsPaidMode = Partial refunds are disabled in paid reset mode. Use /class talent reset instead.
+rpg.class.talent.error.nodeNoRanks = {nodeId} has no allocated ranks.
+rpg.class.talent.error.refundBlocked = Cannot refund {nodeId} because {blockingNodeId} depends on it.
+rpg.class.talent.error.noneToReset = No talent points to reset for {classId}.
+rpg.class.talent.error.treeMaxPoints = {treeId} is already at its point cap ({maxPoints}).
+rpg.class.talent.error.exclusiveSpecBlocked = You are currently spec'd into {treeId}. Reset talents to change spec.
+
+# Talent tree UI
+rpg.talent.ui.title = Talent Trees
+rpg.talent.ui.nodesHeading = Nodes
+rpg.talent.ui.selectNode = Select a node
+rpg.talent.ui.allocate = Allocate Point
+rpg.talent.ui.reset = Reset All Talents
+
+rpg.abilities.star_charge.name = Star Charge
+rpg.abilities.star_charge.description = Ignite your reactor harness and crash into your target.
+rpg.abilities.concussion_slam.name = Concussion Slam
+rpg.abilities.concussion_slam.description = Deliver a crushing close-range impact that rattles everything in front of you.
+rpg.abilities.aegis_overload.name = Aegis Overload
+rpg.abilities.aegis_overload.description = Overcharge your plating to restore stability in the middle of a fight.
+rpg.abilities.bastion_field.name = Bastion Field
+rpg.abilities.bastion_field.description = Trigger a fortified pulse that hardens your stance and restores your health.
+rpg.abilities.reactor_crash.name = Reactor Crash
+rpg.abilities.reactor_crash.description = Dump raw reactor output into a devastating breach strike.
+rpg.abilities.shattershot.name = Shattershot
+rpg.abilities.shattershot.description = Fire a dense burst of star-glass shards at a distant foe.
+rpg.abilities.prism_burst.name = Prism Burst
+rpg.abilities.prism_burst.description = Fire a tightly tuned shard beam that punches through the air with lethal precision.
+rpg.abilities.scrapstep.name = Scrapstep
+rpg.abilities.scrapstep.description = Kick off broken terrain and surge forward in a burst of scavenger momentum.
+rpg.abilities.killshot.name = Killshot
+rpg.abilities.killshot.description = Line up a devastating elimination shot against a priority target.
+rpg.abilities.ghostline_dash.name = Ghostline Dash
+rpg.abilities.ghostline_dash.description = Slip forward in a blur and reposition before the enemy can answer.
+rpg.abilities.echo_pulse.name = Echo Pulse
+rpg.abilities.echo_pulse.description = Release a restorative resonance through your own armor lattice.
+rpg.abilities.pulse_lance.name = Pulse Lance
+rpg.abilities.pulse_lance.description = Focus a cutting wave of resonance into a precise offensive strike.
+rpg.abilities.null_ward.name = Null Ward
+rpg.abilities.null_ward.description = Stabilize your own signal field and recover from incoming pressure.
+rpg.abilities.choir_bloom.name = Choir Bloom
+rpg.abilities.choir_bloom.description = Unfurl a powerful restorative bloom of ancient harmonic energy.
+rpg.abilities.disruption_wave.name = Disruption Wave
+rpg.abilities.disruption_wave.description = Unleash a sharp destabilizing pulse that tears through enemy formations.
+rpg.abilities.race_forgeskin.name = Forge Skin
+rpg.abilities.race_forgeskin.description = Forgeborn bodies endure heat, weight, and punishment better than most.
+rpg.abilities.race_slipstream.name = Slipstream
+rpg.abilities.race_slipstream.description = Riftwalkers move with practiced grace through broken terrain and unstable gravity.
+rpg.abilities.race_echosense.name = Echo Sense
+rpg.abilities.race_echosense.description = Echobound minds can feel the buried songs of ancient machinery.
+
+rpg.starforged.race.forgeborn.name = Forgeborn
+rpg.starforged.race.forgeborn.description = Heavy-framed frontier survivors adapted to heat, pressure, and industrial wastelands.
+rpg.starforged.race.riftwalker.name = Riftwalker
+rpg.starforged.race.riftwalker.description = Agile drifters shaped by broken transit routes, debris fields, and fast-moving salvage life.
+rpg.starforged.race.echobound.name = Echobound
+rpg.starforged.race.echobound.description = Sensitive attuners who hear patterns in the ruined systems of Veyra Null.
+
+rpg.starforged.class.vanguard.name = Vanguard
+rpg.starforged.class.vanguard.description = Armored shock troops who lead from the front with impact weapons and reactor momentum.
+rpg.starforged.class.fluxHunter.name = Flux Hunter
+rpg.starforged.class.fluxHunter.description = Mobile ranged specialists who weaponize tuned shards, pulses, and scavenged tech.
+rpg.starforged.class.echoWarden.name = Echo Warden
+rpg.starforged.class.echoWarden.description = Resonance-channelers who stabilize allies and weaponize ancient signal patterns.

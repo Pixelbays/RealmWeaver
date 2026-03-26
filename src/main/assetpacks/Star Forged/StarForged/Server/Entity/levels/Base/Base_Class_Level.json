@@ -1,0 +1,23 @@
+{
+  "DisplayName": "Base Class Level",
+  "Description": "Base template for Star Forged class progression.",
+  "MaxLevel": 30,
+  "StartingLevel": 1,
+  "ExpCurveRef": "Curve_StarForged",
+  "Prerequisites": {},
+  "DefaultRewards": {
+    "LevelUpEffects": {
+      "SoundId": "SFX_Item_Repair"
+    },
+    "StatPoints": 0,
+    "SkillPoints": 0
+  },
+  "LevelRewards": {},
+  "StatGrowth": {
+    "FlatGrowth": {},
+    "MilestoneGrowth": {}
+  },
+  "Enabled": true,
+  "Visible": false,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
+}

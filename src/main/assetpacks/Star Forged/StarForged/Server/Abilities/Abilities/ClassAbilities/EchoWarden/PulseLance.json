@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "EchoWarden"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.pulse_lance.name",
+    "Description": "pixelbays.rpg.abilities.pulse_lance.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Pulse_Lance"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Project a cutting wave of resonant force into a target.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Wand"
+}

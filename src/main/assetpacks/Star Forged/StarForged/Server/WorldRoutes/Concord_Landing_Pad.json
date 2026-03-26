@@ -1,0 +1,13 @@
+{
+  "Enabled": true,
+  "DisplayName": "Concord Landing Pad",
+  "Description": "Return to the main Charter Concord arrival platform on Veyra Null.",
+  "DestinationType": "World",
+  "TargetWorldName": "Concord_Landing_Pad",
+  "TravelAudience": "Self",
+  "RequireLeaderForGroupTravel": false,
+  "PersonalReturnPoint": true,
+  "Prerequisites": {
+    "RequiredLevel": 1
+  }
+}

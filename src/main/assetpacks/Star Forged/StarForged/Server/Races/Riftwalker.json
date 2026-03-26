@@ -1,0 +1,45 @@
+{
+  "displayName": "Riftwalker",
+  "description": "Agile drifters shaped by broken transit routes, debris fields, and fast-moving salvage life.",
+  "enabled": true,
+  "visible": true,
+  "isHybrid": false,
+  "parentRaces": [
+    "base_race"
+  ],
+  "compatibleHybridRaces": [],
+  "incompatibleHybridRaces": [],
+  "minSize": 0.95,
+  "maxSize": 1.03,
+  "startingStats": {
+    "Health": 95,
+    "Stamina": 60
+  },
+  "statModifiers": {
+    "additiveModifiers": {
+      "Stamina": 10
+    },
+    "multiplicativeModifiers": {}
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "Slipstream",
+      "abilityType": "Race",
+      "unlockType": "Starting",
+      "requiredLevel": 1
+    }
+  ],
+  "abilityIds": [
+    "Slipstream"
+  ],
+  "allowedCosmeticCategories": [
+    "Hair",
+    "Face",
+    "Body"
+  ],
+  "allowedCosmeticIds": [],
+  "notAllowedCosmeticCategories": [],
+  "notAllowedCosmeticIds": [],
+  "inheritanceRules": {
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "Spawners": [
+    {
+      "SpawnerId": "Example_Shield"
+    }
+  ],
+  "LifeSpan": 3.0,
+  "IsImportant": false
+}

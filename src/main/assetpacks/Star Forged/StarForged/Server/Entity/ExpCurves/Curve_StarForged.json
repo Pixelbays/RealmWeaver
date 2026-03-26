@@ -1,0 +1,8 @@
+{
+  "name": "Star Forged Curve",
+  "description": "A brisk early-game curve for frontier progression.",
+  "type": "exponential",
+  "baseExp": 120,
+  "growthRate": 42,
+  "exponent": 1.72
+}

@@ -1,0 +1,1176 @@
+{
+  "Tags": {},
+  "AccountUsername": "Heru",
+  "SelectedCharacterId": "54ac97ed-1deb-49c3-a4f1-da1d328dd142",
+  "AccountAchievementProgress": {
+    "UnlockedAchievements": {
+      "LineageAwakened": {
+        "AchievementId": "LineageAwakened",
+        "UnlockedAtEpochMs": 1773629998616,
+        "PointsAwarded": 5
+      }
+    },
+    "ProgressTracking": {
+      "LineageAwakened": {
+        "AchievementId": "LineageAwakened",
+        "CriteriaProgress": {
+          "choose_race": 1
+        },
+        "StartDateEpochMs": 1773629998616
+      }
+    },
+    "TotalAchievementPoints": 5,
+    "DisplayedTitle": ""
+  },
+  "RecoveryHistoryEpochMs": [],
+  "Profiles": [
+    {
+      "CharacterId": "54ac97ed-1deb-49c3-a4f1-da1d328dd142",
+      "CharacterName": "Legacy Character",
+      "RaceId": "Human",
+      "PrimaryClassId": "Warrior",
+      "CreatedAtEpochMs": 1773555841349,
+      "LastPlayedEpochMs": 1773630192146,
+      "SoftDeleted": false,
+      "DeletedAtEpochMs": 0,
+      "LevelProgression": {
+        "LevelSystems": {
+          "Warrior": {
+            "SystemId": "Warrior",
+            "CurrentLevel": 14,
+            "CurrentExp": 50.0,
+            "ExpToNextLevel": 1500.0,
+            "TotalLevelsGained": 4,
+            "LastGrowthAppliedLevel": 14,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          },
+          "Base_Character_Level": {
+            "SystemId": "Base_Character_Level",
+            "CurrentLevel": 1,
+            "CurrentExp": 0.0,
+            "ExpToNextLevel": 100.0,
+            "TotalLevelsGained": 0,
+            "LastGrowthAppliedLevel": 0,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          }
+        },
+        "LastLogoutEpochMs": 1773630192145
+      },
+      "ClassProgression": {
+        "LearnedClasses": {
+          "Warrior": {
+            "ClassId": "Warrior",
+            "LearnedTime": 1773555249827,
+            "AllocatedNodes": {},
+            "SpentTalentPoints": 0
+          }
+        }
+      },
+      "RaceProgression": {
+        "RaceId": "Human",
+        "ParentRaces": [],
+        "UnlockedRaceAbilities": []
+      },
+      "ClassAbilities": {
+        "UnlockedAbilities": {
+          "Charge": {
+            "AbilityId": "Charge",
+            "ClassId": "Warrior",
+            "UnlockedTime": 1773555249827,
+            "Rank": 1
+          }
+        },
+        "ToggleStates": {}
+      },
+      "AbilityBindings": {
+        "HotbarBindings": {},
+        "WeaponBindings": {},
+        "AbilitySlotBindings": {}
+      },
+      "AchievementProgress": {
+        "UnlockedAchievements": {
+          "ChoosePath": {
+            "AchievementId": "ChoosePath",
+            "UnlockedAtEpochMs": 1773629998615,
+            "PointsAwarded": 10
+          },
+          "FirstPower": {
+            "AchievementId": "FirstPower",
+            "UnlockedAtEpochMs": 1773629998611,
+            "PointsAwarded": 15
+          }
+        },
+        "ProgressTracking": {
+          "ChoosePath": {
+            "AchievementId": "ChoosePath",
+            "CriteriaProgress": {
+              "learn_first_class": 1
+            },
+            "StartDateEpochMs": 1773629998615
+          },
+          "FirstPower": {
+            "AchievementId": "FirstPower",
+            "CriteriaProgress": {
+              "unlock_first_ability": 1
+            },
+            "StartDateEpochMs": 1773629998600
+          },
+          "FirstSteps": {
+            "AchievementId": "FirstSteps",
+            "CriteriaProgress": {
+              "reach_base_level": 1
+            },
+            "StartDateEpochMs": 1773629998615
+          }
+        },
+        "TotalAchievementPoints": 25,
+        "DisplayedTitle": "com.hypixel.hytale.protocol.FormattedMessage@ce37e547"
+      },
+      "StatSnapshot": {
+        "Version": 5,
+        "Stats": {
+          "Charisma": {
+            "Id": "Charisma",
+            "Value": 100.0
+          },
+          "Dexterity": {
+            "Id": "Dexterity",
+            "Value": 100.0
+          },
+          "Mana": {
+            "Id": "Mana",
+            "Value": 0.0
+          },
+          "Rested_XP_Rate": {
+            "Id": "Rested_XP_Rate",
+            "Value": 0.0
+          },
+          "Intelligence": {
+            "Id": "Intelligence",
+            "Value": 100.0
+          },
+          "Chi": {
+            "Id": "Chi",
+            "Value": 0.0
+          },
+          "SoulShards": {
+            "Id": "SoulShards",
+            "Value": 0.0
+          },
+          "Stunned": {
+            "Id": "Stunned",
+            "Value": 0.0
+          },
+          "Rage": {
+            "Id": "Rage",
+            "Value": 100.0
+          },
+          "Immunity": {
+            "Id": "Immunity",
+            "Value": 0.0
+          },
+          "ElementalElemental": {
+            "Id": "ElementalElemental",
+            "Value": 0.0
+          },
+          "Leech": {
+            "Id": "Leech",
+            "Value": 100.0
+          },
+          "Template": {
+            "Id": "Template",
+            "Value": 0.0
+          },
+          "Haste": {
+            "Id": "Haste",
+            "Value": 100.0
+          },
+          "Wisdom": {
+            "Id": "Wisdom",
+            "Value": 100.0
+          },
+          "Stagger": {
+            "Id": "Stagger",
+            "Value": 0.0
+          },
+          "Unknown": {
+            "Id": "Unknown",
+            "Value": 0.0
+          },
+          "Energy": {
+            "Id": "Energy",
+            "Value": 100.0
+          },
+          "Holy": {
+            "Id": "Holy",
+            "Value": 0.0
+          },
+          "Exp_Rate_Gain": {
+            "Id": "Exp_Rate_Gain",
+            "Value": 1.0
+          },
+          "Agility": {
+            "Id": "Agility",
+            "Value": 100.0
+          },
+          "DeployablePreview": {
+            "Id": "DeployablePreview",
+            "Value": 0.0
+          },
+          "Totems": {
+            "Id": "Totems",
+            "Value": 0.0
+          },
+          "Constitution": {
+            "Id": "Constitution",
+            "Value": 100.0
+          },
+          "Versatility": {
+            "Id": "Versatility",
+            "Value": 100.0
+          },
+          "Speed": {
+            "Id": "Speed",
+            "Value": 100.0
+          },
+          "Oxygen": {
+            "Id": "Oxygen",
+            "Value": 100.0
+          },
+          "Runes": {
+            "Id": "Runes",
+            "Value": 0.0
+          },
+          "Health": {
+            "Id": "Health",
+            "Value": 100.0,
+            "Modifiers": {
+              "rpg_class_additive_Health": {
+                "Id": "Static",
+                "CalculationType": "Additive",
+                "Amount": 1400.0
+              }
+            }
+          },
+          "GlidingActive": {
+            "Id": "GlidingActive",
+            "Value": 0.0
+          },
+          "Mastery": {
+            "Id": "Mastery",
+            "Value": 100.0
+          },
+          "SignatureCharges": {
+            "Id": "SignatureCharges",
+            "Value": 0.0
+          },
+          "Stamina": {
+            "Id": "Stamina",
+            "Value": 10.0
+          },
+          "AstralPower": {
+            "Id": "AstralPower",
+            "Value": 0.0
+          },
+          "Ammo": {
+            "Id": "Ammo",
+            "Value": 0.0
+          },
+          "Heat": {
+            "Id": "Heat",
+            "Value": 0.0
+          },
+          "SignatureEnergy": {
+            "Id": "SignatureEnergy",
+            "Value": 0.0
+          },
+          "Focus": {
+            "Id": "Focus",
+            "Value": 0.0
+          },
+          "CriticalStrike": {
+            "Id": "CriticalStrike",
+            "Value": 100.0
+          },
+          "Insanity": {
+            "Id": "Insanity",
+            "Value": 0.0
+          },
+          "StaminaRegenDelay": {
+            "Id": "StaminaRegenDelay",
+            "Value": 0.0
+          },
+          "Rested_XP": {
+            "Id": "Rested_XP",
+            "Value": 0.0
+          },
+          "MagicCharges": {
+            "Id": "MagicCharges",
+            "Value": 0.0
+          },
+          "Silenced": {
+            "Id": "Silenced",
+            "Value": 0.0
+          },
+          "Strength": {
+            "Id": "Strength",
+            "Value": 1.0
+          },
+          "Avoidance": {
+            "Id": "Avoidance",
+            "Value": 100.0
+          }
+        }
+      },
+      "SavedWorldName": "default",
+      "SavedTransform": {
+        "Position": {
+          "X": -823.7797241210938,
+          "Y": 120.0,
+          "Z": 325.4198303222656
+        },
+        "Rotation": {
+          "Pitch": 0.0,
+          "Yaw": 7.015661239624023,
+          "Roll": 0.0
+        }
+      },
+      "InventorySnapshot": {
+        "Version": 4,
+        "Storage": {
+          "Id": "Simple",
+          "Capacity": 36,
+          "Items": {
+            "1": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "3": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "2": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "7": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "6": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "4": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "5": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "8": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "9": {
+              "Id": "Weapon_Club_Zombie_Leg",
+              "Quantity": 1,
+              "Durability": 16.0,
+              "MaxDurability": 16.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "Armor": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {}
+        },
+        "HotBar": {
+          "Id": "Simple",
+          "Capacity": 9,
+          "Items": {
+            "0": {
+              "Id": "Rock_Crystal_Blue_Large",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "1": {
+              "Id": "Furniture_Lumberjack_Door",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "Utility": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {}
+        },
+        "Backpack": {
+          "Id": "Empty"
+        },
+        "ActiveHotbarSlot": 0,
+        "Tool": {
+          "Id": "Simple",
+          "Capacity": 23,
+          "Items": {
+            "0": {
+              "Id": "EditorTool_Paint",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "1": {
+              "Id": "EditorTool_Sculpt",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "3": {
+              "Id": "EditorTool_Paste",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "2": {
+              "Id": "EditorTool_Selection",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "4": {
+              "Id": "EditorTool_Line",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "5": {
+              "Id": "EditorTool_Layers",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "ActiveToolsSlot": -1,
+        "ActiveUtilitySlot": -1,
+        "SortType": "Name"
+      },
+      "ActiveHotbarSlot": 3,
+      "ActiveUtilitySlot": -1,
+      "ActiveToolsSlot": -1
+    },
+    {
+      "CharacterId": "e35037db-9958-4d06-8d40-28fa03824f41",
+      "CharacterName": "test",
+      "RaceId": "Human",
+      "PrimaryClassId": "Warrior",
+      "CreatedAtEpochMs": 1773593195486,
+      "LastPlayedEpochMs": 1773605655826,
+      "SoftDeleted": false,
+      "DeletedAtEpochMs": 0,
+      "LevelProgression": {
+        "LevelSystems": {
+          "Warrior": {
+            "SystemId": "Warrior",
+            "CurrentLevel": 1,
+            "CurrentExp": 0.0,
+            "ExpToNextLevel": 100.0,
+            "TotalLevelsGained": 0,
+            "LastGrowthAppliedLevel": 0,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          },
+          "Base_Character_Level": {
+            "SystemId": "Base_Character_Level",
+            "CurrentLevel": 1,
+            "CurrentExp": 0.0,
+            "ExpToNextLevel": 100.0,
+            "TotalLevelsGained": 0,
+            "LastGrowthAppliedLevel": 0,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          }
+        },
+        "LastLogoutEpochMs": 1773593936483
+      },
+      "ClassProgression": {
+        "LearnedClasses": {
+          "Warrior": {
+            "ClassId": "Warrior",
+            "LearnedTime": 1773593195486,
+            "AllocatedNodes": {},
+            "SpentTalentPoints": 0
+          }
+        }
+      },
+      "RaceProgression": {
+        "RaceId": "Human",
+        "ParentRaces": [],
+        "UnlockedRaceAbilities": []
+      },
+      "ClassAbilities": {
+        "UnlockedAbilities": {
+          "Charge": {
+            "AbilityId": "Charge",
+            "ClassId": "Warrior",
+            "UnlockedTime": 1773593195486,
+            "Rank": 1
+          }
+        },
+        "ToggleStates": {}
+      },
+      "AbilityBindings": {
+        "HotbarBindings": {},
+        "WeaponBindings": {},
+        "AbilitySlotBindings": {}
+      },
+      "AchievementProgress": {
+        "UnlockedAchievements": {},
+        "ProgressTracking": {},
+        "TotalAchievementPoints": 0,
+        "DisplayedTitle": ""
+      },
+      "StatSnapshot": {
+        "Version": 5,
+        "Stats": {
+          "Charisma": {
+            "Id": "Charisma",
+            "Value": 100.0
+          },
+          "Dexterity": {
+            "Id": "Dexterity",
+            "Value": 100.0
+          },
+          "Mana": {
+            "Id": "Mana",
+            "Value": 0.0
+          },
+          "Rested_XP_Rate": {
+            "Id": "Rested_XP_Rate",
+            "Value": 0.0
+          },
+          "Intelligence": {
+            "Id": "Intelligence",
+            "Value": 100.0
+          },
+          "Chi": {
+            "Id": "Chi",
+            "Value": 0.0
+          },
+          "SoulShards": {
+            "Id": "SoulShards",
+            "Value": 0.0
+          },
+          "Stunned": {
+            "Id": "Stunned",
+            "Value": 0.0
+          },
+          "Rage": {
+            "Id": "Rage",
+            "Value": 100.0
+          },
+          "Immunity": {
+            "Id": "Immunity",
+            "Value": 0.0
+          },
+          "ElementalElemental": {
+            "Id": "ElementalElemental",
+            "Value": 0.0
+          },
+          "Leech": {
+            "Id": "Leech",
+            "Value": 100.0
+          },
+          "Template": {
+            "Id": "Template",
+            "Value": 0.0
+          },
+          "Haste": {
+            "Id": "Haste",
+            "Value": 100.0
+          },
+          "Wisdom": {
+            "Id": "Wisdom",
+            "Value": 100.0
+          },
+          "Stagger": {
+            "Id": "Stagger",
+            "Value": 0.0
+          },
+          "Unknown": {
+            "Id": "Unknown",
+            "Value": 0.0
+          },
+          "Energy": {
+            "Id": "Energy",
+            "Value": 100.0
+          },
+          "Holy": {
+            "Id": "Holy",
+            "Value": 0.0
+          },
+          "Exp_Rate_Gain": {
+            "Id": "Exp_Rate_Gain",
+            "Value": 1.0
+          },
+          "Agility": {
+            "Id": "Agility",
+            "Value": 100.0
+          },
+          "DeployablePreview": {
+            "Id": "DeployablePreview",
+            "Value": 0.0
+          },
+          "Totems": {
+            "Id": "Totems",
+            "Value": 0.0
+          },
+          "Constitution": {
+            "Id": "Constitution",
+            "Value": 100.0
+          },
+          "Versatility": {
+            "Id": "Versatility",
+            "Value": 100.0
+          },
+          "Speed": {
+            "Id": "Speed",
+            "Value": 100.0
+          },
+          "Oxygen": {
+            "Id": "Oxygen",
+            "Value": 100.0
+          },
+          "Runes": {
+            "Id": "Runes",
+            "Value": 0.0
+          },
+          "Health": {
+            "Id": "Health",
+            "Value": 100.0,
+            "Modifiers": {
+              "rpg_class_additive_Health": {
+                "Id": "Static",
+                "CalculationType": "Additive",
+                "Amount": 100.0
+              }
+            }
+          },
+          "GlidingActive": {
+            "Id": "GlidingActive",
+            "Value": 0.0
+          },
+          "Mastery": {
+            "Id": "Mastery",
+            "Value": 100.0
+          },
+          "SignatureCharges": {
+            "Id": "SignatureCharges",
+            "Value": 0.0
+          },
+          "Stamina": {
+            "Id": "Stamina",
+            "Value": 10.0
+          },
+          "AstralPower": {
+            "Id": "AstralPower",
+            "Value": 0.0
+          },
+          "Ammo": {
+            "Id": "Ammo",
+            "Value": 0.0
+          },
+          "Heat": {
+            "Id": "Heat",
+            "Value": 0.0
+          },
+          "SignatureEnergy": {
+            "Id": "SignatureEnergy",
+            "Value": 0.0
+          },
+          "Focus": {
+            "Id": "Focus",
+            "Value": 0.0
+          },
+          "CriticalStrike": {
+            "Id": "CriticalStrike",
+            "Value": 100.0
+          },
+          "Insanity": {
+            "Id": "Insanity",
+            "Value": 0.0
+          },
+          "StaminaRegenDelay": {
+            "Id": "StaminaRegenDelay",
+            "Value": 0.0
+          },
+          "Rested_XP": {
+            "Id": "Rested_XP",
+            "Value": 0.0
+          },
+          "MagicCharges": {
+            "Id": "MagicCharges",
+            "Value": 0.0
+          },
+          "Silenced": {
+            "Id": "Silenced",
+            "Value": 0.0
+          },
+          "Strength": {
+            "Id": "Strength",
+            "Value": 1.0
+          },
+          "Avoidance": {
+            "Id": "Avoidance",
+            "Value": 100.0
+          }
+        }
+      },
+      "SavedWorldName": "default",
+      "SavedTransform": {
+        "Position": {
+          "X": -848.5,
+          "Y": 120.0,
+          "Z": 336.5
+        },
+        "Rotation": {
+          "Pitch": 0.0,
+          "Yaw": -1.627147912979126,
+          "Roll": 0.0
+        }
+      },
+      "InventorySnapshot": {
+        "Version": 4,
+        "Storage": {
+          "Id": "Simple",
+          "Capacity": 36,
+          "Items": {}
+        },
+        "Armor": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {}
+        },
+        "HotBar": {
+          "Id": "Simple",
+          "Capacity": 9,
+          "Items": {}
+        },
+        "Utility": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {}
+        },
+        "Backpack": {
+          "Id": "Empty"
+        },
+        "ActiveHotbarSlot": 0,
+        "Tool": {
+          "Id": "Simple",
+          "Capacity": 23,
+          "Items": {
+            "0": {
+              "Id": "EditorTool_Paint",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "2": {
+              "Id": "EditorTool_Selection",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "4": {
+              "Id": "EditorTool_Line",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "1": {
+              "Id": "EditorTool_Sculpt",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "3": {
+              "Id": "EditorTool_Paste",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "5": {
+              "Id": "EditorTool_Layers",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "ActiveToolsSlot": -1,
+        "ActiveUtilitySlot": -1,
+        "SortType": "Name"
+      },
+      "ActiveHotbarSlot": 0,
+      "ActiveUtilitySlot": -1,
+      "ActiveToolsSlot": -1
+    },
+    {
+      "CharacterId": "59def3e3-8991-412e-bdb6-948bd6890296",
+      "CharacterName": "FarCry Player 3",
+      "RaceId": "Human",
+      "PrimaryClassId": "Warrior",
+      "CreatedAtEpochMs": 1773598466983,
+      "LastPlayedEpochMs": 1773598466983,
+      "SoftDeleted": false,
+      "DeletedAtEpochMs": 0,
+      "LevelProgression": {
+        "LevelSystems": {
+          "Warrior": {
+            "SystemId": "Warrior",
+            "CurrentLevel": 1,
+            "CurrentExp": 0.0,
+            "ExpToNextLevel": 100.0,
+            "TotalLevelsGained": 0,
+            "LastGrowthAppliedLevel": 0,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          },
+          "Base_Character_Level": {
+            "SystemId": "Base_Character_Level",
+            "CurrentLevel": 1,
+            "CurrentExp": 0.0,
+            "ExpToNextLevel": 100.0,
+            "TotalLevelsGained": 0,
+            "LastGrowthAppliedLevel": 0,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          }
+        },
+        "LastLogoutEpochMs": 0
+      },
+      "ClassProgression": {
+        "LearnedClasses": {
+          "Warrior": {
+            "ClassId": "Warrior",
+            "LearnedTime": 1773598466983,
+            "AllocatedNodes": {},
+            "SpentTalentPoints": 0
+          }
+        }
+      },
+      "RaceProgression": {
+        "RaceId": "Human",
+        "ParentRaces": [],
+        "UnlockedRaceAbilities": []
+      },
+      "ClassAbilities": {
+        "UnlockedAbilities": {
+          "Charge": {
+            "AbilityId": "Charge",
+            "ClassId": "Warrior",
+            "UnlockedTime": 1773598466983,
+            "Rank": 1
+          }
+        },
+        "ToggleStates": {}
+      },
+      "AbilityBindings": {
+        "HotbarBindings": {},
+        "WeaponBindings": {},
+        "AbilitySlotBindings": {}
+      },
+      "AchievementProgress": {
+        "UnlockedAchievements": {},
+        "ProgressTracking": {},
+        "TotalAchievementPoints": 0,
+        "DisplayedTitle": ""
+      },
+      "StatSnapshot": {
+        "Version": 5,
+        "Stats": {
+          "Charisma": {
+            "Id": "Charisma",
+            "Value": 0.0
+          },
+          "Dexterity": {
+            "Id": "Dexterity",
+            "Value": 0.0
+          },
+          "Mana": {
+            "Id": "Mana",
+            "Value": 0.0
+          },
+          "Rested_XP_Rate": {
+            "Id": "Rested_XP_Rate",
+            "Value": 0.0
+          },
+          "Intelligence": {
+            "Id": "Intelligence",
+            "Value": 0.0
+          },
+          "Chi": {
+            "Id": "Chi",
+            "Value": 0.0
+          },
+          "SoulShards": {
+            "Id": "SoulShards",
+            "Value": 0.0
+          },
+          "Stunned": {
+            "Id": "Stunned",
+            "Value": 0.0
+          },
+          "Rage": {
+            "Id": "Rage",
+            "Value": 0.0
+          },
+          "Immunity": {
+            "Id": "Immunity",
+            "Value": 0.0
+          },
+          "ElementalElemental": {
+            "Id": "ElementalElemental",
+            "Value": 0.0
+          },
+          "Leech": {
+            "Id": "Leech",
+            "Value": 0.0
+          },
+          "Template": {
+            "Id": "Template",
+            "Value": 0.0
+          },
+          "Haste": {
+            "Id": "Haste",
+            "Value": 0.0
+          },
+          "Wisdom": {
+            "Id": "Wisdom",
+            "Value": 0.0
+          },
+          "Stagger": {
+            "Id": "Stagger",
+            "Value": 0.0
+          },
+          "Unknown": {
+            "Id": "Unknown",
+            "Value": 0.0
+          },
+          "Energy": {
+            "Id": "Energy",
+            "Value": 0.0
+          },
+          "Holy": {
+            "Id": "Holy",
+            "Value": 0.0
+          },
+          "Exp_Rate_Gain": {
+            "Id": "Exp_Rate_Gain",
+            "Value": 1.0
+          },
+          "Agility": {
+            "Id": "Agility",
+            "Value": 0.0
+          },
+          "DeployablePreview": {
+            "Id": "DeployablePreview",
+            "Value": 0.0
+          },
+          "Totems": {
+            "Id": "Totems",
+            "Value": 0.0
+          },
+          "Constitution": {
+            "Id": "Constitution",
+            "Value": 0.0
+          },
+          "Versatility": {
+            "Id": "Versatility",
+            "Value": 0.0
+          },
+          "Speed": {
+            "Id": "Speed",
+            "Value": 0.0
+          },
+          "Oxygen": {
+            "Id": "Oxygen",
+            "Value": 100.0
+          },
+          "Runes": {
+            "Id": "Runes",
+            "Value": 0.0
+          },
+          "Health": {
+            "Id": "Health",
+            "Value": 100.0
+          },
+          "GlidingActive": {
+            "Id": "GlidingActive",
+            "Value": 0.0
+          },
+          "Mastery": {
+            "Id": "Mastery",
+            "Value": 0.0
+          },
+          "SignatureCharges": {
+            "Id": "SignatureCharges",
+            "Value": 0.0
+          },
+          "Stamina": {
+            "Id": "Stamina",
+            "Value": 10.0
+          },
+          "AstralPower": {
+            "Id": "AstralPower",
+            "Value": 0.0
+          },
+          "Ammo": {
+            "Id": "Ammo",
+            "Value": 0.0
+          },
+          "Heat": {
+            "Id": "Heat",
+            "Value": 0.0
+          },
+          "SignatureEnergy": {
+            "Id": "SignatureEnergy",
+            "Value": 0.0
+          },
+          "Focus": {
+            "Id": "Focus",
+            "Value": 0.0
+          },
+          "CriticalStrike": {
+            "Id": "CriticalStrike",
+            "Value": 0.0
+          },
+          "Insanity": {
+            "Id": "Insanity",
+            "Value": 0.0
+          },
+          "StaminaRegenDelay": {
+            "Id": "StaminaRegenDelay",
+            "Value": 0.0
+          },
+          "Rested_XP": {
+            "Id": "Rested_XP",
+            "Value": 0.0
+          },
+          "MagicCharges": {
+            "Id": "MagicCharges",
+            "Value": 0.0
+          },
+          "Silenced": {
+            "Id": "Silenced",
+            "Value": 0.0
+          },
+          "Strength": {
+            "Id": "Strength",
+            "Value": 1.0
+          },
+          "Avoidance": {
+            "Id": "Avoidance",
+            "Value": 0.0
+          }
+        }
+      },
+      "SavedWorldName": "",
+      "SavedTransform": {
+        "Position": {
+          "X": 0.0,
+          "Y": 0.0,
+          "Z": 0.0
+        },
+        "Rotation": {
+          "Pitch": 0.0,
+          "Yaw": 0.0,
+          "Roll": 0.0
+        }
+      },
+      "InventorySnapshot": {
+        "Version": 4,
+        "Storage": {
+          "Id": "Simple",
+          "Capacity": 36,
+          "Items": {}
+        },
+        "Armor": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {}
+        },
+        "HotBar": {
+          "Id": "Simple",
+          "Capacity": 9,
+          "Items": {}
+        },
+        "Utility": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {}
+        },
+        "Backpack": {
+          "Id": "Empty"
+        },
+        "ActiveHotbarSlot": 0,
+        "Tool": {
+          "Id": "Simple",
+          "Capacity": 23,
+          "Items": {}
+        },
+        "ActiveToolsSlot": -1,
+        "ActiveUtilitySlot": -1,
+        "SortType": "Name"
+      },
+      "ActiveHotbarSlot": 0,
+      "ActiveUtilitySlot": -1,
+      "ActiveToolsSlot": -1
+    }
+  ]
+}

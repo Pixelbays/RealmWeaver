@@ -1,0 +1,24 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Void Storage",
+  "Description": "Long-term archival storage for rare or sentimental items.",
+  "Scope": "Player",
+  "StorageMode": "Void",
+  "RemoteAccessAllowed": true,
+  "SearchEnabled": false,
+  "SortEnabled": false,
+  "AutoStackEnabled": false,
+  "DefaultSlotCount": 12,
+  "MaxSlotCountPerTab": 24,
+  "DefaultTabCount": 1,
+  "MaxTabs": 2,
+  "Tabs": [
+    {
+      "Id": "Vault",
+      "DisplayName": "Vault",
+      "Description": "Deep storage for rare items.",
+      "SlotCount": 12,
+      "UnlockByDefault": true
+    }
+  ]
+}

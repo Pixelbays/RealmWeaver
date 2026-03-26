@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "FluxHunter"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.prism_burst.name",
+    "Description": "pixelbays.rpg.abilities.prism_burst.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Prism_Burst"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Fire a sharply focused burst of tuned shards.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Wand"
+}

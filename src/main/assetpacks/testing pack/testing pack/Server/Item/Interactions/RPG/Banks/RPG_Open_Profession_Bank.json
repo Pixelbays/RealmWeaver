@@ -1,0 +1,6 @@
+{
+  "Type": "OpenBankUi",
+  "BankTypeId": "Professions",
+  "ProfessionId": "woodworking",
+  "OpenSelectionWhenTypeMissing": false
+}

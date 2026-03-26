@@ -1,0 +1,450 @@
+{
+  "DisplayName": "Warriors",
+  "Description": "A fierce melee combatant who specializes in strength and endurance. Warriors excel at close-quarters combat and can withstand massive amounts of damage.",
+  "Icon": "Icons/ItemsGenerated/Armor_Leather_Medium_Chest.png",
+  "Enabled": true,
+  "Visible": true,
+  "Roles": [
+    "tank",
+    "dps"
+  ],
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "LevelSystemId": "Warrior",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "Charge",
+      "UnlockLevel": 1
+    }
+  ],
+  "TalentTrees": [
+    {
+      "TreeId": "offense",
+      "DisplayName": "Offense",
+      "Description": "Increase your damage and offensive capabilities.",
+      "Roles": [
+        "dps"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "battle_hardened",
+          "DisplayName": "Battle Hardened",
+          "Description": "Increases max health by 50 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 50
+            }
+          }
+        },
+        {
+          "NodeId": "berserker_charge",
+          "DisplayName": "Berserker Charge",
+          "Description": "Unlocks the Charge ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 5,
+          "RequiredNodes": [
+            "battle_hardened"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "GrantsAbilityId": "Charge"
+        },
+        {
+          "NodeId": "warcry",
+          "DisplayName": "Warcry",
+          "Description": "Increases maximum Rage by 10 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 10,
+          "RequiredNodes": [
+            "battle_hardened"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Rage": 10
+            }
+          }
+        },
+        {
+          "NodeId": "martial_focus",
+          "DisplayName": "Martial Focus",
+          "Description": "Increases Haste by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "berserker_charge",
+            "warcry"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 3
+            }
+          }
+        },
+        {
+          "NodeId": "relentless_momentum",
+          "DisplayName": "Relentless Momentum",
+          "Description": "Increases Speed by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "berserker_charge"
+          ],
+          "PositionX": -2,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Speed": 2
+            }
+          }
+        },
+        {
+          "NodeId": "crushing_blows",
+          "DisplayName": "Crushing Blows",
+          "Description": "Increases Critical Strike by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "warcry"
+          ],
+          "PositionX": 2,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 4
+            }
+          }
+        },
+        {
+          "NodeId": "adrenal_surge",
+          "DisplayName": "Adrenal Surge",
+          "Description": "Increases Stamina by 15 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "relentless_momentum",
+            "martial_focus"
+          ],
+          "PositionX": -1,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Stamina": 15
+            }
+          }
+        },
+        {
+          "NodeId": "blood_frenzy",
+          "DisplayName": "Blood Frenzy",
+          "Description": "Increases Versatility by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "martial_focus",
+            "crushing_blows"
+          ],
+          "PositionX": 1,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Versatility": 3
+            }
+          }
+        },
+        {
+          "NodeId": "executioner_training",
+          "DisplayName": "Executioner Training",
+          "Description": "Increases Mastery by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 16,
+          "RequiredNodes": [
+            "adrenal_surge",
+            "blood_frenzy"
+          ],
+          "PositionX": 0,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 4
+            }
+          }
+        },
+        {
+          "NodeId": "juggernaut",
+          "DisplayName": "Juggernaut",
+          "Description": "Increases maximum Health by 150 and Stamina by 30.",
+          "MaxRank": 1,
+          "RequiredLevel": 20,
+          "RequiredNodes": [
+            "executioner_training"
+          ],
+          "PositionX": 0,
+          "PositionY": 5,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 150,
+              "Stamina": 30
+            }
+          }
+        },
+        {
+          "NodeId": "unbridled_wrath",
+          "DisplayName": "Unbridled Wrath",
+          "Description": "Increases maximum Rage by 8 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "relentless_momentum"
+          ],
+          "PositionX": -3,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Rage": 8
+            }
+          }
+        },
+        {
+          "NodeId": "sweeping_strikes",
+          "DisplayName": "Sweeping Strikes",
+          "Description": "Increases Speed by 2 and Haste by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "crushing_blows"
+          ],
+          "PositionX": 3,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Speed": 2,
+              "Haste": 2
+            }
+          }
+        },
+        {
+          "NodeId": "tempered_fury",
+          "DisplayName": "Tempered Fury",
+          "Description": "Increases maximum Heat by 10 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 14,
+          "RequiredNodes": [
+            "unbridled_wrath",
+            "adrenal_surge"
+          ],
+          "PositionX": -2,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Heat": 10
+            }
+          }
+        },
+        {
+          "NodeId": "slaughterhouse",
+          "DisplayName": "Slaughterhouse",
+          "Description": "Increases Critical Strike by 5 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 14,
+          "RequiredNodes": [
+            "blood_frenzy",
+            "sweeping_strikes"
+          ],
+          "PositionX": 2,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 5
+            }
+          }
+        },
+        {
+          "NodeId": "battle_trance",
+          "DisplayName": "Battle Trance",
+          "Description": "Increases Haste by 4 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 16,
+          "RequiredNodes": [
+            "adrenal_surge"
+          ],
+          "PositionX": -1,
+          "PositionY": 5,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 4
+            }
+          }
+        },
+        {
+          "NodeId": "killing_spree",
+          "DisplayName": "Killing Spree",
+          "Description": "Increases Mastery by 5 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 16,
+          "RequiredNodes": [
+            "blood_frenzy"
+          ],
+          "PositionX": 1,
+          "PositionY": 5,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 5
+            }
+          }
+        },
+        {
+          "NodeId": "titan_grip_training",
+          "DisplayName": "Titan Grip Training",
+          "Description": "Increases maximum Health by 100 and Stamina by 20.",
+          "MaxRank": 2,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "tempered_fury",
+            "executioner_training"
+          ],
+          "PositionX": -2,
+          "PositionY": 6,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 100,
+              "Stamina": 20
+            }
+          }
+        },
+        {
+          "NodeId": "brutal_precision",
+          "DisplayName": "Brutal Precision",
+          "Description": "Increases Critical Strike by 6 and Versatility by 2 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "slaughterhouse",
+            "executioner_training"
+          ],
+          "PositionX": 2,
+          "PositionY": 6,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 6,
+              "Versatility": 2
+            }
+          }
+        },
+        {
+          "NodeId": "unbreakable_offense",
+          "DisplayName": "Unbreakable Offense",
+          "Description": "Increases Versatility by 6 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 20,
+          "RequiredNodes": [
+            "titan_grip_training",
+            "juggernaut",
+            "brutal_precision"
+          ],
+          "PositionX": 0,
+          "PositionY": 7,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Versatility": 6
+            }
+          }
+        },
+        {
+          "NodeId": "avatar_of_war",
+          "DisplayName": "Avatar of War",
+          "Description": "Increases maximum Health by 200, maximum Rage by 20, and Mastery by 8.",
+          "MaxRank": 1,
+          "RequiredLevel": 24,
+          "RequiredNodes": [
+            "unbreakable_offense"
+          ],
+          "PositionX": 0,
+          "PositionY": 8,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 200,
+              "Rage": 20,
+              "Mastery": 8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "TreeId": "defense",
+      "DisplayName": "Defense",
+      "Description": "Bolster your defenses and resilience.",
+      "Roles": [
+        "tank"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "iron_skin",
+          "DisplayName": "Iron Skin",
+          "Description": "Increases max health by 75 per rank.",
+          "MaxRank": 5,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 75
+            }
+          }
+        },
+        {
+          "NodeId": "endurance",
+          "DisplayName": "Endurance",
+          "Description": "Increases max stamina by 20 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 5,
+          "RequiredNodes": [
+            "iron_skin"
+          ],
+          "PositionX": 2,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Stamina": 20
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "PerLevelModifiers": {
+    "AdditiveModifiers": {
+      "Health": 100
+    }
+  },
+  "Tags": {
+    "type": [
+      "combat"
+    ],
+    "races": [
+      "Global"
+    ]
+  },
+  "EquipmentRestrictions": {
+    "RestrictionMode": "Hard",
+    "AllowedArmorTypes": [
+      "cobalt"
+    ],
+    "AllowedWeaponTypes": [
+      "axe"
+    ]
+  },
+  "ResourceStats": [
+    "Rage",
+    "Heat"
+  ]
+}

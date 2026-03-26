@@ -1,0 +1,35 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Personal Bank",
+  "Description": "Character-scoped item storage for personal progression and loot.",
+  "Scope": "Character",
+  "StorageMode": "Mixed",
+  "DefaultTabCount": 1,
+  "MaxTabs": 4,
+  "Tabs": [
+    {
+      "Id": "Main",
+      "DisplayName": "Main",
+      "Description": "General adventuring storage.",
+      "SlotCount": 24,
+      "UnlockByDefault": true
+    },
+    {
+      "Id": "Materials",
+      "DisplayName": "Materials",
+      "Description": "Crafting mats and reagents.",
+      "SlotCount": 24,
+      "UnlockByDefault": false,
+      "AllowedItemTags": [
+        "material",
+        "reagent"
+      ],
+      "UnlockCost": {
+        "Tier": 2,
+        "CurrencyId": "gold",
+        "Amount": 500,
+        "Note": "Unlock material storage"
+      }
+    }
+  ]
+}

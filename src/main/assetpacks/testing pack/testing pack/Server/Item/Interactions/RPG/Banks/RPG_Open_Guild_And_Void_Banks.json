@@ -1,0 +1,9 @@
+{
+  "Type": "OpenBankUi",
+  "BankTypeIds": [
+    "Guild",
+    "Void"
+  ],
+  "MenuTitle": "Shared Storage Services",
+  "OpenSelectionWhenTypeMissing": false
+}

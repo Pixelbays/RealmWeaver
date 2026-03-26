@@ -1,0 +1,11 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Ember Brands",
+  "Description": "Clan-marked tokens of debt, honor, and war spoils recognized by the Ember Clades and their trading circles.",
+  "SortOrder": 30,
+  "AllowedScopes": [
+    "Character",
+    "Guild"
+  ],
+  "AuctionHouseAllowed": false
+}

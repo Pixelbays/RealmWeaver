@@ -1,0 +1,25 @@
+{
+  "Categories": [
+    "Vanguard",
+    "Mobility"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.star_charge.name",
+    "Description": "pixelbays.rpg.abilities.star_charge.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Star_Charge"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Crash into a target and deal a burst of physical damage.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace"
+}

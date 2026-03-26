@@ -1,0 +1,234 @@
+{
+  "GeneralSettings": {
+    "DebuggingMode": "DeveloperDontUse",
+    "PlayerLogging": false,
+    "AntiGrindMod": false,
+    "RequireRaceAtStart": false,
+    "GlobalMobScaling": false,
+    "ServerName": "Star Forged",
+    "DiscordJoin": "",
+    "Website": "",
+    "Expansions": []
+  },
+  "StatSettings": {
+    "AdvantageRollModifiers": {}
+  },
+  "ClassSettings": {
+    "Enabled": true,
+    "RoleTypes": [
+      "tank",
+      "healer",
+      "dps"
+    ],
+    "ClassMode": "SingleClass",
+    "ActiveClassMode": "Manual",
+    "ClassTags": [
+      "combat"
+    ],
+    "XPRouting": "ActiveClassOnly",
+    "XPTagSplits": {
+      "combat": 1.0,
+      "job": 0.0,
+      "profession": 0.0,
+      "base": 0.0
+    },
+    "MaxCombatClasses": 1,
+    "MaxProfessionClasses": 0,
+    "ClassSwitchingRules": "",
+    "RequireClassAtStart": false,
+    "AbilityLearningMode": "AutoLearnOnLevelUp"
+  },
+  "CharacterSettings": {
+    "Enabled": true,
+    "MaxCharacterSlots": 6,
+    "AllowCharacterCreation": true,
+    "AllowCharacterDeletion": true,
+    "AllowLogoutToCharacterSelect": false,
+    "DeletionMode": "SoftDeleteRecovery",
+    "SoftDeleteRecoveryDays": 14,
+    "DeletedCharacterRetentionHours": 336,
+    "MaxRecoveriesPerWindow": 3,
+    "RecoveryWindowHours": 24,
+    "LogoutTimerSeconds": 0,
+    "LoginVfx": [],
+    "LogoutVfx": [],
+    "AutoMigrateLegacyPlayerData": false,
+    "LegacyMigrationCharacterName": "Legacy Character",
+    "RequireUniqueCharacterNames": false,
+    "MinCharacterNameLength": 3,
+    "MaxCharacterNameLength": 24,
+    "ReservedCharacterNames": [],
+    "RequireRaceOnCreation": false,
+    "RequireStarterClassOnCreation": false,
+    "UseLobbyInstance": true,
+    "LobbyInstanceTemplateId": "Default_Void",
+    "DefaultLobbySpawnPointId": "default",
+    "UseRaceSpecificSpawnPoints": false,
+    "RaceLobbySpawnPointIds": {},
+    "LobbyBackgroundMode": "RaceSpecific",
+    "DefaultLobbyBackgroundId": "background_default",
+    "RaceLobbyBackgroundIds": {},
+    "PreviewCameraMode": "RaceSpecific",
+    "DefaultPreviewCameraPresetId": "character_select_default",
+    "RacePreviewCameraPresetIds": {}
+  },
+  "AchievementSettings": {
+    "Enabled": false,
+    "ToastNotificationsEnabled": false,
+    "TitleNotificationsEnabled": false,
+    "PersistProgressImmediately": false,
+    "UnlockEffects": {},
+    "ProgressGainedEffects": {}
+  },
+  "TalentSettings": {
+    "Enabled": true,
+    "SpecMode": "Exclusive"
+  },
+  "LevelingSettings": {
+    "Enabled": true,
+    "RestedXpEnabled": false,
+    "RestedXpBonusPercent": 50,
+    "RestedXpConsumeRatio": 1,
+    "RestedXpGainTags": [
+      "combat"
+    ],
+    "HardcoreEnabled": false,
+    "HardcoreLossType": "ResetToZero",
+    "HardcoreLevelLossPercent": 50,
+    "HardcoreCurrencyLossEnabled": false,
+    "HardcoreCurrencyLossPercent": 25,
+    "HardcoreCurrencyLossScopes": [
+      "Character"
+    ],
+    "BaseXpMultiplier": 1.0,
+    "DefaultPlayerProfileCount": 1
+  },
+  "AbilitySettings": {
+    "Enabled": true,
+    "BaseGlobalCooldown": 0,
+    "HotbarAbilitySlots": [
+      7,
+      8,
+      9
+    ]
+  },
+  "InventorySettings": {
+    "Enabled": false,
+    "InventoryHandling": "Strength",
+    "DefaultInventorySize": 9,
+    "StrengthInventorySlots": {},
+    "ExtraSlotsRingsEnabled": false,
+    "ExtraSlotsTrinketsEnabled": false,
+    "ExtraSlotsNeckEnabled": false
+  },
+  "ItemSettings": {
+    "Enabled": true,
+    "LevelScalingTag": "RPG.ScaleWithLevel",
+    "ScalePerLevelPercent": 3.0
+  },
+  "PartySettings": {
+    "Enabled": true,
+    "GroupFinderEnabled": true,
+    "PartyEnabled": true,
+    "PartyMaxSize": 5,
+    "PartyMaxAssistants": 1,
+    "RaidEnabled": true,
+    "RaidMaxSize": 20,
+    "RaidMaxAssistants": 4,
+    "PartyInviteExpirySeconds": 300,
+    "PartyXpEnabled": false,
+    "PartyXpGrantingMode": "SplitEqualInRange",
+    "PartyXpRangeBlocks": 48,
+    "PartyXpMinMembersInRange": 1,
+    "PartyNpcAllowed": false,
+    "PartyPersistenceEnabled": false,
+    "PartyPersistenceIntervalSeconds": 60
+  },
+  "GuildSettings": {
+    "Enabled": true,
+    "GuildEnabled": true,
+    "GuildMaxMembers": 50,
+    "GuildInviteExpirySeconds": 3600,
+    "GuildNameMinLength": 3,
+    "GuildNameMaxLength": 24,
+    "GuildTagMinLength": 2,
+    "GuildTagMaxLength": 5,
+    "GuildDefaultJoinPolicy": "InviteOnly",
+    "GuildMembershipScope": "ACCOUNT",
+    "GuildMaxMembershipsPerOwner": 1,
+    "GuildPersistenceEnabled": true,
+    "GuildPersistenceIntervalSeconds": 120
+  },
+  "NpcSettings": {
+    "Enabled": false,
+    "ThreatEnabled": false,
+    "ThreatLookbackSeconds": 6.0,
+    "DefaultThreatMultiplier": 1.0,
+    "RoleThreatMultipliers": {
+      "tank": 1.5,
+      "healer": 1.0,
+      "dps": 1.0
+    }
+  },
+  "CameraSettings": {
+    "Enabled": false,
+    "TargetingStyle": "MOBA",
+    "CameraStyle": "Vanilla"
+  },
+  "BankSettings": {
+    "Enabled": true,
+    "AllowAssetDefinedBankTypes": false
+  },
+  "CurrencySettings": {
+    "Enabled": true,
+    "PersistenceEnabled": true
+  },
+  "AuctionHouseSettings": {
+    "Enabled": true,
+    "BiddingAllowed": true,
+    "BuyOutsAllowed": true,
+    "DefaultListingLengthHours": 24,
+    "ListingDurations": [
+      {}
+    ]
+  },
+  "MailSettings": {
+    "Enabled": true,
+    "MailEnabled": true,
+    "AllowItemAttachments": false
+  },
+  "ChatSettings": {
+    "Enabled": false,
+    "Channels": [
+      {
+        "Enabled": true,
+        "Type": "Party",
+        "Id": "party",
+        "Aliases": [
+          "p"
+        ],
+        "FormatTranslationKey": "rpg.chat.party.message"
+      },
+      {
+        "Enabled": true,
+        "Type": "Guild",
+        "Id": "guild",
+        "Aliases": [
+          "g"
+        ],
+        "FormatTranslationKey": "rpg.chat.guild.message"
+      }
+    ]
+  },
+  "LockpickingSettings": {
+    "Enabled": true
+  },
+  "ExpansionSettings": {
+    "Enabled": false
+  },
+  "WorldSettings": {
+    "Enabled": true,
+    "WorldMode": "Hybrid",
+    "AllowTravelCommands": true
+  }
+}

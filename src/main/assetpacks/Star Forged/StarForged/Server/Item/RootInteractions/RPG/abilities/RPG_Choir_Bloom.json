@@ -1,0 +1,17 @@
+{
+  "Interactions": [
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Health": 55
+      },
+      "Effects": {
+      }
+    }
+  ],
+  "Cooldown": {
+    "Id": "RPG_Choir_Bloom",
+    "Cooldown": 18.0
+  }
+}

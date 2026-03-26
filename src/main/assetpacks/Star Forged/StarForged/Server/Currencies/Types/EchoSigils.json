@@ -1,0 +1,11 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Echo Sigils",
+  "Description": "Resonant access-seals recovered from Forge Choir ruins, shrine interfaces, and memory obelisks.",
+  "SortOrder": 40,
+  "AllowedScopes": [
+    "Character",
+    "Account"
+  ],
+  "AuctionHouseAllowed": false
+}

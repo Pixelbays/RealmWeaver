@@ -1,0 +1,25 @@
+{
+  "DisplayName": "First Steps",
+  "Description": "Reach level 2 on your character.",
+  "NameTranslationKey": "pixelbays.rpg.achievement.definition.firstSteps.name",
+  "DescriptionTranslationKey": "pixelbays.rpg.achievement.definition.firstSteps.description",
+  "Category": "Progression",
+  "Points": 10,
+  "Criteria": [
+    {
+      "Id": "reach_base_level",
+      "Type": "ReachLevel",
+      "TargetValue": 2,
+      "SystemId": "Base_Character_Level"
+    }
+  ],
+  "Reward": {
+    "Notification": {
+      "PrimaryMessage": "Achievement Unlocked",
+      "SecondaryMessage": "{name}"
+    }
+  },
+  "AccountWide": false,
+  "Hidden": false,
+  "IconId": "Common.Items.Resource.Book"
+}

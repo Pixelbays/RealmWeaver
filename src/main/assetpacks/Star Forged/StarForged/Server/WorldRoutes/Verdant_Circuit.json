@@ -1,0 +1,13 @@
+{
+  "Enabled": true,
+  "DisplayName": "Verdant Circuit",
+  "Description": "Push into the overgrown machine-jungle where roots and conduits have fused together.",
+  "DestinationType": "World",
+  "TargetWorldName": "Verdant_Circuit",
+  "TravelAudience": "Self",
+  "RequireLeaderForGroupTravel": false,
+  "PersonalReturnPoint": true,
+  "Prerequisites": {
+    "RequiredLevel": 8
+  }
+}

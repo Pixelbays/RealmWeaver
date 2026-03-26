@@ -1,0 +1,17 @@
+{
+  "Enabled": true,
+  "DisplayName": "Mendicant Signal Sanctum",
+  "Description": "Phase into a shared sanctuary shard tuned for Echo listeners and signal adepts.",
+  "DestinationType": "ShardTemplate",
+  "InstanceTemplateId": "Mendicant_Sanctum",
+  "ShardKey": "starforged-mendicant-sanctum",
+  "TravelAudience": "Self",
+  "RequireLeaderForGroupTravel": false,
+  "PersonalReturnPoint": true,
+  "Prerequisites": {
+    "RequiredLevel": 10,
+    "RequiredRaceIds": [
+      "Echobound"
+    ]
+  }
+}

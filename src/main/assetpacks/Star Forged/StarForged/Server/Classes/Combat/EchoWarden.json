@@ -1,0 +1,290 @@
+{
+  "DisplayName": "Echo Warden",
+  "Description": "Resonance-channelers who stabilize allies and weaponize ancient signal patterns.",
+  "Icon": "Icons/ItemsGenerated/Utility_Helipack.png",
+  "Enabled": true,
+  "Visible": true,
+  "Roles": [
+    "healer",
+    "dps"
+  ],
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "LevelSystemId": "EchoWarden",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "EchoPulse",
+      "UnlockLevel": 1
+    },
+    {
+      "AbilityId": "PulseLance",
+      "UnlockLevel": 4
+    },
+    {
+      "AbilityId": "NullWard",
+      "UnlockLevel": 8
+    }
+  ],
+  "TalentTrees": [
+    {
+      "TreeId": "resonance",
+      "DisplayName": "Resonance",
+      "Description": "Strengthen restorative pulses and steady your own signal control.",
+      "Roles": [
+        "healer"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "stable_tone",
+          "DisplayName": "Stable Tone",
+          "Description": "Increase Mana by 15 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mana": 15
+            }
+          }
+        },
+        {
+          "NodeId": "harmonic_mesh",
+          "DisplayName": "Harmonic Mesh",
+          "Description": "Increase Versatility by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "stable_tone"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Versatility": 3
+            }
+          }
+        },
+        {
+          "NodeId": "clear_signal",
+          "DisplayName": "Clear Signal",
+          "Description": "Increase Haste by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "stable_tone"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 3
+            }
+          }
+        },
+        {
+          "NodeId": "restorative_echo",
+          "DisplayName": "Restorative Echo",
+          "Description": "Increase Mana by 20 and Versatility by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "harmonic_mesh",
+            "clear_signal"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mana": 20,
+              "Versatility": 2
+            }
+          }
+        },
+        {
+          "NodeId": "guardian_wave",
+          "DisplayName": "Guardian Wave",
+          "Description": "Increase Health by 35 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 10,
+          "RequiredNodes": [
+            "restorative_echo"
+          ],
+          "PositionX": 0,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 35
+            }
+          }
+        },
+        {
+          "NodeId": "choir_bloom_protocol",
+          "DisplayName": "Choir Bloom Protocol",
+          "Description": "Unlocks the Choir Bloom ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "restorative_echo"
+          ],
+          "PositionX": 1,
+          "PositionY": 3,
+          "GrantsAbilityId": "ChoirBloom"
+        },
+        {
+          "NodeId": "choir_attunement",
+          "DisplayName": "Choir Attunement",
+          "Description": "Increase Mana by 35, Haste by 4, and Versatility by 5.",
+          "MaxRank": 1,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "guardian_wave",
+            "choir_bloom_protocol"
+          ],
+          "PositionX": 0,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mana": 35,
+              "Haste": 4,
+              "Versatility": 5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "TreeId": "interference",
+      "DisplayName": "Interference",
+      "Description": "Destabilize enemy patterns and weaponize aggressive signal output.",
+      "Roles": [
+        "dps"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "static_charge",
+          "DisplayName": "Static Charge",
+          "Description": "Increase Critical Strike by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 4
+            }
+          }
+        },
+        {
+          "NodeId": "signal_spike",
+          "DisplayName": "Signal Spike",
+          "Description": "Increase Mastery by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "static_charge"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 4
+            }
+          }
+        },
+        {
+          "NodeId": "overtone_surge",
+          "DisplayName": "Overtone Surge",
+          "Description": "Increase Haste by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "static_charge"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 3
+            }
+          }
+        },
+        {
+          "NodeId": "feedback_loop",
+          "DisplayName": "Feedback Loop",
+          "Description": "Increase Critical Strike by 4 and Mastery by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "signal_spike",
+            "overtone_surge"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 4,
+              "Mastery": 2
+            }
+          }
+        },
+        {
+          "NodeId": "rupture_chorus",
+          "DisplayName": "Rupture Chorus",
+          "Description": "Increase Haste by 2 and Versatility by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "feedback_loop"
+          ],
+          "PositionX": 0,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 2,
+              "Versatility": 3
+            }
+          }
+        },
+        {
+          "NodeId": "disruption_wave_protocol",
+          "DisplayName": "Disruption Wave Protocol",
+          "Description": "Unlocks the Disruption Wave ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "feedback_loop"
+          ],
+          "PositionX": -1,
+          "PositionY": 3,
+          "GrantsAbilityId": "DisruptionWave"
+        },
+        {
+          "NodeId": "null_resonator",
+          "DisplayName": "Null Resonator",
+          "Description": "Increase Critical Strike by 8, Mastery by 5, and Haste by 4.",
+          "MaxRank": 1,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "rupture_chorus",
+            "disruption_wave_protocol"
+          ],
+          "PositionX": 0,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 8,
+              "Mastery": 5,
+              "Haste": 4
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "ResourceStats": [
+    "Heat"
+  ]
+}

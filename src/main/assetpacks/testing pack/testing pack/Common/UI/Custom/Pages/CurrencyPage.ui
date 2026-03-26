@@ -1,0 +1,124 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {}
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 820, Height: 620);
+
+  #Title {
+    Group {
+      $C.@Title {
+        @Text = %pixelbays.rpg.currency.ui.title;
+      }
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: (Full: 12);
+
+    Label #StatusLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true);
+      Anchor: (Bottom: 12);
+    }
+
+    Group #ActionsRow {
+      LayoutMode: Left;
+      Anchor: (Height: 40, Bottom: 12);
+
+      TextButton #RefreshButton {
+        Text: %pixelbays.rpg.currency.ui.refreshButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 140, Height: 40);
+      }
+
+      Group { FlexWeight: 1; }
+
+      TextButton #NormalizeCharacterButton {
+        Text: %pixelbays.rpg.currency.ui.normalizeCharacterButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 40, Right: 8);
+      }
+
+      TextButton #NormalizeAccountButton {
+        Text: %pixelbays.rpg.currency.ui.normalizeAccountButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 40, Right: 8);
+      }
+
+      TextButton #NormalizeGuildButton {
+        Text: %pixelbays.rpg.currency.ui.normalizeGuildButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 170, Height: 40);
+      }
+    }
+
+    Group #ConversionPanel {
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.currency.ui.conversionsHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #ConversionLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+        Anchor: (Bottom: 6);
+      }
+    }
+
+    Group #CharacterPanel {
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.currency.ui.characterHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #CharacterLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      }
+    }
+
+    Group #AccountPanel {
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.currency.ui.accountHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #AccountLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      }
+    }
+
+    Group #GuildPanel {
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.currency.ui.guildHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #GuildLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

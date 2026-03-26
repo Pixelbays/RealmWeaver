@@ -1,0 +1,9 @@
+{
+  "Parent": "Base_Class_Level",
+  "DisplayName": "Vanguard Class",
+  "Description": "Shock-assault class progression.",
+  "Enabled": true,
+  "Visible": true,
+  "IconId": "rpg:icon_vanguard",
+  "ExpCurveRef": "Curve_StarForged"
+}

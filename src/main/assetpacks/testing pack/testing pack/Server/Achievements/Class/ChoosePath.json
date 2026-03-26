@@ -1,0 +1,24 @@
+{
+  "DisplayName": "Choose Your Path",
+  "Description": "Learn your first class.",
+  "NameTranslationKey": "pixelbays.rpg.achievement.definition.choosePath.name",
+  "DescriptionTranslationKey": "pixelbays.rpg.achievement.definition.choosePath.description",
+  "Category": "Class",
+  "Points": 10,
+  "Criteria": [
+    {
+      "Id": "learn_first_class",
+      "Type": "LearnClass",
+      "TargetValue": 1
+    }
+  ],
+  "Reward": {
+    "Notification": {
+      "PrimaryMessage": "Achievement Unlocked",
+      "SecondaryMessage": "{name}"
+    }
+  },
+  "AccountWide": false,
+  "Hidden": false,
+  "IconId": "Common.Items.Weapon.Sword.CopperSword"
+}

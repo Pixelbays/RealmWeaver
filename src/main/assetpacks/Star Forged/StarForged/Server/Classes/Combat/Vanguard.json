@@ -1,0 +1,323 @@
+{
+  "DisplayName": "Vanguard",
+  "Description": "Armored shock troops who lead from the front with impact weapons and reactor momentum.",
+  "Icon": "Icons/ItemsGenerated/Weapon_Mace_Iron.png",
+  "Enabled": true,
+  "Visible": true,
+  "Roles": [
+    "tank",
+    "dps"
+  ],
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "LevelSystemId": "Vanguard",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "StarCharge",
+      "UnlockLevel": 1
+    },
+    {
+      "AbilityId": "ConcussionSlam",
+      "UnlockLevel": 4
+    },
+    {
+      "AbilityId": "AegisOverload",
+      "UnlockLevel": 8
+    }
+  ],
+  "TalentTrees": [
+    {
+      "TreeId": "bulwark",
+      "DisplayName": "Bulwark",
+      "Description": "Build into a plated frontliner that absorbs impact and holds the line.",
+      "Roles": [
+        "tank"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "plated_frame",
+          "DisplayName": "Plated Frame",
+          "Description": "Increase maximum Health by 40 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 40
+            }
+          }
+        },
+        {
+          "NodeId": "impact_anchor",
+          "DisplayName": "Impact Anchor",
+          "Description": "Increase Stamina by 12 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "plated_frame"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Stamina": 12
+            }
+          }
+        },
+        {
+          "NodeId": "shock_bracing",
+          "DisplayName": "Shock Bracing",
+          "Description": "Increase Versatility by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "plated_frame"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Versatility": 3
+            }
+          }
+        },
+        {
+          "NodeId": "frontline_mass",
+          "DisplayName": "Frontline Mass",
+          "Description": "Increase Health by 60 and Stamina by 10 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "impact_anchor",
+            "shock_bracing"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 60,
+              "Stamina": 10
+            }
+          }
+        },
+        {
+          "NodeId": "reactor_guard",
+          "DisplayName": "Reactor Guard",
+          "Description": "Increase Mastery by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 10,
+          "RequiredNodes": [
+            "impact_anchor"
+          ],
+          "PositionX": -2,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 4
+            }
+          }
+        },
+        {
+          "NodeId": "siege_carapace",
+          "DisplayName": "Siege Carapace",
+          "Description": "Increase Health by 80 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "frontline_mass",
+            "reactor_guard"
+          ],
+          "PositionX": -1,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 80
+            }
+          }
+        },
+        {
+          "NodeId": "fortress_protocol",
+          "DisplayName": "Fortress Protocol",
+          "Description": "Unlocks the Bastion Field ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 14,
+          "RequiredNodes": [
+            "frontline_mass"
+          ],
+          "PositionX": 1,
+          "PositionY": 3,
+          "GrantsAbilityId": "BastionField"
+        },
+        {
+          "NodeId": "walking_bastion",
+          "DisplayName": "Walking Bastion",
+          "Description": "Increase Health by 150, Stamina by 20, and Versatility by 5.",
+          "MaxRank": 1,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "siege_carapace",
+            "fortress_protocol"
+          ],
+          "PositionX": 0,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 150,
+              "Stamina": 20,
+              "Versatility": 5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "TreeId": "breach",
+      "DisplayName": "Breach",
+      "Description": "Turn raw reactor output into mobility, impact, and explosive opening pressure.",
+      "Roles": [
+        "dps"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "ignition_servos",
+          "DisplayName": "Ignition Servos",
+          "Description": "Increase Haste by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 3
+            }
+          }
+        },
+        {
+          "NodeId": "collision_course",
+          "DisplayName": "Collision Course",
+          "Description": "Increase Critical Strike by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "ignition_servos"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 4
+            }
+          }
+        },
+        {
+          "NodeId": "overdrive_rails",
+          "DisplayName": "Overdrive Rails",
+          "Description": "Increase Speed by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "ignition_servos"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Speed": 2
+            }
+          }
+        },
+        {
+          "NodeId": "shatter_entry",
+          "DisplayName": "Shatter Entry",
+          "Description": "Increase Mastery by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "collision_course",
+            "overdrive_rails"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 4
+            }
+          }
+        },
+        {
+          "NodeId": "assault_vector",
+          "DisplayName": "Assault Vector",
+          "Description": "Increase Speed by 2 and Haste by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 10,
+          "RequiredNodes": [
+            "overdrive_rails"
+          ],
+          "PositionX": 2,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Speed": 2,
+              "Haste": 2
+            }
+          }
+        },
+        {
+          "NodeId": "meteor_drive",
+          "DisplayName": "Meteor Drive",
+          "Description": "Increase Critical Strike by 5 and Mastery by 3 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "shatter_entry",
+            "assault_vector"
+          ],
+          "PositionX": 1,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 5,
+              "Mastery": 3
+            }
+          }
+        },
+        {
+          "NodeId": "reactor_crash_protocol",
+          "DisplayName": "Reactor Crash Protocol",
+          "Description": "Unlocks the Reactor Crash ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 14,
+          "RequiredNodes": [
+            "shatter_entry"
+          ],
+          "PositionX": -1,
+          "PositionY": 3,
+          "GrantsAbilityId": "ReactorCrash"
+        },
+        {
+          "NodeId": "breach_protocol",
+          "DisplayName": "Breach Protocol",
+          "Description": "Increase Haste by 6, Speed by 3, and Critical Strike by 6.",
+          "MaxRank": 1,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "meteor_drive",
+            "reactor_crash_protocol"
+          ],
+          "PositionX": 0,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 6,
+              "Speed": 3,
+              "CriticalStrike": 6
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

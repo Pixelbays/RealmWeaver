@@ -1,0 +1,9 @@
+{
+  "Parent": "Base_Class_Level",
+  "DisplayName": "Echo Warden Class",
+  "Description": "Resonance-support progression.",
+  "Enabled": true,
+  "Visible": true,
+  "IconId": "rpg:icon_echowarden",
+  "ExpCurveRef": "Curve_StarForged"
+}

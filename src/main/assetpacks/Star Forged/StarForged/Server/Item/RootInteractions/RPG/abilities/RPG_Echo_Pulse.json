@@ -1,0 +1,16 @@
+{
+  "Interactions": [
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Health": 35
+      },
+      "Effects": {}
+    }
+  ],
+  "Cooldown": {
+    "Id": "RPG_Echo_Pulse",
+    "Cooldown": 0
+  }
+}

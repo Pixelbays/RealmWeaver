@@ -1,0 +1,7 @@
+{
+  "Id": "FluxHunter",
+  "Name": "Flux Hunter",
+  "Icon": "Icons/ItemCategories/Items.png",
+  "InfoDisplayMode": "Tooltip",
+  "Order": 11
+}

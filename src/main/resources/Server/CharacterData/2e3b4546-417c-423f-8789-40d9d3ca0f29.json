@@ -1,0 +1,544 @@
+{
+  "Tags": {},
+  "AccountUsername": "Heru",
+  "SelectedCharacterId": "15cdb512-2152-4eb9-9631-696b4cd460fc",
+  "AccountAchievementProgress": {
+    "UnlockedAchievements": {},
+    "ProgressTracking": {},
+    "TotalAchievementPoints": 0,
+    "DisplayedTitle": ""
+  },
+  "RecoveryHistoryEpochMs": [],
+  "AccountTokens": {},
+  "Profiles": [
+    {
+      "CharacterId": "15cdb512-2152-4eb9-9631-696b4cd460fc",
+      "CharacterName": "Test",
+      "RaceId": "",
+      "PrimaryClassId": "EchoWarden",
+      "CreatedAtEpochMs": 1774500068616,
+      "LastPlayedEpochMs": 1774500399906,
+      "SoftDeleted": false,
+      "DeletedAtEpochMs": 0,
+      "LevelProgression": {
+        "LevelSystems": {
+          "FluxHunter": {
+            "SystemId": "FluxHunter",
+            "CurrentLevel": 1,
+            "CurrentExp": 0.0,
+            "ExpToNextLevel": 200.0,
+            "TotalLevelsGained": 0,
+            "LastGrowthAppliedLevel": 0,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          },
+          "EchoWarden": {
+            "SystemId": "EchoWarden",
+            "CurrentLevel": 30,
+            "CurrentExp": 0.0,
+            "ExpToNextLevel": 0.0,
+            "TotalLevelsGained": 7,
+            "LastGrowthAppliedLevel": 30,
+            "AvailableStatPoints": 0,
+            "AvailableSkillPoints": 0
+          }
+        },
+        "LastLogoutEpochMs": 1774500399906
+      },
+      "ClassProgression": {
+        "LearnedClasses": {
+          "EchoWarden": {
+            "ClassId": "EchoWarden",
+            "LearnedTime": 1773719350457,
+            "AllocatedNodes": {},
+            "SpentTalentPoints": 0
+          }
+        }
+      },
+      "RaceProgression": {
+        "RaceId": "",
+        "ParentRaces": [],
+        "UnlockedRaceAbilities": []
+      },
+      "ClassAbilities": {
+        "UnlockedAbilities": {
+          "NullWard": {
+            "AbilityId": "NullWard",
+            "ClassId": "EchoWarden",
+            "UnlockedTime": 1773719471960,
+            "Rank": 1
+          },
+          "PulseLance": {
+            "AbilityId": "PulseLance",
+            "ClassId": "EchoWarden",
+            "UnlockedTime": 1773719471958,
+            "Rank": 1
+          }
+        },
+        "ToggleStates": {}
+      },
+      "AbilityBindings": {
+        "HotbarBindings": {
+          "6": "EchoPulse",
+          "7": "EchoPulse"
+        },
+        "WeaponBindings": {},
+        "AbilitySlotBindings": {}
+      },
+      "AchievementProgress": {
+        "UnlockedAchievements": {},
+        "ProgressTracking": {},
+        "TotalAchievementPoints": 0,
+        "DisplayedTitle": ""
+      },
+      "StatSnapshot": {
+        "Version": 5,
+        "Stats": {
+          "Charisma": {
+            "Id": "Charisma",
+            "Value": 100.0
+          },
+          "Dexterity": {
+            "Id": "Dexterity",
+            "Value": 100.0
+          },
+          "Mana": {
+            "Id": "Mana",
+            "Value": 0.0
+          },
+          "Rested_XP_Rate": {
+            "Id": "Rested_XP_Rate",
+            "Value": 0.0
+          },
+          "Intelligence": {
+            "Id": "Intelligence",
+            "Value": 100.0
+          },
+          "Chi": {
+            "Id": "Chi",
+            "Value": 100.0
+          },
+          "SoulShards": {
+            "Id": "SoulShards",
+            "Value": 100.0
+          },
+          "Stunned": {
+            "Id": "Stunned",
+            "Value": 100.0
+          },
+          "Rage": {
+            "Id": "Rage",
+            "Value": 100.0
+          },
+          "Immunity": {
+            "Id": "Immunity",
+            "Value": 0.0
+          },
+          "ElementalElemental": {
+            "Id": "ElementalElemental",
+            "Value": 100.0
+          },
+          "Leech": {
+            "Id": "Leech",
+            "Value": 100.0
+          },
+          "Template": {
+            "Id": "Template",
+            "Value": 100.0
+          },
+          "Haste": {
+            "Id": "Haste",
+            "Value": 100.0
+          },
+          "Wisdom": {
+            "Id": "Wisdom",
+            "Value": 100.0
+          },
+          "Stagger": {
+            "Id": "Stagger",
+            "Value": 100.0
+          },
+          "Unknown": {
+            "Id": "Unknown",
+            "Value": 0.0
+          },
+          "Energy": {
+            "Id": "Energy",
+            "Value": 100.0
+          },
+          "Holy": {
+            "Id": "Holy",
+            "Value": 100.0
+          },
+          "Exp_Rate_Gain": {
+            "Id": "Exp_Rate_Gain",
+            "Value": 1.0
+          },
+          "Agility": {
+            "Id": "Agility",
+            "Value": 100.0
+          },
+          "DeployablePreview": {
+            "Id": "DeployablePreview",
+            "Value": 0.0
+          },
+          "Totems": {
+            "Id": "Totems",
+            "Value": 100.0
+          },
+          "Constitution": {
+            "Id": "Constitution",
+            "Value": 100.0
+          },
+          "Versatility": {
+            "Id": "Versatility",
+            "Value": 100.0
+          },
+          "Speed": {
+            "Id": "Speed",
+            "Value": 100.0
+          },
+          "Oxygen": {
+            "Id": "Oxygen",
+            "Value": 100.0
+          },
+          "Runes": {
+            "Id": "Runes",
+            "Value": 100.0
+          },
+          "Health": {
+            "Id": "Health",
+            "Value": 100.0,
+            "Modifiers": {
+              "Armor_ADDITIVE": {
+                "Id": "Static",
+                "CalculationType": "Additive",
+                "Amount": 61.0
+              }
+            }
+          },
+          "GlidingActive": {
+            "Id": "GlidingActive",
+            "Value": 0.0
+          },
+          "Mastery": {
+            "Id": "Mastery",
+            "Value": 100.0
+          },
+          "SignatureCharges": {
+            "Id": "SignatureCharges",
+            "Value": 0.0
+          },
+          "Stamina": {
+            "Id": "Stamina",
+            "Value": 10.0
+          },
+          "AstralPower": {
+            "Id": "AstralPower",
+            "Value": 100.0
+          },
+          "Ammo": {
+            "Id": "Ammo",
+            "Value": 0.0
+          },
+          "Heat": {
+            "Id": "Heat",
+            "Value": 100.0
+          },
+          "SignatureEnergy": {
+            "Id": "SignatureEnergy",
+            "Value": 0.0
+          },
+          "Focus": {
+            "Id": "Focus",
+            "Value": 100.0
+          },
+          "CriticalStrike": {
+            "Id": "CriticalStrike",
+            "Value": 100.0
+          },
+          "Insanity": {
+            "Id": "Insanity",
+            "Value": 100.0
+          },
+          "StaminaRegenDelay": {
+            "Id": "StaminaRegenDelay",
+            "Value": 0.0
+          },
+          "Rested_XP": {
+            "Id": "Rested_XP",
+            "Value": 0.0
+          },
+          "MagicCharges": {
+            "Id": "MagicCharges",
+            "Value": 0.0
+          },
+          "Silenced": {
+            "Id": "Silenced",
+            "Value": 100.0
+          },
+          "Strength": {
+            "Id": "Strength",
+            "Value": 100.0
+          },
+          "Avoidance": {
+            "Id": "Avoidance",
+            "Value": 100.0
+          }
+        }
+      },
+      "SavedWorldName": "instance-Default_Void-15efa0f6-aa0f-4093-a646-0e3b3007b138",
+      "SavedTransform": {
+        "Position": {
+          "X": 0.5,
+          "Y": 80.0,
+          "Z": 0.5
+        },
+        "Rotation": {
+          "Pitch": 0.0,
+          "Yaw": 3.1415927410125732,
+          "Roll": 0.0
+        }
+      },
+      "InventorySnapshot": {
+        "Version": 4,
+        "Storage": {
+          "Id": "Simple",
+          "Capacity": 36,
+          "Items": {
+            "3": {
+              "Id": "Weapon_Arrow_Crude",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "2": {
+              "Id": "Weapon_Arrow_Crude",
+              "Quantity": 80,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "7": {
+              "Id": "Weapon_Arrow_Crude",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "6": {
+              "Id": "Rock_Crystal_Blue_Block",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "4": {
+              "Id": "Weapon_Arrow_Crude",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "5": {
+              "Id": "Weapon_Arrow_Crude",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "13": {
+              "Id": "Rock_Crystal_Blue_Block",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "8": {
+              "Id": "Weapon_Arrow_Crude",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "9": {
+              "Id": "Weapon_Arrow_Crude",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "11": {
+              "Id": "Ingredient_Fabric_Scrap_Wool",
+              "Quantity": 2,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "10": {
+              "Id": "Ingredient_Fabric_Scrap_Linen",
+              "Quantity": 2,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "Armor": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {
+            "0": {
+              "Id": "Armor_Cobalt_Head_Space",
+              "Quantity": 1,
+              "Durability": 120.0,
+              "MaxDurability": 120.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "1": {
+              "Id": "Armor_Cobalt_Chest_Space",
+              "Quantity": 1,
+              "Durability": 120.0,
+              "MaxDurability": 120.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "3": {
+              "Id": "Armor_Cobalt_Legs_Space",
+              "Quantity": 1,
+              "Durability": 120.0,
+              "MaxDurability": 120.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "2": {
+              "Id": "Armor_Cobalt_Hands_Space",
+              "Quantity": 1,
+              "Durability": 120.0,
+              "MaxDurability": 120.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "HotBar": {
+          "Id": "Simple",
+          "Capacity": 9,
+          "Items": {
+            "0": {
+              "Id": "Soil_Grass_Cold",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "1": {
+              "Id": "Soil_Dirt_Blue",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "3": {
+              "Id": "Rock_Crystal_Blue_Block",
+              "Quantity": 100,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "2": {
+              "Id": "Weapon_Assault_Rifle_Space",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "Utility": {
+          "Id": "Simple",
+          "Capacity": 4,
+          "Items": {}
+        },
+        "Backpack": {
+          "Id": "Empty"
+        },
+        "ActiveHotbarSlot": 0,
+        "Tool": {
+          "Id": "Simple",
+          "Capacity": 23,
+          "Items": {
+            "0": {
+              "Id": "EditorTool_Paint",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "1": {
+              "Id": "EditorTool_Sculpt",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "3": {
+              "Id": "EditorTool_Paste",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "2": {
+              "Id": "EditorTool_Selection",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "4": {
+              "Id": "EditorTool_Line",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            },
+            "5": {
+              "Id": "EditorTool_Layers",
+              "Quantity": 1,
+              "Durability": 0.0,
+              "MaxDurability": 0.0,
+              "OverrideDroppedItemAnimation": false
+            }
+          }
+        },
+        "ActiveToolsSlot": -1,
+        "ActiveUtilitySlot": -1,
+        "SortType": "Name"
+      },
+      "ActiveHotbarSlot": 5,
+      "ActiveUtilitySlot": -1,
+      "ActiveToolsSlot": -1,
+      "Appearance": {
+        "BodyCharacteristic": "",
+        "Underwear": "",
+        "Face": "",
+        "Eyes": "",
+        "Ears": "",
+        "Mouth": "",
+        "FacialHair": "",
+        "Haircut": "",
+        "Eyebrows": "",
+        "Pants": "ApprenticePants.Black",
+        "Overpants": "",
+        "Undertop": "Bannerlord_Chainmail.Blued",
+        "Overtop": "AlpineExplorerJumper.Navy",
+        "Shoes": "BasicBoots.Black",
+        "HeadAccessory": "AcornHairclip.Acorn",
+        "FaceAccessory": "",
+        "EarAccessory": "",
+        "SkinFeature": "",
+        "Gloves": "",
+        "Cape": ""
+      }
+    }
+  ]
+}

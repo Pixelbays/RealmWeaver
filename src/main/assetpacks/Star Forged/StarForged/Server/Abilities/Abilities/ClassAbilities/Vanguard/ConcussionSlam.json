@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "Vanguard"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.concussion_slam.name",
+    "Description": "pixelbays.rpg.abilities.concussion_slam.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Concussion_Slam"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Smash the ground in front of you and deal heavy close-range damage.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace"
+}

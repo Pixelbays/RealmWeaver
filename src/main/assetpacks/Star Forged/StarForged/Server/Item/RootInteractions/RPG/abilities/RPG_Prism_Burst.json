@@ -1,0 +1,33 @@
+{
+  "Interactions": [
+    {
+      "Type": "Selector",
+      "RunTime": 0.1,
+      "Selector": {
+        "Id": "Raycast",
+        "Distance": 20,
+        "IgnoreFluids": true,
+        "IgnoreEmptyCollisionMaterial": true
+      },
+      "HitEntity": {
+        "Type": "DamageEntity",
+        "DamageCalculator": {
+          "Class": "Charged",
+          "BaseDamage": {
+            "Physical": 22
+          }
+        }
+      },
+      "Failed": {
+        "Type": "Simple",
+        "RunTime": 0
+      },
+      "Effects": {
+      }
+    }
+  ],
+  "Cooldown": {
+    "Id": "RPG_Prism_Burst",
+    "Cooldown": 7.0
+  }
+}

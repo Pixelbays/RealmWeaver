@@ -1,0 +1,9 @@
+{
+  "Parent": "Base_Class_Level",
+  "DisplayName": "Flux Hunter Class",
+  "Description": "Ranged scavenger-tech progression.",
+  "Enabled": true,
+  "Visible": true,
+  "IconId": "rpg:icon_fluxhunter",
+  "ExpCurveRef": "Curve_StarForged"
+}

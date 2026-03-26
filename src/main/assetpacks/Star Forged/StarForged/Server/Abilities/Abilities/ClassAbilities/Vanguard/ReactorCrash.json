@@ -1,0 +1,25 @@
+{
+  "Categories": [
+    "Vanguard",
+    "Mobility"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.reactor_crash.name",
+    "Description": "pixelbays.rpg.abilities.reactor_crash.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Reactor_Crash"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Deliver a brutal breach strike empowered by overloaded reactor output.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace"
+}

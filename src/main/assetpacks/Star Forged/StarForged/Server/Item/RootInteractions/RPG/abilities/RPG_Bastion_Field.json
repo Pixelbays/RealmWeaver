@@ -1,0 +1,17 @@
+{
+  "Interactions": [
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Health": 45
+      },
+      "Effects": {
+      }
+    }
+  ],
+  "Cooldown": {
+    "Id": "RPG_Bastion_Field",
+    "Cooldown": 18.0
+  }
+}

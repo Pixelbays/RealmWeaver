@@ -1,0 +1,32 @@
+{
+  "raceId": "base_race",
+  "displayName": "Base Race",
+  "description": "Common defaults for all races.",
+  "iconId": "Icon_Race_Human",
+  "enabled": true,
+  "visible": false,
+  "isHybrid": false,
+  "parentRaces": [],
+  "compatibleHybridRaces": [],
+  "incompatibleHybridRaces": [],
+  "minSize": 1.0,
+  "maxSize": 1.0,
+  "startingStats": {},
+  "statModifiers": {
+    "additiveModifiers": {},
+    "multiplicativeModifiers": {}
+  },
+  "abilityUnlocks": [],
+  "abilityIds": [],
+  "allowedCosmeticCategories": [],
+  "allowedCosmeticIds": [],
+  "notAllowedCosmeticCategories": [],
+  "notAllowedCosmeticIds": [],
+  "inheritanceRules": {
+    "statBlendMode": "Average",
+    "abilityMerge": "Union",
+    "cosmeticMerge": "WhiteList_Union",
+    "weightA": 0.5,
+    "weightB": 0.5
+  }
+}

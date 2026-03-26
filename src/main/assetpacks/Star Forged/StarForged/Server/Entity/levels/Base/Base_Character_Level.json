@@ -1,0 +1,28 @@
+{
+  "DisplayName": "Character Level",
+  "Description": "Main character progression system for Star Forged.",
+  "MaxLevel": 30,
+  "StartingLevel": 1,
+  "ExpCurveRef": "Curve_StarForged",
+  "Prerequisites": {},
+  "DefaultRewards": {
+    "StatPoints": 3,
+    "SkillPoints": 1,
+    "StatIncreases": {
+      "Health": 8.0,
+      "Stamina": 4.0
+    }
+  },
+  "LevelRewards": {},
+  "StatGrowth": {
+    "FlatGrowth": {
+      "Health": 6.0,
+      "Stamina": 2.0
+    },
+    "PercentageGrowth": {},
+    "MilestoneGrowth": {}
+  },
+  "Enabled": true,
+  "Visible": true,
+  "Icon": "Icons/Items/EditorTools/Entity.png"
+}

@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "FluxHunter"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.scrapstep.name",
+    "Description": "pixelbays.rpg.abilities.scrapstep.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Scrapstep"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Launch yourself forward to reposition quickly.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Wand"
+}

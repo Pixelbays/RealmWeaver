@@ -1,0 +1,38 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Warbound Stash",
+  "Description": "Roster-shared progression storage for a warband or seasonal group.",
+  "Scope": "Warband",
+  "RemoteAccessAllowed": true,
+  "DefaultSlotCount": 24,
+  "MaxSlotCountPerTab": 48,
+  "DefaultTabCount": 1,
+  "MaxTabs": 5,
+  "Tabs": [
+    {
+      "Id": "Warband",
+      "DisplayName": "Warband",
+      "Description": "Shared items for your active warband.",
+      "SlotCount": 24,
+      "UnlockByDefault": true
+    },
+    {
+      "Id": "Consumables",
+      "DisplayName": "Consumables",
+      "Description": "Potions, food, and utility supplies.",
+      "SlotCount": 24,
+      "UnlockByDefault": false,
+      "AllowedItemTags": [
+        "consumable",
+        "food",
+        "potion"
+      ],
+      "UnlockCost": {
+        "Tier": 2,
+        "CurrencyId": "gold",
+        "Amount": 1500,
+        "Note": "Unlock consumables tab"
+      }
+    }
+  ]
+}

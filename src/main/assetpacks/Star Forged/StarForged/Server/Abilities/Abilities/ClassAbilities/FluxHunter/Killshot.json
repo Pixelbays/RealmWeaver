@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "FluxHunter"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.killshot.name",
+    "Description": "pixelbays.rpg.abilities.killshot.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Killshot"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Unload a high-damage precision shot into a single target.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Wand"
+}

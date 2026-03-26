@@ -1,0 +1,285 @@
+{
+  "DisplayName": "Flux Hunter",
+  "Description": "Mobile ranged specialists who weaponize tuned shards, pulses, and scavenged tech.",
+  "Enabled": true,
+  "Visible": true,
+  "Roles": [
+    "dps"
+  ],
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "LevelSystemId": "FluxHunter",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "Shattershot",
+      "UnlockLevel": 1
+    },
+    {
+      "AbilityId": "PrismBurst",
+      "UnlockLevel": 4
+    },
+    {
+      "AbilityId": "Scrapstep",
+      "UnlockLevel": 8
+    }
+  ],
+  "TalentTrees": [
+    {
+      "TreeId": "deadeye",
+      "DisplayName": "Deadeye",
+      "Description": "Focus on clean shots, tuned aim, and high-value eliminations.",
+      "Roles": [
+        "dps"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "rangefinder",
+          "DisplayName": "Rangefinder",
+          "Description": "Increase Critical Strike by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 4
+            }
+          }
+        },
+        {
+          "NodeId": "coil_tension",
+          "DisplayName": "Coil Tension",
+          "Description": "Increase Haste by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "rangefinder"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 3
+            }
+          }
+        },
+        {
+          "NodeId": "glassline_focus",
+          "DisplayName": "Glassline Focus",
+          "Description": "Increase Mastery by 4 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "rangefinder"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 4
+            }
+          }
+        },
+        {
+          "NodeId": "thread_the_gap",
+          "DisplayName": "Thread the Gap",
+          "Description": "Increase Critical Strike by 4 and Haste by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "coil_tension",
+            "glassline_focus"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 4,
+              "Haste": 2
+            }
+          }
+        },
+        {
+          "NodeId": "kill_window",
+          "DisplayName": "Kill Window",
+          "Description": "Increase Versatility by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 10,
+          "RequiredNodes": [
+            "thread_the_gap"
+          ],
+          "PositionX": 0,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Versatility": 3
+            }
+          }
+        },
+        {
+          "NodeId": "killshot_protocol",
+          "DisplayName": "Killshot Protocol",
+          "Description": "Unlocks the Killshot ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "thread_the_gap"
+          ],
+          "PositionX": 1,
+          "PositionY": 3,
+          "GrantsAbilityId": "Killshot"
+        },
+        {
+          "NodeId": "starfall_sight",
+          "DisplayName": "Starfall Sight",
+          "Description": "Increase Critical Strike by 8, Mastery by 5, and Haste by 4.",
+          "MaxRank": 1,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "kill_window",
+            "killshot_protocol"
+          ],
+          "PositionX": 0,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "CriticalStrike": 8,
+              "Mastery": 5,
+              "Haste": 4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "TreeId": "skirmisher",
+      "DisplayName": "Skirmisher",
+      "Description": "Lean into mobility, salvage cunning, and relentless repositioning.",
+      "Roles": [
+        "dps"
+      ],
+      "MaxPoints": 20,
+      "Nodes": [
+        {
+          "NodeId": "quickstep_rig",
+          "DisplayName": "Quickstep Rig",
+          "Description": "Increase Speed by 2 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Speed": 2
+            }
+          }
+        },
+        {
+          "NodeId": "salvage_padding",
+          "DisplayName": "Salvage Padding",
+          "Description": "Increase Health by 30 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "quickstep_rig"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 30
+            }
+          }
+        },
+        {
+          "NodeId": "strafe_pattern",
+          "DisplayName": "Strafe Pattern",
+          "Description": "Increase Haste by 2 and Speed by 1 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "quickstep_rig"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 2,
+              "Speed": 1
+            }
+          }
+        },
+        {
+          "NodeId": "scrap_sense",
+          "DisplayName": "Scrap Sense",
+          "Description": "Increase Mastery by 3 per rank.",
+          "MaxRank": 3,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "salvage_padding",
+            "strafe_pattern"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 3
+            }
+          }
+        },
+        {
+          "NodeId": "hit_and_fade",
+          "DisplayName": "Hit and Fade",
+          "Description": "Increase Versatility by 3 and Speed by 2 per rank.",
+          "MaxRank": 2,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "scrap_sense"
+          ],
+          "PositionX": 0,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Versatility": 3,
+              "Speed": 2
+            }
+          }
+        },
+        {
+          "NodeId": "ghostline_protocol",
+          "DisplayName": "Ghostline Protocol",
+          "Description": "Unlocks the Ghostline Dash ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 12,
+          "RequiredNodes": [
+            "scrap_sense"
+          ],
+          "PositionX": -1,
+          "PositionY": 3,
+          "GrantsAbilityId": "GhostlineDash"
+        },
+        {
+          "NodeId": "ghostline_runner",
+          "DisplayName": "Ghostline Runner",
+          "Description": "Increase Speed by 4, Haste by 4, and Versatility by 5.",
+          "MaxRank": 1,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "hit_and_fade",
+            "ghostline_protocol"
+          ],
+          "PositionX": 0,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Speed": 4,
+              "Haste": 4,
+              "Versatility": 5
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

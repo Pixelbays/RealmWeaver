@@ -1,0 +1,43 @@
+{
+  "displayName": "Forgeborn",
+  "description": "Heavy-framed frontier survivors adapted to heat, pressure, and industrial wastelands.",
+  "enabled": true,
+  "visible": true,
+  "isHybrid": false,
+  "parentRaces": [
+    "base_race"
+  ],
+  "compatibleHybridRaces": [],
+  "incompatibleHybridRaces": [],
+  "minSize": 0.98,
+  "maxSize": 1.08,
+  "startingStats": {
+    "Health": 110,
+    "Stamina": 55
+  },
+  "statModifiers": {
+    "additiveModifiers": {
+      "Health": 10,
+      "Stamina": 5
+    },
+    "multiplicativeModifiers": {}
+  },
+  "abilityUnlocks": [
+    {
+      "abilityId": "ForgeSkin",
+      "abilityType": "Race",
+      "unlockType": "Starting",
+      "requiredLevel": 1
+    }
+  ],
+  "abilityIds": [
+    "ForgeSkin"
+  ],
+  "allowedCosmeticCategories": [
+  ],
+  "allowedCosmeticIds": [],
+  "notAllowedCosmeticCategories": [],
+  "notAllowedCosmeticIds": [],
+  "inheritanceRules": {
+  }
+}

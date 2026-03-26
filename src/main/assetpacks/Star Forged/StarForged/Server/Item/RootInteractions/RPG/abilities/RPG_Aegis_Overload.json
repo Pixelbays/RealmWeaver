@@ -1,0 +1,17 @@
+{
+  "Interactions": [
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Health": 25
+      },
+      "Effects": {
+      }
+    }
+  ],
+  "Cooldown": {
+    "Id": "RPG_Aegis_Overload",
+    "Cooldown": 14.0
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "Vanguard"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.bastion_field.name",
+    "Description": "pixelbays.rpg.abilities.bastion_field.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Bastion_Field"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Create a fortified self-pulse that restores a large amount of health.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace"
+}

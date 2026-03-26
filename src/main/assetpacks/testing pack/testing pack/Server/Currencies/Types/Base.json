@@ -1,0 +1,19 @@
+{
+  "DisplayName": "Currency",
+  "Description": "Base currency definition for RPG economies.",
+  "Enabled": true,
+  "VisibleInUi": true,
+  "SortOrder": 0,
+  "AuctionHouseAllowed": false,
+  "StorageMode": "NumericWallet",
+  "AllowedScopes": [
+    "Character",
+    "Account",
+    "Guild",
+    "Custom"
+  ],
+  "StartingBalance": 0,
+  "MinBalance": 0,
+  "MaxBalance": 9223372036854775807,
+  "AllowNegative": false
+}

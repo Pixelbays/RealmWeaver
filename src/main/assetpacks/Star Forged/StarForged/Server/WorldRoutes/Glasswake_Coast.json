@@ -1,0 +1,13 @@
+{
+  "Enabled": true,
+  "DisplayName": "Glasswake Coast",
+  "Description": "Travel to the fused shoreline where relic hunters comb the reflective tide flats.",
+  "DestinationType": "World",
+  "TargetWorldName": "Glasswake_Coast",
+  "TravelAudience": "Self",
+  "RequireLeaderForGroupTravel": false,
+  "PersonalReturnPoint": true,
+  "Prerequisites": {
+    "RequiredLevel": 14
+  }
+}

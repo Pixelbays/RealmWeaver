@@ -1,0 +1,17 @@
+{
+  "Interactions": [
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Health": 25
+      },
+      "Effects": {
+      }
+    }
+  ],
+  "Cooldown": {
+    "Id": "RPG_Null_Ward",
+    "Cooldown": 12.0
+  }
+}

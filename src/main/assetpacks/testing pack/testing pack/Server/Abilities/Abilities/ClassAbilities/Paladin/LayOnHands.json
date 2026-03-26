@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "Paladin",
+    "Holy"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.paladin_lay_on_hands.name",
+    "Description": "pixelbays.rpg.abilities.paladin_lay_on_hands.description"
+  },
+  "AbilityType": "Active",
+  "GlobalCooldown": 6.0,
+  "GlobalCooldownCategories": [],
+  "PrerequisiteAbilities": [],
+  "Parent": "GlobalBase",
+  "StatRequirements": {},
+  "HasRanks": true,
+  "MaxRank": 3,
+  "Interactions": {
+    "Primary": "RPG_LayOnHands"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Heal yourself or an ally for a moderate amount."
+}

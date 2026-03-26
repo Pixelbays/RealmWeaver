@@ -1,0 +1,23 @@
+{
+  "Categories": [
+    "Fire"
+  ],
+  "TranslationProperties": {
+    "Name": "pixelbays.rpg.abilities.Fireball.name",
+    "Description": "pixelbays.rpg.abilities.Fireball.description"
+  },
+  "AbilityType": "Active",
+  "GlobalCooldown": 2.5,
+  "GlobalCooldownCategories": [],
+  "Parent": "GlobalBase",
+  "PrerequisiteAbilities": [],
+  "StatRequirements": {},
+  "HasRanks": false,
+  "MaxRank": 1,
+  "Interactions": {
+    "Primary": "RPG_Fireball"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Launch a fiery projectile at your target."
+}

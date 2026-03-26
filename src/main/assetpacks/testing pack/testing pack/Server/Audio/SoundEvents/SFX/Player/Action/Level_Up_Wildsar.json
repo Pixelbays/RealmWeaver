@@ -1,0 +1,13 @@
+{
+  "Layers": [
+    {
+      "Files": [
+        "Sounds/wildstar_lvl_up_28.ogg"
+      ],
+      "Volume": 10
+    }
+  ],
+  "Volume": 10,
+  "PreventSoundInterruption": true,
+  "MaxInstance": 5
+}

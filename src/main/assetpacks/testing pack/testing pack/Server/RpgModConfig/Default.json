@@ -1,0 +1,340 @@
+{
+  "GeneralSettings": {
+    "DebuggingMode": "DeveloperDontUse",
+    "PlayerLogging": false,
+    "AntiGrindMod": false,
+    "RequireRaceAtStart": false,
+    "GlobalMobScaling": false,
+    "ServerName": "Pixelbays",
+    "DiscordJoin": "",
+    "Website": "",
+    "Expansions": []
+  },
+  "StatSettings": {
+    "AdvantageRollModifiers": {
+      "Rage": [
+        {
+          "Min": 1,
+          "Max": 10,
+          "Modifier": -2
+        },
+        {
+          "Min": 11,
+          "Max": 20,
+          "Modifier": 2
+        }
+      ]
+    }
+  },
+  "ClassSettings": {
+    "Enabled": true,
+    "RoleTypes": [
+      "tank",
+      "healer",
+      "dps"
+    ],
+    "ClassMode": "SingleClass",
+    "ActiveClassMode": "Manual",
+    "ClassTags": [
+      "combat",
+      "profession",
+      "job"
+    ],
+    "XPRouting": "ActiveClassOnly",
+    "XPTagSplits": {
+      "combat": 1.0,
+      "job": 1.0,
+      "profession": 0.0,
+      "base": 0.0
+    },
+    "MaxCombatClasses": 1,
+    "MaxProfessionClasses": 2,
+    "ClassSwitchingRules": "",
+    "RequireClassAtStart": false,
+    "AbilityLearningMode": "AutoLearnOnLevelUp"
+  },
+  "CharacterSettings": {
+    "Enabled": true,
+    "MaxCharacterSlots": 6,
+    "AllowCharacterCreation": true,
+    "AllowCharacterDeletion": true,
+    "AllowLogoutToCharacterSelect": true,
+    "DeletionMode": "SoftDeleteRecovery",
+    "SoftDeleteRecoveryDays": 14,
+    "DeletedCharacterRetentionHours": 336,
+    "MaxRecoveriesPerWindow": 3,
+    "RecoveryWindowHours": 24,
+    "LogoutTimerSeconds": 0,
+    "LoginVfx": [],
+    "LogoutVfx": [],
+    "AutoMigrateLegacyPlayerData": true,
+    "LegacyMigrationCharacterName": "Legacy Character",
+    "RequireUniqueCharacterNames": false,
+    "MinCharacterNameLength": 3,
+    "MaxCharacterNameLength": 24,
+    "ReservedCharacterNames": [],
+    "RequireRaceOnCreation": true,
+    "RequireStarterClassOnCreation": false,
+    "UseLobbyInstance": true,
+    "LobbyInstanceTemplateId": "Default_Void",
+    "DefaultLobbySpawnPointId": "default",
+    "UseRaceSpecificSpawnPoints": false,
+    "RaceLobbySpawnPointIds": {
+      "human": "human_preview",
+      "elf": "elf_preview"
+    },
+    "LobbyBackgroundMode": "RaceSpecific",
+    "DefaultLobbyBackgroundId": "background_default",
+    "RaceLobbyBackgroundIds": {
+      "human": "background_human",
+      "elf": "background_elf"
+    },
+    "PreviewCameraMode": "RaceSpecific",
+    "DefaultPreviewCameraPresetId": "character_select_default",
+    "RacePreviewCameraPresetIds": {
+      "human": "character_select_human",
+      "elf": "character_select_elf"
+    }
+  },
+  "AchievementSettings": {
+    "Enabled": true,
+    "ToastNotificationsEnabled": true,
+    "TitleNotificationsEnabled": true,
+    "PersistProgressImmediately": true,
+    "UnlockEffects": {
+      "Notification": {
+        "PrimaryMessage": "Achievement Unlocked",
+        "SecondaryMessage": "{name}"
+      },
+      "EventTitle": {
+        "PrimaryMessage": "Achievement Unlocked",
+        "SecondaryMessage": "{name}",
+        "Major": true
+      },
+      "ChatMessage": "Achievement unlocked: {name} ({points} points)",
+      "KillFeedPopup": "Achievement unlocked: {name}"
+    },
+    "ProgressGainedEffects": {
+      "ChatMessage": "Achievement progress: {name} {current}/{target}"
+    }
+  },
+  "TalentSettings": {
+    "Enabled": true,
+    "SpecMode": "Exclusive"
+  },
+  "LevelingSettings": {
+    "Enabled": true,
+    "RestedXpEnabled": false,
+    "RestedXpBonusPercent": 50,
+    "RestedXpConsumeRatio": 1,
+    "RestedXpGainTags": [
+      "combat",
+      "profession",
+      "job"
+    ],
+    "HardcoreEnabled": false,
+    "HardcoreLossType": "ResetToZero",
+    "HardcoreLevelLossPercent": 50,
+    "HardcoreCurrencyLossEnabled": false,
+    "HardcoreCurrencyLossPercent": 25,
+    "HardcoreCurrencyLossScopes": [
+      "Character"
+    ],
+    "BaseXpMultiplier": 1.0,
+    "DefaultPlayerProfileCount": 3
+  },
+  "AbilitySettings": {
+    "Enabled": true,
+    "BaseGlobalCooldown": 1500,
+    "HotbarAbilitySlots": [
+      7,
+      8,
+      9
+    ]
+  },
+  "InventorySettings": {
+    "Enabled": false,
+    "InventoryHandling": "Strength",
+    "DefaultInventorySize": 9,
+    "StrengthInventorySlots": {
+      "5": 9,
+      "6": 11
+    },
+    "ExtraSlotsRingsEnabled": false,
+    "ExtraSlotsTrinketsEnabled": false,
+    "ExtraSlotsNeckEnabled": false
+  },
+  "ItemSettings": {
+    "Enabled": true,
+    "LevelScalingTag": "RPG.ScaleWithLevel",
+    "ScalePerLevelPercent": 3.0
+  },
+  "PartySettings": {
+    "Enabled": true,
+    "GroupFinderEnabled": true,
+    "PartyEnabled": true,
+    "PartyMaxSize": 5,
+    "PartyMaxAssistants": 1,
+    "RaidEnabled": true,
+    "RaidMaxSize": 20,
+    "RaidMaxAssistants": 4,
+    "PartyInviteExpirySeconds": 300,
+    "PartyXpEnabled": true,
+    "PartyXpGrantingMode": "SplitEqualInRange",
+    "PartyXpRangeBlocks": 48,
+    "PartyXpMinMembersInRange": 1,
+    "PartyNpcAllowed": true,
+    "PartyPersistenceEnabled": false,
+    "PartyPersistenceIntervalSeconds": 60
+  },
+  "GuildSettings": {
+    "Enabled": true,
+    "GuildEnabled": true,
+    "GuildMaxMembers": 50,
+    "GuildInviteExpirySeconds": 3600,
+    "GuildNameMinLength": 3,
+    "GuildNameMaxLength": 24,
+    "GuildTagMinLength": 2,
+    "GuildTagMaxLength": 5,
+    "GuildDefaultJoinPolicy": "InviteOnly",
+    "GuildMembershipScope": "ACCOUNT",
+    "GuildMaxMembershipsPerOwner": 1,
+    "GuildPersistenceEnabled": true,
+    "GuildPersistenceIntervalSeconds": 120
+  },
+  "NpcSettings": {
+    "Enabled": true,
+    "ThreatEnabled": true,
+    "ThreatLookbackSeconds": 6.0,
+    "DefaultThreatMultiplier": 1.0,
+    "RoleThreatMultipliers": {
+      "tank": 1.5,
+      "healer": 1.0,
+      "dps": 1.0
+    }
+  },
+  "CameraSettings": {
+    "Enabled": true,
+    "TargetingStyle": "MOBA",
+    "CameraStyle": "Vanilla"
+  },
+  "BankSettings": {
+    "Enabled": true,
+  },
+  "CurrencySettings": {
+    "Enabled": true,
+    "PersistenceEnabled": true
+  },
+  "AuctionHouseSettings": {
+    "Enabled": true,
+    "BiddingAllowed": true,
+    "BuyOutsAllowed": true,
+    "DefaultListingLengthHours": 24,
+    "ListingDurations": [
+      {
+        "Hours": 24,
+        "ListingFee": {
+          "CurrencyId": "Gold",
+          "Amount": 1
+        }
+      },
+      {
+        "Hours": 48,
+        "ListingFee": {
+          "CurrencyId": "Gold",
+          "Amount": 2
+        }
+      },
+      {
+        "Hours": 72,
+        "ListingFee": {
+          "CurrencyId": "Gold",
+          "Amount": 3
+        }
+      }
+    ],
+    "SuccessfulFeePercent": 5,
+    "BuyerItemMailDelayMinutes": 0,
+    "SellerCurrencyDelayMinutes": 0,
+    "MaxActiveListingsPerOwner": 20,
+    "PostRateLimitCount": 5,
+    "PostRateLimitWindowSeconds": 60,
+    "MinimumLevelToPost": 1,
+    "AllowSellerCancels": true,
+    "ExpiredListingsReturnByMail": true,
+    "PersistenceEnabled": true
+  },
+  "MailSettings": {
+    "Enabled": true,
+    "MailEnabled": true,
+    "OwnershipMode": "Account",
+    "AllowItemAttachments": true,
+    "AllowCurrencyAttachments": true,
+    "AllowCashOnDelivery": true,
+    "RateLimitMinutes": 0,
+    "BaseDeliveryDelayMinutes": 0,
+    "GuildDeliveryReductionMinutes": 0,
+    "FriendDeliveryReductionMinutes": 0,
+    "MaxSubjectLength": 64,
+    "MaxBodyLength": 2000,
+    "MaxItemAttachments": 6,
+    "MailExpiryDays": 30,
+    "PersistenceEnabled": true
+  },
+  "ChatSettings": {
+    "Enabled": true,
+    "Channels": [
+      {
+        "Enabled": true,
+        "Type": "Party",
+        "Id": "party",
+        "Aliases": [
+          "p"
+        ],
+        "FormatTranslationKey": "rpg.chat.party.message"
+      },
+      {
+        "Enabled": true,
+        "Type": "Guild",
+        "Id": "guild",
+        "Aliases": [
+          "g"
+        ],
+        "FormatTranslationKey": "rpg.chat.guild.message"
+      }
+    ]
+  },
+  "LockpickingSettings": {
+    "Enabled": true,
+    "LockpickItemTag": "Lockpick",
+    "LockpickingDifficultyTiers": {
+      "Easy": {
+        "PinCount": 3,
+        "TimeLimitSeconds": 20.0,
+        "SweetSpotSize": 0.22,
+        "NeedleSpeed": 0.35,
+        "SweetSpotSizeScale": 0.95,
+        "NeedleSpeedScale": 1.05,
+        "MaxMistakes": 3
+      },
+      "Medium": {
+        "PinCount": 4,
+        "TimeLimitSeconds": 18.0,
+        "SweetSpotSize": 0.18,
+        "NeedleSpeed": 0.45,
+        "SweetSpotSizeScale": 0.9,
+        "NeedleSpeedScale": 1.1,
+        "MaxMistakes": 2
+      },
+      "Hard": {
+        "PinCount": 5,
+        "TimeLimitSeconds": 15.0,
+        "SweetSpotSize": 0.55,
+        "NeedleSpeed": 0.55,
+        "SweetSpotSizeScale": 0.85,
+        "NeedleSpeedScale": 1.15,
+        "MaxMistakes": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "DisplayName": "Base Bank",
+  "Description": "Shared baseline bank settings for RPG bank definitions.",
+  "Enabled": true,
+  "VisibleInUi": true,
+  "Scope": "Player",
+  "StorageMode": "Items",
+  "AutoCreateOnFirstUse": true,
+  "RemoteAccessAllowed": false,
+  "DepositEnabled": true,
+  "WithdrawEnabled": true,
+  "SearchEnabled": true,
+  "SortEnabled": true,
+  "AutoStackEnabled": true,
+  "DefaultSlotCount": 24,
+  "MaxSlotCountPerTab": 48,
+  "DefaultTabCount": 1,
+  "MaxTabs": 4,
+  "OpenCost": {
+    "Tier": 1,
+    "CurrencyId": "gold",
+    "Amount": 0,
+    "Note": "Free by default"
+  },
+  "AdditionalTabCosts": [
+    {
+      "Tier": 2,
+      "CurrencyId": "gold",
+      "Amount": 500,
+      "Note": "Unlock tab 2"
+    },
+    {
+      "Tier": 3,
+      "CurrencyId": "gold",
+      "Amount": 1500,
+      "Note": "Unlock tab 3"
+    },
+    {
+      "Tier": 4,
+      "CurrencyId": "gold",
+      "Amount": 5000,
+      "Note": "Unlock tab 4"
+    }
+  ],
+  "SlotUpgradeCosts": [
+    {
+      "Tier": 1,
+      "CurrencyId": "gold",
+      "Amount": 250,
+      "Note": "Increase tab capacity"
+    }
+  ],
+  "Tabs": [
+    {
+      "Id": "Main",
+      "DisplayName": "Main",
+      "Description": "Default storage tab.",
+      "SlotCount": 24,
+      "UnlockByDefault": true
+    }
+  ]
+}

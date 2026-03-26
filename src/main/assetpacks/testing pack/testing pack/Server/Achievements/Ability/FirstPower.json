@@ -1,0 +1,25 @@
+{
+  "DisplayName": "First Power",
+  "Description": "Unlock your first class ability.",
+  "NameTranslationKey": "pixelbays.rpg.achievement.definition.firstPower.name",
+  "DescriptionTranslationKey": "pixelbays.rpg.achievement.definition.firstPower.description",
+  "Category": "Ability",
+  "Points": 15,
+  "Criteria": [
+    {
+      "Id": "unlock_first_ability",
+      "Type": "UnlockAbility",
+      "TargetValue": 1
+    }
+  ],
+  "Reward": {
+    "DisplayedTitleTranslationKey": "pixelbays.rpg.achievement.title.awakened",
+    "Notification": {
+      "PrimaryMessage": "Achievement Unlocked",
+      "SecondaryMessage": "{name}"
+    }
+  },
+  "AccountWide": false,
+  "Hidden": false,
+  "IconId": "Common.Icons.Ability.Default"
+}

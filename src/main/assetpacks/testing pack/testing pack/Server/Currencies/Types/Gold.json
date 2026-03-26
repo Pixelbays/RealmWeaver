@@ -1,0 +1,14 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Gold",
+  "Description": "Primary numeric currency stored directly in wallets.",
+  "SortOrder": 10,
+  "AuctionHouseAllowed": true,
+  "StorageMode": "NumericWallet",
+  "AllowedScopes": [
+    "Character",
+    "Account",
+    "Guild",
+    "Custom"
+  ]
+}

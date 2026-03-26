@@ -1,0 +1,53 @@
+{
+  "Parent": "Base",
+  "DisplayName": "Account Bank",
+  "Description": "Account-wide storage shared across all characters.",
+  "Scope": "Account",
+  "RemoteAccessAllowed": true,
+  "DefaultSlotCount": 30,
+  "MaxSlotCountPerTab": 60,
+  "DefaultTabCount": 1,
+  "MaxTabs": 6,
+  "AdditionalTabCosts": [
+    {
+      "Tier": 2,
+      "CurrencyId": "gold",
+      "Amount": 1000,
+      "Note": "Unlock tab 2"
+    },
+    {
+      "Tier": 3,
+      "CurrencyId": "gold",
+      "Amount": 3000,
+      "Note": "Unlock tab 3"
+    },
+    {
+      "Tier": 4,
+      "CurrencyId": "gold",
+      "Amount": 8000,
+      "Note": "Unlock tab 4"
+    }
+  ],
+  "Tabs": [
+    {
+      "Id": "Shared",
+      "DisplayName": "Shared",
+      "Description": "Main account-wide storage.",
+      "SlotCount": 30,
+      "UnlockByDefault": true
+    },
+    {
+      "Id": "Warbound",
+      "DisplayName": "Warbound",
+      "Description": "Cross-character transfer storage.",
+      "SlotCount": 30,
+      "UnlockByDefault": false,
+      "UnlockCost": {
+        "Tier": 2,
+        "CurrencyId": "gold",
+        "Amount": 1000,
+        "Note": "Unlock warbound stash tab"
+      }
+    }
+  ]
+}

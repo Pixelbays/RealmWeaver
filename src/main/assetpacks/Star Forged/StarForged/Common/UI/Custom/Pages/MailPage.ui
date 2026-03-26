@@ -1,0 +1,184 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {}
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 1120, Height: 720);
+
+  #Title {
+    Group {
+      $C.@Title {
+        @Text = %pixelbays.rpg.mail.ui.title;
+      }
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: (Full: 12);
+
+    Label #StatusLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true);
+      Anchor: (Bottom: 12);
+    }
+
+    Group #MainRow {
+      LayoutMode: Left;
+      Anchor: (Height: 420, Bottom: 12);
+
+      Group #InboxPanel {
+        LayoutMode: Top;
+        Anchor: (Width: 470, Height: 420, Right: 12);
+
+        Label {
+          Text: %pixelbays.rpg.mail.ui.mailboxHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        Label #SummaryLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 10);
+        }
+
+        Label {
+          Text: %pixelbays.rpg.mail.ui.inboxHeading;
+          Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        Label #InboxLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 12);
+        }
+
+        Group { FlexWeight: 1; }
+
+        Group #SelectionRow {
+          LayoutMode: Left;
+          Anchor: (Height: 42, Bottom: 8);
+
+          $C.@TextField #SelectIndexField {
+            @Anchor = (Width: 150, Height: 42);
+            PlaceholderText: %pixelbays.rpg.mail.ui.selectPlaceholder;
+          }
+
+          Group { FlexWeight: 1; }
+
+          TextButton #SelectButton {
+            Text: %pixelbays.rpg.mail.ui.selectButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 130, Height: 42, Right: 8);
+          }
+
+          TextButton #RefreshButton {
+            Text: %pixelbays.rpg.mail.ui.refreshButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 130, Height: 42);
+          }
+        }
+      }
+
+      Group #DetailPanel {
+        LayoutMode: Top;
+        Anchor: (Width: 626, Height: 420);
+
+        Label {
+          Text: %pixelbays.rpg.mail.ui.detailHeading;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+          Anchor: (Bottom: 6);
+        }
+
+        Label #DetailHeaderLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true);
+          Anchor: (Bottom: 8);
+        }
+
+        Label #DetailMetaLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 12);
+        }
+
+        Label #DetailBodyLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 12);
+        }
+
+        Group { FlexWeight: 1; }
+
+        Group #DetailActionRow {
+          LayoutMode: Left;
+          Anchor: (Height: 44);
+
+          TextButton #MarkReadButton {
+            Text: %pixelbays.rpg.mail.ui.markReadButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 160, Height: 44);
+          }
+        }
+      }
+    }
+
+    Group #ComposePanel {
+      LayoutMode: Top;
+      Anchor: (Bottom: 8);
+
+      Label {
+        Text: %pixelbays.rpg.mail.ui.composeHeading;
+        Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label {
+        Text: %pixelbays.rpg.mail.ui.composeSubheading;
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+        Anchor: (Bottom: 10);
+      }
+
+      Group #ComposeRowOne {
+        LayoutMode: Left;
+        Anchor: (Height: 44, Bottom: 8);
+
+        $C.@TextField #RecipientField {
+          @Anchor = (Width: 260, Height: 44);
+          PlaceholderText: %pixelbays.rpg.mail.ui.recipientPlaceholder;
+        }
+
+        Group { Anchor: (Width: 8); }
+
+        $C.@TextField #SubjectField {
+          @Anchor = (Width: 420, Height: 44);
+          PlaceholderText: %pixelbays.rpg.mail.ui.subjectPlaceholder;
+        }
+
+        Group { FlexWeight: 1; }
+      }
+
+      Group #ComposeRowTwo {
+        LayoutMode: Left;
+        Anchor: (Height: 44);
+
+        $C.@TextField #BodyField {
+          @Anchor = (Width: 910, Height: 44);
+          PlaceholderText: %pixelbays.rpg.mail.ui.bodyPlaceholder;
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #SendButton {
+          Text: %pixelbays.rpg.mail.ui.sendButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 160, Height: 44);
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}
