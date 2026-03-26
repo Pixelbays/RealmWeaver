@@ -30,7 +30,7 @@ public final class ChatCommand extends AbstractPlayerCommand {
 
     private ChatCommand(String description) {
         super(description);
-        this.channelArg = this.withRequiredArg("channel", "Channel id (party/guild) or off", ArgTypes.STRING);
+        this.channelArg = this.withRequiredArg("channel", "Channel id or alias, or off", ArgTypes.STRING);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.pixelbays.rpg.chat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -19,11 +20,33 @@ import com.hypixel.hytale.server.core.universe.PlayerRef;
 
 public final class ChatManager {
 
-    private final Map<String, ChatChannel> channelsById = new LinkedHashMap<>();
-    private final Map<String, String> aliasToId = new LinkedHashMap<>();
+    private volatile Map<String, ChatChannel> channelsById = Map.of();
+    private volatile Map<String, String> aliasToId = Map.of();
     private final Map<UUID, String> activeChannelByPlayer = new ConcurrentHashMap<>();
 
-    public void registerChannel(@Nonnull ChatChannel channel) {
+    public synchronized void registerChannel(@Nonnull ChatChannel channel) {
+        List<ChatChannel> channels = new ArrayList<>(channelsById.values());
+        channels.add(channel);
+        replaceChannels(channels);
+    }
+
+    public synchronized void replaceChannels(@Nonnull List<? extends ChatChannel> channels) {
+        LinkedHashMap<String, ChatChannel> nextChannelsById = new LinkedHashMap<>();
+        LinkedHashMap<String, String> nextAliasToId = new LinkedHashMap<>();
+
+        for (ChatChannel channel : channels) {
+            registerChannel(channel, nextChannelsById, nextAliasToId);
+        }
+
+        channelsById = Collections.unmodifiableMap(nextChannelsById);
+        aliasToId = Collections.unmodifiableMap(nextAliasToId);
+        activeChannelByPlayer.entrySet().removeIf(entry -> !nextChannelsById.containsKey(entry.getValue()));
+    }
+
+    private static void registerChannel(
+            @Nonnull ChatChannel channel,
+            @Nonnull Map<String, ChatChannel> channelsById,
+            @Nonnull Map<String, String> aliasToId) {
         String id = normalizeKey(channel.getId());
         if (id.isEmpty()) {
             throw new IllegalArgumentException("Channel id cannot be empty");

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.pixelbays.rpg.chat.config.settings.ChatChannelDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildManager;
@@ -18,26 +19,41 @@ import com.hypixel.hytale.server.core.universe.Universe;
 public final class GuildChatChannel implements ChatChannel {
 
     private final GuildManager guildManager;
+    private final String id;
+    private final List<String> aliases;
+    private final String formatTranslationKey;
 
     public GuildChatChannel(@Nonnull GuildManager guildManager) {
+        this(guildManager, ChatChannelDefinition.builtIn(
+                ChatChannelDefinition.ChannelType.Guild,
+                "guild",
+                List.of("g"),
+                "rpg.chat.guild.message"));
+    }
+
+    public GuildChatChannel(@Nonnull GuildManager guildManager, @Nonnull ChatChannelDefinition definition) {
         this.guildManager = guildManager;
+        this.id = definition.getId();
+        this.aliases = List.copyOf(definition.getAliases());
+        this.formatTranslationKey = definition.getFormatTranslationKey();
     }
 
     @Override
     @Nonnull
     public String getId() {
-        return "guild";
+        return id;
     }
 
     @Override
     @Nonnull
     public List<String> getAliases() {
-        return List.of("g");
+        return aliases;
     }
 
     @Override
     public boolean canSend(@Nonnull PlayerRef sender) {
-        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        var assetMap = RpgModConfig.getAssetMap();
+        RpgModConfig config = assetMap != null ? assetMap.getAsset("default") : null;
         if (config == null || !config.isGuildEnabled()) {
             return false;
         }
@@ -73,7 +89,7 @@ public final class GuildChatChannel implements ChatChannel {
         return (sender, msg) -> {
             Guild guild = guildManager.getGuildForMember(sender.getUuid());
             String tag = guild != null ? guild.getTag() : "";
-            return Message.translation("pixelbays.rpg.chat.guild.message")
+            return Message.translation(formatTranslationKey)
                     .param("tag", tag)
                     .param("username", sender.getUsername())
                     .param("message", msg);

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import org.pixelbays.rpg.chat.config.settings.ChatChannelDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.party.Party;
 import org.pixelbays.rpg.party.PartyManager;
@@ -19,26 +20,41 @@ import com.hypixel.hytale.server.core.universe.Universe;
 public final class PartyChatChannel implements ChatChannel {
 
     private final PartyManager partyManager;
+    private final String id;
+    private final List<String> aliases;
+    private final String formatTranslationKey;
 
     public PartyChatChannel(@Nonnull PartyManager partyManager) {
+        this(partyManager, ChatChannelDefinition.builtIn(
+                ChatChannelDefinition.ChannelType.Party,
+                "party",
+                List.of("p"),
+                "rpg.chat.party.message"));
+    }
+
+    public PartyChatChannel(@Nonnull PartyManager partyManager, @Nonnull ChatChannelDefinition definition) {
         this.partyManager = partyManager;
+        this.id = definition.getId();
+        this.aliases = List.copyOf(definition.getAliases());
+        this.formatTranslationKey = definition.getFormatTranslationKey();
     }
 
     @Override
     @Nonnull
     public String getId() {
-        return "party";
+        return id;
     }
 
     @Override
     @Nonnull
     public List<String> getAliases() {
-        return List.of("p");
+        return aliases;
     }
 
     @Override
     public boolean canSend(@Nonnull PlayerRef sender) {
-        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        var assetMap = RpgModConfig.getAssetMap();
+        RpgModConfig config = assetMap != null ? assetMap.getAsset("default") : null;
         if (config == null || !config.isPartyEnabled()) {
             return false;
         }
@@ -71,7 +87,7 @@ public final class PartyChatChannel implements ChatChannel {
     @Override
     @Nonnull
     public PlayerChatEvent.Formatter getFormatter() {
-        return (sender, msg) -> Message.translation("pixelbays.rpg.chat.party.message")
+        return (sender, msg) -> Message.translation(formatTranslationKey)
                 .param("username", sender.getUsername())
                 .param("message", msg);
     }
