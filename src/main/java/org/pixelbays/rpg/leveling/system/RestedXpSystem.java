@@ -44,15 +44,15 @@ public class RestedXpSystem {
 
             Store<EntityStore> store = entityRef.getStore();
             World world = store.getExternalData().getWorld();
-            if (world == null) {
-                return;
-            }
-
             world.execute(() -> handlePlayerConnect(entityRef));
         };
     }
 
     private void handlePlayerConnect(@Nonnull Ref<EntityStore> entityRef) {
+        if (!entityRef.isValid()) {
+            return;
+        }
+
         Store<EntityStore> store = entityRef.getStore();
             RpgModConfig config = resolveConfig();
             if (config == null || !config.isRestedXpEnabled()) {
@@ -129,15 +129,15 @@ public class RestedXpSystem {
 
             Store<EntityStore> store = entityRef.getStore();
             World world = store.getExternalData().getWorld();
-            if (world == null) {
-                return;
-            }
-
             world.execute(() -> handlePlayerDisconnect(entityRef));
         };
     }
 
     private void handlePlayerDisconnect(@Nonnull Ref<EntityStore> entityRef) {
+        if (!entityRef.isValid()) {
+            return;
+        }
+
         Store<EntityStore> store = entityRef.getStore();
         LevelProgressionComponent levelComp = store.getComponent(entityRef, LevelProgressionComponent.getComponentType());
         if (levelComp == null) {
