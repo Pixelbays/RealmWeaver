@@ -1,7 +1,14 @@
 package org.pixelbays.rpg.ability.system;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,17 +28,25 @@ import org.pixelbays.rpg.global.util.RpgLogging;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
+import com.hypixel.hytale.protocol.GameMode;
+import com.hypixel.hytale.protocol.InteractionCooldown;
 import com.hypixel.hytale.protocol.InteractionType;
+import com.hypixel.hytale.protocol.RootInteractionSettings;
 import com.hypixel.hytale.protocol.SoundCategory;
 import com.hypixel.hytale.protocol.packets.entities.SpawnModelParticles;
+import com.hypixel.hytale.server.core.Message;
+import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.InteractionChain;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.InteractionManager;
+import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
 import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.UnarmedInteractions;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.InteractionTypeUtils;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelParticle;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
@@ -49,7 +64,16 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
  */
 public class ClassAbilitySystem {
 
+    private static final long MIN_PARTICLE_DURATION_MS = 50L;
+    private static final int PARTICLE_FADE_STEPS = 8;
+    private static final float[] DEFAULT_CHARGE_TIMES = new float[] { 0.0F };
+    private static final Field INTERACTION_MANAGER_COOLDOWN_HANDLER_FIELD = resolveField(InteractionManager.class,
+        "cooldownHandler");
+    private static final Field COOLDOWN_REMAINING_FIELD = resolveField(CooldownHandler.Cooldown.class,
+        "remainingCooldown");
+
     private final GlobalCoolDown globalCoolDown = new GlobalCoolDown();
+    private final Map<ParticleEffectKey, ScheduledParticleEffect> activeParticleEffects = new ConcurrentHashMap<>();
 
     public ClassAbilitySystem(@Nonnull ClassManagementSystem classManagementSystem) {
         // Abilities are loaded via Hytale's asset system
@@ -123,12 +147,6 @@ public class ClassAbilitySystem {
             return fail(entityRef, abilityId, "Ability is disabled: " + abilityDef.getDisplayName());
         }
 
-        GlobalCoolDown.GcdResult gcdResult = globalCoolDown.tryConsume(entityRef, store, abilityDef);
-        if (!gcdResult.allowed()) {
-            return fail(entityRef, abilityId,
-                    "Global cooldown active (" + gcdResult.remainingMs() + "ms)");
-        }
-
         // Get the interaction chain ID from the ability definition
         String chainId = abilityDef.getInteractionChainId();
         if (chainId == null || chainId.isEmpty()) {
@@ -151,6 +169,19 @@ public class ClassAbilitySystem {
         if (manager == null) {
             RpgLogging.debugDeveloper("Interaction manager not available for entity %s", entityRef);
             return fail(entityRef, abilityId, "Interaction manager not available");
+        }
+
+        CooldownCheckResult interactionCooldown = checkInteractionCooldown(entityRef, store, manager, interactionType, root);
+        if (!interactionCooldown.ready()) {
+            sendInteractionCooldownMessage(entityRef, store, abilityDef, interactionCooldown.remainingSeconds());
+            return fail(entityRef, abilityId,
+                    "Interaction cooldown active (" + formatCooldownSeconds(interactionCooldown.remainingSeconds()) + "s)");
+        }
+
+        GlobalCoolDown.GcdResult gcdResult = globalCoolDown.tryConsume(entityRef, store, abilityDef);
+        if (!gcdResult.allowed()) {
+            return fail(entityRef, abilityId,
+                    "Global cooldown active (" + gcdResult.remainingMs() + "ms)");
         }
 
         // Create interaction context
@@ -305,30 +336,155 @@ public class ClassAbilitySystem {
                 return;
             }
 
-            com.hypixel.hytale.protocol.ModelParticle[] protocolParticles =
-                new com.hypixel.hytale.protocol.ModelParticle[particles.length];
-            for (int i = 0; i < particles.length; i++) {
-                protocolParticles[i] = particles[i].toPacket();
-            }
-
-            SpawnModelParticles packet = new SpawnModelParticles(networkId.getId(), protocolParticles);
-
-            SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource =
-                store.getResource(EntityModule.get().getPlayerSpatialResourceType());
-            ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
-            playerSpatialResource.getSpatialStructure().collect(transform.getPosition(), 96.0, nearbyPlayers);
-
-            for (Ref<EntityStore> playerRef : nearbyPlayers) {
-                if (!playerRef.isValid()) {
-                    continue;
-                }
-
-                PlayerRef playerRefComponent = store.getComponent(playerRef, PlayerRef.getComponentType());
-                if (playerRefComponent != null) {
-                    playerRefComponent.getPacketHandler().writeNoCache(packet);
-                }
-            }
+            ParticleEffectKey effectKey = new ParticleEffectKey(networkId.getId(), abilityDef.getId());
+            cancelParticleLifecycle(effectKey);
+            sendModelParticles(store, transform, networkId.getId(), particles, 1.0f);
         });
+    }
+
+    private void scheduleParticleLifecycle(
+            @Nonnull World world,
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ParticleEffectKey effectKey,
+            int entityId,
+            @Nonnull ModelParticle[] particles,
+            float durationSeconds,
+            boolean fadeOut) {
+        cancelParticleLifecycle(effectKey);
+
+        long durationMs = Math.max(MIN_PARTICLE_DURATION_MS, (long) (durationSeconds * 1000.0f));
+        ScheduledParticleEffect effect = new ScheduledParticleEffect();
+        activeParticleEffects.put(effectKey, effect);
+
+        if (fadeOut) {
+            for (int step = 1; step <= PARTICLE_FADE_STEPS; step++) {
+                long delayMs = Math.max(1L,
+                        Math.round((durationMs * step) / (double) (PARTICLE_FADE_STEPS + 1)));
+                float scaleFactor = Math.max(0.0f, 1.0f - (step / (float) (PARTICLE_FADE_STEPS + 1)));
+                effect.add(HytaleServer.SCHEDULED_EXECUTOR.schedule(
+                        () -> world.execute(() -> updateFadingParticleEffect(
+                                entityRef,
+                                store,
+                                effectKey,
+                                effect,
+                                entityId,
+                                particles,
+                                scaleFactor)),
+                        delayMs,
+                        TimeUnit.MILLISECONDS));
+            }
+        }
+
+        effect.add(HytaleServer.SCHEDULED_EXECUTOR.schedule(
+                () -> world.execute(() -> clearParticleEffect(entityRef, store, effectKey, effect, entityId)),
+                durationMs,
+                TimeUnit.MILLISECONDS));
+    }
+
+    private void updateFadingParticleEffect(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ParticleEffectKey effectKey,
+            @Nonnull ScheduledParticleEffect expectedEffect,
+            int entityId,
+            @Nonnull ModelParticle[] particles,
+            float scaleFactor) {
+        if (!isCurrentEffect(effectKey, expectedEffect) || !entityRef.isValid()) {
+            return;
+        }
+
+        TransformComponent transform = store.getComponent(entityRef, EntityModule.get().getTransformComponentType());
+        if (transform == null) {
+            return;
+        }
+
+        sendModelParticles(store, transform, entityId, particles, scaleFactor);
+    }
+
+    private void clearParticleEffect(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ParticleEffectKey effectKey,
+            @Nonnull ScheduledParticleEffect expectedEffect,
+            int entityId) {
+        if (!isCurrentEffect(effectKey, expectedEffect)) {
+            return;
+        }
+
+        activeParticleEffects.remove(effectKey, expectedEffect);
+
+        if (!entityRef.isValid()) {
+            expectedEffect.cancelAll();
+            return;
+        }
+
+        TransformComponent transform = store.getComponent(entityRef, EntityModule.get().getTransformComponentType());
+        if (transform != null) {
+            sendEmptyModelParticles(store, transform, entityId);
+        }
+
+        expectedEffect.cancelAll();
+    }
+
+    private boolean isCurrentEffect(
+            @Nonnull ParticleEffectKey effectKey,
+            @Nonnull ScheduledParticleEffect expectedEffect) {
+        return activeParticleEffects.get(effectKey) == expectedEffect;
+    }
+
+    private void cancelParticleLifecycle(@Nonnull ParticleEffectKey effectKey) {
+        ScheduledParticleEffect existing = activeParticleEffects.remove(effectKey);
+        if (existing != null) {
+            existing.cancelAll();
+        }
+    }
+
+    private void sendEmptyModelParticles(
+            @Nonnull Store<EntityStore> store,
+            @Nonnull TransformComponent transform,
+            int entityId) {
+        sendModelParticlesPacket(store, transform, new SpawnModelParticles(entityId, new com.hypixel.hytale.protocol.ModelParticle[0]));
+    }
+
+    private void sendModelParticles(
+            @Nonnull Store<EntityStore> store,
+            @Nonnull TransformComponent transform,
+            int entityId,
+            @Nonnull ModelParticle[] particles,
+            float scaleFactor) {
+        com.hypixel.hytale.protocol.ModelParticle[] protocolParticles =
+                new com.hypixel.hytale.protocol.ModelParticle[particles.length];
+        for (int i = 0; i < particles.length; i++) {
+            ModelParticle scaledParticle = new ModelParticle(particles[i]);
+            if (scaleFactor != 1.0f) {
+                scaledParticle.scale(scaleFactor);
+            }
+            protocolParticles[i] = scaledParticle.toPacket();
+        }
+
+        sendModelParticlesPacket(store, transform, new SpawnModelParticles(entityId, protocolParticles));
+    }
+
+    private void sendModelParticlesPacket(
+            @Nonnull Store<EntityStore> store,
+            @Nonnull TransformComponent transform,
+            @Nonnull SpawnModelParticles packet) {
+        SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource =
+                store.getResource(EntityModule.get().getPlayerSpatialResourceType());
+        ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
+        playerSpatialResource.getSpatialStructure().collect(transform.getPosition(), 96.0, nearbyPlayers);
+
+        for (Ref<EntityStore> playerRef : nearbyPlayers) {
+            if (!playerRef.isValid()) {
+                continue;
+            }
+
+            PlayerRef playerRefComponent = store.getComponent(playerRef, PlayerRef.getComponentType());
+            if (playerRefComponent != null) {
+                playerRefComponent.getPacketHandler().writeNoCache(packet);
+            }
+        }
     }
 
     /**
@@ -418,6 +574,144 @@ public class ClassAbilitySystem {
         return TriggerResult.failure(reason);
     }
 
+    @Nonnull
+    private CooldownCheckResult checkInteractionCooldown(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull InteractionManager manager,
+            @Nonnull InteractionType interactionType,
+            @Nonnull RootInteraction root) {
+        CooldownHandler cooldownHandler = getCooldownHandler(manager);
+        if (cooldownHandler == null) {
+            return CooldownCheckResult.available();
+        }
+
+        ResolvedCooldown resolved = resolveInteractionCooldown(entityRef, store, interactionType, root);
+        if (resolved.cooldownTime() <= 0.0f) {
+            return CooldownCheckResult.available();
+        }
+
+        CooldownHandler.Cooldown cooldown = cooldownHandler.getCooldown(
+                resolved.cooldownId(),
+                resolved.cooldownTime(),
+                resolved.chargeTimes(),
+                root.resetCooldownOnStart(),
+                resolved.interruptRecharge());
+        if (cooldown == null || !cooldown.hasCooldown(false)) {
+            return CooldownCheckResult.available();
+        }
+
+        return CooldownCheckResult.blocked(Math.max(0.0f, getRemainingCooldownSeconds(cooldown)));
+    }
+
+    @Nonnull
+    private ResolvedCooldown resolveInteractionCooldown(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull InteractionType interactionType,
+            @Nonnull RootInteraction root) {
+        String cooldownId = root.getId();
+        float cooldownTime = InteractionTypeUtils.getDefaultCooldown(interactionType);
+        float[] chargeTimes = DEFAULT_CHARGE_TIMES;
+        boolean interruptRecharge = false;
+
+        InteractionCooldown cooldown = root.getCooldown();
+        if (cooldown != null) {
+            cooldownTime = cooldown.cooldown;
+            if (cooldown.chargeTimes != null && cooldown.chargeTimes.length > 0) {
+                chargeTimes = cooldown.chargeTimes;
+            }
+            if (cooldown.cooldownId != null && !cooldown.cooldownId.isEmpty()) {
+                cooldownId = cooldown.cooldownId;
+            }
+            interruptRecharge = cooldown.interruptRecharge;
+        }
+
+        Player player = store.getComponent(entityRef, Player.getComponentType());
+        GameMode gameMode = player != null ? player.getGameMode() : GameMode.Adventure;
+        RootInteractionSettings settings = root.getSettings().get(gameMode);
+        if (settings != null && settings.cooldown != null) {
+            InteractionCooldown settingsCooldown = settings.cooldown;
+            cooldownTime = settingsCooldown.cooldown;
+            if (settingsCooldown.chargeTimes != null && settingsCooldown.chargeTimes.length > 0) {
+                chargeTimes = settingsCooldown.chargeTimes;
+            }
+            if (settingsCooldown.cooldownId != null && !settingsCooldown.cooldownId.isEmpty()) {
+                cooldownId = settingsCooldown.cooldownId;
+            }
+            interruptRecharge = interruptRecharge || settingsCooldown.interruptRecharge;
+        }
+
+        return new ResolvedCooldown(cooldownId, cooldownTime, chargeTimes, interruptRecharge);
+    }
+
+    @Nullable
+    private CooldownHandler getCooldownHandler(@Nonnull InteractionManager manager) {
+        if (INTERACTION_MANAGER_COOLDOWN_HANDLER_FIELD == null) {
+            return null;
+        }
+
+        try {
+            return (CooldownHandler) INTERACTION_MANAGER_COOLDOWN_HANDLER_FIELD.get(manager);
+        } catch (IllegalAccessException e) {
+            RpgLogging.debugDeveloper("Failed to access interaction cooldown handler: %s", e.getMessage());
+            return null;
+        }
+    }
+
+    private float getRemainingCooldownSeconds(@Nonnull CooldownHandler.Cooldown cooldown) {
+        if (COOLDOWN_REMAINING_FIELD == null) {
+            return cooldown.getCooldown();
+        }
+
+        try {
+            return COOLDOWN_REMAINING_FIELD.getFloat(cooldown);
+        } catch (IllegalAccessException e) {
+            RpgLogging.debugDeveloper("Failed to read interaction cooldown remaining time: %s", e.getMessage());
+            return cooldown.getCooldown();
+        }
+    }
+
+    private void sendInteractionCooldownMessage(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ClassAbilityDefinition abilityDef,
+            float remainingSeconds) {
+        PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return;
+        }
+
+        playerRef.sendMessage(Message.translation("pixelbays.rpg.ability.error.cooldown")
+            .param("ability", Message.translation(abilityDef.getTranslationKey()))
+            .param("time", formatCooldownSeconds(remainingSeconds)));
+    }
+
+    @Nonnull
+    private String formatCooldownSeconds(float remainingSeconds) {
+        if (remainingSeconds >= 10.0f) {
+            return Integer.toString((int) Math.ceil(remainingSeconds));
+        }
+
+        float rounded = Math.round(remainingSeconds * 10.0f) / 10.0f;
+        if (Math.abs(rounded - Math.round(rounded)) < 0.0001f) {
+            return Integer.toString(Math.round(rounded));
+        }
+
+        return String.format(java.util.Locale.ROOT, "%.1f", rounded);
+    }
+
+    @Nullable
+    private static Field resolveField(@Nonnull Class<?> owner, @Nonnull String fieldName) {
+        try {
+            Field field = owner.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field;
+        } catch (ReflectiveOperationException e) {
+            return null;
+        }
+    }
+
     /**
      * Result of an ability trigger attempt.
      * Contains success status, error messages, and ability information.
@@ -498,6 +792,67 @@ public class ClassAbilitySystem {
                 return abilityDefinition.getDisplayName();
             }
             return errorMessage != null ? errorMessage : "Unknown";
+        }
+    }
+
+    private static final class ParticleEffectKey {
+        private final int entityId;
+        private final String abilityId;
+
+        private ParticleEffectKey(int entityId, @Nonnull String abilityId) {
+            this.entityId = entityId;
+            this.abilityId = abilityId;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+
+            if (!(obj instanceof ParticleEffectKey other)) {
+                return false;
+            }
+
+            return this.entityId == other.entityId && this.abilityId.equals(other.abilityId);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Integer.hashCode(this.entityId);
+            return 31 * result + this.abilityId.hashCode();
+        }
+    }
+
+    private static final class ScheduledParticleEffect {
+        private final List<ScheduledFuture<?>> futures = new ArrayList<>();
+
+        private void add(@Nonnull ScheduledFuture<?> future) {
+            this.futures.add(future);
+        }
+
+        private void cancelAll() {
+            for (ScheduledFuture<?> future : this.futures) {
+                future.cancel(false);
+            }
+            this.futures.clear();
+        }
+    }
+
+    private record ResolvedCooldown(
+            @Nonnull String cooldownId,
+            float cooldownTime,
+            @Nonnull float[] chargeTimes,
+            boolean interruptRecharge) {
+    }
+
+    private record CooldownCheckResult(boolean ready, float remainingSeconds) {
+        private static CooldownCheckResult available() {
+            return new CooldownCheckResult(true, 0.0f);
+        }
+
+        private static CooldownCheckResult blocked(float remainingSeconds) {
+            return new CooldownCheckResult(false, remainingSeconds);
         }
     }
 

@@ -168,6 +168,23 @@ public class ClassAbilityDefinition
             .documentation(
                     "The particles played for this item when in first person. If this is a block, block specific properties should be used instead.")
             .add()
+                .<Float>appendInherited(
+                    new KeyedCodec<>("ParticleDurationSeconds", Codec.FLOAT, false, true),
+                    (ability, value) -> ability.particleDurationSeconds = value,
+                    ability -> ability.particleDurationSeconds,
+                    (ability, parent) -> ability.particleDurationSeconds = parent.particleDurationSeconds)
+                .addValidator(Validators.greaterThanOrEqual(0.0F))
+                .documentation(
+                    "How long the model particle effect should remain active after the ability stops refreshing it. Set to 0 to use the particle system's own lifetime handling.")
+                .add()
+                .appendInherited(
+                    new KeyedCodec<>("FadeOutParticles", Codec.BOOLEAN, false, true),
+                    (ability, value) -> ability.fadeOutParticles = value,
+                    ability -> ability.fadeOutParticles,
+                    (ability, parent) -> ability.fadeOutParticles = parent.fadeOutParticles)
+                .documentation(
+                    "If enabled, the system scales the ability's particles down before clearing them when the particle duration expires.")
+                .add()
             .<Map<InteractionType, String>>appendInherited(
                     new KeyedCodec<>("Interactions",
                             new EnumMapCodec<>(InteractionType.class, RootInteraction.CHILD_ASSET_CODEC)),
@@ -281,6 +298,8 @@ public class ClassAbilityDefinition
     protected transient int abilitySoundSetIndex;
     protected ModelParticle[] particles;
     protected ModelParticle[] firstPersonParticles;
+    protected float particleDurationSeconds;
+    protected boolean fadeOutParticles;
     protected Map<InteractionType, String> interactions = Collections.emptyMap();
     protected Map<String, InteractionVarsEntry> interactionVars = Collections.emptyMap();
     protected InteractionConfiguration interactionConfig;
@@ -333,6 +352,8 @@ public class ClassAbilityDefinition
         this.abilitySoundSetIndex = other.abilitySoundSetIndex;
         this.particles = other.particles;
         this.firstPersonParticles = other.firstPersonParticles;
+        this.particleDurationSeconds = other.particleDurationSeconds;
+        this.fadeOutParticles = other.fadeOutParticles;
         this.interactions = other.interactions;
         this.interactionVars = other.interactionVars;
         this.interactionConfig = other.interactionConfig;
@@ -531,6 +552,14 @@ public class ClassAbilityDefinition
 
     public ModelParticle[] getFirstPersonParticles() {
         return this.firstPersonParticles;
+    }
+
+    public float getParticleDurationSeconds() {
+        return this.particleDurationSeconds;
+    }
+
+    public boolean isFadeOutParticles() {
+        return this.fadeOutParticles;
     }
 
     public Map<InteractionType, String> getInteractions() {
