@@ -11,6 +11,7 @@ import javax.annotation.Nonnull;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.classes.config.settings.ClassModSettings.XpRoutingMode;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.leveling.event.GiveXPEvent;
@@ -68,6 +69,7 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
 
         var store = event.playerRef().getStore();
         var levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        var classSystem = ExamplePlugin.get().getClassManagementSystem();
 
         if (allowPartyShare && tryDistributePartyXp(event, store)) {
             return;
@@ -83,6 +85,10 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
             : XpRoutingMode.ActiveClassOnly;
 
         var classComp = store.getComponent(event.playerRef(), ClassComponent.getComponentType());
+        if (classComp != null) {
+            classSystem.pruneUnknownClasses(event.playerRef(), store);
+            classComp = store.getComponent(event.playerRef(), ClassComponent.getComponentType());
+        }
         ClassDefinition primaryClass = resolvePrimaryClass(classComp);
         RaceDefinition activeRace = resolveRace(event.playerRef(), store);
         float expToGrant = applyExperienceModifiers(event.amount(), event.playerRef(), store, config, primaryClass, activeRace);
@@ -536,7 +542,8 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
             return null;
         }
 
-        String primaryClassId = classComp.getPrimaryClassId();
+        ClassManagementSystem classSystem = ExamplePlugin.get().getClassManagementSystem();
+        String primaryClassId = classSystem.getPrimaryKnownClassId(classComp);
         if (primaryClassId == null || primaryClassId.isEmpty()) {
             return null;
         }
