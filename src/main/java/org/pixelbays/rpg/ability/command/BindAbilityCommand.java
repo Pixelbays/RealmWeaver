@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
@@ -121,9 +121,9 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
 
         // Get or create binding component
         AbilityBindingComponent bindingComp = store.getComponent(ref,
-                ExamplePlugin.get().getAbilityBindingComponentType());
+                Realmweavers.get().getAbilityBindingComponentType());
         if (bindingComp == null) {
-            bindingComp = store.addComponent(ref, ExamplePlugin.get().getAbilityBindingComponentType());
+            bindingComp = store.addComponent(ref, Realmweavers.get().getAbilityBindingComponentType());
         }
 
         // Handle "clear"
@@ -132,7 +132,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
             bindingComp.setHotbarBinding(internalSlot, null);
             
             // Update hotbar icon
-            ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, null);
+            Realmweavers.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, null);
             
             player.sendMessage(Message.translation("pixelbays.rpg.ability.bind.cleared").param("slot", slot));
             return;
@@ -163,7 +163,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         bindingComp.setHotbarBinding(internalSlot, abilityId);
         
         // Update hotbar icon
-        ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, abilityId);
+        Realmweavers.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, abilityId);
         
         player.sendMessage(Message.translation("pixelbays.rpg.ability.bind.bound")
             .param("ability", abilityName)
@@ -173,7 +173,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
     private void listBindings(@Nonnull Player player, @Nonnull Store<EntityStore> store,
             @Nonnull Ref<EntityStore> ref) {
         AbilityBindingComponent bindingComp = store.getComponent(ref,
-                ExamplePlugin.get().getAbilityBindingComponentType());
+                Realmweavers.get().getAbilityBindingComponentType());
         if (bindingComp == null || bindingComp.getHotbarBindings().isEmpty()) {
             player.sendMessage(Message.translation("pixelbays.rpg.ability.bind.none"));
             return;

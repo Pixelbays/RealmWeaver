@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -29,7 +29,7 @@ public class ClassLearnCommand extends AbstractPlayerCommand {
     public ClassLearnCommand() {
         super("learn", "Learn a new class");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
         @SuppressWarnings("null")
         RequiredArg<String> className = this.withRequiredArg("className", "The class to learn", ArgTypes.STRING);
         this.classNameArg = className;

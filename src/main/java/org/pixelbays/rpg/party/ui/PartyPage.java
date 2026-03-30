@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.PartyActionResult;
 import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.PartyMemberType;
@@ -56,7 +56,7 @@ public class PartyPage extends CustomUIPage {
 
     public PartyPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
     }
 
     @Override

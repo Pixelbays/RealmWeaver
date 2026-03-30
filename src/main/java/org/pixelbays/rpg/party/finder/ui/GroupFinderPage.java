@@ -11,7 +11,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.command.PartyCommandUtil;
 import org.pixelbays.rpg.party.finder.GroupFinderActionResult;
 import org.pixelbays.rpg.party.finder.GroupFinderManager;
@@ -72,7 +72,7 @@ public class GroupFinderPage extends CustomUIPage {
 
     public GroupFinderPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.groupFinderManager = ExamplePlugin.get().getGroupFinderManager();
+        this.groupFinderManager = Realmweavers.get().getGroupFinderManager();
     }
 
     @Override

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -115,7 +115,7 @@ public class LevelProgressionComponent implements Component<EntityStore>, Clonea
      * Get the component type for registration
      */
     public static ComponentType<EntityStore, LevelProgressionComponent> getComponentType() {
-        return ExamplePlugin.get().getLevelProgressionComponentType();
+        return Realmweavers.get().getLevelProgressionComponentType();
     }
 
     @Nonnull

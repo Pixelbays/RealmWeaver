@@ -3,7 +3,7 @@ package org.pixelbays.rpg.npc.component;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -62,7 +62,7 @@ public class NpcRpgDebugComponent implements Component<EntityStore>, Cloneable {
     }
 
     public static ComponentType<EntityStore, NpcRpgDebugComponent> getComponentType() {
-        return ExamplePlugin.get().getNpcRpgDebugComponentType();
+        return Realmweavers.get().getNpcRpgDebugComponentType();
     }
 
     @Nonnull

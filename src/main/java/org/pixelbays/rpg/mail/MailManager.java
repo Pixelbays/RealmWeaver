@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
@@ -329,7 +329,7 @@ public class MailManager {
             return CurrencyActionResult.success("No attached currency.", "", 0L);
         }
 
-        CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+        CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
         CurrencyScope scope = ownershipMode == MailOwnershipMode.Character ? CurrencyScope.Character : CurrencyScope.Account;
         return currencyManager.removeBalance(scope,
                 senderOwnerId,
@@ -373,7 +373,7 @@ public class MailManager {
     @Nullable
     private Guild resolveGuildForMember(@Nonnull UUID accountId) {
         try {
-            Object plugin = ExamplePlugin.get();
+            Object plugin = Realmweavers.get();
             Method getGuildManager = plugin.getClass().getMethod("getGuildManager");
             Object guildManager = getGuildManager.invoke(plugin);
             if (guildManager == null) {
@@ -399,7 +399,7 @@ public class MailManager {
         Set<String> owners = new HashSet<>();
         owners.add(accountId.toString());
 
-        CharacterManager characterManager = ExamplePlugin.get().getCharacterManager();
+        CharacterManager characterManager = Realmweavers.get().getCharacterManager();
         String characterOwnerId = characterManager.resolveCharacterOwnerId(accountId);
         if (!characterOwnerId.isBlank()) {
             owners.add(characterOwnerId);
@@ -409,7 +409,7 @@ public class MailManager {
 
     private String resolveMailboxOwnerId(UUID accountId, MailOwnershipMode ownershipMode) {
         if (ownershipMode == MailOwnershipMode.Character) {
-            CharacterManager characterManager = ExamplePlugin.get().getCharacterManager();
+            CharacterManager characterManager = Realmweavers.get().getCharacterManager();
             String characterOwnerId = characterManager.resolveCharacterOwnerId(accountId);
             if (!characterOwnerId.isBlank()) {
                 return characterOwnerId;
@@ -442,7 +442,7 @@ public class MailManager {
 
     @Nonnull
     private List<UUID> resolveKnownRecipientAccountIds() {
-        CharacterManager characterManager = ExamplePlugin.get().getCharacterManager();
+        CharacterManager characterManager = Realmweavers.get().getCharacterManager();
         return characterManager == null ? List.of() : characterManager.getKnownAccountIds();
     }
 

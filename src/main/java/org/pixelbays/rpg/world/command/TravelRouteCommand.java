@@ -2,7 +2,7 @@ package org.pixelbays.rpg.world.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -39,10 +39,10 @@ public class TravelRouteCommand extends AbstractPlayerCommand {
 		}
 
 		if ("list".equalsIgnoreCase(requestedRouteId)) {
-			ExamplePlugin.get().getWorldTravelManager().sendRouteList(player);
+			Realmweavers.get().getWorldTravelManager().sendRouteList(player);
 			return;
 		}
 
-		ExamplePlugin.get().getWorldTravelManager().travelRoute(requestedRouteId, store, ref, playerRef);
+		Realmweavers.get().getWorldTravelManager().travelRoute(requestedRouteId, store, ref, playerRef);
 	}
 }

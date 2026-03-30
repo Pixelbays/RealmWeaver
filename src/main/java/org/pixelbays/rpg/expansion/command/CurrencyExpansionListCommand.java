@@ -2,7 +2,7 @@ package org.pixelbays.rpg.expansion.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.global.config.settings.GeneralModSettings;
 
@@ -24,7 +24,7 @@ public class CurrencyExpansionListCommand extends AbstractPlayerCommand {
     public CurrencyExpansionListCommand() {
         super("list", "List configured expansions");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.expansionManager = ExamplePlugin.get().getExpansionManager();
+        this.expansionManager = Realmweavers.get().getExpansionManager();
     }
 
     @Override

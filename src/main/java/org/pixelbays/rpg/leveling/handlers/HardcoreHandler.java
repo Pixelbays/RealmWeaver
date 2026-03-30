@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.config.CharacterProfileData;
 import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
@@ -60,7 +60,7 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 			return;
 		}
 
-		CharacterProfileData activeProfile = ExamplePlugin.get().getCharacterManager()
+		CharacterProfileData activeProfile = Realmweavers.get().getCharacterManager()
 				.getLoadedActiveProfile(playerRef.getUuid(), playerRef.getUsername());
 		if (activeProfile == null || !activeProfile.isHardcore()) {
 			return;
@@ -73,7 +73,7 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 
 		HardcoreLossType lossType = config.getHardcoreLossType();
 		int lossPercent = clampPercent(config.getHardcoreLevelLossPercent());
-		StatSystem statSystem = ExamplePlugin.get().getStatSystem();
+		StatSystem statSystem = Realmweavers.get().getStatSystem();
 
 		for (Map.Entry<String, LevelProgressionComponent.LevelSystemData> entry : levelComp.getAllSystems().entrySet()) {
 			String systemId = entry.getKey();
@@ -99,7 +99,7 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 			levelData.setCurrentLevel(newLevel);
 			levelData.setCurrentExp(0f);
 
-			LevelSystemConfig systemConfig = ExamplePlugin.get().getLevelProgressionSystem().getConfig(systemId);
+			LevelSystemConfig systemConfig = Realmweavers.get().getLevelProgressionSystem().getConfig(systemId);
 			if (systemConfig != null) {
 				float expRequired = systemConfig.calculateExpForLevel(newLevel + 1);
 				levelData.setExpToNextLevel(expRequired);
@@ -139,7 +139,7 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 			return;
 		}
 
-		CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+		CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
 		for (CurrencyScope scope : config.getHardcoreCurrencyLossScopes()) {
 			if (scope == null) {
 				continue;
@@ -176,10 +176,10 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 
 	private String resolveCurrencyOwnerId(@Nonnull CurrencyScope scope, @Nonnull PlayerRef playerRef) {
 		return switch (scope) {
-			case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+			case Character -> Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
 			case Account -> playerRef.getUuid().toString();
 			case Guild -> {
-				Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
+				Guild guild = Realmweavers.get().getGuildManager().getGuildForMember(playerRef.getUuid());
 				yield guild == null ? null : guild.getId().toString();
 			}
 			case Global -> "global";

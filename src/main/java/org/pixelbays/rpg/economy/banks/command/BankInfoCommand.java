@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.banks.BankAccount;
 import org.pixelbays.rpg.economy.banks.BankManager;
 import org.pixelbays.rpg.economy.banks.config.BankScope;
@@ -31,8 +31,8 @@ public class BankInfoCommand extends AbstractPlayerCommand {
     public BankInfoCommand() {
         super("info", "Show your bank overview");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.bankManager = ExamplePlugin.get().getBankManager();
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.bankManager = Realmweavers.get().getBankManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override
@@ -48,7 +48,7 @@ public class BankInfoCommand extends AbstractPlayerCommand {
         }
 
     String playerId = String.valueOf(playerRef.getUuid());
-    String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+    String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
     List<BankAccount> characterBanks = characterOwnerId.isBlank()
         ? List.of()
         : bankManager.getBanksForOwner(BankScope.Character, characterOwnerId);

@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
@@ -103,7 +103,7 @@ public class LockpickInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        if (!ExamplePlugin.get().isLockpickingModuleEnabled()) {
+        if (!Realmweavers.get().isLockpickingModuleEnabled()) {
             RpgLogging.debug("LockpickInteraction: lockpicking module disabled");
             triggerFailure(context);
             return;

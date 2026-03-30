@@ -3,7 +3,7 @@ package org.pixelbays.rpg.mail.interaction;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.mail.ui.MailPage;
 

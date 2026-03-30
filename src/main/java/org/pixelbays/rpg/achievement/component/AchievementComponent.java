@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -83,7 +83,7 @@ public class AchievementComponent implements Component<EntityStore>, Cloneable {
     }
 
     public static ComponentType<EntityStore, AchievementComponent> getComponentType() {
-        return ExamplePlugin.get().getAchievementComponentType();
+        return Realmweavers.get().getAchievementComponentType();
     }
 
     public boolean isUnlocked(@Nonnull String achievementId) {

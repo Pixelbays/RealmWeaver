@@ -8,7 +8,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.CharacterActionResult;
 import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.character.appearance.CharacterAppearanceCatalog;
@@ -100,7 +100,7 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
 
     public CharacterAppearancePage(@Nonnull PlayerRef playerRef, @Nonnull Mode mode) {
         super(playerRef, CustomPageLifetime.CanDismiss, PageEventData.CODEC);
-        this.characterManager = ExamplePlugin.get().getCharacterManager();
+        this.characterManager = Realmweavers.get().getCharacterManager();
         this.mode = mode;
     }
 
@@ -817,14 +817,14 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
 
     @Nonnull
     private List<ChoiceEntry> buildRaceEntries() {
-        ExpansionManager expansionManager = ExamplePlugin.get().getExpansionManager();
+        ExpansionManager expansionManager = Realmweavers.get().getExpansionManager();
         List<ChoiceEntry> entries = new ArrayList<>();
 
         if (mode == Mode.CREATE && !characterManager.getSettings().isRequireRaceOnCreation()) {
             entries.add(new ChoiceEntry("", "No race", true, ""));
         }
 
-        List<RaceDefinition> definitions = new ArrayList<>(ExamplePlugin.get().getRaceManagementSystem().getRaceDefinitions().values());
+        List<RaceDefinition> definitions = new ArrayList<>(Realmweavers.get().getRaceManagementSystem().getRaceDefinitions().values());
         definitions.sort(Comparator.comparing(this::resolveRaceDisplayName, String.CASE_INSENSITIVE_ORDER));
 
         for (RaceDefinition definition : definitions) {
@@ -862,14 +862,14 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
 
     @Nonnull
     private List<ChoiceEntry> buildClassEntries() {
-        ExpansionManager expansionManager = ExamplePlugin.get().getExpansionManager();
+        ExpansionManager expansionManager = Realmweavers.get().getExpansionManager();
         List<ChoiceEntry> entries = new ArrayList<>();
 
         if (mode == Mode.CREATE && !characterManager.getSettings().isRequireStarterClassOnCreation()) {
             entries.add(new ChoiceEntry("", "No starting class", true, ""));
         }
 
-        List<ClassDefinition> definitions = new ArrayList<>(ExamplePlugin.get().getClassManagementSystem().getAllClassDefinitions().values());
+        List<ClassDefinition> definitions = new ArrayList<>(Realmweavers.get().getClassManagementSystem().getAllClassDefinitions().values());
         definitions.sort(Comparator.comparing(this::resolveClassDisplayName, String.CASE_INSENSITIVE_ORDER));
 
         for (ClassDefinition definition : definitions) {
@@ -989,7 +989,7 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
         if (mode != Mode.BARBER) {
             return "Creation Cost: Free";
         }
-        BarberShopSettings settings = ExamplePlugin.get().getCharacterManager().getSettings().getBarberShopSettings();
+        BarberShopSettings settings = Realmweavers.get().getCharacterManager().getSettings().getBarberShopSettings();
         int changes = draftAppearance.countDifferences(persistedAppearance);
         if (!settings.isEnabled() || changes <= 0) {
             return "Barber Cost: Free";

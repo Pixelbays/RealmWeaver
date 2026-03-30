@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.talent.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.talent.TalentSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -34,7 +34,7 @@ public class ClassTalentRefundCommand extends AbstractPlayerCommand {
     public ClassTalentRefundCommand() {
         super("refund", "Refund one rank from a talent node");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.talentSystem = ExamplePlugin.get().getTalentSystem();
+        this.talentSystem = Realmweavers.get().getTalentSystem();
         this.classIdArg = this.withRequiredArg("classId", "The class whose talent to refund", ArgTypes.STRING);
         this.treeIdArg = this.withRequiredArg("treeId", "The talent tree ID", ArgTypes.STRING);
         this.nodeIdArg = this.withRequiredArg("nodeId", "The talent node ID", ArgTypes.STRING);

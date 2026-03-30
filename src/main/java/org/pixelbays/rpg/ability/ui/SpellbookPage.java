@@ -11,7 +11,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.binding.AbilityBindingService.BindingTarget;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
@@ -158,7 +158,7 @@ public class SpellbookPage extends CustomUIPage {
         if (selectedAbilityId.equalsIgnoreCase(currentAbilityId)) {
             bindingService.setBinding(bindingComponent, target, null);
             if (target.kind() == AbilityBindingService.BindingKind.HOTBAR) {
-                ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, target.internalSlot(), null);
+                Realmweavers.get().getHotbarIconManager().updateHotbarSlot(ref, store, target.internalSlot(), null);
             }
             statusMessage = Message.translation("pixelbays.rpg.spellbook.ui.status.cleared")
                     .param("ability", abilityName)
@@ -166,7 +166,7 @@ public class SpellbookPage extends CustomUIPage {
         } else {
             bindingService.setBinding(bindingComponent, target, selectedAbilityId);
             if (target.kind() == AbilityBindingService.BindingKind.HOTBAR) {
-                ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, target.internalSlot(), selectedAbilityId);
+                Realmweavers.get().getHotbarIconManager().updateHotbarSlot(ref, store, target.internalSlot(), selectedAbilityId);
             }
             statusMessage = Message.translation("pixelbays.rpg.spellbook.ui.status.bound")
                     .param("ability", abilityName)

@@ -6,7 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.classes.component.ClassComponent;
@@ -47,9 +47,9 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
     public ClassDebugCommand() {
         super("debug", "Dump class data to chat and console");
         requirePermission(HytalePermissions.fromCommand("admin"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.abilitySystem = Realmweavers.get().getClassAbilitySystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
         this.classNameArg = this.withRequiredArg("className", "The class to debug", ArgTypes.STRING);
     }
 
@@ -73,7 +73,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
             return;
         }
 
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
         boolean learned = classComp != null && classComp.hasLearnedClass(classId);
         boolean active = classComp != null && classId.equals(classComp.getPrimaryClassId());
 

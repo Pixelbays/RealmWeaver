@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
@@ -34,8 +34,8 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
     public ClassLevelUpCommand() {
         super("levelup", "Grant exactly enough XP to reach the next level");
         requirePermission(HytalePermissions.fromCommand("admin"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
         this.classNameArg = this.withRequiredArg("className", "The class to level up", ArgTypes.STRING);
     }
 
@@ -59,7 +59,7 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
             return;
         }
 
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
             player.sendMessage(Message.translation("pixelbays.rpg.class.error.notLearned")
                     .param("class", classDef.getDisplayName()));

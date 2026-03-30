@@ -2,7 +2,7 @@ package org.pixelbays.rpg.global.input;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
@@ -29,9 +29,9 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  */
 public class HotbarInputHandler {
 
-    private final ExamplePlugin plugin;
+    private final Realmweavers plugin;
 
-    public HotbarInputHandler(@Nonnull ExamplePlugin plugin) {
+    public HotbarInputHandler(@Nonnull Realmweavers plugin) {
         this.plugin = plugin;
     }
 

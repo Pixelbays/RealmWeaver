@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
@@ -68,8 +68,8 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
         }
 
         var store = event.playerRef().getStore();
-        var levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
-        var classSystem = ExamplePlugin.get().getClassManagementSystem();
+        var levelSystem = Realmweavers.get().getLevelProgressionSystem();
+        var classSystem = Realmweavers.get().getClassManagementSystem();
 
         if (allowPartyShare && tryDistributePartyXp(event, store)) {
             return;
@@ -157,7 +157,7 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
     }
 
     private boolean tryDistributePartyXp(@Nonnull GiveXPEvent event, @Nonnull Store<EntityStore> store) {
-        PartyManager partyManager = ExamplePlugin.get().getPartyManager();
+        PartyManager partyManager = Realmweavers.get().getPartyManager();
         if (partyManager == null) {
             return false;
         }
@@ -542,7 +542,7 @@ public class GiveXPHandler implements Consumer<GiveXPEvent> {
             return null;
         }
 
-        ClassManagementSystem classSystem = ExamplePlugin.get().getClassManagementSystem();
+        ClassManagementSystem classSystem = Realmweavers.get().getClassManagementSystem();
         String primaryClassId = classSystem.getPrimaryKnownClassId(classComp);
         if (primaryClassId == null || primaryClassId.isEmpty()) {
             return null;

@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.achievement.component.AchievementComponent;
 import org.pixelbays.rpg.achievement.component.AchievementComponent.AchievementProgress;
 import org.pixelbays.rpg.achievement.config.AchievementDefinition;
@@ -71,15 +71,15 @@ public final class AchievementSystem {
     }
 
     public void register() {
-        ExamplePlugin.get().getEventRegistry().registerGlobal(PlayerReadyEvent.class,
+        Realmweavers.get().getEventRegistry().registerGlobal(PlayerReadyEvent.class,
                 event -> scheduleSync(event.getPlayerRef(), event.getPlayerRef().getStore()));
-        ExamplePlugin.get().getEventRegistry().register(LevelUpEvent.class,
+        Realmweavers.get().getEventRegistry().register(LevelUpEvent.class,
                 event -> scheduleSync(event.playerRef(), event.playerRef().getStore()));
-        ExamplePlugin.get().getEventRegistry().register(ClassLearnedEvent.class,
+        Realmweavers.get().getEventRegistry().register(ClassLearnedEvent.class,
                 event -> scheduleSync(event.entityRef(), event.entityRef().getStore()));
-        ExamplePlugin.get().getEventRegistry().register(RaceChangedEvent.class,
+        Realmweavers.get().getEventRegistry().register(RaceChangedEvent.class,
                 event -> scheduleSync(event.entityRef(), event.entityRef().getStore()));
-        ExamplePlugin.get().getEventRegistry().register(ClassAbilityUnlockedEvent.class,
+        Realmweavers.get().getEventRegistry().register(ClassAbilityUnlockedEvent.class,
                 event -> scheduleSync(event.entityRef(), event.entityRef().getStore()));
     }
 

@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -116,7 +116,7 @@ public class AbilityEmpowerComponent implements Component<EntityStore>, Cloneabl
 
     @SuppressWarnings("unchecked")
     public static ComponentType<EntityStore, AbilityEmpowerComponent> getComponentType() {
-        return (ComponentType<EntityStore, AbilityEmpowerComponent>) (ComponentType<?, ?>) ExamplePlugin.get()
+        return (ComponentType<EntityStore, AbilityEmpowerComponent>) (ComponentType<?, ?>) Realmweavers.get()
                 .getAbilityEmpowerComponentType();
     }
 

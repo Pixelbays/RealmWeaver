@@ -2,7 +2,7 @@ package org.pixelbays.rpg.party.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.PartyActionResult;
 import org.pixelbays.rpg.party.PartyManager;
 
@@ -23,7 +23,7 @@ public class PartyDeclineCommand extends AbstractPlayerCommand {
     public PartyDeclineCommand() {
         super("decline", "Decline your current party invite");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
     }
 
     @Override

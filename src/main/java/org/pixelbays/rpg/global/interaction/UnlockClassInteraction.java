@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -64,7 +64,7 @@ public class UnlockClassInteraction extends SimpleInstantInteraction {
 				success = true;
 				continue;
 			}
-			String result = ExamplePlugin.get().getClassManagementSystem().learnClass(entityRef, classId, store);
+			String result = Realmweavers.get().getClassManagementSystem().learnClass(entityRef, classId, store);
 			if (result.startsWith("SUCCESS:")) {
 				success = true;
 			}

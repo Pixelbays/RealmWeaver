@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildActionResult;
 import org.pixelbays.rpg.guild.GuildManager;
@@ -62,7 +62,7 @@ public class GuildPage extends CustomUIPage {
 
     public GuildPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

@@ -3,7 +3,7 @@ package org.pixelbays.rpg.economy.currency.command;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 import org.pixelbays.rpg.guild.Guild;
@@ -79,7 +79,7 @@ public final class CurrencyCommandUtil {
     @Nullable
     public static String resolveOwnerId(@Nonnull CurrencyScope scope, @Nonnull PlayerRef playerRef) {
         return switch (scope) {
-            case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+            case Character -> Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
             case Account -> String.valueOf(playerRef.getUuid());
             case Guild -> resolveGuildOwnerId(playerRef.getUuid().toString());
             case Global -> "global";
@@ -89,7 +89,7 @@ public final class CurrencyCommandUtil {
 
     @Nullable
     private static String resolveGuildOwnerId(@Nonnull String memberId) {
-        GuildManager guildManager = ExamplePlugin.get().getGuildManager();
+        GuildManager guildManager = Realmweavers.get().getGuildManager();
         Guild guild = guildManager.getGuildForMember(java.util.UUID.fromString(memberId));
         return guild == null ? null : String.valueOf(guild.getId());
     }

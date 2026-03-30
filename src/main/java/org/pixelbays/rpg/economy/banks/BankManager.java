@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.banks.config.BankData;
 import org.pixelbays.rpg.economy.banks.config.BankScope;
 import org.pixelbays.rpg.economy.banks.config.BankTypeDefinition;
@@ -269,13 +269,13 @@ public class BankManager {
 
     @Nonnull
     public BankActionResult getOrCreateDefaultPersonalBank(@Nonnull UUID ownerId) {
-        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
         return getOrCreateConfiguredBank(BankScope.Character, characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId);
     }
 
     @Nonnull
     public BankActionResult getOrCreateDefaultPersonalBank(@Nonnull UUID ownerId, @Nonnull Inventory payerInventory) {
-        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
         return getOrCreateConfiguredBank(BankScope.Character,
                 characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId,
                 ownerId,
@@ -328,7 +328,7 @@ public class BankManager {
         if (definition == null) {
             return BankActionResult.failure("No default bank type available for scope " + BankScope.Profession.name() + '.');
         }
-        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
         return getOrCreateBank(definition,
                 createQualifiedOwnerId(characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId, professionId));
     }
@@ -341,7 +341,7 @@ public class BankManager {
         if (definition == null) {
             return BankActionResult.failure("No default bank type available for scope " + BankScope.Profession.name() + '.');
         }
-        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
+        String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
         return getOrCreateBank(definition,
             createQualifiedOwnerId(characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId, professionId), ownerId,
                 payerInventory);
@@ -729,7 +729,7 @@ public class BankManager {
     private String resolveBankWalletPlayerOwnerId(@Nonnull BankAccount bankAccount, @Nonnull UUID playerId) {
         return switch (bankAccount.getOwnerScope()) {
             case Character -> {
-                String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerId);
+                String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerId);
                 yield characterOwnerId.isBlank() ? playerId.toString() : characterOwnerId;
             }
             case Player, Account -> playerId.toString();
@@ -744,7 +744,7 @@ public class BankManager {
             @Nonnull UUID payerId) {
         return switch (scope) {
             case Character -> {
-                String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(payerId);
+                String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(payerId);
                 yield characterOwnerId.isBlank() ? payerId.toString() : characterOwnerId;
             }
             case Account -> payerId.toString();
@@ -834,7 +834,7 @@ public class BankManager {
 
     @Nonnull
     private CurrencyManager getCurrencyManager() {
-        return ExamplePlugin.get().getCurrencyManager();
+        return Realmweavers.get().getCurrencyManager();
     }
 
     @Nonnull

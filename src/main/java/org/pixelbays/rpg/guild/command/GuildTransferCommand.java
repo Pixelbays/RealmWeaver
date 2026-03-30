@@ -2,7 +2,7 @@ package org.pixelbays.rpg.guild.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.GuildActionResult;
 import org.pixelbays.rpg.guild.GuildManager;
 
@@ -28,7 +28,7 @@ public class GuildTransferCommand extends AbstractPlayerCommand {
         super("transfer", "Transfer guild leadership");
         requirePermission(HytalePermissions.fromCommand("player"));
         this.playerArg = this.withRequiredArg("player", "Player name", ArgTypes.STRING);
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

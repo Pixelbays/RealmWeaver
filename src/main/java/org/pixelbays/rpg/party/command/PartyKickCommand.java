@@ -2,7 +2,7 @@ package org.pixelbays.rpg.party.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.PartyActionResult;
 import org.pixelbays.rpg.party.PartyManager;
 
@@ -28,7 +28,7 @@ public class PartyKickCommand extends AbstractPlayerCommand {
         super("kick", "Kick a member from your party");
         requirePermission(HytalePermissions.fromCommand("player"));
         this.playerArg = this.withRequiredArg("player", "Player name", ArgTypes.STRING);
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
     }
 
     @Override

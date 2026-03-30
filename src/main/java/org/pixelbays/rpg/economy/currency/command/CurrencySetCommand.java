@@ -2,7 +2,7 @@ package org.pixelbays.rpg.economy.currency.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
@@ -33,7 +33,7 @@ public class CurrencySetCommand extends AbstractPlayerCommand {
         this.scopeArg = this.withRequiredArg("scope", "character|account|guild", ArgTypes.STRING);
         this.currencyIdArg = this.withRequiredArg("currencyId", "Currency id", ArgTypes.STRING);
         this.amountArg = this.withRequiredArg("amount", "Amount", ArgTypes.INTEGER);
-        this.currencyManager = ExamplePlugin.get().getCurrencyManager();
+        this.currencyManager = Realmweavers.get().getCurrencyManager();
     }
 
     @Override

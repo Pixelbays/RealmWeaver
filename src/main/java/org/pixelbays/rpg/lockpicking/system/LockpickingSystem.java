@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.lockpicking.config.settings.LockpickingModSettings.LockpickingDifficultyTier;
@@ -797,6 +797,6 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
 
     @Nonnull
     public static LockpickingSystem get() {
-        return ExamplePlugin.get().getLockpickingSystem();
+        return Realmweavers.get().getLockpickingSystem();
     }
 }

@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
@@ -31,7 +31,7 @@ public class ClassInfoCommand extends AbstractPlayerCommand {
     public ClassInfoCommand() {
         super("info", "Show detailed class information");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
         this.classNameArg = this.withRequiredArg("className", "The class to view", ArgTypes.STRING);
     }
 
@@ -56,7 +56,7 @@ public class ClassInfoCommand extends AbstractPlayerCommand {
             return;
         }
 
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
         boolean learned = classComp != null && classComp.hasLearnedClass(classId);
 
         player.sendMessage(Message.translation("pixelbays.rpg.class.info.header").param("name", classDef.getDisplayName()));

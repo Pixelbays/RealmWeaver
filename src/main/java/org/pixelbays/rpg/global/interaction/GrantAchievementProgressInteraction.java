@@ -2,7 +2,7 @@ package org.pixelbays.rpg.global.interaction;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -54,7 +54,7 @@ public class GrantAchievementProgressInteraction extends SimpleInstantInteractio
 			return;
 		}
 
-		boolean success = ExamplePlugin.get().getAchievementSystem()
+		boolean success = Realmweavers.get().getAchievementSystem()
 				.grantAchievementProgress(entityRef, store, achievementId, criterionId, amount);
 		context.getState().state = success ? InteractionState.Finished : InteractionState.Failed;
 	}

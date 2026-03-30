@@ -2,7 +2,7 @@ package org.pixelbays.rpg.party.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.PartyActionResult;
 import org.pixelbays.rpg.party.PartyManager;
 
@@ -24,7 +24,7 @@ public class PartyDisbandCommand extends AbstractPlayerCommand {
     public PartyDisbandCommand() {
         super("disband", "Disband your current party");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
     }
 
     @Override

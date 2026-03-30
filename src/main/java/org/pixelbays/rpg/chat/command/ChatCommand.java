@@ -2,7 +2,7 @@ package org.pixelbays.rpg.chat.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.chat.ChatChannel;
 import org.pixelbays.rpg.chat.ChatManager;
 
@@ -44,7 +44,7 @@ public final class ChatCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        ChatManager chatManager = ExamplePlugin.get().getChatManager();
+        ChatManager chatManager = Realmweavers.get().getChatManager();
 
         if (channelArg == null) {
             ChatChannel active = chatManager.getActiveChannel(playerRef.getUuid());

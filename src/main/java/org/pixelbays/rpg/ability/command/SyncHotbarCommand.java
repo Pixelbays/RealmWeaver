@@ -2,7 +2,7 @@ package org.pixelbays.rpg.ability.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 
 import com.hypixel.hytale.component.Ref;
@@ -44,14 +44,14 @@ public class SyncHotbarCommand extends AbstractPlayerCommand {
 
         // Check if player has any bindings
         AbilityBindingComponent bindingComp = store.getComponent(ref,
-                ExamplePlugin.get().getAbilityBindingComponentType());
+                Realmweavers.get().getAbilityBindingComponentType());
         if (bindingComp == null || bindingComp.getHotbarBindings().isEmpty()) {
             player.sendMessage(Message.translation("pixelbays.rpg.ability.sync.none"));
             return;
         }
 
         // Sync all hotbar icons
-        ExamplePlugin.get().getHotbarIconManager().syncHotbarIcons(ref, store);
+        Realmweavers.get().getHotbarIconManager().syncHotbarIcons(ref, store);
 
         player.sendMessage(Message.translation("pixelbays.rpg.ability.sync.success")
             .param("count", bindingComp.getHotbarBindings().size()));

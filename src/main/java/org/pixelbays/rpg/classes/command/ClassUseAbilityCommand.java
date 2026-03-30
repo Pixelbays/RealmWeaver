@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
@@ -37,7 +37,7 @@ public class ClassUseAbilityCommand extends AbstractPlayerCommand {
     public ClassUseAbilityCommand() {
         super("useability", "Trigger an ability interaction for testing");
         requirePermission(HytalePermissions.fromCommand("admin"));
-        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        this.abilitySystem = Realmweavers.get().getClassAbilitySystem();
         this.abilityIdArg = this.withRequiredArg("abilityId", "Ability id to trigger", ArgTypes.STRING);
     }
 
@@ -56,7 +56,7 @@ public class ClassUseAbilityCommand extends AbstractPlayerCommand {
             return;
         }
 
-        ClassAbilityComponent abilityComp = store.getComponent(ref, ExamplePlugin.get().getClassAbilityComponentType());
+        ClassAbilityComponent abilityComp = store.getComponent(ref, Realmweavers.get().getClassAbilityComponentType());
         if (abilityComp == null || !abilityComp.hasAbility(abilityId)) {
             player.sendMessage(Message.translation("pixelbays.rpg.class.ability.error.notUnlocked").param("abilityId", abilityId));
             return;

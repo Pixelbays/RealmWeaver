@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.achievement.component.AchievementComponent;
 import org.pixelbays.rpg.achievement.config.AchievementDefinition;
 import org.pixelbays.rpg.character.CharacterManager;
@@ -89,7 +89,7 @@ public final class PrerequisiteEvaluator {
 		}
 
 		if (!requirements.getRequiredExpansionIds().isEmpty()) {
-			if (playerRef == null || !ExamplePlugin.get().getExpansionManager().hasAccess(playerRef,
+			if (playerRef == null || !Realmweavers.get().getExpansionManager().hasAccess(playerRef,
 					requirements.getRequiredExpansionIds())) {
 				return Message.translation("pixelbays.rpg.interaction.prereq.expansion")
 						.param("expansions", describeExpansions(requirements.getRequiredExpansionIds()));
@@ -117,7 +117,7 @@ public final class PrerequisiteEvaluator {
 			}
 		}
 
-		PartyManager partyManager = ExamplePlugin.get().getPartyManager();
+		PartyManager partyManager = Realmweavers.get().getPartyManager();
 		Party party = playerRef == null ? null : partyManager.getPartyForMember(playerRef.getUuid());
 
 		if (requirements.isRequireParty() || requirements.getRequiredPartyCount() > 0) {
@@ -198,7 +198,7 @@ public final class PrerequisiteEvaluator {
 			@Nonnull Ref<EntityStore> entityRef,
 			@Nonnull PlayerRef playerRef) {
 		AchievementComponent characterState = store.getComponent(entityRef, AchievementComponent.getComponentType());
-		CharacterManager characterManager = ExamplePlugin.get().getCharacterManager();
+		CharacterManager characterManager = Realmweavers.get().getCharacterManager();
 		AchievementComponent accountState = characterManager.getOrCreateAccountAchievementProgress(playerRef.getUuid(), playerRef.getUsername());
 
 		for (String achievementId : requirements.getRequiredAchievementIds()) {
@@ -233,7 +233,7 @@ public final class PrerequisiteEvaluator {
 
 	@Nonnull
 	private static String describeExpansions(@Nonnull List<String> expansionIds) {
-		return ExamplePlugin.get().getExpansionManager().describeRequirements(expansionIds);
+		return Realmweavers.get().getExpansionManager().describeRequirements(expansionIds);
 	}
 
 	@Nonnull

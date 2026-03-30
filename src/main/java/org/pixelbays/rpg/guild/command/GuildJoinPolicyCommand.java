@@ -2,7 +2,7 @@ package org.pixelbays.rpg.guild.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.GuildActionResult;
 import org.pixelbays.rpg.guild.GuildJoinPolicy;
 import org.pixelbays.rpg.guild.GuildManager;
@@ -29,7 +29,7 @@ public class GuildJoinPolicyCommand extends AbstractPlayerCommand {
         super("joinpolicy", "Set guild join policy");
         requirePermission(HytalePermissions.fromCommand("player"));
         this.policyArg = this.withRequiredArg("policy", "invite|open|application", ArgTypes.STRING);
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

@@ -2,7 +2,7 @@ package org.pixelbays.rpg.lockpicking.input;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.lockpicking.system.LockpickingSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -31,7 +31,7 @@ public class LockpickingInputFilter implements PlayerPacketFilter {
 
     @Override
     public boolean test(@Nonnull PlayerRef playerRef, @Nonnull Packet packet) {
-        if (!ExamplePlugin.get().isLockpickingModuleEnabled()) {
+        if (!Realmweavers.get().isLockpickingModuleEnabled()) {
             return false;
         }
 

@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.talent.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.talent.TalentSystem;
 
 import com.hypixel.hytale.component.Ref;
@@ -33,7 +33,7 @@ public class ClassTalentResetCommand extends AbstractPlayerCommand {
     public ClassTalentResetCommand() {
         super("reset", "Reset all talent allocations for a class");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.talentSystem = ExamplePlugin.get().getTalentSystem();
+        this.talentSystem = Realmweavers.get().getTalentSystem();
         this.classIdArg = this.withRequiredArg("classId", "The class to reset talents for", ArgTypes.STRING);
     }
 

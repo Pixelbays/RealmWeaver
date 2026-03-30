@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.mail.config.MailData;
 
 import com.hypixel.hytale.assetstore.AssetPack;
@@ -84,7 +84,7 @@ public class MailPersistence {
             return null;
         }
 
-        PluginManifest manifest = ExamplePlugin.get().getManifest();
+        PluginManifest manifest = Realmweavers.get().getManifest();
         String pluginId = new PluginIdentifier(manifest).toString();
 
         AssetPack fallback = null;

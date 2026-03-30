@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.banks.BankAccount;
 import org.pixelbays.rpg.economy.banks.BankActionResult;
 import org.pixelbays.rpg.economy.banks.BankManager;
@@ -55,8 +55,8 @@ public class BankPage extends CustomUIPage {
 
     public BankPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.bankManager = ExamplePlugin.get().getBankManager();
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.bankManager = Realmweavers.get().getBankManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override
@@ -165,7 +165,7 @@ public class BankPage extends CustomUIPage {
         }
 
         Map<String, String> params = new HashMap<>();
-        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+        String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
         params.put("character", summarize(characterOwnerId.isBlank()
             ? List.of()
             : bankManager.getBanksForOwner(BankScope.Character, characterOwnerId)));

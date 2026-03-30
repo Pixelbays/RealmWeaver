@@ -2,7 +2,7 @@ package org.pixelbays.rpg.party.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.PartyActionResult;
 import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.PartyType;
@@ -29,14 +29,14 @@ public class PartyCreateCommand extends AbstractPlayerCommand {
         super("create", "Create a new party or raid");
         requirePermission(HytalePermissions.fromCommand("player"));
         this.typeArg = null;
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
         this.addUsageVariant(new PartyCreateCommand("Create a new party or raid"));
     }
 
     private PartyCreateCommand(String description) {
         super(description);
         this.typeArg = this.withRequiredArg("type", "party or raid", ArgTypes.STRING);
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
     }
 
     @Override

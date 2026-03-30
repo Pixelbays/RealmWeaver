@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.talent.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
@@ -35,8 +35,8 @@ public class ClassTalentGrantCommand extends AbstractPlayerCommand {
     public ClassTalentGrantCommand() {
         super("grant", "Debug: grant talent points to a class");
         requirePermission(HytalePermissions.fromCommand("admin"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
         this.classIdArg = this.withRequiredArg("classId", "The class id to grant points to", ArgTypes.STRING);
         this.amountArg = this.withRequiredArg("amount", "The amount of talent points to add", ArgTypes.INTEGER);
     }
@@ -64,7 +64,7 @@ public class ClassTalentGrantCommand extends AbstractPlayerCommand {
             return;
         }
 
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
             player.sendMessage(Message.translation("pixelbays.rpg.class.error.notLearned").param("class", classId));
             return;

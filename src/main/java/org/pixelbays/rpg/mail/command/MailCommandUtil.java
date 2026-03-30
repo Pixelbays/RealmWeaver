@@ -5,7 +5,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.CharacterManager;
 
 import com.hypixel.hytale.server.core.Message;
@@ -31,7 +31,7 @@ public final class MailCommandUtil {
             return playerRef.getUuid();
         }
 
-        CharacterManager characterManager = ExamplePlugin.get().getCharacterManager();
+        CharacterManager characterManager = Realmweavers.get().getCharacterManager();
         for (UUID accountId : characterManager.getKnownAccountIds()) {
             String username = characterManager.resolveAccountUsername(accountId);
             if (username != null && username.equalsIgnoreCase(trimmed)) {
@@ -48,7 +48,7 @@ public final class MailCommandUtil {
             return playerRef.getUsername();
         }
 
-        String username = ExamplePlugin.get().getCharacterManager().resolveAccountUsername(accountId);
+        String username = Realmweavers.get().getCharacterManager().resolveAccountUsername(accountId);
         return username == null || username.isBlank() ? accountId.toString() : username;
     }
 

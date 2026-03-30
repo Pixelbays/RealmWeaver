@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.talent.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
@@ -34,16 +34,16 @@ public class ClassTalentInfoCommand extends AbstractPlayerCommand {
     public ClassTalentInfoCommand() {
         super("info", "View talent tree allocation summary");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.talentSystem = ExamplePlugin.get().getTalentSystem();
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.talentSystem = Realmweavers.get().getTalentSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
         this.classIdArg = null;
         this.addUsageVariant(new ClassTalentInfoCommand("View talent tree allocation summary"));
     }
 
     private ClassTalentInfoCommand(String description) {
         super(description);
-        this.talentSystem = ExamplePlugin.get().getTalentSystem();
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.talentSystem = Realmweavers.get().getTalentSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
         this.classIdArg = this.withRequiredArg("classId", "The class to inspect", ArgTypes.STRING);
     }
 
@@ -65,7 +65,7 @@ public class ClassTalentInfoCommand extends AbstractPlayerCommand {
                 return;
             }
         } else {
-            ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+            ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
             String primaryClassId = classComp != null ? classComp.getPrimaryClassId() : null;
             if (primaryClassId == null || primaryClassId.isEmpty()) {
                 player.sendMessage(Message.translation("pixelbays.rpg.class.talent.noLearnedClass"));
@@ -80,7 +80,7 @@ public class ClassTalentInfoCommand extends AbstractPlayerCommand {
             return;
         }
 
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
             player.sendMessage(Message.translation("pixelbays.rpg.class.error.notLearned").param("class", classDef.getDisplayName()));
             return;

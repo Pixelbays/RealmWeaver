@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
@@ -43,7 +43,7 @@ public class NpcThreatDamageSystem extends DamageEventSystem {
     public NpcThreatDamageSystem(@Nonnull ComponentType<EntityStore, NpcThreatComponent> threatComponentType) {
         this.threatComponentType = threatComponentType;
         this.query = NPCEntity.getComponentType();
-        this.classManagementSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.classManagementSystem = Realmweavers.get().getClassManagementSystem();
     }
 
     @Nonnull

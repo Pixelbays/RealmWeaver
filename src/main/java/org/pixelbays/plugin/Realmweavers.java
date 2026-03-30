@@ -196,9 +196,9 @@ import com.hypixel.hytale.server.npc.entities.NPCEntity;
  * Realmweaver - Adds data-driven MMO/RPG progression systems to Hytale.
  */
 @SuppressWarnings("null")
-public class ExamplePlugin extends JavaPlugin {
+public class Realmweavers extends JavaPlugin {
 
-        private static ExamplePlugin instance;
+        private static Realmweavers instance;
 
         private LevelProgressionSystem levelSystem;
         private ClassManagementSystem classManagementSystem;
@@ -264,7 +264,7 @@ public class ExamplePlugin extends JavaPlugin {
         private CommandRegistration unlockAbilityCommandRegistration;
         private CommandRegistration travelRouteCommandRegistration;
 
-        public ExamplePlugin(@Nonnull JavaPluginInit init) {
+        public Realmweavers(@Nonnull JavaPluginInit init) {
                 super(init);
                 instance = this;
                 RpgLogging.debugDeveloper("Hello from %s version %s", this.getName(),
@@ -802,7 +802,7 @@ public class ExamplePlugin extends JavaPlugin {
         }
 
         @Nonnull
-        public static ExamplePlugin get() {
+        public static Realmweavers get() {
                 return instance;
         }
 

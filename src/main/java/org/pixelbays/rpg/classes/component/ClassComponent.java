@@ -8,7 +8,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -172,7 +172,7 @@ public class ClassComponent implements Component<EntityStore>, Cloneable {
      * Get the component type for registration
      */
     public static ComponentType<EntityStore, ClassComponent> getComponentType() {
-        return ExamplePlugin.get().getClassComponentType();
+        return Realmweavers.get().getClassComponentType();
     }
     
     @Nonnull

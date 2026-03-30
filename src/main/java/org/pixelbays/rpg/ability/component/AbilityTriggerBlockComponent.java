@@ -3,7 +3,7 @@ package org.pixelbays.rpg.ability.component;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -62,6 +62,6 @@ public class AbilityTriggerBlockComponent implements Component<EntityStore> {
 
     @Nonnull
     public static ComponentType<EntityStore, AbilityTriggerBlockComponent> getComponentType() {
-        return ExamplePlugin.get().getAbilityTriggerBlockComponentType();
+        return Realmweavers.get().getAbilityTriggerBlockComponentType();
     }
 }

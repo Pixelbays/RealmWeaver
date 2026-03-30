@@ -2,7 +2,7 @@ package org.pixelbays.rpg.npc.system;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
@@ -35,7 +35,7 @@ public class NpcRpgDebugOverlaySystem extends EntityTickingSystem<EntityStore> {
         this.npcComponentType = npcComponentType;
         this.debugComponentType = debugComponentType;
         this.query = Query.and(npcComponentType, debugComponentType);
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
     }
 
     @Nonnull

@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 import org.pixelbays.rpg.leveling.event.GiveXPEvent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
@@ -36,14 +36,14 @@ public class LevelTestCommand extends AbstractPlayerCommand {
     public LevelTestCommand() {
         super("leveltest", "Run a quick test of one or all level systems");
         requirePermission(HytalePermissions.fromCommand("admin"));
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
         this.targetArg = null;
         this.addUsageVariant(new LevelTestCommand("Run a quick test of one or all level systems"));
     }
 
     private LevelTestCommand(String description) {
         super(description);
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
         this.targetArg = this.withRequiredArg("target", "all or <SystemId>", ArgTypes.STRING);
     }
 

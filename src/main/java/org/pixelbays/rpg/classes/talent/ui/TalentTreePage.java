@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.talent.TalentSystem;
@@ -71,7 +71,7 @@ public class TalentTreePage extends CustomUIPage {
 
     public TalentTreePage(@Nonnull PlayerRef playerRef, @Nonnull String classId) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.talentSystem = ExamplePlugin.get().getTalentSystem();
+        this.talentSystem = Realmweavers.get().getTalentSystem();
         this.classId = classId;
 
         // Default to first defined tree

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
@@ -41,18 +41,18 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
     public ClassProgressCommand() {
         super("progress", "View class progression");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
-        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
+        this.abilitySystem = Realmweavers.get().getClassAbilitySystem();
         this.classNameArg = null;
         this.addUsageVariant(new ClassProgressCommand("View class progression"));
     }
 
     private ClassProgressCommand(String description) {
         super(description);
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
-        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
+        this.abilitySystem = Realmweavers.get().getClassAbilitySystem();
         this.classNameArg = this.withRequiredArg("className", "The class to view", ArgTypes.STRING);
     }
 
@@ -64,8 +64,8 @@ public class ClassProgressCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
-        ClassAbilityComponent abilityComp = store.getComponent(ref, ExamplePlugin.get().getClassAbilityComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
+        ClassAbilityComponent abilityComp = store.getComponent(ref, Realmweavers.get().getClassAbilityComponentType());
 
         String classId;
         if (this.classNameArg != null) {

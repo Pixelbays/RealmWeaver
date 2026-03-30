@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.builder.BuilderCodec;
 import com.hypixel.hytale.component.Component;
@@ -34,7 +34,7 @@ public class NpcThreatComponent implements Component<EntityStore>, Cloneable {
     }
 
     public static ComponentType<EntityStore, NpcThreatComponent> getComponentType() {
-        return ExamplePlugin.get().getNpcThreatComponentType();
+        return Realmweavers.get().getNpcThreatComponentType();
     }
 
     public void addThreat(@Nullable Ref<EntityStore> sourceRef, float threatAmount, long timestampMillis) {

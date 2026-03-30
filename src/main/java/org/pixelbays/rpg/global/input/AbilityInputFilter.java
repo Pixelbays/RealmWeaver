@@ -2,7 +2,7 @@ package org.pixelbays.rpg.global.input;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
@@ -24,7 +24,7 @@ public class AbilityInputFilter implements PlayerPacketFilter {
     private final HotbarInputHandler hotbarHandler;
     private final AbilitySlotsInputHandler abilitySlotsHandler;
 
-    public AbilityInputFilter(@Nonnull ExamplePlugin plugin) {
+    public AbilityInputFilter(@Nonnull Realmweavers plugin) {
         this.weaponsHandler = new WeaponsInputHandler(plugin);
         this.hotbarHandler = new HotbarInputHandler(plugin);
         this.abilitySlotsHandler = new AbilitySlotsInputHandler(plugin);

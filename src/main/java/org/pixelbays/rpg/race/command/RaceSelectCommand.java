@@ -2,7 +2,7 @@ package org.pixelbays.rpg.race.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
@@ -35,9 +35,9 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
     public RaceSelectCommand() {
         super("select", "Select a race");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.raceManagementSystem = ExamplePlugin.get().getRaceManagementSystem();
-        this.raceSystem = ExamplePlugin.get().getRaceSystem();
-        this.expansionManager = ExamplePlugin.get().getExpansionManager();
+        this.raceManagementSystem = Realmweavers.get().getRaceManagementSystem();
+        this.raceSystem = Realmweavers.get().getRaceSystem();
+        this.expansionManager = Realmweavers.get().getExpansionManager();
         this.raceIdArg = this.withRequiredArg("raceId", "Race to select", ArgTypes.STRING);
     }
 

@@ -2,7 +2,7 @@ package org.pixelbays.rpg.guild.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.GuildActionResult;
 import org.pixelbays.rpg.guild.GuildManager;
 import org.pixelbays.rpg.guild.GuildPermission;
@@ -33,7 +33,7 @@ public class GuildRoleSetPermCommand extends AbstractPlayerCommand {
         this.roleArg = this.withRequiredArg("role", "Role id", ArgTypes.STRING);
         this.permArg = this.withRequiredArg("permission", "Permission", ArgTypes.STRING);
         this.enabledArg = this.withRequiredArg("enabled", "true|false", ArgTypes.STRING);
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

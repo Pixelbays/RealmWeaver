@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.banks.BankAccount;
 import org.pixelbays.rpg.economy.banks.BankActionResult;
 import org.pixelbays.rpg.economy.banks.BankManager;
@@ -67,7 +67,7 @@ public class BankStoragePage extends CustomUIPage {
 
     public BankStoragePage(@Nonnull PlayerRef playerRef, @Nonnull String bankId, @Nonnull String initialTabId) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.bankManager = ExamplePlugin.get().getBankManager();
+        this.bankManager = Realmweavers.get().getBankManager();
         this.bankId = bankId;
         this.currentTabId = initialTabId;
     }

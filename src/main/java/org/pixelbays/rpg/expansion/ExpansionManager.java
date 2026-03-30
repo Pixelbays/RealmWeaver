@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
 import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
@@ -256,7 +256,7 @@ public class ExpansionManager {
                 ? CurrencyAccessContext.fromInventory(player.getInventory())
                 : CurrencyAccessContext.empty();
 
-        CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+        CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
         CurrencyActionResult spendResult = currencyManager.spend(
                 purchaseScope,
                 ownerId,
@@ -290,7 +290,7 @@ public class ExpansionManager {
     @Nullable
     private String resolveCurrencyOwnerId(@Nonnull CurrencyScope scope, @Nonnull PlayerRef playerRef) {
         return switch (scope) {
-            case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+            case Character -> Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
             case Account -> String.valueOf(playerRef.getUuid());
             case Guild -> resolveGuildOwnerId(playerRef.getUuid());
             case Global -> "global";
@@ -303,7 +303,7 @@ public class ExpansionManager {
         if (memberId == null) {
             return null;
         }
-        Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(memberId);
+        Guild guild = Realmweavers.get().getGuildManager().getGuildForMember(memberId);
         return guild == null ? null : String.valueOf(guild.getId());
     }
 

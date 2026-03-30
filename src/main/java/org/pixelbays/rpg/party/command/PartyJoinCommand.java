@@ -2,7 +2,7 @@ package org.pixelbays.rpg.party.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.PartyActionResult;
 import org.pixelbays.rpg.party.PartyManager;
 
@@ -28,7 +28,7 @@ public class PartyJoinCommand extends AbstractPlayerCommand {
         super("join", "Join a party you were invited to");
         requirePermission(HytalePermissions.fromCommand("player"));
         this.playerArg = this.withRequiredArg("player", "Party leader or member", ArgTypes.STRING);
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
     }
 
     @Override

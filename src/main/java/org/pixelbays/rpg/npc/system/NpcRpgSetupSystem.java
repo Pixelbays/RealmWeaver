@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
@@ -38,9 +38,9 @@ public class NpcRpgSetupSystem extends EntityTickingSystem<EntityStore> {
 
     public NpcRpgSetupSystem(@Nonnull ComponentType<EntityStore, NpcRpgSetupComponent> setupComponentType) {
         this.setupComponentType = setupComponentType;
-        this.classManagementSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.levelProgressionSystem = ExamplePlugin.get().getLevelProgressionSystem();
-        this.raceSystem = ExamplePlugin.get().getRaceSystem();
+        this.classManagementSystem = Realmweavers.get().getClassManagementSystem();
+        this.levelProgressionSystem = Realmweavers.get().getLevelProgressionSystem();
+        this.raceSystem = Realmweavers.get().getRaceSystem();
     }
 
     @Override

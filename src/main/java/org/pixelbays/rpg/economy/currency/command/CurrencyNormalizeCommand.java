@@ -2,7 +2,7 @@ package org.pixelbays.rpg.economy.currency.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 
@@ -28,7 +28,7 @@ public class CurrencyNormalizeCommand extends AbstractPlayerCommand {
         super("normalize", "Normalize convertible currencies for a scope");
         requirePermission(HytalePermissions.fromCommand("admin"));
         this.scopeArg = this.withRequiredArg("scope", "character|account|guild", ArgTypes.STRING);
-        this.currencyManager = ExamplePlugin.get().getCurrencyManager();
+        this.currencyManager = Realmweavers.get().getCurrencyManager();
     }
 
     @Override

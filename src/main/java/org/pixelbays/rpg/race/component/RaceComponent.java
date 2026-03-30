@@ -7,7 +7,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -92,7 +92,7 @@ public class RaceComponent implements Component<EntityStore> {
     }
 
     public static ComponentType<EntityStore, RaceComponent> getComponentType() {
-        return ExamplePlugin.get().getRaceComponentType();
+        return Realmweavers.get().getRaceComponentType();
     }
 
     @Nullable

@@ -17,6 +17,6 @@
         
     },
     "DisabledByDefault": false,
-    "Main": "org.pixelbays.plugin.ExamplePlugin",
+    "Main": "org.pixelbays.plugin.Realmweavers",
     "IncludesAssetPack": true
 }

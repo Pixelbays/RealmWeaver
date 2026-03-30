@@ -7,7 +7,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.banks.BankAccount;
 import org.pixelbays.rpg.economy.banks.BankActionResult;
 import org.pixelbays.rpg.economy.banks.BankManager;
@@ -94,7 +94,7 @@ public final class BankUiOpener {
             return false;
         }
 
-        BankManager bankManager = ExamplePlugin.get().getBankManager();
+        BankManager bankManager = Realmweavers.get().getBankManager();
         BankActionResult result = bankManager.getOrCreateBank(definition, ownerId, playerRef.getUuid(), player.getInventory());
         if (!result.isSuccess() || result.getBankAccount() == null) {
             player.sendMessage(BankCommandUtil.managerResultMessage(result.getMessage()));
@@ -117,7 +117,7 @@ public final class BankUiOpener {
             @Nonnull PlayerRef playerRef,
             @Nullable String professionId,
             @Nullable String customOwnerId) {
-        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+        String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
         String resolvedCharacterOwnerId = characterOwnerId.isBlank() ? playerRef.getUuid().toString() : characterOwnerId;
         return switch (scope) {
             case Character -> resolvedCharacterOwnerId;
@@ -136,7 +136,7 @@ public final class BankUiOpener {
 
     @Nullable
     private static String resolveGuildOwnerId(@Nonnull PlayerRef playerRef) {
-        GuildManager guildManager = ExamplePlugin.get().getGuildManager();
+        GuildManager guildManager = Realmweavers.get().getGuildManager();
         Guild guild = guildManager.getGuildForMember(playerRef.getUuid());
         return guild == null ? null : guild.getId().toString();
     }

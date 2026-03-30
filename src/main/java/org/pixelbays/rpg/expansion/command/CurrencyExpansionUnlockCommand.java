@@ -2,7 +2,7 @@ package org.pixelbays.rpg.expansion.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.currency.command.CurrencyCommandUtil;
 import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.expansion.ExpansionPurchaseResult;
@@ -30,7 +30,7 @@ public class CurrencyExpansionUnlockCommand extends AbstractPlayerCommand {
         super("unlock", "Unlock an expansion with currency");
         requirePermission(HytalePermissions.fromCommand("player"));
         this.expansionIdArg = this.withRequiredArg("expansionId", "Expansion id", ArgTypes.STRING);
-        this.expansionManager = ExamplePlugin.get().getExpansionManager();
+        this.expansionManager = Realmweavers.get().getExpansionManager();
     }
 
     @Override

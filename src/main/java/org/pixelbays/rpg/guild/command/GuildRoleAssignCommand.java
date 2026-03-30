@@ -2,7 +2,7 @@ package org.pixelbays.rpg.guild.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.GuildActionResult;
 import org.pixelbays.rpg.guild.GuildManager;
 
@@ -30,7 +30,7 @@ public class GuildRoleAssignCommand extends AbstractPlayerCommand {
         requirePermission(HytalePermissions.fromCommand("player"));
         this.playerArg = this.withRequiredArg("player", "Player name", ArgTypes.STRING);
         this.roleArg = this.withRequiredArg("role", "Role id", ArgTypes.STRING);
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

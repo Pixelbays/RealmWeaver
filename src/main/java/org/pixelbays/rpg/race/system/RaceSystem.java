@@ -3,7 +3,7 @@ package org.pixelbays.rpg.race.system;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.race.component.RaceComponent;
@@ -137,7 +137,7 @@ public class RaceSystem {
             return;
         }
 
-        var levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        var levelSystem = Realmweavers.get().getLevelProgressionSystem();
         if (levelSystem == null) {
             return;
         }

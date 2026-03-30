@@ -2,7 +2,7 @@ package org.pixelbays.rpg.character.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -31,6 +31,6 @@ public class CharacterUiCommand extends AbstractPlayerCommand {
         if (player == null) {
             return;
         }
-        ExamplePlugin.get().getCharacterManager().enterCharacterSelect(ref, store, playerRef);
+        Realmweavers.get().getCharacterManager().enterCharacterSelect(ref, store, playerRef);
     }
 }

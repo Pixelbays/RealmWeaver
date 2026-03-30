@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.config.settings.StatModSettings.RollModifierRange;
 import org.pixelbays.rpg.global.system.RNGSystem;
@@ -172,7 +172,7 @@ public class DiceRollInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        XpBarHudService hudService = ExamplePlugin.get().getXpBarHudService();
+        XpBarHudService hudService = Realmweavers.get().getXpBarHudService();
         if (hudService == null) {
             return;
         }

@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -183,7 +183,7 @@ public class LockpickingSessionComponent implements Component<EntityStore> {
     }
 
     public static ComponentType<EntityStore, LockpickingSessionComponent> getComponentType() {
-        return ExamplePlugin.get().getLockpickingSessionComponentType();
+        return Realmweavers.get().getLockpickingSessionComponentType();
     }
 
     public boolean isActive() {

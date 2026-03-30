@@ -2,7 +2,7 @@ package org.pixelbays.rpg.global.interaction;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.global.config.builder.RaceRefCodec;
 
@@ -48,7 +48,7 @@ public class UnlockRaceInteraction extends SimpleInstantInteraction {
 			return;
 		}
 
-		boolean success = ExamplePlugin.get().getRaceSystem().setRace(entityRef, raceId, store);
+		boolean success = Realmweavers.get().getRaceSystem().setRace(entityRef, raceId, store);
 		context.getState().state = success ? InteractionState.Finished : InteractionState.Failed;
 	}
 }

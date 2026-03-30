@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildManager;
 import org.pixelbays.rpg.guild.GuildPermission;
@@ -28,7 +28,7 @@ public class GuildRoleListCommand extends AbstractPlayerCommand {
     public GuildRoleListCommand() {
         super("list", "List guild roles");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

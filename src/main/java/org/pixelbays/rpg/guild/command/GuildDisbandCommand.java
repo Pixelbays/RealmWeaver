@@ -2,7 +2,7 @@ package org.pixelbays.rpg.guild.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.GuildActionResult;
 import org.pixelbays.rpg.guild.GuildManager;
 
@@ -24,7 +24,7 @@ public class GuildDisbandCommand extends AbstractPlayerCommand {
     public GuildDisbandCommand() {
         super("disband", "Disband your guild");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

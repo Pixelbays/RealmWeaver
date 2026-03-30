@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.talent.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.classes.talent.ui.TalentTreePage;
@@ -34,14 +34,14 @@ public class ClassTalentUiCommand extends AbstractPlayerCommand {
     public ClassTalentUiCommand() {
         super("ui", "Open the talent tree UI");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
         this.classIdArg = null;
         this.addUsageVariant(new ClassTalentUiCommand("Open the talent tree UI"));
     }
 
     private ClassTalentUiCommand(String description) {
         super(description);
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
         this.classIdArg = this.withRequiredArg("classId", "Class to view", ArgTypes.STRING);
     }
 
@@ -64,7 +64,7 @@ public class ClassTalentUiCommand extends AbstractPlayerCommand {
                 return;
             }
         } else {
-            ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+            ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
             classId = classComp != null ? classComp.getPrimaryClassId() : null;
         }
 
@@ -74,7 +74,7 @@ public class ClassTalentUiCommand extends AbstractPlayerCommand {
         }
 
         // Validate the player has learned this class
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
         if (classComp == null || !classComp.hasLearnedClass(classId)) {
             player.sendMessage(Message.translation("pixelbays.rpg.class.talent.noLearnedClass"));
             return;

@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -57,7 +57,7 @@ public class UnlockExpansionInteraction extends SimpleInstantInteraction {
 			if (expansionId == null || expansionId.isBlank()) {
 				continue;
 			}
-			if (ExamplePlugin.get().getExpansionManager().unlockForPlayer(playerRef.getUuid(), expansionId)) {
+			if (Realmweavers.get().getExpansionManager().unlockForPlayer(playerRef.getUuid(), expansionId)) {
 				success = true;
 			}
 		}

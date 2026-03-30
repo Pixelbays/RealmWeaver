@@ -2,7 +2,7 @@ package org.pixelbays.rpg.global.input;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
@@ -27,10 +27,10 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 @SuppressWarnings("null")
 public class WeaponsInputHandler {
 
-    private final ExamplePlugin plugin;
+    private final Realmweavers plugin;
     private final AbilityBindingService bindingService;
 
-    public WeaponsInputHandler(@Nonnull ExamplePlugin plugin) {
+    public WeaponsInputHandler(@Nonnull Realmweavers plugin) {
         this.plugin = plugin;
         this.bindingService = new AbilityBindingService();
     }

@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.mail.MailActionResult;
 import org.pixelbays.rpg.mail.MailManager;
 import org.pixelbays.rpg.mail.MailMessage;
@@ -64,7 +64,7 @@ public class SendMailInteraction extends SimpleInstantInteraction {
 			return;
 		}
 
-		MailManager mailManager = ExamplePlugin.get().getMailManager();
+		MailManager mailManager = Realmweavers.get().getMailManager();
 		MailActionResult result;
 		MailMessage template = resolveTemplate();
 		if (template != null) {

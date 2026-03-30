@@ -2,7 +2,7 @@ package org.pixelbays.rpg.leveling.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.system.LevelProgressionSystem;
 
@@ -28,7 +28,7 @@ public class TestLevelCommand extends AbstractPlayerCommand {
     public TestLevelCommand() {
         super("testlevel", "Tests the RPG leveling system - runs automated test");
         requirePermission(HytalePermissions.fromCommand("admin"));
-        this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
+        this.levelSystem = Realmweavers.get().getLevelProgressionSystem();
     }
 
     @Override

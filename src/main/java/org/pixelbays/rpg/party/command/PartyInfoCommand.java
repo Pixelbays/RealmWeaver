@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.PartyRole;
 import org.pixelbays.rpg.party.ui.PartyUiSnapshot;
@@ -28,7 +28,7 @@ public class PartyInfoCommand extends AbstractPlayerCommand {
     public PartyInfoCommand() {
         super("info", "Show info about your party");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.partyManager = ExamplePlugin.get().getPartyManager();
+        this.partyManager = Realmweavers.get().getPartyManager();
     }
 
     @Override

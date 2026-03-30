@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.achievement.component.AchievementComponent;
 import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
@@ -478,8 +478,8 @@ public final class CharacterManager {
         saveActiveCharacter(playerRef.getUuid(), ref, store);
         applyProfileToPlayer(target, ref, store);
         activeCharacterIds.put(playerRef.getUuid(), target.getCharacterId());
-        if (ExamplePlugin.get().getAchievementSystem() != null) {
-            ExamplePlugin.get().getAchievementSystem().synchronizeEntityAchievements(ref, store);
+        if (Realmweavers.get().getAchievementSystem() != null) {
+            Realmweavers.get().getAchievementSystem().synchronizeEntityAchievements(ref, store);
         }
         roster.setSelectedCharacterId(target.getCharacterId());
         target.setLastPlayedEpochMs(System.currentTimeMillis());
@@ -1152,7 +1152,7 @@ public final class CharacterManager {
             return 0;
         }
 
-        return ExamplePlugin.get().getExpansionManager().getAccessibleLevelCap(playerRef, baseMaxLevel);
+        return Realmweavers.get().getExpansionManager().getAccessibleLevelCap(playerRef, baseMaxLevel);
     }
 
     private boolean ensureLegacyMigration(@Nonnull CharacterRosterData roster,
@@ -1242,8 +1242,8 @@ public final class CharacterManager {
 
         applyAppearanceToPlayer(ref, store, profile.getRaceId(), profile.getAppearance());
 
-        StatSystem statSystem = ExamplePlugin.get().getStatSystem();
-    ExamplePlugin.get().getClassManagementSystem().pruneUnknownClasses(ref, store);
+        StatSystem statSystem = Realmweavers.get().getStatSystem();
+    Realmweavers.get().getClassManagementSystem().pruneUnknownClasses(ref, store);
         statSystem.recalculateClassStatBonuses(ref, store);
         statSystem.recalculateTalentStatBonuses(ref, store);
         statSystem.recalculateRaceStatBonuses(ref, store);
@@ -1496,7 +1496,7 @@ public final class CharacterManager {
             return CurrencyActionResult.success("Appearance updated.", cost.getCurrencyId(), 0L);
         }
 
-        CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+        CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
         String ownerId = resolveCurrencyOwnerId(settings.getCurrencyScope(), profile, playerRef);
         CurrencyAccessContext accessContext = CurrencyAccessContext.fromInventory(resolveInventory(store, playerRef));
         return currencyManager.spend(settings.getCurrencyScope(), ownerId, cost, accessContext);
@@ -1645,7 +1645,7 @@ public final class CharacterManager {
             return;
         }
 
-        HotbarAbilityIconManager hotbarIconManager = ExamplePlugin.get().getHotbarIconManager();
+        HotbarAbilityIconManager hotbarIconManager = Realmweavers.get().getHotbarIconManager();
         if (hotbarIconManager != null) {
             for (int slot : result.clearedHotbarSlots()) {
                 hotbarIconManager.updateHotbarSlot(ref, store, slot, null);
@@ -2151,7 +2151,7 @@ public final class CharacterManager {
         if (raceId == null || raceId.isBlank()) {
             return null;
         }
-        RaceManagementSystem raceManagementSystem = ExamplePlugin.get().getRaceManagementSystem();
+        RaceManagementSystem raceManagementSystem = Realmweavers.get().getRaceManagementSystem();
         RaceDefinition definition = raceManagementSystem.getRaceDefinition(raceId);
         return definition != null && definition.isEnabled() ? definition : null;
     }
@@ -2161,7 +2161,7 @@ public final class CharacterManager {
         if (classId == null || classId.isBlank()) {
             return null;
         }
-        ClassDefinition definition = ExamplePlugin.get().getClassManagementSystem().getClassDefinition(classId);
+        ClassDefinition definition = Realmweavers.get().getClassManagementSystem().getClassDefinition(classId);
         return definition != null && definition.isEnabled() ? definition : null;
     }
 
@@ -2185,7 +2185,7 @@ public final class CharacterManager {
             return "";
         }
 
-        String primaryClassId = ExamplePlugin.get().getClassManagementSystem().getPrimaryKnownClassId(classComponent);
+        String primaryClassId = Realmweavers.get().getClassManagementSystem().getPrimaryKnownClassId(classComponent);
         return primaryClassId == null ? "" : primaryClassId;
     }
 
@@ -2212,7 +2212,7 @@ public final class CharacterManager {
     @Nonnull
     private List<ClassDefinition> getStartingClassDefinitions() {
         List<ClassDefinition> startingClasses = new ArrayList<>();
-        var classManagementSystem = ExamplePlugin.get().getClassManagementSystem();
+        var classManagementSystem = Realmweavers.get().getClassManagementSystem();
 
         for (ClassDefinition classDefinition : classManagementSystem.getAllClassDefinitions().values()) {
             if (classDefinition == null || !classDefinition.isEnabled() || !classDefinition.isStartingClass()) {

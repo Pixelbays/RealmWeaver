@@ -9,7 +9,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.event.ClassAbilityUnlockedEvent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
@@ -124,7 +124,7 @@ public class ClassManagementSystem {
 
         PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
         if (playerRef != null) {
-            ExpansionManager expansionManager = ExamplePlugin.get().getExpansionManager();
+            ExpansionManager expansionManager = Realmweavers.get().getExpansionManager();
             if (!expansionManager.hasAccess(playerRef, classDef.getRequiredExpansionIds())) {
                 return "ERROR: Requires expansion access: "
                         + expansionManager.describeRequirements(classDef.getRequiredExpansionIds());
@@ -471,7 +471,7 @@ public class ClassManagementSystem {
         classId = resolvedClassId;
 
         PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
-        if (playerRef != null && !ExamplePlugin.get().getExpansionManager().hasAccess(playerRef, classDef.getRequiredExpansionIds())) {
+        if (playerRef != null && !Realmweavers.get().getExpansionManager().hasAccess(playerRef, classDef.getRequiredExpansionIds())) {
             return false;
         }
 
@@ -535,7 +535,7 @@ public class ClassManagementSystem {
         }
 
         if (chargeLearnCosts && unlock.hasLearnCosts()) {
-            CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+            CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
             List<ClassDefinition.AbilityLearnCost> learnCosts = sanitizeLearnCosts(unlock.getLearnCosts());
             for (ClassDefinition.AbilityLearnCost learnCost : learnCosts) {
                 if (learnCost == null) {
@@ -680,7 +680,7 @@ public class ClassManagementSystem {
         }
 
         if (validateLearnCosts && unlock.hasLearnCosts()) {
-            CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+            CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
             for (ClassDefinition.AbilityLearnCost learnCost : sanitizeLearnCosts(unlock.getLearnCosts())) {
                 if (learnCost == null) {
                     continue;
@@ -792,10 +792,10 @@ public class ClassManagementSystem {
         }
 
         return switch (scope) {
-            case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+            case Character -> Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
             case Account -> playerRef.getUuid().toString();
             case Guild -> {
-                Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
+                Guild guild = Realmweavers.get().getGuildManager().getGuildForMember(playerRef.getUuid());
                 yield guild == null ? null : guild.getId().toString();
             }
             case Global -> "global";

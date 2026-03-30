@@ -3,7 +3,7 @@ package org.pixelbays.rpg.npc.corecomponents;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.npc.component.NpcRpgDebugComponent;
@@ -39,7 +39,7 @@ public class ActionRpgCastAbility extends ActionBase {
             @Nonnull Store<EntityStore> store) {
         super.execute(ref, role, sensorInfo, dt, store);
 
-        ClassAbilitySystem abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        ClassAbilitySystem abilitySystem = Realmweavers.get().getClassAbilitySystem();
         if (requireUnlocked && !abilitySystem.isAbilityUnlocked(ref, store, abilityId)) {
             if (logFailures) {
                 RpgLogging.debugDeveloper("[NpcAbility] Ability not unlocked: %s", abilityId);

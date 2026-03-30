@@ -8,7 +8,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
 import org.pixelbays.rpg.economy.currency.command.CurrencyCommandUtil;
@@ -55,7 +55,7 @@ public class CurrencyPage extends CustomUIPage {
 
     public CurrencyPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.currencyManager = ExamplePlugin.get().getCurrencyManager();
+        this.currencyManager = Realmweavers.get().getCurrencyManager();
     }
 
     @Override

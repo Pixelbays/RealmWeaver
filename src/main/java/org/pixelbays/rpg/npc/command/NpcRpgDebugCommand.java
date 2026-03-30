@@ -6,7 +6,7 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.npc.component.NpcRpgDebugComponent;
 
 import com.hypixel.hytale.component.Ref;

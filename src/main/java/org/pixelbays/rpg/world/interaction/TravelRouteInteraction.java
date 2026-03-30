@@ -2,7 +2,7 @@ package org.pixelbays.rpg.world.interaction;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.global.interaction.InteractionPlayerUtil;
 
 import com.hypixel.hytale.codec.Codec;
@@ -47,7 +47,7 @@ public class TravelRouteInteraction extends SimpleInstantInteraction {
 			return;
 		}
 
-		boolean success = ExamplePlugin.get().getWorldTravelManager().travelRoute(routeId, store, entityRef, playerRef);
+		boolean success = Realmweavers.get().getWorldTravelManager().travelRoute(routeId, store, entityRef, playerRef);
 		context.getState().state = success ? InteractionState.Finished : InteractionState.Failed;
 	}
 }

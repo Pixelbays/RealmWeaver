@@ -2,7 +2,7 @@ package org.pixelbays.rpg.character.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.character.token.CharacterTokenActionResult;
 
@@ -33,7 +33,7 @@ public class CharacterTokenSetCommand extends AbstractPlayerCommand {
         this.playerArg = this.withRequiredArg("player", "Player name", ArgTypes.STRING);
         this.tokenIdArg = this.withRequiredArg("tokenId", "Token id", ArgTypes.STRING);
         this.amountArg = this.withRequiredArg("amount", "Amount", ArgTypes.INTEGER);
-        this.characterManager = ExamplePlugin.get().getCharacterManager();
+        this.characterManager = Realmweavers.get().getCharacterManager();
     }
 
     @Override

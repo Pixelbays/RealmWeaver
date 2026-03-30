@@ -2,7 +2,7 @@ package org.pixelbays.rpg.classes.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.classes.component.ClassComponent;
@@ -35,16 +35,16 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
     public ClassAbilitiesCommand() {
         super("abilities", "View class abilities");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.abilitySystem = Realmweavers.get().getClassAbilitySystem();
         this.classNameArg = null;
         this.addUsageVariant(new ClassAbilitiesCommand("View class abilities"));
     }
 
     private ClassAbilitiesCommand(String description) {
         super(description);
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.abilitySystem = Realmweavers.get().getClassAbilitySystem();
         this.classNameArg = this.withRequiredArg("className", "The class to view", ArgTypes.STRING);
     }
 
@@ -56,7 +56,7 @@ public class ClassAbilitiesCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
 
         String classId;
         if (this.classNameArg != null) {

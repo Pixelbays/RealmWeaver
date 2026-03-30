@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.prereq.PrerequisiteEvaluator;
 import org.pixelbays.rpg.party.Party;
@@ -258,7 +258,7 @@ public class WorldTravelManager {
 			return List.of(initiator);
 		}
 
-		PartyManager partyManager = ExamplePlugin.get().getPartyManager();
+		PartyManager partyManager = Realmweavers.get().getPartyManager();
 		Party party = partyManager.getPartyForMember(initiator.getUuid());
 		if (party == null) {
 			initiator.sendMessage(Message.translation("pixelbays.rpg.world.travel.error.requiresGroup")

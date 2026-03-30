@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
@@ -33,8 +33,8 @@ public class ClassListCommand extends AbstractPlayerCommand {
     public ClassListCommand() {
         super("list", "List all available classes");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.classSystem = ExamplePlugin.get().getClassManagementSystem();
-        this.expansionManager = ExamplePlugin.get().getExpansionManager();
+        this.classSystem = Realmweavers.get().getClassManagementSystem();
+        this.expansionManager = Realmweavers.get().getExpansionManager();
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ClassListCommand extends AbstractPlayerCommand {
                           @Nonnull World world) {
         
         Player player = store.getComponent(ref, Player.getComponentType());
-        ClassComponent classComp = store.getComponent(ref, ExamplePlugin.get().getClassComponentType());
+        ClassComponent classComp = store.getComponent(ref, Realmweavers.get().getClassComponentType());
         
         player.sendMessage(Message.translation("pixelbays.rpg.class.list.header"));
         

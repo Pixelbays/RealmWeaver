@@ -11,7 +11,7 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
 import org.pixelbays.rpg.mail.MailActionResult;
 import org.pixelbays.rpg.mail.MailManager;
@@ -68,7 +68,7 @@ public class MailPage extends CustomUIPage {
 
     public MailPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.mailManager = ExamplePlugin.get().getMailManager();
+        this.mailManager = Realmweavers.get().getMailManager();
     }
 
     @Override

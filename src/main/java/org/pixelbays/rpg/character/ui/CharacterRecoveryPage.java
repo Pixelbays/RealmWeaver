@@ -7,7 +7,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.CharacterActionResult;
 import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.character.config.CharacterProfileData;
@@ -54,7 +54,7 @@ public class CharacterRecoveryPage extends CustomUIPage {
 
     public CharacterRecoveryPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
-        this.characterManager = ExamplePlugin.get().getCharacterManager();
+        this.characterManager = Realmweavers.get().getCharacterManager();
     }
 
     @Override

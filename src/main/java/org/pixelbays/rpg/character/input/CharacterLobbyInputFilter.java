@@ -1,6 +1,6 @@
 package org.pixelbays.rpg.character.input;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.protocol.Packet;
 import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
@@ -13,7 +13,7 @@ public class CharacterLobbyInputFilter implements PlayerPacketFilter {
 
     @Override
     public boolean test(PlayerRef playerRef, Packet packet) {
-        if (!ExamplePlugin.get().getCharacterManager().requiresCharacterUiLock(playerRef)) {
+        if (!Realmweavers.get().getCharacterManager().requiresCharacterUiLock(playerRef)) {
             return false;
         }
 

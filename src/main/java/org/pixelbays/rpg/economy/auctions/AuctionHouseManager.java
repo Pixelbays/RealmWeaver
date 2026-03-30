@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.economy.auctions.config.AuctionData;
 import org.pixelbays.rpg.economy.auctions.config.settings.AuctionHouseModSettings;
 import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
@@ -135,7 +135,7 @@ public class AuctionHouseManager {
 
         CurrencyAmountDefinition listingFee = duration.getListingFee();
         if (!listingFee.isFree()) {
-            CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+            CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
             CurrencyActionResult feeResult = currencyManager.removeBalance(
                     request.getSellerCurrencyScope(),
                     request.getSellerOwnerId(),

@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -60,7 +60,7 @@ public class UnlockAchievementInteraction extends SimpleInstantInteraction {
 			if (achievementId == null || achievementId.isBlank()) {
 				continue;
 			}
-			if (ExamplePlugin.get().getAchievementSystem().unlockAchievement(entityRef, store, achievementId)) {
+			if (Realmweavers.get().getAchievementSystem().unlockAchievement(entityRef, store, achievementId)) {
 				success = true;
 			}
 		}

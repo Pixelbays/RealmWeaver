@@ -2,7 +2,7 @@ package org.pixelbays.rpg.global.input;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
@@ -27,10 +27,10 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 @SuppressWarnings("null")
 public class AbilitySlotsInputHandler {
 
-    private final ExamplePlugin plugin;
+    private final Realmweavers plugin;
     private final AbilityBindingService bindingService;
 
-    public AbilitySlotsInputHandler(@Nonnull ExamplePlugin plugin) {
+    public AbilitySlotsInputHandler(@Nonnull Realmweavers plugin) {
         this.plugin = plugin;
         this.bindingService = new AbilityBindingService();
     }
@@ -85,7 +85,7 @@ public class AbilitySlotsInputHandler {
 
             // Look up ability binding for this ability slot
             AbilityBindingComponent bindingComp = store.getComponent(entityRef,
-                    ExamplePlugin.get().getAbilityBindingComponentType());
+                    Realmweavers.get().getAbilityBindingComponentType());
             if (bindingComp == null) {
                 playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.noBindingData"));
                 return;

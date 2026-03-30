@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.character.token.CharacterTokenDefinition;
 
@@ -27,7 +27,7 @@ public class CharacterTokenInfoCommand extends AbstractPlayerCommand {
     public CharacterTokenInfoCommand() {
         super("info", "Show your account character tokens");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.characterManager = ExamplePlugin.get().getCharacterManager();
+        this.characterManager = Realmweavers.get().getCharacterManager();
     }
 
     @Override

@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.config.settings.TalentModSettings;
@@ -328,7 +328,7 @@ public class TalentSystem {
         if (talentSettings.getResetMode() == TalentResetMode.Paid && checkItemCost) {
             CurrencyAmountDefinition resetCost = talentSettings.getResetCost();
             if (!resetCost.isFree()) {
-                CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+                CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
                 String ownerId = resolveCurrencyOwnerId(CurrencyScope.Character, entityRef, store);
                 if (ownerId == null || ownerId.isBlank()) {
                     return "ERROR: Scope is unavailable right now: Character";
@@ -395,10 +395,10 @@ public class TalentSystem {
         }
 
         return switch (scope) {
-            case Character -> ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+            case Character -> Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
             case Account -> playerRef.getUuid().toString();
             case Guild -> {
-                Guild guild = ExamplePlugin.get().getGuildManager().getGuildForMember(playerRef.getUuid());
+                Guild guild = Realmweavers.get().getGuildManager().getGuildForMember(playerRef.getUuid());
                 yield guild == null ? null : guild.getId().toString();
             }
             case Global -> "global";

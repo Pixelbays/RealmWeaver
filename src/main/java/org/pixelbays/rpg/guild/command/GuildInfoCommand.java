@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildManager;
 import com.hypixel.hytale.component.Ref;
@@ -25,7 +25,7 @@ public class GuildInfoCommand extends AbstractPlayerCommand {
     public GuildInfoCommand() {
         super("info", "Show guild info");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.guildManager = ExamplePlugin.get().getGuildManager();
+        this.guildManager = Realmweavers.get().getGuildManager();
     }
 
     @Override

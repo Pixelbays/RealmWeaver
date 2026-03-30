@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.config.ClassDefinition.ResourceDisplayDefinition;
@@ -98,7 +98,7 @@ public class XpBarHudService {
         });
 
         HudManager hudManager = player.getHudManager();
-        if (ExamplePlugin.get().getCharacterManager().requiresCharacterUiLock(playerRef)) {
+        if (Realmweavers.get().getCharacterManager().requiresCharacterUiLock(playerRef)) {
             if (hudManager.getCustomHud() == hud) {
                 hudManager.setCustomHud(playerRef, null);
             }
@@ -226,7 +226,7 @@ public class XpBarHudService {
 
     @Nonnull
     private static List<XpBarHud.PartyMemberHudData> resolvePartyMembers(@Nonnull PlayerRef viewerRef) {
-        PartyManager partyManager = ExamplePlugin.get().getPartyManager();
+        PartyManager partyManager = Realmweavers.get().getPartyManager();
 
         Party party = partyManager.getPartyForMember(viewerRef.getUuid());
         if (party == null) {
@@ -535,7 +535,7 @@ public class XpBarHudService {
 
     @Nonnull
     private static ClassManagementSystem getClassManagementSystem() {
-        return ExamplePlugin.get().getClassManagementSystem();
+        return Realmweavers.get().getClassManagementSystem();
     }
 
     @Nullable

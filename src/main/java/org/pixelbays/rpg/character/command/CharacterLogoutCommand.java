@@ -2,7 +2,7 @@ package org.pixelbays.rpg.character.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.character.CharacterActionResult;
 
 import com.hypixel.hytale.component.Ref;
@@ -27,7 +27,7 @@ public class CharacterLogoutCommand extends AbstractPlayerCommand {
             @Nonnull Ref<EntityStore> ref,
             @Nonnull PlayerRef playerRef,
             @Nonnull World world) {
-        CharacterActionResult result = ExamplePlugin.get().getCharacterManager().logoutToCharacterSelect(ref, store, playerRef);
-        playerRef.sendMessage(ExamplePlugin.get().getCharacterManager().mapMessage(result.getMessage()));
+        CharacterActionResult result = Realmweavers.get().getCharacterManager().logoutToCharacterSelect(ref, store, playerRef);
+        playerRef.sendMessage(Realmweavers.get().getCharacterManager().mapMessage(result.getMessage()));
     }
 }

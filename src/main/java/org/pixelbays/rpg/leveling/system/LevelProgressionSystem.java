@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
@@ -286,7 +286,7 @@ public class LevelProgressionSystem {
         if (rewards.getCurrencyRewards() != null && !rewards.getCurrencyRewards().isEmpty() && store != null) {
             PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
             if (playerRef != null) {
-                CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+                CurrencyManager currencyManager = Realmweavers.get().getCurrencyManager();
                 for (Map.Entry<String, Long> entry : rewards.getCurrencyRewards().entrySet()) {
                     String currencyId = entry.getKey();
                     Long amount = entry.getValue();
@@ -294,7 +294,7 @@ public class LevelProgressionSystem {
                         continue;
                     }
 
-                        String characterOwnerId = ExamplePlugin.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
+                        String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(playerRef);
                         if (characterOwnerId.isBlank()) {
                         continue;
                         }
@@ -625,7 +625,7 @@ public class LevelProgressionSystem {
             return;
         }
 
-        var classSystem = ExamplePlugin.get().getClassManagementSystem();
+        var classSystem = Realmweavers.get().getClassManagementSystem();
         java.util.List<String> classIds = classSystem.getClassesForLevelSystem(systemId);
         if (classIds.isEmpty()) {
             return;
@@ -1020,7 +1020,7 @@ public class LevelProgressionSystem {
             return baseMaxLevel;
         }
 
-        return ExamplePlugin.get().getExpansionManager().getAccessibleLevelCap(playerRef, config.getMaxLevel());
+        return Realmweavers.get().getExpansionManager().getAccessibleLevelCap(playerRef, config.getMaxLevel());
     }
 
     private void refreshClassStatsIfNeeded(@Nonnull Ref<EntityStore> entityRef,
@@ -1030,7 +1030,7 @@ public class LevelProgressionSystem {
             return;
         }
 
-        var classSystem = ExamplePlugin.get().getClassManagementSystem();
+        var classSystem = Realmweavers.get().getClassManagementSystem();
         if (classSystem.getClassesForLevelSystem(systemId).isEmpty()) {
             return;
         }

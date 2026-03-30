@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.expansion.ExpansionManager;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
@@ -34,9 +34,9 @@ public class RaceListCommand extends AbstractPlayerCommand {
     public RaceListCommand() {
         super("list", "List all available races");
         requirePermission(HytalePermissions.fromCommand("player"));
-        this.raceManagementSystem = ExamplePlugin.get().getRaceManagementSystem();
-        this.raceSystem = ExamplePlugin.get().getRaceSystem();
-        this.expansionManager = ExamplePlugin.get().getExpansionManager();
+        this.raceManagementSystem = Realmweavers.get().getRaceManagementSystem();
+        this.raceSystem = Realmweavers.get().getRaceSystem();
+        this.expansionManager = Realmweavers.get().getExpansionManager();
     }
 
     @Override

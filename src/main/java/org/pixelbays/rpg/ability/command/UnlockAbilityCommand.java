@@ -2,7 +2,7 @@ package org.pixelbays.rpg.ability.command;
 
 import javax.annotation.Nonnull;
 
-import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 
@@ -54,9 +54,9 @@ public class UnlockAbilityCommand extends AbstractPlayerCommand {
 
         // Get or create ability component
         ClassAbilityComponent abilityComp = store.getComponent(ref,
-                ExamplePlugin.get().getClassAbilityComponentType());
+                Realmweavers.get().getClassAbilityComponentType());
         if (abilityComp == null) {
-            abilityComp = store.addComponent(ref, ExamplePlugin.get().getClassAbilityComponentType());
+            abilityComp = store.addComponent(ref, Realmweavers.get().getClassAbilityComponentType());
         }
 
         // If no argument, show list
