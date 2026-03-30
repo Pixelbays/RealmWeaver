@@ -69,6 +69,9 @@ idea.project.settings.runConfigurations {
         if (load_user_mods.toBoolean()) {
             programParameters += " --mods=$hytaleHome/UserData/Mods"
         }
+        if (asset_dir_pack_name != null && !asset_dir_pack_name.isEmpty()) {
+            programParameters += " --mods=$projectDir/src/main/assetpacks/$asset_dir_pack_name"
+        }
         workingDirectory = serverRunDir.absolutePath
     }
 }

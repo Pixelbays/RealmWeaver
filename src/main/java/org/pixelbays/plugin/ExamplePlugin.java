@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.ability.command.BindAbilityCommand;
+import org.pixelbays.rpg.ability.command.SpellbookCommand;
 import org.pixelbays.rpg.ability.command.SyncHotbarCommand;
 import org.pixelbays.rpg.ability.command.UnlockAbilityCommand;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
@@ -37,9 +38,9 @@ import org.pixelbays.rpg.character.token.CharacterTokenDefinition;
 import org.pixelbays.rpg.chat.ChatManager;
 import org.pixelbays.rpg.chat.GuildChatChannel;
 import org.pixelbays.rpg.chat.PartyChatChannel;
+import org.pixelbays.rpg.chat.command.ChatCommand;
 import org.pixelbays.rpg.chat.config.settings.ChatChannelDefinition;
 import org.pixelbays.rpg.chat.config.settings.ChatModSettings;
-import org.pixelbays.rpg.chat.command.ChatCommand;
 import org.pixelbays.rpg.classes.command.ClassCommand;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
@@ -72,6 +73,7 @@ import org.pixelbays.rpg.global.event.RaceStatBonusesRecalculatedEvent;
 import org.pixelbays.rpg.global.event.StatGrowthAppliedEvent;
 import org.pixelbays.rpg.global.event.StatIncreasesAppliedEvent;
 import org.pixelbays.rpg.global.input.AbilityInputFilter;
+import org.pixelbays.rpg.global.input.UiInputFilter;
 import org.pixelbays.rpg.global.interaction.DiceRollInteraction;
 import org.pixelbays.rpg.global.interaction.ForceTargetInteraction;
 import org.pixelbays.rpg.global.interaction.GrantAchievementProgressInteraction;
@@ -83,6 +85,7 @@ import org.pixelbays.rpg.global.interaction.UnlockExpansionInteraction;
 import org.pixelbays.rpg.global.interaction.UnlockRaceInteraction;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.system.XpDeathDropSystem;
+import org.pixelbays.rpg.global.config.BuildFlags;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.guild.GuildManager;
 import org.pixelbays.rpg.guild.command.GuildCommand;
@@ -236,6 +239,7 @@ public class ExamplePlugin extends JavaPlugin {
         private ComponentType<EntityStore, NpcThreatComponent> npcThreatComponentType;
         private ComponentType<EntityStore, LockpickingSessionComponent> lockpickingSessionComponentType;
 
+        private PacketFilter uiInputFilter;
         private PacketFilter abilityInputFilter;
         private PacketFilter characterLobbyInputFilter;
         private PacketFilter inventoryOpenFilter;
@@ -255,6 +259,7 @@ public class ExamplePlugin extends JavaPlugin {
         private CommandRegistration mailCommandRegistration;
         private CommandRegistration chatCommandRegistration;
         private CommandRegistration bindAbilityCommandRegistration;
+        private CommandRegistration spellbookCommandRegistration;
         private CommandRegistration syncHotbarCommandRegistration;
         private CommandRegistration unlockAbilityCommandRegistration;
         private CommandRegistration travelRouteCommandRegistration;
@@ -498,23 +503,25 @@ public class ExamplePlugin extends JavaPlugin {
                                                 "LockpickingSession",
                                                 LockpickingSessionComponent.CODEC);
 
-                this.npcRpgDebugComponentType = this.getEntityStoreRegistry()
-                                .registerComponent(
-                                                NpcRpgDebugComponent.class,
-                                                "NpcRpgDebug",
-                                                NpcRpgDebugComponent.CODEC);
+                if (BuildFlags.NPC_MODULE) {
+                        this.npcRpgDebugComponentType = this.getEntityStoreRegistry()
+                                        .registerComponent(
+                                                        NpcRpgDebugComponent.class,
+                                                        "NpcRpgDebug",
+                                                        NpcRpgDebugComponent.CODEC);
 
-                this.npcRpgSetupComponentType = this.getEntityStoreRegistry()
-                                .registerComponent(
-                                                NpcRpgSetupComponent.class,
-                                                "NpcRpgSetup",
-                                                NpcRpgSetupComponent.CODEC);
+                        this.npcRpgSetupComponentType = this.getEntityStoreRegistry()
+                                        .registerComponent(
+                                                        NpcRpgSetupComponent.class,
+                                                        "NpcRpgSetup",
+                                                        NpcRpgSetupComponent.CODEC);
 
-                this.npcThreatComponentType = this.getEntityStoreRegistry()
-                                .registerComponent(
-                                                NpcThreatComponent.class,
-                                                "NpcThreat",
-                                                NpcThreatComponent.CODEC);
+                        this.npcThreatComponentType = this.getEntityStoreRegistry()
+                                        .registerComponent(
+                                                        NpcThreatComponent.class,
+                                                        "NpcThreat",
+                                                        NpcThreatComponent.CODEC);
+                }
 
                 RpgLogging.debugDeveloper(
                                 "Registered LevelProgressionComponent, ClassComponent, ClassAbilityComponent, AbilityEmpowerComponent, RaceComponent, AbilityBindingComponent, and AbilityTriggerBlockComponent");
@@ -552,8 +559,12 @@ public class ExamplePlugin extends JavaPlugin {
                 this.getEventRegistry().register(GiveXPEvent.class, new GiveXPHandler());
                 this.getEventRegistry().register(GiveCurrencyEvent.class, new GiveCurrencyHandler());
                 this.getEventRegistry().register(LevelUpEvent.class, new LevelUpHandler());
-                this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, new RpgCameraController());
-                new InventoryHandlingSystem().register(this.getEventRegistry());
+                if (BuildFlags.CAMERA_MODULE) {
+                        this.getEventRegistry().registerGlobal(PlayerReadyEvent.class, new RpgCameraController());
+                }
+                if (BuildFlags.INVENTORY_MODULE) {
+                        new InventoryHandlingSystem().register(this.getEventRegistry());
+                }
                 registerRpgEventHooks();
         }
 
@@ -561,7 +572,9 @@ public class ExamplePlugin extends JavaPlugin {
 
                 // Initialize level progression system
                 this.levelSystem = new LevelProgressionSystem(this.getEventRegistry());
-                this.restedXpSystem = new RestedXpSystem(this.getEventRegistry());
+                if (BuildFlags.RESTED_XP) {
+                        this.restedXpSystem = new RestedXpSystem(this.getEventRegistry());
+                }
 
                 // Initialize race systems (before class/stat systems since they depend on it)
                 this.raceManagementSystem = new RaceManagementSystem();
@@ -648,6 +661,10 @@ public class ExamplePlugin extends JavaPlugin {
 
         private void registerNpcSystems() {
 
+                if (!BuildFlags.NPC_MODULE) {
+                        return;
+                }
+
                 NPCPlugin npcPlugin = NPCPlugin.get();
                 if (npcPlugin == null) {
                         RpgLogging.debugDeveloper("NPCPlugin unavailable; skipping NPC RPG registration.");
@@ -709,11 +726,12 @@ public class ExamplePlugin extends JavaPlugin {
                 // Register equipment restriction system
                 if (moduleFlags.classModuleEnabled()) {
                         this.equipmentRestrictions = new EquipmentRestrictions(this.classManagementSystem);
-                        this.equipmentRestrictions.register(this.getEventRegistry());
+                        this.getEntityStoreRegistry().registerSystem(this.equipmentRestrictions.createInventoryChangeSystem());
                 }
 
                 this.randomizedEquipmentManager = new RandomizedEquipmentManager();
                 this.randomizedEquipmentManager.register(this.getEventRegistry());
+                this.getEntityStoreRegistry().registerSystem(this.randomizedEquipmentManager.createInventoryChangeSystem());
 
                 // Register class level milestone rewards listener
                 if (moduleFlags.classModuleEnabled() && moduleFlags.levelingModuleEnabled()) {
@@ -727,8 +745,10 @@ public class ExamplePlugin extends JavaPlugin {
         private void registerAlwaysAvailableCommands() {
 
                 this.raceCommandRegistration = refreshCommand(this.raceCommandRegistration, true, RaceCommand::new);
-                this.npcRpgDebugCommandRegistration = refreshCommand(this.npcRpgDebugCommandRegistration, true,
-                                NpcRpgDebugCommand::new);
+                if (BuildFlags.NPC_MODULE) {
+                        this.npcRpgDebugCommandRegistration = refreshCommand(this.npcRpgDebugCommandRegistration, true,
+                                        NpcRpgDebugCommand::new);
+                }
         }
         
         @Override
@@ -742,6 +762,10 @@ public class ExamplePlugin extends JavaPlugin {
                         this.lockpickingSystem.shutdown();
                 }
                 // Deregister packet filter
+                if (this.uiInputFilter != null) {
+                        PacketAdapters.deregisterInbound(this.uiInputFilter);
+                        RpgLogging.debugDeveloper("Deregistered UI input packet filter");
+                }
                 if (this.abilityInputFilter != null) {
                         PacketAdapters.deregisterInbound(this.abilityInputFilter);
                         RpgLogging.debugDeveloper("Deregistered ability input packet filter");
@@ -772,6 +796,7 @@ public class ExamplePlugin extends JavaPlugin {
                 unregisterCommand(this.mailCommandRegistration);
                 unregisterCommand(this.chatCommandRegistration);
                 unregisterCommand(this.bindAbilityCommandRegistration);
+                unregisterCommand(this.spellbookCommandRegistration);
                 unregisterCommand(this.syncHotbarCommandRegistration);
                 unregisterCommand(this.unlockAbilityCommandRegistration);
         }
@@ -799,6 +824,11 @@ public class ExamplePlugin extends JavaPlugin {
         @Nonnull
         public HotbarAbilityIconManager getHotbarIconManager() {
                 return hotbarIconManager;
+        }
+
+        @Nullable
+        public XpBarHudService getXpBarHudService() {
+                return xpBarHudService;
         }
 
         @Nonnull
@@ -1007,6 +1037,7 @@ public class ExamplePlugin extends JavaPlugin {
 
         private void onRpgModConfigChanged() {
                 RpgModConfig config = resolveModConfig();
+                reconcileSavedAbilityBindings(config);
                 reconcileDynamicRegistrations(config);
         }
 
@@ -1075,6 +1106,10 @@ public class ExamplePlugin extends JavaPlugin {
                                 this.bindAbilityCommandRegistration,
                                 moduleFlags.abilityModuleEnabled(),
                                 BindAbilityCommand::new);
+                this.spellbookCommandRegistration = refreshCommand(
+                                this.spellbookCommandRegistration,
+                                moduleFlags.abilityModuleEnabled(),
+                                SpellbookCommand::new);
                 this.syncHotbarCommandRegistration = refreshCommand(
                                 this.syncHotbarCommandRegistration,
                                 moduleFlags.abilityModuleEnabled(),
@@ -1085,7 +1120,7 @@ public class ExamplePlugin extends JavaPlugin {
                                 UnlockAbilityCommand::new);
                 this.travelRouteCommandRegistration = refreshCommand(
                                 this.travelRouteCommandRegistration,
-                                config != null && config.getWorldSettings().isEnabled() && config.getWorldSettings().isAllowTravelCommands(),
+                                BuildFlags.WORLD_MODULE && config != null && config.getWorldSettings().isEnabled() && config.getWorldSettings().isAllowTravelCommands(),
                                 TravelRouteCommand::new);
 
                 if (this.getState() != PluginState.SETUP) {
@@ -1093,6 +1128,14 @@ public class ExamplePlugin extends JavaPlugin {
                 }
 
                 reconcileInboundFilters(moduleFlags);
+        }
+
+        private void reconcileSavedAbilityBindings(@Nullable RpgModConfig config) {
+                if (config == null || this.characterManager == null) {
+                        return;
+                }
+
+                this.characterManager.sanitizeAbilityBindingsForCurrentConfig();
         }
 
         private void reconcilePersistenceBackedManagers(@Nullable RpgModConfig config) {
@@ -1137,17 +1180,6 @@ public class ExamplePlugin extends JavaPlugin {
         }
 
         private void reconcileInboundFilters(@Nonnull ModuleFlags moduleFlags) {
-                if (moduleFlags.abilityModuleEnabled()) {
-                        if (this.abilityInputFilter == null) {
-                                this.abilityInputFilter = PacketAdapters.registerInbound(new AbilityInputFilter(this));
-                                RpgLogging.debugDeveloper("Registered ability input packet filter");
-                        }
-                } else if (this.abilityInputFilter != null) {
-                        PacketAdapters.deregisterInbound(this.abilityInputFilter);
-                        this.abilityInputFilter = null;
-                        RpgLogging.debugDeveloper("Deregistered ability input packet filter");
-                }
-
                 if (moduleFlags.characterModuleEnabled()) {
                         if (this.characterLobbyInputFilter == null) {
                                 this.characterLobbyInputFilter = PacketAdapters
@@ -1158,6 +1190,22 @@ public class ExamplePlugin extends JavaPlugin {
                         PacketAdapters.deregisterInbound(this.characterLobbyInputFilter);
                         this.characterLobbyInputFilter = null;
                         RpgLogging.debugDeveloper("Deregistered character lobby input packet filter");
+                }
+
+                if (this.uiInputFilter == null) {
+                        this.uiInputFilter = PacketAdapters.registerInbound(new UiInputFilter());
+                        RpgLogging.debugDeveloper("Registered UI input packet filter");
+                }
+
+                if (moduleFlags.abilityModuleEnabled()) {
+                        if (this.abilityInputFilter == null) {
+                                this.abilityInputFilter = PacketAdapters.registerInbound(new AbilityInputFilter(this));
+                                RpgLogging.debugDeveloper("Registered ability input packet filter");
+                        }
+                } else if (this.abilityInputFilter != null) {
+                        PacketAdapters.deregisterInbound(this.abilityInputFilter);
+                        this.abilityInputFilter = null;
+                        RpgLogging.debugDeveloper("Deregistered ability input packet filter");
                 }
 
                 if (moduleFlags.inventoryModuleEnabled()) {
@@ -1243,23 +1291,22 @@ public class ExamplePlugin extends JavaPlugin {
 
         private ModuleFlags resolveModuleFlags(@Nullable RpgModConfig config) {
                 return new ModuleFlags(
-                                isModuleEnabled(config, config != null ? config.getClassSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getCharacterSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getAchievementSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getTalentSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getLevelingSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getAbilitySettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getInventorySettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getPartySettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getGuildSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.isChatModuleEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getCameraSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getBankSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getCurrencySettings().isEnabled() : null),
-                                isModuleEnabled(config,
-                                                config != null ? config.getAuctionHouseSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getMailSettings().isEnabled() : null),
-                                isModuleEnabled(config, config != null ? config.getLockpickingSettings().isEnabled() : null));
+                                BuildFlags.CLASS_MODULE         && isModuleEnabled(config, config != null ? config.getClassSettings().isEnabled() : null),
+                                BuildFlags.CHARACTER_MODULE     && isModuleEnabled(config, config != null ? config.getCharacterSettings().isEnabled() : null),
+                                BuildFlags.ACHIEVEMENT_MODULE   && isModuleEnabled(config, config != null ? config.getAchievementSettings().isEnabled() : null),
+                                BuildFlags.TALENT_MODULE        && isModuleEnabled(config, config != null ? config.getTalentSettings().isEnabled() : null),
+                                BuildFlags.LEVELING_MODULE      && isModuleEnabled(config, config != null ? config.getLevelingSettings().isEnabled() : null),
+                                BuildFlags.ABILITY_MODULE       && isModuleEnabled(config, config != null ? config.getAbilitySettings().isEnabled() : null),
+                                BuildFlags.INVENTORY_MODULE     && isModuleEnabled(config, config != null ? config.getInventorySettings().isEnabled() : null),
+                                BuildFlags.PARTY_MODULE         && isModuleEnabled(config, config != null ? config.getPartySettings().isEnabled() : null),
+                                BuildFlags.GUILD_MODULE         && isModuleEnabled(config, config != null ? config.getGuildSettings().isEnabled() : null),
+                                BuildFlags.CHAT_MODULE          && isModuleEnabled(config, config != null ? config.isChatModuleEnabled() : null),
+                                BuildFlags.CAMERA_MODULE        && isModuleEnabled(config, config != null ? config.getCameraSettings().isEnabled() : null),
+                                BuildFlags.BANK_MODULE          && isModuleEnabled(config, config != null ? config.getBankSettings().isEnabled() : null),
+                                BuildFlags.CURRENCY_MODULE      && isModuleEnabled(config, config != null ? config.getCurrencySettings().isEnabled() : null),
+                                BuildFlags.AUCTION_HOUSE_MODULE && isModuleEnabled(config, config != null ? config.getAuctionHouseSettings().isEnabled() : null),
+                                BuildFlags.MAIL_MODULE          && isModuleEnabled(config, config != null ? config.getMailSettings().isEnabled() : null),
+                                BuildFlags.LOCKPICKING_MODULE   && isModuleEnabled(config, config != null ? config.getLockpickingSettings().isEnabled() : null));
         }
 
         private record ModuleFlags(

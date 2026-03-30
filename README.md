@@ -5,6 +5,16 @@ Realmweaver is a data-driven MMO/RPG framework mod for Hytale. It combines chara
 > **⚠️ Early access warning**  
 > Hytale is still evolving, and so is Realmweaver. Systems are already substantial, but some feature areas are still maturing or awaiting polish.
 
+# Alpha Disclaimer
+
+This mod is currently in alpha and will remain so until version 0.1.0 is released.
+
+A large portion of the core features are already implemented, but there are still additional systems planned and plenty of bugs to fix before reaching a full release. Progress is steady, and version 1.0 is closer than ever.
+
+If you encounter any bugs or have feature requests, please submit them. Feedback is greatly appreciated and helps shape the direction of the project.
+
+This has been a long-term passion project, with many hours invested even before launch. I’m excited to continue improving it and bringing it to its full potential.
+
 ## What Realmweaver is
 
 Realmweaver is not a single mechanic. It is a modular RPG stack built around Hytale's ECS architecture, JSON assets, and custom UI flow.
