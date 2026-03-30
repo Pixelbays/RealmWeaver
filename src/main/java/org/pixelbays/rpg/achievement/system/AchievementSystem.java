@@ -1,5 +1,6 @@
 package org.pixelbays.rpg.achievement.system;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -628,7 +629,7 @@ public final class AchievementSystem {
             world.execute(() -> {
                 SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource = store
                         .getResource(EntityModule.get().getPlayerSpatialResourceType());
-                ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
+                List<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
                 playerSpatialResource.getSpatialStructure().collect(transform.getPosition(), 75.0, nearbyPlayers);
                 for (Ref<EntityStore> playerRef : nearbyPlayers) {
                     if (!playerRef.isValid()) {
