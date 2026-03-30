@@ -60,6 +60,7 @@ public class HotbarInputHandler {
 
                 int targetSlot = chain.data.targetSlot;
                 int originalSlot = chain.activeHotbarSlot;
+                targetSlot = targetSlot + 1; // Convert to 0-indexed
 
                 // Check if target slot is an ability slot
                 if (isAbilitySlot(targetSlot, abilitySlots)) {
@@ -84,7 +85,6 @@ public class HotbarInputHandler {
         }
         return false;
     }
-
     /**
      * Trigger hotbar ability and fix client desync.
      */
@@ -104,13 +104,12 @@ public class HotbarInputHandler {
                 return;
             }
             // Fix client desync: force client back to original slot
-            playerComponent.getInventory().setActiveHotbarSlot((byte) originalSlot);
+            playerComponent.getInventory().setActiveHotbarSlot(entityRef, (byte) originalSlot, store);
             SetActiveSlot setActiveSlotPacket = new SetActiveSlot(
                 Inventory.HOTBAR_SECTION_ID,  // -1 indicates the hotbar
                 originalSlot
             );
             playerRef.getPacketHandler().write(setActiveSlotPacket);
-
             // Get ability binding for this slot
             AbilityBindingComponent bindingComp = store.getComponent(entityRef, AbilityBindingComponent.getComponentType());
             if (bindingComp == null) {

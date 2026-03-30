@@ -3,8 +3,8 @@ package org.pixelbays.rpg.global.input;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
-import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
@@ -24,12 +24,15 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
  * Handles native ability slot input (Ability1, Ability2, Ability3).
  * Uses Hytale's built-in ability interaction types (IDs 2, 3, 4).
  */
+@SuppressWarnings("null")
 public class AbilitySlotsInputHandler {
 
     private final ExamplePlugin plugin;
+    private final AbilityBindingService bindingService;
 
     public AbilitySlotsInputHandler(@Nonnull ExamplePlugin plugin) {
         this.plugin = plugin;
+        this.bindingService = new AbilityBindingService();
     }
 
     /**
@@ -94,27 +97,29 @@ public class AbilitySlotsInputHandler {
                         .param("slot", slotNumber));
                 return;
             }
+            String resolvedAbilityId = abilityId;
 
-            // Verify ability is unlocked
-            ClassAbilityComponent abilityComp = store.getComponent(entityRef,
-                    ExamplePlugin.get().getClassAbilityComponentType());
-            if (abilityComp == null || !abilityComp.hasAbility(abilityId)) {
+            // Verify ability is unlocked from either class or race progression.
+            if (!bindingService.isAbilityUnlocked(entityRef, store, resolvedAbilityId)) {
                 playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.notUnlocked")
-                        .param("abilityId", abilityId));
+                        .param("abilityId", resolvedAbilityId));
                 return;
             }
 
             // Resolve ability definition
-            ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
+            ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(resolvedAbilityId);
             if (abilityDef == null) {
                 playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.notFound")
-                        .param("abilityId", abilityId));
+                        .param("abilityId", resolvedAbilityId));
                 return;
             }
 
             // Execute ability
             ClassAbilitySystem abilitySystem = plugin.getClassAbilitySystem();
-            ClassAbilitySystem.TriggerResult result = abilitySystem.triggerAbility(entityRef, store, abilityId, abilityType);
+            if (abilitySystem == null) {
+                return;
+            }
+            ClassAbilitySystem.TriggerResult result = abilitySystem.triggerAbility(entityRef, store, resolvedAbilityId, abilityType);
             if (result.isFailure()) {
                 String errorMsg = result.getErrorMessage();
                 if (errorMsg != null && !errorMsg.isEmpty()) {
@@ -125,11 +130,11 @@ public class AbilitySlotsInputHandler {
             }
 
             // Debug logging
-                RpgLogging.debugDeveloper(
+            RpgLogging.debugDeveloper(
                     "Ability slot trigger: player=%s, slot=%d, ability=%s",
                     playerRef.getUsername(),
                     slotNumber,
-                    abilityId);
+                    resolvedAbilityId);
         });
     }
 }
