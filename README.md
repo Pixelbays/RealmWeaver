@@ -177,3 +177,13 @@ Start with these pages:
 Realmweaver is best described as a Hytale MMO/RPG framework that already ships with meaningful progression, social, and economy foundations. It is suited to creators who want to build a realm with identity, persistence, and room to grow.
 
 It can also be presented as the base framework for a family of themed asset packs, such as **Realmweaver: MMAnywhere** and **Realmweaver: Space Forged**.
+
+
+
+
+## AI Usage
+
+There is usage of AI in this project as a tool to enhance creativity and productivity, always with human review and testing, and limited to:
+
+    Code snippets.
+    Text content, descriptions, and documentation.
