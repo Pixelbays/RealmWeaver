@@ -35,7 +35,7 @@ Group #LayoutRoot {
   }
 
   Label {
-    Text: %rpg.character.recovery.title;
+    Text: %pixelbays.rpg.character.recovery.title;
     Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, HorizontalAlignment: Center);
     Anchor: (Height: 28, Top: 26, Left: 0, Right: 0);
   }
@@ -55,13 +55,13 @@ Group #LayoutRoot {
     OutlineSize: 1;
 
     Label {
-      Text: %rpg.character.recovery.listHeading;
+      Text: %pixelbays.rpg.character.recovery.listHeading;
       Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
       Anchor: (Bottom: 6);
     }
 
     Label {
-      Text: %rpg.character.recovery.listSubheading;
+      Text: %pixelbays.rpg.character.recovery.listSubheading;
       Style: (...$C.@DefaultLabelStyle, FontSize: 12);
       Anchor: (Bottom: 12);
     }
@@ -84,13 +84,13 @@ Group #LayoutRoot {
     OutlineSize: 1;
 
     Label {
-      Text: %rpg.character.recovery.detailsHeading;
+      Text: %pixelbays.rpg.character.recovery.detailsHeading;
       Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
       Anchor: (Bottom: 6);
     }
 
     Label {
-      Text: %rpg.character.recovery.detailsSubheading;
+      Text: %pixelbays.rpg.character.recovery.detailsSubheading;
       Style: (...$C.@DefaultLabelStyle, FontSize: 12);
       Anchor: (Bottom: 12);
     }
@@ -119,7 +119,7 @@ Group #LayoutRoot {
     OutlineSize: 1;
 
     Label {
-      Text: %rpg.character.recovery.summaryHeading;
+      Text: %pixelbays.rpg.character.recovery.summaryHeading;
       Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
       Anchor: (Bottom: 6);
     }
@@ -127,7 +127,26 @@ Group #LayoutRoot {
     Label #SummaryLabel {
       Text: "";
       Style: (...$C.@DefaultLabelStyle, FontSize: 12);
-      Anchor: (Height: 118);
+      Anchor: (Height: 72, Bottom: 10);
+    }
+
+    Group { FlexWeight: 1; }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Height: 44);
+
+      TextButton #BackButton {
+        Text: %pixelbays.rpg.character.recovery.backButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 180, Height: 44, Right: 8);
+      }
+
+      TextButton #RecoverButton {
+        Text: %pixelbays.rpg.character.recovery.recoverButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 220, Height: 44);
+      }
     }
   }
 
@@ -142,24 +161,6 @@ Group #LayoutRoot {
     }
   }
 
-  Group #BottomControls {
-    LayoutMode: Left;
-    Anchor: (Left: 500, Right: 56, Bottom: 52, Height: 44);
-
-    Group { FlexWeight: 1; }
-
-    TextButton #BackButton {
-      Text: %rpg.character.recovery.backButton;
-      Style: $C.@DefaultTextButtonStyle;
-      Anchor: (Width: 180, Height: 44, Right: 8);
-    }
-
-    TextButton #RecoverButton {
-      Text: %rpg.character.recovery.recoverButton;
-      Style: $C.@DefaultTextButtonStyle;
-      Anchor: (Width: 220, Height: 44);
-    }
-  }
 }
 
 $C.@BackButton {}
