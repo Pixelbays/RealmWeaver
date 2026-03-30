@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.character.config.CharacterProfileData;
 import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
 import org.pixelbays.rpg.economy.currency.CurrencyManager;
 import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
@@ -51,6 +52,17 @@ public class HardcoreHandler extends DeathSystems.OnDeathSystem {
 			@Nonnull CommandBuffer<EntityStore> commandBuffer) {
 		RpgModConfig config = resolveConfig();
 		if (config == null || !config.isHardcoreEnabled()) {
+			return;
+		}
+
+		PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+		if (playerRef == null) {
+			return;
+		}
+
+		CharacterProfileData activeProfile = ExamplePlugin.get().getCharacterManager()
+				.getLoadedActiveProfile(playerRef.getUuid(), playerRef.getUsername());
+		if (activeProfile == null || !activeProfile.isHardcore()) {
 			return;
 		}
 
