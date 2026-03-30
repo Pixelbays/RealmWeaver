@@ -21,6 +21,7 @@ import com.hypixel.hytale.event.EventRegistry;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
@@ -115,40 +116,7 @@ public class InventoryHandlingSystem implements Consumer<PlayerReadyEvent> {
             return;
         }
 
-        byte activeHotbarSlot = inventory.getActiveHotbarSlot();
-        byte activeUtilitySlot = inventory.getActiveUtilitySlot();
-        byte activeToolsSlot = inventory.getActiveToolsSlot();
-
-        Inventory newInventory = new Inventory(
-                newStorage,
-                inventory.getArmor(),
-                inventory.getHotbar(),
-                inventory.getUtility(),
-                inventory.getTools(),
-                inventory.getBackpack());
-
-        player.setInventory(newInventory, false);
-
-        if (activeHotbarSlot >= 0 && activeHotbarSlot < newInventory.getHotbar().getCapacity()) {
-            newInventory.setActiveHotbarSlot(activeHotbarSlot);
-        }
-
-        if (activeUtilitySlot >= 0 && activeUtilitySlot < newInventory.getUtility().getCapacity()) {
-            newInventory.setActiveUtilitySlot(activeUtilitySlot);
-        }
-
-        if (activeToolsSlot >= 0 && activeToolsSlot < newInventory.getTools().getCapacity()) {
-            newInventory.setActiveToolsSlot(activeToolsSlot);
-        }
-
-        if (!remainder.isEmpty()) {
-            newInventory.getCombinedHotbarFirst().addItemStacks(remainder);
-        }
-
-        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
-        if (playerRef != null) {
-            playerRef.getPacketHandler().writeNoCache(newInventory.toPacket());
-        }
+        store.putComponent(ref, InventoryComponent.Storage.getComponentType(), new InventoryComponent.Storage(newStorage));
 
         RpgLogging.debugDeveloper(
                 "[Inventory] Applied size=%s (base=%s bonus=%s mode=%s) extraSlots=rings:%s trinkets:%s neck:%s player=%s",

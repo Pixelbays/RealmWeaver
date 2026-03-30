@@ -161,7 +161,7 @@ public class RpgInventoryPage extends CustomUIPage {
         }
 
         if ("Hotbar".equals(grid)) {
-            player.getInventory().setActiveSlot(Inventory.HOTBAR_SECTION_ID, (byte) slotIndex);
+            player.getInventory().setActiveSlot(ref, Inventory.HOTBAR_SECTION_ID, (byte) slotIndex, store);
         }
 
         if (mouseButton == null || mouseButton != 1) {
