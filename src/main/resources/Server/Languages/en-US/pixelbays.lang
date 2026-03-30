@@ -198,6 +198,7 @@ rpg.character.error.raceRequired = Race is required.
 rpg.character.error.recoveryDisabled = Soft-delete recovery is disabled.
 rpg.character.error.recoveryExpired = Recovery window has expired.
 rpg.character.error.recoveryLimitReached = You have reached the character recovery limit for the current window.
+rpg.character.error.slotUnlockTokenRequired = You need a {token} token to unlock another character slot.
 rpg.character.error.systemDisabled = Character system is disabled.
 rpg.character.error.unknownClass = Unknown starter class.
 rpg.character.error.unknownRace = Unknown race.
@@ -208,6 +209,7 @@ rpg.character.success.loggedOutToSelect = Logged out to character select.
 rpg.character.success.logoutTimerStarted = Logout timer started.
 rpg.character.success.markedForRecovery = Character marked for recovery.
 rpg.character.success.recovered = Character recovered.
+rpg.character.success.createdUnlockedSlot = Character created and a new slot was unlocked.
 rpg.character.success.selected = Character selected.
 
 rpg.character.token.error.disabledType = Token type is disabled: {token}

@@ -1,0 +1,9 @@
+{
+  "Enabled": true,
+  "DisplayName": "Character Slot Token",
+  "Description": "Automatically consumed when a new character needs to unlock an extra slot.",
+  "SortOrder": 100,
+  "VisibleInCharacterSelect": true,
+  "StartingBalance": 0,
+  "MaxBalance": 50
+}
