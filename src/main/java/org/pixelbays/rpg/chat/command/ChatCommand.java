@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public final class ChatCommand extends AbstractPlayerCommand {
@@ -24,6 +25,7 @@ public final class ChatCommand extends AbstractPlayerCommand {
 
     public ChatCommand() {
         super("chat", "Set your active chat channel");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.channelArg = null;
         this.addUsageVariant(new ChatCommand("Set your active chat channel"));
     }

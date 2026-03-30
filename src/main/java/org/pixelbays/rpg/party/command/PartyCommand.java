@@ -33,4 +33,9 @@ public class PartyCommand extends AbstractCommandCollection {
         this.addSubCommand(new PartyUiCommand());
         this.addSubCommand(new PartyFinderCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

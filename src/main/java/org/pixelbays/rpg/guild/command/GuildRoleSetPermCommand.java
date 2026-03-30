@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class GuildRoleSetPermCommand extends AbstractPlayerCommand {
@@ -28,6 +29,7 @@ public class GuildRoleSetPermCommand extends AbstractPlayerCommand {
 
     public GuildRoleSetPermCommand() {
         super("setperm", "Set a role permission");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.roleArg = this.withRequiredArg("role", "Role id", ArgTypes.STRING);
         this.permArg = this.withRequiredArg("permission", "Permission", ArgTypes.STRING);
         this.enabledArg = this.withRequiredArg("enabled", "true|false", ArgTypes.STRING);

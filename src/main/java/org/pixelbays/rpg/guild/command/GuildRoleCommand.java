@@ -19,4 +19,9 @@ public class GuildRoleCommand extends AbstractCommandCollection {
         this.addSubCommand(new GuildRoleAssignCommand());
         this.addSubCommand(new GuildRoleListCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

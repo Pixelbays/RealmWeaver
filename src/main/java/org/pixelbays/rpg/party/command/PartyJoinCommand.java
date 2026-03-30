@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class PartyJoinCommand extends AbstractPlayerCommand {
@@ -25,6 +26,7 @@ public class PartyJoinCommand extends AbstractPlayerCommand {
 
     public PartyJoinCommand() {
         super("join", "Join a party you were invited to");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.playerArg = this.withRequiredArg("player", "Party leader or member", ArgTypes.STRING);
         this.partyManager = ExamplePlugin.get().getPartyManager();
     }

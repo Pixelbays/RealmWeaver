@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class GuildCreateCommand extends AbstractPlayerCommand {
@@ -26,6 +27,7 @@ public class GuildCreateCommand extends AbstractPlayerCommand {
 
     public GuildCreateCommand() {
         super("create", "Create a new guild");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.nameArg = this.withRequiredArg("name", "Guild name", ArgTypes.STRING);
         this.tagArg = this.withRequiredArg("tag", "Guild tag", ArgTypes.STRING);
         this.guildManager = ExamplePlugin.get().getGuildManager();

@@ -19,6 +19,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -32,6 +33,7 @@ public class ClassLevelUpCommand extends AbstractPlayerCommand {
 
     public ClassLevelUpCommand() {
         super("levelup", "Grant exactly enough XP to reach the next level");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
         this.classNameArg = this.withRequiredArg("className", "The class to level up", ArgTypes.STRING);

@@ -22,4 +22,9 @@ public class ClassTalentCommand extends AbstractCommandCollection {
         this.addSubCommand(new ClassTalentRefundCommand());
         this.addSubCommand(new ClassTalentResetCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

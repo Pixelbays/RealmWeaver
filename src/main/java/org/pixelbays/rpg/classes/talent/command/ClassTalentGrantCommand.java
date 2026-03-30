@@ -18,6 +18,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -33,6 +34,7 @@ public class ClassTalentGrantCommand extends AbstractPlayerCommand {
 
     public ClassTalentGrantCommand() {
         super("grant", "Debug: grant talent points to a class");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
         this.classIdArg = this.withRequiredArg("classId", "The class id to grant points to", ArgTypes.STRING);

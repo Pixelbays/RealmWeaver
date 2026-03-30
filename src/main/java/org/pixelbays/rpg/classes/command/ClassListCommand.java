@@ -18,6 +18,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -31,6 +32,7 @@ public class ClassListCommand extends AbstractPlayerCommand {
 
     public ClassListCommand() {
         super("list", "List all available classes");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.expansionManager = ExamplePlugin.get().getExpansionManager();
     }

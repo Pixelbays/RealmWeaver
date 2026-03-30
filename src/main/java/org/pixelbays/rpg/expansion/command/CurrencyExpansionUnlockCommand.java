@@ -18,6 +18,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class CurrencyExpansionUnlockCommand extends AbstractPlayerCommand {
@@ -27,6 +28,7 @@ public class CurrencyExpansionUnlockCommand extends AbstractPlayerCommand {
 
     public CurrencyExpansionUnlockCommand() {
         super("unlock", "Unlock an expansion with currency");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.expansionIdArg = this.withRequiredArg("expansionId", "Expansion id", ArgTypes.STRING);
         this.expansionManager = ExamplePlugin.get().getExpansionManager();
     }

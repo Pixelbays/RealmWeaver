@@ -15,4 +15,9 @@ public class RaceCommand extends AbstractCommandCollection {
         this.addSubCommand(new RaceListCommand());
         this.addSubCommand(new RaceSelectCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

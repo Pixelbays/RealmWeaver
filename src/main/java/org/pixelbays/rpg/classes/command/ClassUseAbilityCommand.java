@@ -23,6 +23,7 @@ import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -35,6 +36,7 @@ public class ClassUseAbilityCommand extends AbstractPlayerCommand {
 
     public ClassUseAbilityCommand() {
         super("useability", "Trigger an ability interaction for testing");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
         this.abilityIdArg = this.withRequiredArg("abilityId", "Ability id to trigger", ArgTypes.STRING);
     }

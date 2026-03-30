@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class CurrencyNormalizeCommand extends AbstractPlayerCommand {
@@ -25,6 +26,7 @@ public class CurrencyNormalizeCommand extends AbstractPlayerCommand {
 
     public CurrencyNormalizeCommand() {
         super("normalize", "Normalize convertible currencies for a scope");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.scopeArg = this.withRequiredArg("scope", "character|account|guild", ArgTypes.STRING);
         this.currencyManager = ExamplePlugin.get().getCurrencyManager();
     }

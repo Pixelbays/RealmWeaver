@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -34,6 +35,7 @@ public class LevelTestCommand extends AbstractPlayerCommand {
 
     public LevelTestCommand() {
         super("leveltest", "Run a quick test of one or all level systems");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();
         this.targetArg = null;
         this.addUsageVariant(new LevelTestCommand("Run a quick test of one or all level systems"));

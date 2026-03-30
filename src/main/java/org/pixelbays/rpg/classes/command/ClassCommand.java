@@ -52,4 +52,9 @@ public class ClassCommand extends AbstractCommandCollection {
             this.addSubCommand(new ClassTalentCommand());
         }
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

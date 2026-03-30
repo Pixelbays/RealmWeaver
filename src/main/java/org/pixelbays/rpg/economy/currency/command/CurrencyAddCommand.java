@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class CurrencyAddCommand extends AbstractPlayerCommand {
@@ -28,6 +29,7 @@ public class CurrencyAddCommand extends AbstractPlayerCommand {
 
     public CurrencyAddCommand() {
         super("add", "Add currency to yourself");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.scopeArg = this.withRequiredArg("scope", "character|account|guild", ArgTypes.STRING);
         this.currencyIdArg = this.withRequiredArg("currencyId", "Currency id", ArgTypes.STRING);
         this.amountArg = this.withRequiredArg("amount", "Amount", ArgTypes.INTEGER);

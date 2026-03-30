@@ -30,6 +30,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -45,6 +46,7 @@ public class ClassDebugCommand extends AbstractPlayerCommand {
 
     public ClassDebugCommand() {
         super("debug", "Dump class data to chat and console");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.classSystem = ExamplePlugin.get().getClassManagementSystem();
         this.abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
         this.levelSystem = ExamplePlugin.get().getLevelProgressionSystem();

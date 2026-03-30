@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class GuildJoinPolicyCommand extends AbstractPlayerCommand {
@@ -26,6 +27,7 @@ public class GuildJoinPolicyCommand extends AbstractPlayerCommand {
 
     public GuildJoinPolicyCommand() {
         super("joinpolicy", "Set guild join policy");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.policyArg = this.withRequiredArg("policy", "invite|open|application", ArgTypes.STRING);
         this.guildManager = ExamplePlugin.get().getGuildManager();
     }

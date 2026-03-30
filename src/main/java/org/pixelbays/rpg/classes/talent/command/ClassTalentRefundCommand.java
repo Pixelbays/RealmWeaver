@@ -15,6 +15,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -32,6 +33,7 @@ public class ClassTalentRefundCommand extends AbstractPlayerCommand {
 
     public ClassTalentRefundCommand() {
         super("refund", "Refund one rank from a talent node");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.talentSystem = ExamplePlugin.get().getTalentSystem();
         this.classIdArg = this.withRequiredArg("classId", "The class whose talent to refund", ArgTypes.STRING);
         this.treeIdArg = this.withRequiredArg("treeId", "The talent tree ID", ArgTypes.STRING);

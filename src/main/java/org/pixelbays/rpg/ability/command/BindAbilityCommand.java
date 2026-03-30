@@ -5,9 +5,9 @@ import java.util.Arrays;
 import javax.annotation.Nonnull;
 
 import org.pixelbays.plugin.ExamplePlugin;
+import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
-import org.pixelbays.rpg.ability.system.ClassAbilitySystem;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 
 import com.hypixel.hytale.component.Ref;
@@ -20,6 +20,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -31,11 +32,14 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 @SuppressWarnings("null")
 public class BindAbilityCommand extends AbstractPlayerCommand {
 
+    private final AbilityBindingService bindingService;
      private final RequiredArg<String> slotArg;
      private final RequiredArg<String> abilityIdArg;
 
     public BindAbilityCommand() {
         super("bindability", "Bind an ability to a hotbar slot");
+        requirePermission(HytalePermissions.fromCommand("player"));
+       this.bindingService = new AbilityBindingService();
         this.slotArg = this.withRequiredArg("slot", "Hotbar slot (1-9) or 'list'", ArgTypes.STRING);
         this.abilityIdArg = null;
         this.addUsageVariant(new BindAbilityCommand("Bind an ability to a hotbar slot"));
@@ -43,6 +47,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
 
     private BindAbilityCommand(String description) {
         super(description);
+        this.bindingService = new AbilityBindingService();
         this.slotArg = this.withRequiredArg("slot", "Hotbar slot (1-9)", ArgTypes.STRING);
         this.abilityIdArg = this.withRequiredArg("abilityId", "Ability ID or 'clear'", ArgTypes.STRING);
     }
@@ -101,7 +106,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         int[] abilitySlots = config.getHotbarAbilitySlots();
         boolean isValidSlot = false;
         for (int abilitySlot : abilitySlots) {
-            if (internalSlot == (abilitySlot - 1)) {
+            if (internalSlot == (abilitySlot)) {
                 isValidSlot = true;
                 break;
             }
@@ -141,10 +146,16 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         }
 
         // Check if player has learned this ability
-        ClassAbilitySystem abilitySystem = ExamplePlugin.get().getClassAbilitySystem();
-        if (!abilitySystem.isAbilityUnlocked(ref, store, abilityId)) {
+        String abilityName = AbilityBindingService.resolveDisplayText(abilityDef.getDisplayName(), abilityId);
+        if (!bindingService.isAbilityUnlocked(ref, store, abilityId)) {
             player.sendMessage(Message.translation("pixelbays.rpg.ability.bind.notLearned")
-                    .param("ability", abilityDef.getDisplayName()));
+                .param("ability", abilityName));
+            return;
+        }
+
+        if (abilityDef.getAbilityType() == ClassAbilityDefinition.AbilityType.Passive) {
+            player.sendMessage(Message.translation("pixelbays.rpg.ability.bind.passive")
+                    .param("ability", abilityName));
             return;
         }
 
@@ -155,7 +166,7 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
         ExamplePlugin.get().getHotbarIconManager().updateHotbarSlot(ref, store, internalSlot, abilityId);
         
         player.sendMessage(Message.translation("pixelbays.rpg.ability.bind.bound")
-            .param("ability", abilityDef.getDisplayName())
+            .param("ability", abilityName)
             .param("slot", slot));
     }
 
@@ -177,7 +188,9 @@ public class BindAbilityCommand extends AbstractPlayerCommand {
                     String abilityId = entry.getValue();
 
                     ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
-                    String abilityName = abilityDef != null ? abilityDef.getDisplayName() : abilityId;
+                        String abilityName = abilityDef != null
+                            ? AbilityBindingService.resolveDisplayText(abilityDef.getDisplayName(), abilityId)
+                            : abilityId;
 
                     // Display as 1-indexed for user (internal is 0-indexed)
                     int displaySlot = internalSlot + 1;

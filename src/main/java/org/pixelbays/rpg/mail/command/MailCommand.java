@@ -8,4 +8,9 @@ public class MailCommand extends AbstractCommandCollection {
         super("mail", "Manage your mail");
         this.addSubCommand(new org.pixelbays.rpg.mail.command.MailUiCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

@@ -16,4 +16,9 @@ public class CurrencyCommand extends AbstractCommandCollection {
         this.addSubCommand(new CurrencySetCommand());
         this.addSubCommand(new CurrencyExpansionCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

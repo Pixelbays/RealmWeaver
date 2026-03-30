@@ -9,4 +9,9 @@ public class CurrencyExpansionCommand extends AbstractCommandCollection {
         this.addSubCommand(new CurrencyExpansionListCommand());
         this.addSubCommand(new CurrencyExpansionUnlockCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

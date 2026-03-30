@@ -9,4 +9,9 @@ public class BankCommand extends AbstractCommandCollection {
         this.addSubCommand(new BankInfoCommand());
         this.addSubCommand(new BankUiCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

@@ -18,6 +18,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 /**
@@ -33,6 +34,7 @@ public class RaceSelectCommand extends AbstractPlayerCommand {
 
     public RaceSelectCommand() {
         super("select", "Select a race");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.raceManagementSystem = ExamplePlugin.get().getRaceManagementSystem();
         this.raceSystem = ExamplePlugin.get().getRaceSystem();
         this.expansionManager = ExamplePlugin.get().getExpansionManager();

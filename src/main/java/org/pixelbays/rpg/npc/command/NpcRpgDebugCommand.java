@@ -17,6 +17,7 @@ import com.hypixel.hytale.server.core.command.system.arguments.system.RequiredAr
 import com.hypixel.hytale.server.core.command.system.arguments.types.ArgTypes;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractCommandCollection;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -29,6 +30,7 @@ public class NpcRpgDebugCommand extends AbstractCommandCollection {
 
     public NpcRpgDebugCommand() {
         super("npcdebugrpg", "Toggle RPG debug overlay for NPC roles");
+        requirePermission(HytalePermissions.fromCommand("admin"));
         this.addSubCommand(new EnableCommand(true));
         this.addSubCommand(new EnableCommand(false));
     }

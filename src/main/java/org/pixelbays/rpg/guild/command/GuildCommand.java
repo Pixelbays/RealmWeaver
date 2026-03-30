@@ -38,4 +38,9 @@ public class GuildCommand extends AbstractCommandCollection {
         this.addSubCommand(new GuildInfoCommand());
         this.addSubCommand(new GuildUiCommand());
     }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
+    }
 }

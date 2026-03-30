@@ -16,6 +16,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class PartyKickCommand extends AbstractPlayerCommand {
@@ -25,6 +26,7 @@ public class PartyKickCommand extends AbstractPlayerCommand {
 
     public PartyKickCommand() {
         super("kick", "Kick a member from your party");
+        requirePermission(HytalePermissions.fromCommand("player"));
         this.playerArg = this.withRequiredArg("player", "Player name", ArgTypes.STRING);
         this.partyManager = ExamplePlugin.get().getPartyManager();
     }
