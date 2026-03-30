@@ -60,7 +60,7 @@ public class HotbarAbilityIconManager {
                 // Ability is bound to this slot - create virtual item
                 ItemStack abilityIcon = createAbilityIcon(abilityId);
                 if (abilityIcon != null) {
-                    hotbar.setItemStackForSlot((short) slot, abilityIcon);
+                    // hotbar.setItemStackForSlot((short) slot, abilityIcon);
                 }
             }
             // Note: We don't clear unbound slots automatically to avoid deleting player's items

@@ -472,7 +472,7 @@ public class ClassAbilitySystem {
             @Nonnull SpawnModelParticles packet) {
         SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource =
                 store.getResource(EntityModule.get().getPlayerSpatialResourceType());
-        ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
+        List<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
         playerSpatialResource.getSpatialStructure().collect(transform.getPosition(), 96.0, nearbyPlayers);
 
         for (Ref<EntityStore> playerRef : nearbyPlayers) {
