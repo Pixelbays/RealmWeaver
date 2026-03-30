@@ -28,5 +28,6 @@
     "cosmeticMerge": "WhiteList_Union",
     "weightA": 0.5,
     "weightB": 0.5
-  }
+  },
+  "Enabled": true
 }

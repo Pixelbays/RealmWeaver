@@ -3,8 +3,8 @@
     "FluxHunter"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.killshot.name",
-    "Description": "pixelbays.rpg.abilities.killshot.description"
+    "Name": "starforged.rpg.abilities.killshot.name",
+    "Description": "starforged.rpg.abilities.killshot.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

@@ -5,8 +5,8 @@
     "Passive"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.race_slipstream.name",
-    "Description": "pixelbays.rpg.abilities.race_slipstream.description"
+    "Name": "starforged.rpg.abilities.race_slipstream.name",
+    "Description": "starforged.rpg.abilities.race_slipstream.description"
   },
   "AbilityType": "Passive",
   "GlobalCooldown": 0.0,

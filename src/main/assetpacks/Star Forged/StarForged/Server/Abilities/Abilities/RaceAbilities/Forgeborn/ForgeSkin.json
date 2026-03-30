@@ -5,8 +5,8 @@
     "Passive"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.race_forgeskin.name",
-    "Description": "pixelbays.rpg.abilities.race_forgeskin.description"
+    "Name": "starforged.rpg.abilities.race_forgeskin.name",
+    "Description": "starforged.rpg.abilities.race_forgeskin.description"
   },
   "AbilityType": "Passive",
   "GlobalCooldown": 0.0,

@@ -1,0 +1,165 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {}
+
+Group #LayoutRoot {
+  Anchor: (Full: 0);
+
+  Group #BrandPanel {
+    LayoutMode: Left;
+    Anchor: (Width: 340, Height: 56, Left: 56, Top: 20);
+    Padding: (Full: 10);
+    Background: PatchStyle(Color: #132033(0.94));
+    OutlineColor: #4f7097ff;
+    OutlineSize: 1;
+
+    Group {
+      Anchor: (Width: 52, Height: 36, Right: 10);
+      Background: PatchStyle(Color: #29476c);
+      OutlineColor: #87a7c8ff;
+      OutlineSize: 1;
+      LayoutMode: CenterMiddle;
+
+      Label {
+        Text: %pixelbays.rpg.character.ui.brandLogo;
+        Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Anchor: (Full: 0);
+      }
+    }
+
+    Label #BrandTitleLabel {
+      Text: %pixelbays.rpg.character.ui.brandTitle;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true, VerticalAlignment: Center);
+      FlexWeight: 1;
+    }
+  }
+
+  Label {
+    Text: %rpg.character.recovery.title;
+    Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, HorizontalAlignment: Center);
+    Anchor: (Height: 28, Top: 26, Left: 0, Right: 0);
+  }
+
+  Label #StatusLabel {
+    Text: "";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, HorizontalAlignment: Center, TextColor: #ff6666);
+    Anchor: (Height: 22, Top: 54, Left: 0, Right: 0);
+  }
+
+  Group #DeletedPanel {
+    LayoutMode: Top;
+    Anchor: (Width: 420, Height: 800, Left: 56, Top: 88);
+    Padding: (Full: 12);
+    Background: PatchStyle(Color: #132033(0.94));
+    OutlineColor: #4f7097ff;
+    OutlineSize: 1;
+
+    Label {
+      Text: %rpg.character.recovery.listHeading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+      Anchor: (Bottom: 6);
+    }
+
+    Label {
+      Text: %rpg.character.recovery.listSubheading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Bottom: 12);
+    }
+
+    Group #DeletedList {
+      LayoutMode: TopScrolling;
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+      Anchor: (Bottom: 10);
+      FlexWeight: 1;
+      Padding: (Right: 4);
+    }
+  }
+
+  Group #DetailsPanel {
+    LayoutMode: Top;
+    Anchor: (Width: 420, Height: 420, Right: 56, Top: 88);
+    Padding: (Full: 12);
+    Background: PatchStyle(Color: #132033(0.94));
+    OutlineColor: #4f7097ff;
+    OutlineSize: 1;
+
+    Label {
+      Text: %rpg.character.recovery.detailsHeading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+      Anchor: (Bottom: 6);
+    }
+
+    Label {
+      Text: %rpg.character.recovery.detailsSubheading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Bottom: 12);
+    }
+
+    Label #DetailsLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Height: 280);
+    }
+
+    Group { FlexWeight: 1; }
+
+    $C.@TextField #CharacterIdField {
+      @Anchor = (Height: 1);
+      Visible: false;
+      PlaceholderText: %pixelbays.rpg.character.ui.characterIdPlaceholder;
+    }
+  }
+
+  Group #SummaryPanel {
+    LayoutMode: Top;
+    Anchor: (Width: 420, Height: 188, Right: 56, Bottom: 52);
+    Padding: (Full: 12);
+    Background: PatchStyle(Color: #132033(0.94));
+    OutlineColor: #4f7097ff;
+    OutlineSize: 1;
+
+    Label {
+      Text: %rpg.character.recovery.summaryHeading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+      Anchor: (Bottom: 6);
+    }
+
+    Label #SummaryLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Height: 118);
+    }
+  }
+
+  Group #BottomLeftControls {
+    LayoutMode: Left;
+    Anchor: (Left: 56, Bottom: 52, Height: 44);
+
+    TextButton #LeaveServerButton {
+      Text: %pixelbays.rpg.character.ui.leaveServerButton;
+      Style: $C.@DefaultTextButtonStyle;
+      Anchor: (Width: 180, Height: 44);
+    }
+  }
+
+  Group #BottomControls {
+    LayoutMode: Left;
+    Anchor: (Left: 500, Right: 56, Bottom: 52, Height: 44);
+
+    Group { FlexWeight: 1; }
+
+    TextButton #BackButton {
+      Text: %rpg.character.recovery.backButton;
+      Style: $C.@DefaultTextButtonStyle;
+      Anchor: (Width: 180, Height: 44, Right: 8);
+    }
+
+    TextButton #RecoverButton {
+      Text: %rpg.character.recovery.recoverButton;
+      Style: $C.@DefaultTextButtonStyle;
+      Anchor: (Width: 220, Height: 44);
+    }
+  }
+}
+
+$C.@BackButton {}

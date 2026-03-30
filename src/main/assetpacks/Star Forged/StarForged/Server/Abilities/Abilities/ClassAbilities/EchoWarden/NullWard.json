@@ -3,8 +3,8 @@
     "EchoWarden"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.null_ward.name",
-    "Description": "pixelbays.rpg.abilities.null_ward.description"
+    "Name": "starforged.rpg.abilities.null_ward.name",
+    "Description": "starforged.rpg.abilities.null_ward.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

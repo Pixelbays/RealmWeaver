@@ -5,8 +5,8 @@
     "Passive"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.race_echosense.name",
-    "Description": "pixelbays.rpg.abilities.race_echosense.description"
+    "Name": "starforged.rpg.abilities.race_echosense.name",
+    "Description": "starforged.rpg.abilities.race_echosense.description"
   },
   "AbilityType": "Passive",
   "GlobalCooldown": 0.0,

@@ -3,8 +3,8 @@
     "EchoWarden"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.disruption_wave.name",
-    "Description": "pixelbays.rpg.abilities.disruption_wave.description"
+    "Name": "starforged.rpg.abilities.disruption_wave.name",
+    "Description": "starforged.rpg.abilities.disruption_wave.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

@@ -33,11 +33,11 @@
   "abilityIds": [
     "ForgeSkin"
   ],
-  "allowedCosmeticCategories": [
-  ],
+  "allowedCosmeticCategories": [],
   "allowedCosmeticIds": [],
   "notAllowedCosmeticCategories": [],
   "notAllowedCosmeticIds": [],
-  "inheritanceRules": {
-  }
+  "inheritanceRules": {},
+  "Visible": true,
+  "Enabled": true
 }

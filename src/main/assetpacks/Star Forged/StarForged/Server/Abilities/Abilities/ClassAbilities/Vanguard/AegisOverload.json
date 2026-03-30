@@ -3,8 +3,8 @@
     "Vanguard"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.aegis_overload.name",
-    "Description": "pixelbays.rpg.abilities.aegis_overload.description"
+    "Name": "starforged.rpg.abilities.aegis_overload.name",
+    "Description": "starforged.rpg.abilities.aegis_overload.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

@@ -4,8 +4,8 @@
     "Mobility"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.star_charge.name",
-    "Description": "pixelbays.rpg.abilities.star_charge.description"
+    "Name": "starforged.rpg.abilities.star_charge.name",
+    "Description": "starforged.rpg.abilities.star_charge.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

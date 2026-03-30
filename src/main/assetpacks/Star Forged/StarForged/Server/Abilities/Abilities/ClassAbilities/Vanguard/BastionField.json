@@ -3,8 +3,8 @@
     "Vanguard"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.bastion_field.name",
-    "Description": "pixelbays.rpg.abilities.bastion_field.description"
+    "Name": "starforged.rpg.abilities.bastion_field.name",
+    "Description": "starforged.rpg.abilities.bastion_field.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

@@ -1,0 +1,180 @@
+$C = "../Common.ui";
+
+@SpellbookTabSlot = TextButton {
+  Text: "";
+  Style: $C.@DefaultTextButtonStyle;
+  Anchor: (Width: 0, Height: 0, Right: 0);
+};
+
+@SpellbookAbilityRow = TextButton {
+  Text: "";
+  Style: $C.@DefaultTextButtonStyle;
+  Anchor: (Height: 0, Bottom: 0);
+};
+
+@SpellbookBindButton = TextButton {
+  Text: "";
+  Style: $C.@DefaultTextButtonStyle;
+  Anchor: (Height: 0, Bottom: 0);
+};
+
+$C.@PageOverlay {}
+
+$C.@DecoratedContainer {
+  Anchor: (Width: 1280, Height: 720);
+
+  #Title {
+    Group {
+      $C.@Title {
+        @Text = %pixelbays.rpg.spellbook.ui.title;
+      }
+    }
+  }
+
+  #Content {
+    LayoutMode: Top;
+    Padding: (Full: 12);
+
+    Label #ModeLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true);
+      Anchor: (Bottom: 8);
+    }
+
+    Label #StatusLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Bottom: 12);
+    }
+
+    Group #TabRow {
+      LayoutMode: Left;
+      Anchor: (Height: 38, Bottom: 12);
+
+      @SpellbookTabSlot #Tab0 {}
+      @SpellbookTabSlot #Tab1 {}
+      @SpellbookTabSlot #Tab2 {}
+      @SpellbookTabSlot #Tab3 {}
+      @SpellbookTabSlot #Tab4 {}
+      @SpellbookTabSlot #Tab5 {}
+      @SpellbookTabSlot #Tab6 {}
+      @SpellbookTabSlot #Tab7 {}
+    }
+
+    Group #MainRow {
+      LayoutMode: Left;
+      FlexWeight: 1;
+
+      Group #AbilityPanel {
+        Anchor: (Width: 460, Right: 12);
+        LayoutMode: Top;
+
+        Label {
+          Text: %pixelbays.rpg.spellbook.ui.abilitiesHeading;
+          Style: (...$C.@DefaultLabelStyle, RenderBold: true, FontSize: 13);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #AbilityScroll {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Padding: (Right: 6);
+          Background: #08101a(0.25);
+
+          @SpellbookAbilityRow #AbilityRow0 {}
+          @SpellbookAbilityRow #AbilityRow1 {}
+          @SpellbookAbilityRow #AbilityRow2 {}
+          @SpellbookAbilityRow #AbilityRow3 {}
+          @SpellbookAbilityRow #AbilityRow4 {}
+          @SpellbookAbilityRow #AbilityRow5 {}
+          @SpellbookAbilityRow #AbilityRow6 {}
+          @SpellbookAbilityRow #AbilityRow7 {}
+          @SpellbookAbilityRow #AbilityRow8 {}
+          @SpellbookAbilityRow #AbilityRow9 {}
+          @SpellbookAbilityRow #AbilityRow10 {}
+          @SpellbookAbilityRow #AbilityRow11 {}
+          @SpellbookAbilityRow #AbilityRow12 {}
+          @SpellbookAbilityRow #AbilityRow13 {}
+          @SpellbookAbilityRow #AbilityRow14 {}
+          @SpellbookAbilityRow #AbilityRow15 {}
+          @SpellbookAbilityRow #AbilityRow16 {}
+          @SpellbookAbilityRow #AbilityRow17 {}
+          @SpellbookAbilityRow #AbilityRow18 {}
+          @SpellbookAbilityRow #AbilityRow19 {}
+          @SpellbookAbilityRow #AbilityRow20 {}
+          @SpellbookAbilityRow #AbilityRow21 {}
+          @SpellbookAbilityRow #AbilityRow22 {}
+          @SpellbookAbilityRow #AbilityRow23 {}
+          @SpellbookAbilityRow #AbilityRow24 {}
+          @SpellbookAbilityRow #AbilityRow25 {}
+          @SpellbookAbilityRow #AbilityRow26 {}
+          @SpellbookAbilityRow #AbilityRow27 {}
+          @SpellbookAbilityRow #AbilityRow28 {}
+          @SpellbookAbilityRow #AbilityRow29 {}
+        }
+      }
+
+      Group #DetailPanel {
+        FlexWeight: 1;
+        LayoutMode: Top;
+
+        Label #SelectedAbilityName {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, RenderBold: true, FontSize: 16);
+          Anchor: (Bottom: 6);
+        }
+
+        Label #SelectedAbilitySource {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 4);
+        }
+
+        Label #SelectedAbilityType {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 10);
+        }
+
+        Label #SelectedAbilityDescription {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12, Wrap: true);
+          Anchor: (Height: 130, Bottom: 10);
+        }
+
+        Label #CurrentBindingsLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12, Wrap: true);
+          Anchor: (Bottom: 12);
+        }
+
+        Label {
+          Text: %pixelbays.rpg.spellbook.ui.bindTargetsHeading;
+          Style: (...$C.@DefaultLabelStyle, RenderBold: true, FontSize: 13);
+          Anchor: (Bottom: 6);
+        }
+
+        Group #BindTargetList {
+          FlexWeight: 1;
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Padding: (Right: 6);
+          Background: #08101a(0.18);
+
+          @SpellbookBindButton #BindButton0 {}
+          @SpellbookBindButton #BindButton1 {}
+          @SpellbookBindButton #BindButton2 {}
+          @SpellbookBindButton #BindButton3 {}
+          @SpellbookBindButton #BindButton4 {}
+          @SpellbookBindButton #BindButton5 {}
+          @SpellbookBindButton #BindButton6 {}
+          @SpellbookBindButton #BindButton7 {}
+          @SpellbookBindButton #BindButton8 {}
+        }
+      }
+    }
+  }
+}
+
+$C.@BackButton {}

@@ -10,6 +10,9 @@
     "Website": "",
     "Expansions": []
   },
+  "UiInputSettings": {
+    "Enabled": true
+  },
   "StatSettings": {
     "AdvantageRollModifiers": {}
   },
@@ -40,10 +43,10 @@
   },
   "CharacterSettings": {
     "Enabled": true,
-    "MaxCharacterSlots": 6,
+    "MaxCharacterSlots": 12,
     "AllowCharacterCreation": true,
-    "AllowCharacterDeletion": true,
-    "AllowLogoutToCharacterSelect": false,
+    "AllowCharacterDeletion": false,
+    "AllowLogoutToCharacterSelect": true,
     "DeletionMode": "SoftDeleteRecovery",
     "SoftDeleteRecoveryDays": 14,
     "DeletedCharacterRetentionHours": 336,
@@ -58,8 +61,8 @@
     "MinCharacterNameLength": 3,
     "MaxCharacterNameLength": 24,
     "ReservedCharacterNames": [],
-    "RequireRaceOnCreation": false,
-    "RequireStarterClassOnCreation": false,
+    "RequireRaceOnCreation": true,
+    "RequireStarterClassOnCreation": true,
     "UseLobbyInstance": true,
     "LobbyInstanceTemplateId": "Default_Void",
     "DefaultLobbySpawnPointId": "default",
@@ -110,7 +113,8 @@
       7,
       8,
       9
-    ]
+    ],
+    "AbilityControlType": "Hotbar"
   },
   "InventorySettings": {
     "Enabled": false,
@@ -228,7 +232,7 @@
   },
   "WorldSettings": {
     "Enabled": true,
-    "WorldMode": "Hybrid",
+    "WorldMode": "VanillaWorld",
     "AllowTravelCommands": true
   }
 }

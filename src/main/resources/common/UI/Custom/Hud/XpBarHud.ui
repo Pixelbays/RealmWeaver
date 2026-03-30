@@ -1,4 +1,14 @@
 $C = "../Common.ui";
+Group #DiceOverlayLargeHost {
+  Anchor: (Left: 0, Right: 0, Top: 56, Bottom: 140);
+  LayoutMode: CenterMiddle;
+}
+
+Group #DiceOverlaySmallHost {
+  Anchor: (Top: 78, Right: 20, Width: 240, Height: 120);
+  LayoutMode: Top;
+}
+
 Group #PartyRoot {
   Anchor: (Top: 36, Left: 20, Width: 248, Height: 0);
 

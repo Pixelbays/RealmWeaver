@@ -1,0 +1,55 @@
+$C = "../Common.ui";
+
+Group {
+  Anchor: (Width: 136, Height: 92, Right: 10);
+  Background: PatchStyle(Color: #1a2b42);
+  OutlineColor: #39587dff;
+  OutlineSize: 1;
+
+  TextButton #Button {
+    Anchor: (Full: 0);
+    Padding: (Full: 0);
+    Style: (Hovered: (Background: #263d5d), Pressed: (Background: #315079));
+  }
+
+  Group {
+    LayoutMode: Top;
+    Anchor: (Full: 0);
+    Padding: (Left: 9, Right: 9, Top: 10, Bottom: 10);
+
+    Group #PreviewFrame {
+      Visible: false;
+      Anchor: (Width: 46, Height: 46, Bottom: 6);
+      Background: PatchStyle(Color: #2a4365);
+      OutlineColor: #5b7da5ff;
+      OutlineSize: 1;
+      LayoutMode: CenterMiddle;
+
+      Label #PreviewLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 15, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Anchor: (Full: 0);
+      }
+    }
+
+    Label #TitleLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true);
+      Anchor: (Height: 18, Bottom: 4);
+    }
+
+    Label #SubtitleLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #b9c7d8);
+      Anchor: (Height: 14);
+    }
+  }
+
+  Label #SelectedBadge {
+    Visible: false;
+    Text: "SELECTED";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true, HorizontalAlignment: Center, TextColor: #0f1c2f);
+    Anchor: (Width: 60, Height: 16, Right: 6, Bottom: 6);
+    Background: PatchStyle(Color: #e5be6b);
+  }
+}

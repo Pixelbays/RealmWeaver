@@ -3,8 +3,8 @@
     "FluxHunter"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.prism_burst.name",
-    "Description": "pixelbays.rpg.abilities.prism_burst.description"
+    "Name": "starforged.rpg.abilities.prism_burst.name",
+    "Description": "starforged.rpg.abilities.prism_burst.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

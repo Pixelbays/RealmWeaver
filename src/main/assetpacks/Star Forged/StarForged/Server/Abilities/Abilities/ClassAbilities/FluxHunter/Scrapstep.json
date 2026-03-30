@@ -3,8 +3,8 @@
     "FluxHunter"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.scrapstep.name",
-    "Description": "pixelbays.rpg.abilities.scrapstep.description"
+    "Name": "starforged.rpg.abilities.scrapstep.name",
+    "Description": "starforged.rpg.abilities.scrapstep.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

@@ -1,0 +1,28 @@
+$C = "../Common.ui";
+
+Group {
+  Anchor: (Width: 104, Height: 42, Right: 8);
+  Background: PatchStyle(Color: #20324b);
+  OutlineColor: #39587dff;
+  OutlineSize: 1;
+
+  TextButton #Button {
+    Anchor: (Full: 0);
+    Padding: (Full: 0);
+    Style: (Hovered: (Background: #2a4365), Pressed: (Background: #35527b));
+  }
+
+  Label #Label {
+    Text: "";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 11, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+    Anchor: (Full: 0);
+  }
+
+  Label #SelectedBadge {
+    Visible: false;
+    Text: "OK";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center, TextColor: #0f1c2f);
+    Anchor: (Width: 18, Height: 18, Right: 4, Top: 4);
+    Background: PatchStyle(Color: #e5be6b);
+  }
+}

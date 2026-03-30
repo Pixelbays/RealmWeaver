@@ -4,8 +4,8 @@
     "Mobility"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.reactor_crash.name",
-    "Description": "pixelbays.rpg.abilities.reactor_crash.description"
+    "Name": "starforged.rpg.abilities.reactor_crash.name",
+    "Description": "starforged.rpg.abilities.reactor_crash.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

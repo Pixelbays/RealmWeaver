@@ -3,8 +3,8 @@
     "Vanguard"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.concussion_slam.name",
-    "Description": "pixelbays.rpg.abilities.concussion_slam.description"
+    "Name": "starforged.rpg.abilities.concussion_slam.name",
+    "Description": "starforged.rpg.abilities.concussion_slam.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",

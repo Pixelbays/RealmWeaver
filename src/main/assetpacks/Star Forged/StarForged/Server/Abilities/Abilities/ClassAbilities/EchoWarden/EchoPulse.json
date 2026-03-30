@@ -3,8 +3,8 @@
     "EchoWarden"
   ],
   "TranslationProperties": {
-    "Name": "pixelbays.rpg.abilities.echo_pulse.name",
-    "Description": "pixelbays.rpg.abilities.echo_pulse.description"
+    "Name": "starforged.rpg.abilities.echo_pulse.name",
+    "Description": "starforged.rpg.abilities.echo_pulse.description"
   },
   "AbilityType": "Active",
   "Parent": "GlobalBase",
