@@ -1,5 +1,6 @@
 package org.pixelbays.rpg.leveling.system;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -916,7 +917,7 @@ public class LevelProgressionSystem {
         SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource = store
                 .getResource(EntityModule.get().getPlayerSpatialResourceType());
 
-        ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
+        List<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
         playerSpatialResource.getSpatialStructure().collect(position, radius, nearbyPlayers);
 
         for (Ref<EntityStore> playerRef : nearbyPlayers) {
@@ -1186,7 +1187,7 @@ public class LevelProgressionSystem {
                     // Get all nearby players to send the packet to
                     SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource = store
                             .getResource(EntityModule.get().getPlayerSpatialResourceType());
-                    ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
+                    List<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
                     playerSpatialResource.getSpatialStructure().collect(transform.getPosition(), 75.0, nearbyPlayers);
 
                     // Send packet to all nearby players
