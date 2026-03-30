@@ -11,12 +11,14 @@ import com.hypixel.hytale.server.core.command.system.CommandContext;
 import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayerCommand;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class CharacterLogoutCommand extends AbstractPlayerCommand {
 
     public CharacterLogoutCommand() {
         super("logout", "Return to the character select screen");
+        requirePermission(HytalePermissions.fromCommand("player"));
     }
 
     @Override

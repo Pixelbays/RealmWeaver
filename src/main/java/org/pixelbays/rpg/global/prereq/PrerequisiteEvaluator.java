@@ -33,6 +33,14 @@ public final class PrerequisiteEvaluator {
 	private PrerequisiteEvaluator() {
 	}
 
+	public static boolean meetsRequirements(@Nullable PrerequisiteRequirements requirements,
+			@Nullable CommandBuffer<EntityStore> commandBuffer,
+			@Nonnull Store<EntityStore> store,
+			@Nonnull Ref<EntityStore> entityRef,
+			@Nullable PlayerRef explicitPlayerRef) {
+		return evaluateFailure(requirements, commandBuffer, store, entityRef, explicitPlayerRef) == null;
+	}
+
 	@Nullable
 	public static Message evaluateFailure(@Nullable PrerequisiteRequirements requirements,
 			@Nullable CommandBuffer<EntityStore> commandBuffer,

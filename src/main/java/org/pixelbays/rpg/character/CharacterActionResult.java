@@ -3,7 +3,7 @@ package org.pixelbays.rpg.character;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.pixelbays.rpg.character.config.CharacterRosterData.CharacterProfileData;
+import org.pixelbays.rpg.character.config.CharacterProfileData;
 
 public final class CharacterActionResult {
 

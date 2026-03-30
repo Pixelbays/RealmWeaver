@@ -7,5 +7,11 @@ public class CharacterCommand extends AbstractCommandCollection {
         super("character", "Manage account characters");
         this.addSubCommand(new CharacterUiCommand());
         this.addSubCommand(new CharacterLogoutCommand());
+        this.addSubCommand(new CharacterTokenCommand());
+    }
+
+    @Override
+    protected boolean canGeneratePermission() {
+        return false;
     }
 }

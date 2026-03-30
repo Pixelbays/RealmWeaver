@@ -10,7 +10,9 @@ import javax.annotation.Nullable;
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.character.CharacterActionResult;
 import org.pixelbays.rpg.character.CharacterManager;
-import org.pixelbays.rpg.character.config.CharacterRosterData.CharacterProfileData;
+import org.pixelbays.rpg.character.config.CharacterProfileData;
+import org.pixelbays.rpg.character.config.settings.CharacterModSettings;
+import org.pixelbays.rpg.character.token.CharacterTokenDefinition;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -36,39 +38,28 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 @SuppressWarnings("null")
 public class CharacterSelectPage extends CustomUIPage {
 
+    private static final int HARD_MAX_VISIBLE_SLOTS = 50;
+    private static final String SLOT_ENTRY_ASSET = "Common/CharacterRosterEntry.ui";
+
+    private static final String BRAND_TITLE_LABEL = "#BrandTitleLabel";
     private static final String STATUS_LABEL = "#StatusLabel";
     private static final String HERO_NAME_LABEL = "#HeroNameLabel";
     private static final String HERO_META_LABEL = "#HeroMetaLabel";
     private static final String DETAILS_LABEL = "#DetailsLabel";
     private static final String SETTINGS_LABEL = "#SettingsLabel";
     private static final String OVERFLOW_LABEL = "#OverflowLabel";
-
+    private static final String SLOT_LIST = "#SlotList";
     private static final String CHARACTER_ID_FIELD = "#CharacterIdField";
-    private static final String CREATE_NAME_FIELD = "#CreateNameField";
-    private static final String CREATE_RACE_FIELD = "#CreateRaceField";
-    private static final String CREATE_CLASS_FIELD = "#CreateClassField";
-
-    private static final String SLOT_BUTTON_ONE = "#SlotButton1";
-    private static final String SLOT_BUTTON_TWO = "#SlotButton2";
-    private static final String SLOT_BUTTON_THREE = "#SlotButton3";
-    private static final String SLOT_BUTTON_FOUR = "#SlotButton4";
-    private static final String SLOT_BUTTON_FIVE = "#SlotButton5";
-    private static final String SLOT_BUTTON_SIX = "#SlotButton6";
 
     private static final String REFRESH_BUTTON = "#RefreshButton";
     private static final String SELECT_BUTTON = "#SelectButton";
     private static final String DELETE_BUTTON = "#DeleteButton";
     private static final String RECOVER_BUTTON = "#RecoverButton";
     private static final String CREATE_BUTTON = "#CreateButton";
-
-    private static final String[] SLOT_BUTTONS = {
-            SLOT_BUTTON_ONE,
-            SLOT_BUTTON_TWO,
-            SLOT_BUTTON_THREE,
-            SLOT_BUTTON_FOUR,
-            SLOT_BUTTON_FIVE,
-            SLOT_BUTTON_SIX
-    };
+    private static final String LEAVE_SERVER_BUTTON = "#LeaveServerButton";
+    private static final String ROTATE_LEFT_BUTTON = "#RotateLeftButton";
+    private static final String ROTATE_RIGHT_BUTTON = "#RotateRightButton";
+    private static final String ROSTER_ACTION_ROW = "#RosterActionRow";
 
     private final CharacterManager characterManager;
 
@@ -78,14 +69,20 @@ public class CharacterSelectPage extends CustomUIPage {
     }
 
     @Override
-    @SuppressWarnings("unused")
+    public void onDismiss(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
+        characterManager.resetCharacterAppearancePreviewCamera(playerRef);
+        characterManager.ensureCharacterSelectionUiOpen(ref, store, playerRef);
+    }
+
+    @Override
     public void build(@Nonnull Ref<EntityStore> ref,
             @Nonnull UICommandBuilder commandBuilder,
             @Nonnull UIEventBuilder eventBuilder,
             @Nonnull Store<EntityStore> store) {
         commandBuilder.append("Pages/CharacterSelectPage.ui");
-        bindEvents(eventBuilder);
-        appendView(commandBuilder, null, null);
+        bindStaticEvents(eventBuilder);
+        CharacterProfileData selectedProfile = appendView(ref, store, commandBuilder, eventBuilder, null, null, true);
+        syncPreview(ref, store, selectedProfile);
     }
 
     @Override
@@ -95,48 +92,59 @@ public class CharacterSelectPage extends CustomUIPage {
             return;
         }
 
-        String characterId = extractString(rawData, "@CharacterId");
-        String createName = extractString(rawData, "@CreateName");
-        String createRace = extractString(rawData, "@CreateRace");
-        String createClass = extractString(rawData, "@CreateClass");
-        int slotIndex = extractInt(rawData, "SlotIndex", -1);
+        String characterId = extractString(rawData, "CharacterId");
+        if (characterId == null) {
+            characterId = extractString(rawData, "@CharacterId");
+        }
+        final String resolvedCharacterId = characterId;
 
         World world = store.getExternalData().getWorld();
-        world.execute(() -> handleAction(ref, store, action, characterId, createName, createRace, createClass, slotIndex));
+        world.execute(() -> handleAction(ref, store, action, resolvedCharacterId));
     }
 
     private void handleAction(@Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store,
             @Nonnull String action,
-            @Nullable String characterId,
-            @Nullable String createName,
-            @Nullable String createRace,
-            @Nullable String createClass,
-            int slotIndex) {
+            @Nullable String characterId) {
         Player player = store.getComponent(ref, Player.getComponentType());
         PlayerRef currentPlayerRef = store.getComponent(ref, PlayerRef.getComponentType());
         if (player == null || currentPlayerRef == null) {
             return;
         }
 
-        List<CharacterProfileData> profiles = characterManager.getProfilesFor(currentPlayerRef.getUuid(), currentPlayerRef.getUsername());
+        List<CharacterProfileData> profiles = characterManager.getSelectableProfilesFor(
+                currentPlayerRef.getUuid(),
+                currentPlayerRef.getUsername());
         CharacterActionResult result = null;
         CharacterProfileData focusedProfile = resolveProfile(profiles, characterId);
 
         switch (action) {
             case "Refresh" -> {
+                characterManager.reopenCharacterSelectPage(ref, store, currentPlayerRef);
+                return;
             }
-            case "Focus" -> focusedProfile = resolveProfile(profiles, slotIndex);
+            case "Focus" -> focusedProfile = resolveProfile(profiles, characterId);
             case "Select" -> result = characterManager.selectCharacter(ref, store, currentPlayerRef, characterId);
             case "Delete" -> result = characterManager.deleteCharacter(currentPlayerRef, characterId);
-            case "Recover" -> result = characterManager.recoverCharacter(currentPlayerRef, characterId);
-            case "Create" -> result = characterManager.createCharacter(ref, store, currentPlayerRef, createName, createRace,
-                    createClass);
+            case "OpenRecovery" -> {
+                characterManager.openDeletedCharacterRecoveryPage(ref, store, currentPlayerRef);
+                return;
+            }
+            case "LeaveServer" -> {
+                currentPlayerRef.getPacketHandler().disconnect(Message.raw("Left the server."));
+                return;
+            }
+            case "RotateLeft" -> characterManager.rotateCharacterPreviewLeft(ref, store);
+            case "RotateRight" -> characterManager.rotateCharacterPreviewRight(ref, store);
+            case "CreateNew" -> {
+                characterManager.openCharacterCreator(ref, store, currentPlayerRef);
+                return;
+            }
             default -> {
             }
         }
 
-        if (result != null && result.getProfile() != null) {
+        if (result != null && result.getProfile() != null && !result.getProfile().isSoftDeleted()) {
             focusedProfile = result.getProfile();
         }
 
@@ -144,21 +152,24 @@ public class CharacterSelectPage extends CustomUIPage {
             return;
         }
 
+        if ("Delete".equals(action) && result != null && result.isSuccess()) {
+            characterManager.reopenCharacterSelectPage(ref, store, currentPlayerRef);
+            return;
+        }
+
         UICommandBuilder commandBuilder = new UICommandBuilder();
-        appendView(commandBuilder,
+        CharacterProfileData selectedProfile = appendView(ref,
+            store,
+            commandBuilder,
+                null,
                 result == null ? null : characterManager.mapMessage(result.getMessage()),
-            focusedProfile);
+                focusedProfile,
+                false);
+        syncPreview(ref, store, selectedProfile);
         sendUpdate(commandBuilder);
     }
 
-    private void bindEvents(@Nonnull UIEventBuilder eventBuilder) {
-        for (int index = 0; index < SLOT_BUTTONS.length; index++) {
-            eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
-                SLOT_BUTTONS[index],
-                new EventData().append("Action", "Focus")
-                    .append("SlotIndex", Integer.toString(index)));
-        }
-
+    private void bindStaticEvents(@Nonnull UIEventBuilder eventBuilder) {
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 REFRESH_BUTTON,
                 new EventData().append("Action", "Refresh"));
@@ -175,33 +186,173 @@ public class CharacterSelectPage extends CustomUIPage {
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 RECOVER_BUTTON,
-                new EventData().append("Action", "Recover")
-                        .append("@CharacterId", CHARACTER_ID_FIELD + ".Value"));
+                new EventData().append("Action", "OpenRecovery"));
+
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                LEAVE_SERVER_BUTTON,
+                new EventData().append("Action", "LeaveServer"));
+
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                ROTATE_LEFT_BUTTON,
+                new EventData().append("Action", "RotateLeft"));
+
+        eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                ROTATE_RIGHT_BUTTON,
+                new EventData().append("Action", "RotateRight"));
 
         eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                 CREATE_BUTTON,
-                new EventData().append("Action", "Create")
-                        .append("@CreateName", CREATE_NAME_FIELD + ".Value")
-                        .append("@CreateRace", CREATE_RACE_FIELD + ".Value")
-                        .append("@CreateClass", CREATE_CLASS_FIELD + ".Value"));
+                new EventData().append("Action", "CreateNew"));
     }
 
-    private void appendView(@Nonnull UICommandBuilder commandBuilder,
+    @Nullable
+        private CharacterProfileData appendView(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull UICommandBuilder commandBuilder,
+            @Nullable UIEventBuilder eventBuilder,
             @Nullable Message statusMessage,
-            @Nullable CharacterProfileData focusedProfile) {
+            @Nullable CharacterProfileData focusedProfile,
+            boolean rebuildRows) {
         PlayerRef currentPlayerRef = this.playerRef;
+        CharacterModSettings settings = characterManager.getSettings();
+        List<CharacterProfileData> profiles = characterManager.getSelectableProfilesFor(
+                currentPlayerRef.getUuid(),
+                currentPlayerRef.getUsername());
+        List<CharacterProfileData> deletedProfiles = characterManager.getDeletedProfilesFor(
+                currentPlayerRef.getUuid(),
+                currentPlayerRef.getUsername());
+        String activeCharacterId = characterManager.getActiveCharacterId(currentPlayerRef.getUuid());
+        String lastSelectedCharacterId = characterManager.getLastSelectedCharacterId(
+                currentPlayerRef.getUuid(),
+                currentPlayerRef.getUsername());
+        int currentSlotCapacity = characterManager.getCurrentCharacterSlotCapacity(ref, store, currentPlayerRef);
+        int visibleSlotCount = resolveVisibleSlotCount(profiles.size(), currentSlotCapacity);
+        int defaultSlotCount = settings.getDefaultCharacterSlots();
+        int unlockedSlotCount = characterManager.getUnlockedExtraCharacterSlots(currentPlayerRef.getUuid(), currentPlayerRef.getUsername());
+        int grantedSlotCount = characterManager.getGrantedCharacterSlotCount(ref, store, currentPlayerRef);
+
+        CharacterProfileData selected = resolveSelectedProfile(profiles, focusedProfile, activeCharacterId, lastSelectedCharacterId);
+        boolean deleteVisible = settings.isAllowCharacterDeletion() && selected != null;
+        boolean deletedRecoveryVisible = settings.usesSoftDeleteRecovery() && !deletedProfiles.isEmpty();
+
+        commandBuilder.set(BRAND_TITLE_LABEL + ".Text", "Realmweavers: " + characterManager.resolveServerName());
         if (statusMessage != null) {
             commandBuilder.setObject(STATUS_LABEL + ".Text", toLocalizableString(statusMessage));
         } else {
             commandBuilder.set(STATUS_LABEL + ".Text", "");
         }
 
-        List<CharacterProfileData> profiles = characterManager.getProfilesFor(currentPlayerRef.getUuid(), currentPlayerRef.getUsername());
-        String activeCharacterId = characterManager.getActiveCharacterId(currentPlayerRef.getUuid());
-        String lastSelectedCharacterId = characterManager.getLastSelectedCharacterId(currentPlayerRef.getUuid(),
-                currentPlayerRef.getUsername());
+        if (rebuildRows) {
+            commandBuilder.clear(SLOT_LIST);
+        }
+        for (int index = 0; index < visibleSlotCount; index++) {
+            CharacterProfileData slotProfile = index < profiles.size() ? profiles.get(index) : null;
+            String selector = SLOT_LIST + "[" + index + "]";
+            if (rebuildRows) {
+                appendSlotEntry(commandBuilder, index);
+            }
+            boolean isSelected = slotProfile != null
+                    && selected != null
+                    && selected.getCharacterId().equalsIgnoreCase(slotProfile.getCharacterId());
 
-        CharacterProfileData selected = focusedProfile;
+            commandBuilder.set(selector + ".Visible", true);
+            commandBuilder.set(selector + " #SelectedBar.Visible", isSelected);
+            commandBuilder.set(selector + " #TitleLabel.Text", formatSlotTitle(slotProfile, index));
+            commandBuilder.set(selector + " #SubtitleLabel.Text", formatSlotSubtitle(slotProfile));
+            commandBuilder.set(selector + " #MetaLabel.Text", formatSlotMeta(slotProfile, activeCharacterId, index));
+
+            if (rebuildRows && eventBuilder != null && slotProfile != null) {
+                eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
+                        selector + " #Button",
+                        new EventData().append("Action", "Focus").append("CharacterId", slotProfile.getCharacterId()),
+                        false);
+            }
+        }
+
+        commandBuilder.set(CHARACTER_ID_FIELD + ".Value", selected == null ? "" : selected.getCharacterId());
+        commandBuilder.set(SELECT_BUTTON + ".Visible", selected != null);
+        commandBuilder.set(DELETE_BUTTON + ".Visible", deleteVisible);
+        commandBuilder.set(RECOVER_BUTTON + ".Visible", deletedRecoveryVisible);
+        commandBuilder.set(CREATE_BUTTON + ".Visible", settings.isAllowCharacterCreation());
+        commandBuilder.set(ROSTER_ACTION_ROW + ".Visible", deleteVisible || deletedRecoveryVisible);
+
+        if (selected != null) {
+            String race = selected.getRaceId().isBlank() ? "Unchosen Race" : selected.getRaceId();
+            String classId = characterManager.resolveDisplayedClassName(selected);
+            if (classId.isBlank()) {
+                classId = "Unchosen Class";
+            }
+            int displayLevel = characterManager.resolveDisplayedLevel(selected);
+            commandBuilder.set(HERO_NAME_LABEL + ".Text", selected.getCharacterName());
+            commandBuilder.set(HERO_META_LABEL + ".Text",
+                    "Level " + displayLevel + " • " + race + " • " + classId + (selected.isHardcore() ? " • Hardcore" : ""));
+            commandBuilder.set(DETAILS_LABEL + ".Text",
+                    "Character Id: " + selected.getCharacterId()
+                            + "\nStatus: Ready to enter world"
+                            + "\nProfile Type: " + (selected.isHardcore() ? "Hardcore" : "Standard")
+                            + "\nLobby Background: " + characterManager.resolveBackgroundId(selected)
+                            + "\nPreview Camera: " + characterManager.resolvePreviewCameraId(selected)
+                            + "\nLast Played: " + selected.getLastPlayedEpochMs());
+        } else if (!deletedProfiles.isEmpty()) {
+            commandBuilder.set(HERO_NAME_LABEL + ".Text", "No Active Character Selected");
+            commandBuilder.set(HERO_META_LABEL + ".Text", "Recover a deleted character or create a new one.");
+            commandBuilder.set(DETAILS_LABEL + ".Text", "Deleted characters are stored in the recovery list.");
+        } else {
+            commandBuilder.set(HERO_NAME_LABEL + ".Text", "No Character Selected");
+            commandBuilder.set(HERO_META_LABEL + ".Text", "Create a new adventurer or select an existing one.");
+            commandBuilder.set(DETAILS_LABEL + ".Text", "");
+        }
+
+        Map<CharacterTokenDefinition, Long> tokenBalances = characterManager.getVisibleAccountTokenBalances(
+                currentPlayerRef.getUuid(),
+                currentPlayerRef.getUsername());
+        String tokenSummary = tokenBalances.isEmpty()
+                ? "No account-bound character tokens found."
+                : formatTokenSummary(tokenBalances);
+        commandBuilder.set(SETTINGS_LABEL + ".Text",
+                "Account: " + currentPlayerRef.getUsername()
+                        + "\nActive Character: " + (activeCharacterId.isBlank() ? "none" : activeCharacterId)
+                        + "\nSelected Character: " + (selected == null ? "none" : selected.getCharacterId())
+                        + "\nDeleted Characters: " + deletedProfiles.size()
+                + "\nSlots: " + profiles.size() + "/" + currentSlotCapacity
+                + " (Base " + defaultSlotCount
+                + ", Unlocks " + unlockedSlotCount
+                + ", Grants " + grantedSlotCount
+                + ", Hard Max " + settings.getMaxCharacterSlots() + ")"
+                        + "\n\nCharacter Tokens:\n" + tokenSummary);
+
+        if (profiles.size() > currentSlotCapacity) {
+            commandBuilder.set(OVERFLOW_LABEL + ".Text",
+                "This account currently has more characters than its active slot grants. Existing characters remain selectable.");
+        } else if (profiles.size() > visibleSlotCount) {
+            commandBuilder.set(OVERFLOW_LABEL + ".Text",
+                    "Only the first " + visibleSlotCount + " roster slots are shown in this view.");
+        } else if (!deletedProfiles.isEmpty()) {
+            commandBuilder.set(OVERFLOW_LABEL + ".Text",
+                    deletedProfiles.size() + " deleted character(s) are available in the recovery list.");
+        } else {
+            commandBuilder.set(OVERFLOW_LABEL + ".Text", "");
+        }
+
+        return selected;
+    }
+
+    private int resolveVisibleSlotCount(int profileCount, int currentSlotCapacity) {
+        return Math.max(1, Math.min(HARD_MAX_VISIBLE_SLOTS, Math.max(profileCount, currentSlotCapacity)));
+    }
+
+    @Nonnull
+    private String appendSlotEntry(@Nonnull UICommandBuilder commandBuilder, int slotIndex) {
+        commandBuilder.append(SLOT_LIST, SLOT_ENTRY_ASSET);
+        return SLOT_LIST + "[" + slotIndex + "]";
+    }
+
+    @Nullable
+    private CharacterProfileData resolveSelectedProfile(@Nonnull List<CharacterProfileData> profiles,
+            @Nullable CharacterProfileData focusedProfile,
+            @Nonnull String activeCharacterId,
+            @Nonnull String lastSelectedCharacterId) {
+        CharacterProfileData selected = focusedProfile == null ? null : resolveProfile(profiles, focusedProfile.getCharacterId());
         if (selected == null && !activeCharacterId.isBlank()) {
             selected = resolveProfile(profiles, activeCharacterId);
         }
@@ -209,47 +360,88 @@ public class CharacterSelectPage extends CustomUIPage {
             selected = resolveProfile(profiles, lastSelectedCharacterId);
         }
         if (selected == null && !profiles.isEmpty()) {
-            selected = profiles.get(0);
+            selected = profiles.getFirst();
+        }
+        return selected;
+    }
+
+    @Nonnull
+    private String formatSlotTitle(@Nullable CharacterProfileData profile, int slotIndex) {
+        if (profile == null) {
+            return "Empty Slot " + (slotIndex + 1);
+        }
+        return profile.getCharacterName() + (profile.isHardcore() ? " [Hardcore]" : "");
+    }
+
+    @Nonnull
+    private String formatSlotSubtitle(@Nullable CharacterProfileData profile) {
+        if (profile == null) {
+            return "Choose create below to forge a new character.";
         }
 
-        for (int index = 0; index < SLOT_BUTTONS.length; index++) {
-            CharacterProfileData slotProfile = index < profiles.size() ? profiles.get(index) : null;
-            commandBuilder.set(SLOT_BUTTONS[index] + ".Text", formatSlotText(slotProfile, selected, activeCharacterId, index));
+        String race = profile.getRaceId().isBlank() ? "No Race" : profile.getRaceId();
+        String displayedClass = characterManager.resolveDisplayedClassName(profile);
+        if (displayedClass.isBlank()) {
+            displayedClass = "No Class";
+        }
+        return "Level " + characterManager.resolveDisplayedLevel(profile) + " • " + race + " • " + displayedClass;
+    }
+
+    @Nonnull
+    private String formatSlotMeta(@Nullable CharacterProfileData profile,
+            @Nonnull String activeCharacterId,
+            int slotIndex) {
+        if (profile == null) {
+            return "Slot " + (slotIndex + 1);
         }
 
-        commandBuilder.set(CHARACTER_ID_FIELD + ".Value", selected == null ? "" : selected.getCharacterId());
-
-        if (selected != null) {
-            String race = selected.getRaceId().isBlank() ? "Unchosen Race" : selected.getRaceId();
-            String classId = selected.getPrimaryClassId().isBlank() ? "Unchosen Class" : selected.getPrimaryClassId();
-            int displayLevel = characterManager.resolveDisplayedLevel(selected);
-            commandBuilder.set(HERO_NAME_LABEL + ".Text", selected.getCharacterName());
-            commandBuilder.set(HERO_META_LABEL + ".Text",
-                "Level " + displayLevel + " • " + race + " • " + classId);
-            commandBuilder.set(DETAILS_LABEL + ".Text",
-                    "Character Id: " + selected.getCharacterId()
-                            + "\nStatus: " + (selected.isSoftDeleted() ? "Marked for recovery" : "Ready to enter world")
-                            + "\nLobby Background: " + characterManager.resolveBackgroundId(selected)
-                            + "\nPreview Camera: " + characterManager.resolvePreviewCameraId(selected)
-                            + "\nLast Played: " + selected.getLastPlayedEpochMs());
-        } else {
-            commandBuilder.set(HERO_NAME_LABEL + ".Text", "No Character Selected");
-            commandBuilder.set(HERO_META_LABEL + ".Text", "Create a new adventurer or select an existing one.");
-            commandBuilder.set(DETAILS_LABEL + ".Text", "");
+        StringBuilder builder = new StringBuilder();
+        if (!activeCharacterId.isBlank() && activeCharacterId.equalsIgnoreCase(profile.getCharacterId())) {
+            builder.append("Active Character");
         }
-
-        commandBuilder.set(SETTINGS_LABEL + ".Text",
-                "Account: " + currentPlayerRef.getUsername()
-                        + "\nActive Character: " + (activeCharacterId.isBlank() ? "none" : activeCharacterId)
-                        + "\nSelected Character: " + (selected == null ? "none" : selected.getCharacterId())
-                        + "\nVisible Slots: " + Math.min(profiles.size(), SLOT_BUTTONS.length) + "/" + profiles.size());
-
-        if (profiles.size() > SLOT_BUTTONS.length) {
-            commandBuilder.set(OVERFLOW_LABEL + ".Text",
-                    "Additional characters exist beyond the visible roster slots. Use refresh after changing slot limits.");
-        } else {
-            commandBuilder.set(OVERFLOW_LABEL + ".Text", "");
+        if (profile.isHardcore()) {
+            if (builder.length() > 0) {
+                builder.append(" • ");
+            }
+            builder.append("Hardcore");
         }
+        if (builder.length() > 0) {
+            builder.append(" • ");
+        }
+        builder.append("Slot ").append(slotIndex + 1);
+        return builder.toString();
+    }
+
+    private void syncPreview(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nullable CharacterProfileData selectedProfile) {
+        if (selectedProfile != null) {
+            characterManager.applyCharacterPreview(ref, store, playerRef,
+                    selectedProfile.getRaceId(),
+                    selectedProfile.getAppearance());
+            characterManager.resetCharacterPreviewRotation(ref, store);
+            return;
+        }
+        characterManager.resetCharacterPreviewRotation(ref, store);
+        characterManager.applyCharacterAppearancePreviewCamera(ref, store, playerRef);
+    }
+
+    @Nonnull
+    private String formatTokenSummary(@Nonnull Map<CharacterTokenDefinition, Long> tokenBalances) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<CharacterTokenDefinition, Long> entry : tokenBalances.entrySet()) {
+            CharacterTokenDefinition definition = entry.getKey();
+            if (definition == null) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append("\n");
+            }
+            builder.append(definition.getDisplayName())
+                    .append(": ")
+                    .append(entry.getValue());
+        }
+        return builder.toString();
     }
 
     @Nullable
@@ -263,50 +455,6 @@ public class CharacterSelectPage extends CustomUIPage {
                 .findFirst()
                 .orElse(null);
     }
-
-    @Nullable
-    private CharacterProfileData resolveProfile(@Nonnull List<CharacterProfileData> profiles, int slotIndex) {
-        if (slotIndex < 0 || slotIndex >= profiles.size()) {
-            return null;
-        }
-        return profiles.get(slotIndex);
-    }
-
-    @Nonnull
-    private String formatSlotText(@Nullable CharacterProfileData profile,
-            @Nullable CharacterProfileData selected,
-            @Nonnull String activeCharacterId,
-            int slotIndex) {
-        if (profile == null) {
-            return "Empty Slot\nChoose create below to forge a new character.\nSlot " + (slotIndex + 1);
-        }
-
-        StringBuilder builder = new StringBuilder();
-        int displayLevel = characterManager.resolveDisplayedLevel(profile);
-        builder.append(profile.getCharacterName())
-                .append("\nLevel ")
-            .append(displayLevel)
-                .append(" • ")
-                .append(profile.getRaceId().isBlank() ? "No Race" : profile.getRaceId())
-                .append("\n")
-                .append(profile.getPrimaryClassId().isBlank() ? "No Class" : profile.getPrimaryClassId());
-
-        List<String> badges = new java.util.ArrayList<>();
-        if (profile.isSoftDeleted()) {
-            badges.add("Deleted");
-        }
-        if (!activeCharacterId.isBlank() && activeCharacterId.equalsIgnoreCase(profile.getCharacterId())) {
-            badges.add("Active");
-        }
-        if (selected != null && selected.getCharacterId().equalsIgnoreCase(profile.getCharacterId())) {
-            badges.add("Selected");
-        }
-        if (!badges.isEmpty()) {
-            builder.append("\n[").append(String.join(" • ", badges)).append("]");
-        }
-        return builder.toString();
-    }
-
     @Nonnull
     private static LocalizableString toLocalizableString(@Nonnull Message message) {
         var formatted = message.getFormattedMessage();
@@ -381,18 +529,5 @@ public class CharacterSelectPage extends CustomUIPage {
         }
 
         return rawData.substring(firstQuote + 1, secondQuote);
-    }
-
-    private static int extractInt(@Nonnull String rawData, @Nonnull String key, int fallback) {
-        String value = extractString(rawData, key);
-        if (value == null || value.isBlank()) {
-            return fallback;
-        }
-
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException ignored) {
-            return fallback;
-        }
     }
 }

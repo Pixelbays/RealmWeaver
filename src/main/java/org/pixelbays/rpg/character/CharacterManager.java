@@ -2,10 +2,13 @@ package org.pixelbays.rpg.character;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -18,14 +21,30 @@ import javax.annotation.Nullable;
 
 import org.pixelbays.plugin.ExamplePlugin;
 import org.pixelbays.rpg.achievement.component.AchievementComponent;
+import org.pixelbays.rpg.ability.binding.AbilityBindingService;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
+import org.pixelbays.rpg.ability.system.HotbarAbilityIconManager;
+import org.pixelbays.rpg.character.appearance.CharacterAppearanceData;
+import org.pixelbays.rpg.character.appearance.CharacterAppearanceService;
 import org.pixelbays.rpg.character.config.CharacterRosterData;
-import org.pixelbays.rpg.character.config.CharacterRosterData.CharacterProfileData;
+import org.pixelbays.rpg.character.config.CharacterProfileData;
 import org.pixelbays.rpg.character.config.settings.CharacterModSettings;
+import org.pixelbays.rpg.character.config.settings.CharacterModSettings.BarberShopSettings;
+import org.pixelbays.rpg.character.config.settings.CharacterModSettings.LoginSpawnMode;
+import org.pixelbays.rpg.character.token.CharacterTokenActionResult;
+import org.pixelbays.rpg.character.token.CharacterTokenDefinition;
+import org.pixelbays.rpg.character.token.CharacterTokenRegistry;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
+import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
+import org.pixelbays.rpg.economy.currency.CurrencyActionResult;
+import org.pixelbays.rpg.economy.currency.CurrencyManager;
+import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
+import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 import org.pixelbays.rpg.global.config.RpgModConfig;
+import org.pixelbays.rpg.global.prereq.PrerequisiteEvaluator;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
@@ -33,11 +52,22 @@ import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
 
+import com.hypixel.hytale.builtin.instances.InstancesPlugin;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 import com.hypixel.hytale.math.vector.Transform;
+import com.hypixel.hytale.protocol.ApplyLookType;
 import com.hypixel.hytale.protocol.ClientCameraView;
+import com.hypixel.hytale.protocol.Direction;
+import com.hypixel.hytale.protocol.MouseInputTargetType;
+import com.hypixel.hytale.protocol.MouseInputType;
+import com.hypixel.hytale.protocol.MovementForceRotationType;
+import com.hypixel.hytale.protocol.PlayerSkin;
+import com.hypixel.hytale.protocol.PositionDistanceOffsetType;
+import com.hypixel.hytale.protocol.RotationType;
+import com.hypixel.hytale.protocol.ServerCameraSettings;
+import com.hypixel.hytale.protocol.Vector3f;
 import com.hypixel.hytale.protocol.packets.camera.SetServerCamera;
 import com.hypixel.hytale.protocol.packets.entities.SpawnModelParticles;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
@@ -45,6 +75,10 @@ import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelParticle;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
+import com.hypixel.hytale.server.core.inventory.ItemStack;
+import com.hypixel.hytale.server.core.modules.entity.component.ModelComponent;
+import com.hypixel.hytale.server.core.modules.entity.player.PlayerSkinComponent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
@@ -58,17 +92,23 @@ import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.spawn.ISpawnProvider;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
+import com.hypixel.hytale.server.core.inventory.container.EmptyItemContainer;
+import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
 
-import it.unimi.dsi.fastutil.objects.ObjectList;
-
-@SuppressWarnings("null")
+@SuppressWarnings({ "null", "removal" })
 public final class CharacterManager {
 
     private static final String BASE_CHARACTER_LEVEL = "Base_Character_Level";
+    private static final float CHARACTER_PREVIEW_DEFAULT_YAW = 0.0F;
+    private static final float CHARACTER_PREVIEW_ROTATION_STEP = (float) Math.toRadians(22.5D);
 
     private final CharacterPersistence persistence = new CharacterPersistence();
+    private final CharacterAppearanceService appearanceService = new CharacterAppearanceService();
+    private final AbilityBindingService abilityBindingService = new AbilityBindingService();
     private final Map<UUID, CharacterRosterData> rostersByAccountId = new ConcurrentHashMap<>();
     private final Map<UUID, String> activeCharacterIds = new ConcurrentHashMap<>();
+    private final Map<UUID, Boolean> pendingUiTransitionSuppressions = new ConcurrentHashMap<>();
     private final Map<UUID, ScheduledFuture<?>> pendingLogoutTasks = new ConcurrentHashMap<>();
     private final ScheduledExecutorService logoutScheduler = Executors.newSingleThreadScheduledExecutor(new LogoutThreadFactory());
     private volatile boolean persistenceLoaded;
@@ -79,6 +119,7 @@ public final class CharacterManager {
     public void clear() {
         rostersByAccountId.clear();
         activeCharacterIds.clear();
+        pendingUiTransitionSuppressions.clear();
         persistenceLoaded = false;
         pendingLogoutTasks.values().forEach(task -> task.cancel(false));
         pendingLogoutTasks.clear();
@@ -147,6 +188,15 @@ public final class CharacterManager {
         if (playerRef == null) {
             return;
         }
+        String activeCharacterId = activeCharacterIds.get(playerRef.getUuid());
+        if (activeCharacterId != null && !activeCharacterId.isBlank()) {
+            return;
+        }
+
+        World world = store.getExternalData() == null ? null : store.getExternalData().getWorld();
+        if (event.getReadyId() > 0 && !isLobbyWorld(world)) {
+            return;
+        }
 
         CharacterRosterData roster = getOrCreateRoster(playerRef.getUuid(), playerRef.getUsername());
         if (ensureLegacyMigration(roster, ref, store, playerRef)) {
@@ -188,12 +238,96 @@ public final class CharacterManager {
         }
         cancelPendingLogout(playerRef.getUuid());
         activeCharacterIds.remove(playerRef.getUuid());
-        moveToLobby(ref, store, playerRef);
-        Player player = store.getComponent(ref, Player.getComponentType());
-        if (player == null) {
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            if (!ref.isValid()) {
+                return;
+            }
+            if (!isLobbyWorld(world)) {
+                moveToLobby(ref, store, playerRef);
+            }
+            openCharacterSelectPage(ref, store, playerRef);
+        });
+    }
+
+    public void openCharacterCreator(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            if (!ref.isValid()) {
+                return;
+            }
+            Player player = store.getComponent(ref, Player.getComponentType());
+            if (player == null) {
+                return;
+            }
+            suppressNextCharacterUiReopen(playerRef);
+            player.getPageManager().openCustomPage(ref, store,
+                    new org.pixelbays.rpg.character.ui.CharacterAppearancePage(playerRef,
+                            org.pixelbays.rpg.character.ui.CharacterAppearancePage.Mode.CREATE));
+        });
+    }
+
+    public void openBarberShop(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            if (!ref.isValid()) {
+                return;
+            }
+            Player player = store.getComponent(ref, Player.getComponentType());
+            if (player == null) {
+                return;
+            }
+            suppressNextCharacterUiReopen(playerRef);
+            player.getPageManager().openCustomPage(ref, store,
+                    new org.pixelbays.rpg.character.ui.CharacterAppearancePage(playerRef,
+                            org.pixelbays.rpg.character.ui.CharacterAppearancePage.Mode.BARBER));
+        });
+    }
+
+    public boolean requiresCharacterUiLock(@Nullable PlayerRef playerRef) {
+        if (!isEnabled() || playerRef == null || playerRef.getUuid() == null) {
+            return false;
+        }
+
+        String activeCharacterId = activeCharacterIds.get(playerRef.getUuid());
+        if (activeCharacterId != null && !activeCharacterId.isBlank()) {
+            return false;
+        }
+
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref == null || !ref.isValid()) {
+            return false;
+        }
+
+        Store<EntityStore> store = ref.getStore();
+        if (store == null || store.getExternalData() == null) {
+            return false;
+        }
+
+        return isLobbyWorld(store.getExternalData().getWorld());
+    }
+
+    public void ensureCharacterSelectionUiOpen(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        if (!requiresCharacterUiLock(playerRef)) {
             return;
         }
-        player.getPageManager().openCustomPage(ref, store, new org.pixelbays.rpg.character.ui.CharacterSelectPage(playerRef));
+        if (consumePendingCharacterUiSuppression(playerRef)) {
+            return;
+        }
+
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            if (!ref.isValid() || !requiresCharacterUiLock(playerRef)) {
+                return;
+            }
+            openCharacterSelectPage(ref, store, playerRef);
+        });
     }
 
     @Nonnull
@@ -255,6 +389,29 @@ public final class CharacterManager {
             @Nullable String rawName,
             @Nullable String rawRaceId,
             @Nullable String rawStarterClassId) {
+        return createCharacter(ref, store, playerRef, rawName, rawRaceId, rawStarterClassId, null, false);
+    }
+
+    @Nonnull
+    public CharacterActionResult createCharacter(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            @Nullable String rawName,
+            @Nullable String rawRaceId,
+            @Nullable String rawStarterClassId,
+            @Nullable CharacterAppearanceData requestedAppearance) {
+        return createCharacter(ref, store, playerRef, rawName, rawRaceId, rawStarterClassId, requestedAppearance, false);
+    }
+
+    @Nonnull
+    public CharacterActionResult createCharacter(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            @Nullable String rawName,
+            @Nullable String rawRaceId,
+            @Nullable String rawStarterClassId,
+            @Nullable CharacterAppearanceData requestedAppearance,
+            boolean hardcore) {
         if (!isEnabled()) {
             return CharacterActionResult.failure("Character system is disabled.");
         }
@@ -262,9 +419,6 @@ public final class CharacterManager {
         CharacterModSettings settings = getSettings();
         if (!settings.isAllowCharacterCreation()) {
             return CharacterActionResult.failure("Character creation is disabled.");
-        }
-        if (roster.getActiveProfileCount() >= Math.max(1, settings.getMaxCharacterSlots())) {
-            return CharacterActionResult.failure("You have reached the maximum number of character slots.");
         }
 
         String name = rawName == null ? "" : rawName.trim();
@@ -279,12 +433,22 @@ public final class CharacterManager {
             return CharacterActionResult.failure(validationError);
         }
 
-        CharacterProfileData profile = buildNewProfile(name, raceId, starterClassId, playerRef);
+        CharacterActionResult slotAvailability = ensureCharacterSlotAvailableForCreation(roster, ref, store, playerRef, settings);
+        if (!slotAvailability.isSuccess()) {
+            return slotAvailability;
+        }
+
+        CharacterAppearanceData sanitizedAppearance = sanitizeAppearance(raceId, requestedAppearance);
+        CharacterProfileData profile = buildNewProfile(name, raceId, starterClassId, playerRef, sanitizedAppearance,
+                hardcore && isHardcoreCharacterCreationEnabled());
         roster.upsertProfile(profile);
         if (roster.getSelectedCharacterId().isBlank()) {
             roster.setSelectedCharacterId(profile.getCharacterId());
         }
         persistRoster(roster);
+        if ("Character slot unlocked.".equals(slotAvailability.getMessage())) {
+            return CharacterActionResult.success("Character created and unlocked a new slot.", profile);
+        }
         return CharacterActionResult.success("Character created.", profile);
     }
 
@@ -326,6 +490,7 @@ public final class CharacterManager {
             player.getPageManager().setPage(ref, store, Page.None);
         }
 
+        resetCharacterAppearancePreviewCamera(playerRef);
         playConfiguredVfx(ref, store, getSettings().getLoginVfx());
         moveToGameplayWorld(ref, store, playerRef, target);
         playerRef.sendMessage(mapMessage("Selected character."));
@@ -356,14 +521,13 @@ public final class CharacterManager {
         if (settings.usesSoftDeleteRecovery()) {
             target.setSoftDeleted(true);
             target.setDeletedAtEpochMs(System.currentTimeMillis());
+            normalizeSelectedCharacterId(roster);
             persistRoster(roster);
             return CharacterActionResult.success("Character marked for recovery.", target);
         }
 
         roster.getProfiles().remove(target);
-        if (characterId.equalsIgnoreCase(roster.getSelectedCharacterId())) {
-            roster.setSelectedCharacterId("");
-        }
+        normalizeSelectedCharacterId(roster);
         persistRoster(roster);
         return CharacterActionResult.success("Character deleted.");
     }
@@ -408,6 +572,7 @@ public final class CharacterManager {
         target.setSoftDeleted(false);
         target.setDeletedAtEpochMs(0L);
         roster.getRecoveryHistoryEpochMs().add(System.currentTimeMillis());
+        normalizeSelectedCharacterId(roster);
         persistRoster(roster);
         return CharacterActionResult.success("Character recovered.", target);
     }
@@ -420,9 +585,6 @@ public final class CharacterManager {
         }
         CharacterRosterData roster = getOrCreateRoster(accountId, resolvePlayerUsername(store, ref));
         String activeCharacterId = activeCharacterIds.get(accountId);
-        if (activeCharacterId == null || activeCharacterId.isBlank()) {
-            activeCharacterId = roster.getSelectedCharacterId();
-        }
         if (activeCharacterId == null || activeCharacterId.isBlank()) {
             return;
         }
@@ -437,12 +599,100 @@ public final class CharacterManager {
         persistRoster(roster);
     }
 
+    public void sanitizeAbilityBindingsForCurrentConfig() {
+        if (!isEnabled()) {
+            return;
+        }
+
+        loadFromAssets();
+
+        for (Map.Entry<UUID, CharacterRosterData> rosterEntry : rostersByAccountId.entrySet()) {
+            UUID accountId = rosterEntry.getKey();
+            CharacterRosterData roster = rosterEntry.getValue();
+            if (roster == null) {
+                continue;
+            }
+
+            boolean changed = false;
+            String activeCharacterId = activeCharacterIds.get(accountId);
+            for (CharacterProfileData profile : roster.getProfiles()) {
+                if (profile == null) {
+                    continue;
+                }
+                if (activeCharacterId != null && activeCharacterId.equalsIgnoreCase(profile.getCharacterId())) {
+                    continue;
+                }
+
+                if (abilityBindingService.sanitizeInvalidBindings(profile.getAbilityBindings()).changed()) {
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                persistRoster(roster);
+            }
+        }
+
+        for (Map.Entry<UUID, String> activeEntry : new ArrayList<>(activeCharacterIds.entrySet())) {
+            UUID accountId = activeEntry.getKey();
+            PlayerRef playerRef = Universe.get().getPlayer(accountId);
+            if (playerRef == null) {
+                continue;
+            }
+
+            Ref<EntityStore> ref = playerRef.getReference();
+            if (ref == null || !ref.isValid()) {
+                continue;
+            }
+
+            Store<EntityStore> store = ref.getStore();
+            if (store.getExternalData() == null || store.getExternalData().getWorld() == null) {
+                continue;
+            }
+
+            World world = store.getExternalData().getWorld();
+            world.execute(() -> sanitizeActiveAbilityBindings(accountId, ref, store));
+        }
+    }
+
     @Nonnull
     public List<CharacterProfileData> getProfilesFor(@Nonnull UUID accountId, @Nullable String username) {
         CharacterRosterData roster = getOrCreateRoster(accountId, username);
         List<CharacterProfileData> profiles = new ArrayList<>(roster.getProfiles());
         profiles.sort(Comparator.comparing(CharacterProfileData::isSoftDeleted)
                 .thenComparing(CharacterProfileData::getLastPlayedEpochMs).reversed());
+        return profiles;
+    }
+
+    @Nonnull
+    public List<CharacterProfileData> getSelectableProfilesFor(@Nonnull UUID accountId, @Nullable String username) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        List<CharacterProfileData> profiles = new ArrayList<>();
+        for (CharacterProfileData profile : roster.getProfiles()) {
+            if (profile != null && !profile.isSoftDeleted()) {
+                profiles.add(profile);
+            }
+        }
+        profiles.sort((left, right) -> Long.compare(right.getLastPlayedEpochMs(), left.getLastPlayedEpochMs()));
+        return profiles;
+    }
+
+    @Nonnull
+    public List<CharacterProfileData> getDeletedProfilesFor(@Nonnull UUID accountId, @Nullable String username) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        List<CharacterProfileData> profiles = new ArrayList<>();
+        for (CharacterProfileData profile : roster.getProfiles()) {
+            if (profile != null && profile.isSoftDeleted()) {
+                profiles.add(profile);
+            }
+        }
+        profiles.sort((left, right) -> {
+            int deletedAtCompare = Long.compare(right.getDeletedAtEpochMs(), left.getDeletedAtEpochMs());
+            if (deletedAtCompare != 0) {
+                return deletedAtCompare;
+            }
+            return Long.compare(right.getLastPlayedEpochMs(), left.getLastPlayedEpochMs());
+        });
         return profiles;
     }
 
@@ -455,6 +705,85 @@ public final class CharacterManager {
     public String getLastSelectedCharacterId(@Nonnull UUID accountId, @Nullable String username) {
         CharacterRosterData roster = getOrCreateRoster(accountId, username);
         return roster.getSelectedCharacterId();
+    }
+
+    @Nonnull
+    public Map<CharacterTokenDefinition, Long> getVisibleAccountTokenBalances(@Nonnull UUID accountId, @Nullable String username) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        LinkedHashMap<CharacterTokenDefinition, Long> balances = new LinkedHashMap<>();
+        for (CharacterTokenDefinition definition : CharacterTokenRegistry.getVisibleInCharacterSelect()) {
+            if (definition == null) {
+                continue;
+            }
+            balances.put(definition, roster.getAccountTokens().getOrDefault(definition.getId(), definition.getStartingBalance()));
+        }
+        return balances;
+    }
+
+    public long getAccountTokenBalance(@Nonnull UUID accountId, @Nullable String username, @Nonnull String tokenId) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        CharacterTokenDefinition definition = CharacterTokenRegistry.get(tokenId);
+        if (definition == null || !definition.isEnabled()) {
+            return 0L;
+        }
+        return roster.getAccountTokens().getOrDefault(definition.getId(), definition.getStartingBalance());
+    }
+
+    public int getUnlockedExtraCharacterSlots(@Nonnull UUID accountId, @Nullable String username) {
+        return getOrCreateRoster(accountId, username).getUnlockedExtraCharacterSlots();
+    }
+
+    public int getGrantedCharacterSlotCount(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        return calculatePrerequisiteGrantedCharacterSlots(ref, store, playerRef, getSettings());
+    }
+
+    public int getCurrentCharacterSlotCapacity(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        CharacterRosterData roster = getOrCreateRoster(playerRef.getUuid(), playerRef.getUsername());
+        return calculateCharacterSlotCapacity(roster, ref, store, playerRef, getSettings());
+    }
+
+    public int getVisibleCharacterSlotCount(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        CharacterRosterData roster = getOrCreateRoster(playerRef.getUuid(), playerRef.getUsername());
+        int capacity = calculateCharacterSlotCapacity(roster, ref, store, playerRef, getSettings());
+        return Math.max(1, Math.max(roster.getActiveProfileCount(), capacity));
+    }
+
+    @Nonnull
+    public CharacterTokenActionResult addAccountTokenBalance(@Nonnull UUID accountId,
+            @Nullable String username,
+            @Nonnull String tokenId,
+            long amount) {
+        return mutateAccountTokenBalance(accountId, username, tokenId, amount, TokenMutationType.Add);
+    }
+
+    @Nonnull
+    public CharacterTokenActionResult removeAccountTokenBalance(@Nonnull UUID accountId,
+            @Nullable String username,
+            @Nonnull String tokenId,
+            long amount) {
+        return mutateAccountTokenBalance(accountId, username, tokenId, amount, TokenMutationType.Remove);
+    }
+
+    @Nonnull
+    public CharacterTokenActionResult setAccountTokenBalance(@Nonnull UUID accountId,
+            @Nullable String username,
+            @Nonnull String tokenId,
+            long amount) {
+        return mutateAccountTokenBalance(accountId, username, tokenId, amount, TokenMutationType.Set);
+    }
+
+    @Nonnull
+    public CharacterTokenActionResult spendAccountToken(@Nonnull UUID accountId,
+            @Nullable String username,
+            @Nonnull String tokenId,
+            long amount) {
+        return mutateAccountTokenBalance(accountId, username, tokenId, amount, TokenMutationType.Spend);
     }
 
     @Nonnull
@@ -527,6 +856,120 @@ public final class CharacterManager {
         return settings.getDefaultPreviewCameraPresetId();
     }
 
+    public void applyCharacterAppearancePreviewCamera(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            if (!ref.isValid()) {
+                return;
+            }
+            playerRef.getPacketHandler().writeNoCache(
+                    new SetServerCamera(ClientCameraView.Custom, true, createCharacterAppearancePreviewCameraSettings()));
+        });
+    }
+
+    public void applyCharacterPreview(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            @Nullable String raceId,
+            @Nullable CharacterAppearanceData appearance) {
+        applyAppearanceToPlayer(ref, store, raceId, appearance);
+        RpgLogging.debugDeveloper(
+                "[CharacterManager] applyCharacterPreview player=%s race=%s appearance=%s",
+                playerRef.getUsername(),
+                raceId,
+                appearance == null ? "null" : appearance.asMap());
+        applyCharacterAppearancePreviewCamera(ref, store, playerRef);
+    }
+
+    public void resetCharacterAppearancePreviewCamera(@Nonnull PlayerRef playerRef) {
+        playerRef.getPacketHandler().writeNoCache(new SetServerCamera(ClientCameraView.Custom, false, null));
+    }
+
+    public void resetCharacterPreviewRotation(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store) {
+        setCharacterPreviewRotation(ref, store, CHARACTER_PREVIEW_DEFAULT_YAW);
+    }
+
+    public void rotateCharacterPreview(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            float yawDelta) {
+        TransformComponent transformComponent = store.getComponent(ref, TransformComponent.getComponentType());
+        if (transformComponent == null) {
+            return;
+        }
+
+        float nextYaw = transformComponent.getRotation().getYaw() + yawDelta;
+        setCharacterPreviewRotation(ref, store, normalizePreviewYaw(nextYaw));
+    }
+
+    public void rotateCharacterPreviewLeft(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store) {
+        rotateCharacterPreview(ref, store, -CHARACTER_PREVIEW_ROTATION_STEP);
+    }
+
+    public void rotateCharacterPreviewRight(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store) {
+        rotateCharacterPreview(ref, store, CHARACTER_PREVIEW_ROTATION_STEP);
+    }
+
+    @Nonnull
+    public String resolveServerName() {
+        RpgModConfig config = resolveConfig();
+        if (config == null || config.getServerName() == null || config.getServerName().isBlank()) {
+            return "Server Name";
+        }
+        return config.getServerName();
+    }
+
+    @Nonnull
+    private ServerCameraSettings createCharacterAppearancePreviewCameraSettings() {
+        ServerCameraSettings cameraSettings = new ServerCameraSettings();
+        cameraSettings.positionLerpSpeed = 0.2F;
+        cameraSettings.rotationLerpSpeed = 0.2F;
+        cameraSettings.distance = 3.75F;
+        cameraSettings.allowPitchControls = false;
+        cameraSettings.displayCursor = true;
+        cameraSettings.sendMouseMotion = false;
+        cameraSettings.isFirstPerson = false;
+        cameraSettings.applyLookType = ApplyLookType.Rotation;
+        cameraSettings.mouseInputTargetType = MouseInputTargetType.None;
+        cameraSettings.movementForceRotationType = MovementForceRotationType.Custom;
+        cameraSettings.eyeOffset = false;
+        cameraSettings.positionDistanceOffsetType = PositionDistanceOffsetType.DistanceOffset;
+        cameraSettings.rotationType = RotationType.Custom;
+        cameraSettings.rotation = new Direction((float) Math.PI, -0.18F, 0.0F);
+        cameraSettings.movementForceRotation = new Direction((float) Math.PI, 0.0F, 0.0F);
+        cameraSettings.mouseInputType = MouseInputType.LookAtPlane;
+        cameraSettings.planeNormal = new Vector3f(0.0F, 1.0F, 0.0F);
+        return cameraSettings;
+    }
+
+    private void setCharacterPreviewRotation(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            float yaw) {
+        TransformComponent transformComponent = store.getComponent(ref, TransformComponent.getComponentType());
+        if (transformComponent == null) {
+            return;
+        }
+
+        com.hypixel.hytale.math.vector.Vector3f rotation = transformComponent.getRotation().clone();
+        rotation.setPitch(0.0F);
+        rotation.setYaw(yaw);
+        rotation.setRoll(0.0F);
+        transformComponent.teleportRotation(rotation);
+    }
+
+    private float normalizePreviewYaw(float yaw) {
+        float fullTurn = (float) (Math.PI * 2.0D);
+        float normalized = yaw % fullTurn;
+        if (normalized < 0.0F) {
+            normalized += fullTurn;
+        }
+        return normalized;
+    }
+
     public int resolveDisplayedLevel(@Nullable CharacterProfileData profile) {
         if (profile == null) {
             return 1;
@@ -534,7 +977,7 @@ public final class CharacterManager {
 
         LevelProgressionComponent levelProgression = profile.getLevelProgression();
 
-        String primaryClassId = profile.getPrimaryClassId();
+        String primaryClassId = resolvePrimaryKnownClassId(profile);
         if (!primaryClassId.isBlank()) {
             ClassDefinition classDefinition = resolveClassDefinition(primaryClassId);
             String systemId = primaryClassId;
@@ -563,21 +1006,40 @@ public final class CharacterManager {
         return bestLevel;
     }
 
+    @Nonnull
+    public String resolveDisplayedClassName(@Nullable CharacterProfileData profile) {
+        String classId = resolvePrimaryKnownClassId(profile);
+        if (classId.isBlank()) {
+            return "";
+        }
+
+        ClassDefinition classDefinition = resolveClassDefinition(classId);
+        if (classDefinition != null && classDefinition.getDisplayName() != null
+                && !classDefinition.getDisplayName().isBlank()) {
+            return classDefinition.getDisplayName();
+        }
+
+        return classId;
+    }
+
     public boolean isEnabled() {
         RpgModConfig config = resolveConfig();
         return config == null || config.isCharacterModuleEnabled();
     }
 
     @Nonnull
-    private CharacterProfileData buildNewProfile(@Nonnull String name,
+        private CharacterProfileData buildNewProfile(@Nonnull String name,
             @Nonnull String raceId,
             @Nonnull String starterClassId,
-            @Nullable PlayerRef playerRef) {
+            @Nullable PlayerRef playerRef,
+                @Nonnull CharacterAppearanceData appearance,
+                boolean hardcore) {
         CharacterProfileData profile = new CharacterProfileData();
         profile.setCharacterId(UUID.randomUUID().toString());
         profile.setCharacterName(name);
         profile.setCreatedAtEpochMs(System.currentTimeMillis());
         profile.setLastPlayedEpochMs(System.currentTimeMillis());
+            profile.setHardcore(hardcore);
 
         LevelProgressionComponent levelProgression = new LevelProgressionComponent();
         initializeProfileLevelSystem(levelProgression, BASE_CHARACTER_LEVEL, 1, playerRef);
@@ -637,6 +1099,7 @@ public final class CharacterManager {
         profile.setAchievementProgress(new AchievementComponent());
         profile.setStatSnapshot(new EntityStatMap());
         profile.setInventorySnapshot(new Inventory());
+        profile.setAppearance(appearance);
         return profile;
     }
 
@@ -729,13 +1192,18 @@ public final class CharacterManager {
         AchievementComponent achievementProgress = store.getComponent(ref, AchievementComponent.getComponentType());
         EntityStatMap statMap = store.getComponent(ref, EntityStatMap.getComponentType());
         TransformComponent transformComponent = store.getComponent(ref, TransformComponent.getComponentType());
+        PlayerSkinComponent playerSkinComponent = store.getComponent(ref, PlayerSkinComponent.getComponentType());
         Player player = store.getComponent(ref, Player.getComponentType());
 
         profile.setLevelProgression(levelComponent == null ? new LevelProgressionComponent() : (LevelProgressionComponent) levelComponent.clone());
         profile.setClassProgression(classComponent == null ? new ClassComponent() : (ClassComponent) classComponent.clone());
         profile.setRaceProgression(raceComponent == null ? new RaceComponent() : (RaceComponent) raceComponent.clone());
         profile.setClassAbilities(classAbilities == null ? new ClassAbilityComponent() : classAbilities.clone());
-        profile.setAbilityBindings(abilityBindings == null ? new AbilityBindingComponent() : (AbilityBindingComponent) abilityBindings.clone());
+        AbilityBindingComponent capturedBindings = abilityBindings == null
+            ? new AbilityBindingComponent()
+            : (AbilityBindingComponent) abilityBindings.clone();
+        abilityBindingService.sanitizeInvalidBindings(capturedBindings);
+        profile.setAbilityBindings(capturedBindings);
         profile.setAchievementProgress(achievementProgress == null ? new AchievementComponent() : (AchievementComponent) achievementProgress.clone());
         profile.setStatSnapshot(statMap == null ? new EntityStatMap() : statMap.clone());
         profile.setSavedWorldName(store.getExternalData().getWorld() == null ? "" : store.getExternalData().getWorld().getName());
@@ -747,7 +1215,10 @@ public final class CharacterManager {
             profile.setActiveToolsSlot(player.getInventory().getActiveToolsSlot());
         }
         profile.setRaceId(profile.getRaceProgression().getRaceId());
-        profile.setPrimaryClassId(profile.getClassProgression().getPrimaryClassId());
+        profile.setPrimaryClassId(resolvePrimaryKnownClassId(profile.getClassProgression()));
+        profile.setAppearance(appearanceService.fromPlayerSkin(
+                playerSkinComponent == null ? null : playerSkinComponent.getPlayerSkin(),
+                profile.getRaceId()));
     }
 
     private void applyProfileToPlayer(@Nonnull CharacterProfileData profile,
@@ -757,35 +1228,301 @@ public final class CharacterManager {
         store.putComponent(ref, ClassComponent.getComponentType(), (ClassComponent) profile.getClassProgression().clone());
         store.putComponent(ref, RaceComponent.getComponentType(), (RaceComponent) profile.getRaceProgression().clone());
         store.putComponent(ref, ClassAbilityComponent.getComponentType(), profile.getClassAbilities().clone());
-        store.putComponent(ref, AbilityBindingComponent.getComponentType(), (AbilityBindingComponent) profile.getAbilityBindings().clone());
+        AbilityBindingComponent appliedBindings = (AbilityBindingComponent) profile.getAbilityBindings().clone();
+        abilityBindingService.sanitizeInvalidBindings(appliedBindings);
+        store.putComponent(ref, AbilityBindingComponent.getComponentType(), appliedBindings);
         store.putComponent(ref, AchievementComponent.getComponentType(), (AchievementComponent) profile.getAchievementProgress().clone());
         store.putComponent(ref, EntityStatMap.getComponentType(), profile.getStatSnapshot().clone());
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
         if (player != null) {
-            Inventory restoredInventory = copyInventory(profile.getInventorySnapshot());
-            player.setInventory(restoredInventory, false);
-
-            if (profile.getActiveHotbarSlot() >= 0 && profile.getActiveHotbarSlot() < restoredInventory.getHotbar().getCapacity()) {
-                restoredInventory.setActiveHotbarSlot(profile.getActiveHotbarSlot());
-            }
-            if (profile.getActiveUtilitySlot() >= 0 && profile.getActiveUtilitySlot() < restoredInventory.getUtility().getCapacity()) {
-                restoredInventory.setActiveUtilitySlot(profile.getActiveUtilitySlot());
-            }
-            if (profile.getActiveToolsSlot() >= 0 && profile.getActiveToolsSlot() < restoredInventory.getTools().getCapacity()) {
-                restoredInventory.setActiveToolsSlot(profile.getActiveToolsSlot());
-            }
-
-            if (playerRef != null) {
-                playerRef.getPacketHandler().writeNoCache(restoredInventory.toPacket());
-            }
+            applyInventorySnapshot(ref, store, profile.getInventorySnapshot(), profile.getActiveHotbarSlot(),
+                    profile.getActiveUtilitySlot(), profile.getActiveToolsSlot());
         }
 
+        applyAppearanceToPlayer(ref, store, profile.getRaceId(), profile.getAppearance());
+
         StatSystem statSystem = ExamplePlugin.get().getStatSystem();
+    ExamplePlugin.get().getClassManagementSystem().pruneUnknownClasses(ref, store);
         statSystem.recalculateClassStatBonuses(ref, store);
         statSystem.recalculateTalentStatBonuses(ref, store);
         statSystem.recalculateRaceStatBonuses(ref, store);
+    }
+
+    @Nonnull
+    public CharacterAppearanceService getAppearanceService() {
+        return appearanceService;
+    }
+
+    @Nonnull
+    public CharacterAppearanceData sanitizeAppearance(@Nullable String raceId,
+            @Nullable CharacterAppearanceData appearance) {
+        return appearanceService.sanitizeAppearance(resolveRaceDefinition(raceId), appearance);
+    }
+
+    @Nonnull
+    public CharacterAppearanceData createDefaultAppearance(@Nullable String raceId) {
+        return appearanceService.createDefaultAppearance(raceId);
+    }
+
+    @Nullable
+    public CharacterProfileData getActiveProfile(@Nonnull UUID accountId, @Nullable String username) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        String activeCharacterId = activeCharacterIds.getOrDefault(accountId, roster.getSelectedCharacterId());
+        if (activeCharacterId == null || activeCharacterId.isBlank()) {
+            return null;
+        }
+        return roster.getProfile(activeCharacterId);
+    }
+
+    @Nullable
+    public CharacterProfileData getLoadedActiveProfile(@Nonnull UUID accountId, @Nullable String username) {
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        String activeCharacterId = activeCharacterIds.get(accountId);
+        if (activeCharacterId == null || activeCharacterId.isBlank()) {
+            return null;
+        }
+        return roster.getProfile(activeCharacterId);
+    }
+
+    public boolean isHardcoreCharacterCreationEnabled() {
+        RpgModConfig config = resolveConfig();
+        return config != null && config.isHardcoreEnabled();
+    }
+
+    @Nonnull
+    public CharacterActionResult applyBarberAppearance(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull CharacterAppearanceData requestedAppearance) {
+        CharacterProfileData activeProfile = getActiveProfile(playerRef.getUuid(), playerRef.getUsername());
+        if (activeProfile == null) {
+            return CharacterActionResult.failure("No active character is available for barber changes.");
+        }
+
+        CharacterAppearanceData sanitized = sanitizeAppearance(activeProfile.getRaceId(), requestedAppearance);
+        CharacterAppearanceData current = activeProfile.getAppearance();
+        int changes = sanitized.countDifferences(current);
+        if (changes <= 0) {
+            applyAppearanceToPlayer(ref, store, activeProfile.getRaceId(), sanitized);
+            return CharacterActionResult.success("Appearance updated.", activeProfile);
+        }
+
+        BarberShopSettings barberSettings = getSettings().getBarberShopSettings();
+        CurrencyActionResult spendResult = chargeBarberCost(barberSettings, activeProfile, playerRef, store, changes);
+        if (!spendResult.isSuccess()) {
+            return CharacterActionResult.failure(spendResult.getMessage());
+        }
+
+        CharacterRosterData roster = getOrCreateRoster(playerRef.getUuid(), playerRef.getUsername());
+        CharacterProfileData storedProfile = roster.getProfile(activeProfile.getCharacterId());
+        if (storedProfile == null) {
+            return CharacterActionResult.failure("Character profile not found.");
+        }
+        storedProfile.setAppearance(sanitized);
+        applyAppearanceToPlayer(ref, store, storedProfile.getRaceId(), sanitized);
+        persistRoster(roster);
+        return CharacterActionResult.success("Appearance updated.", storedProfile);
+    }
+
+    public void applyAppearanceToPlayer(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nullable String raceId,
+            @Nullable CharacterAppearanceData requestedAppearance) {
+        CharacterAppearanceData sanitized = sanitizeAppearance(raceId, requestedAppearance);
+        PlayerRef targetPlayerRef = store.getComponent(ref, PlayerRef.getComponentType());
+        String targetLabel = targetPlayerRef == null
+            ? String.valueOf(ref)
+            : targetPlayerRef.getUsername() + " (" + targetPlayerRef.getUuid() + ")";
+        RpgLogging.debugDeveloper(
+            "[CharacterManager] applyAppearanceToPlayer target=%s race=%s requested=%s sanitized=%s",
+            targetLabel,
+                raceId,
+                requestedAppearance == null ? "null" : requestedAppearance.asMap(),
+                sanitized.asMap());
+        PlayerSkinComponent playerSkinComponent = store.getComponent(ref, PlayerSkinComponent.getComponentType());
+        PlayerSkin fallbackSkin = playerSkinComponent == null ? null : new PlayerSkin(playerSkinComponent.getPlayerSkin());
+        PlayerSkin sanitizedSkin = resolveValidPlayerSkin(sanitized.toPlayerSkin(), fallbackSkin);
+        if (playerSkinComponent == null) {
+            store.putComponent(ref, PlayerSkinComponent.getComponentType(), new PlayerSkinComponent(sanitizedSkin));
+        } else {
+            PlayerSkin playerSkin = playerSkinComponent.getPlayerSkin();
+            playerSkin.bodyCharacteristic = sanitizedSkin.bodyCharacteristic;
+            playerSkin.underwear = sanitizedSkin.underwear;
+            playerSkin.face = sanitizedSkin.face;
+            playerSkin.eyes = sanitizedSkin.eyes;
+            playerSkin.ears = sanitizedSkin.ears;
+            playerSkin.mouth = sanitizedSkin.mouth;
+            playerSkin.facialHair = sanitizedSkin.facialHair;
+            playerSkin.haircut = sanitizedSkin.haircut;
+            playerSkin.eyebrows = sanitizedSkin.eyebrows;
+            playerSkin.pants = sanitizedSkin.pants;
+            playerSkin.overpants = sanitizedSkin.overpants;
+            playerSkin.undertop = sanitizedSkin.undertop;
+            playerSkin.overtop = sanitizedSkin.overtop;
+            playerSkin.shoes = sanitizedSkin.shoes;
+            playerSkin.headAccessory = sanitizedSkin.headAccessory;
+            playerSkin.faceAccessory = sanitizedSkin.faceAccessory;
+            playerSkin.earAccessory = sanitizedSkin.earAccessory;
+            playerSkin.skinFeature = sanitizedSkin.skinFeature;
+            playerSkin.gloves = sanitizedSkin.gloves;
+            playerSkin.cape = sanitizedSkin.cape;
+        }
+
+        playerSkinComponent = store.getComponent(ref, PlayerSkinComponent.getComponentType());
+        if (playerSkinComponent != null) {
+            playerSkinComponent.setNetworkOutdated();
+            var playerModel = com.hypixel.hytale.server.core.cosmetics.CosmeticsModule.get().createModel(playerSkinComponent.getPlayerSkin());
+            if (playerModel != null) {
+                store.putComponent(ref, ModelComponent.getComponentType(), new ModelComponent(playerModel));
+                RpgLogging.debugDeveloper(
+                        "[CharacterManager] applyAppearanceToPlayer modelUpdated target=%s body=%s face=%s hair=%s headAccessory=%s",
+                        targetLabel,
+                        sanitizedSkin.bodyCharacteristic,
+                        sanitizedSkin.face,
+                        sanitizedSkin.haircut,
+                        sanitizedSkin.headAccessory);
+            } else {
+                RpgLogging.debugDeveloper(
+                        "[CharacterManager] applyAppearanceToPlayer createModel returned null target=%s skin=%s",
+                        targetLabel,
+                        CharacterAppearanceData.fromPlayerSkin(playerSkinComponent.getPlayerSkin()).asMap());
+            }
+        } else {
+            RpgLogging.debugDeveloper("[CharacterManager] applyAppearanceToPlayer missing PlayerSkinComponent target=%s",
+                    targetLabel);
+        }
+    }
+
+    @Nonnull
+    private PlayerSkin resolveValidPlayerSkin(@Nullable PlayerSkin requestedSkin, @Nullable PlayerSkin fallbackSkin) {
+        if (isValidPlayerSkin(requestedSkin)) {
+            return new PlayerSkin(requestedSkin);
+        }
+        PlayerSkin mergedSkin = mergePlayerSkin(requestedSkin, fallbackSkin);
+        if (isValidPlayerSkin(mergedSkin)) {
+            RpgLogging.debugDeveloper(
+                    "[CharacterManager] resolveValidPlayerSkin merged requested skin over fallback successfully");
+            return new PlayerSkin(mergedSkin);
+        }
+        if (isValidPlayerSkin(fallbackSkin)) {
+            RpgLogging.debugDeveloper(
+                    "[CharacterManager] resolveValidPlayerSkin falling back to existing skin because requested/merged skin was invalid");
+            return new PlayerSkin(fallbackSkin);
+        }
+
+        PlayerSkin generatedSkin = com.hypixel.hytale.server.core.cosmetics.CosmeticsModule.get().generateRandomSkin(new Random());
+        if (isValidPlayerSkin(generatedSkin)) {
+            return new PlayerSkin(generatedSkin);
+        }
+
+        return requestedSkin == null ? new PlayerSkin(generatedSkin) : new PlayerSkin(requestedSkin);
+    }
+
+    @Nonnull
+    private PlayerSkin mergePlayerSkin(@Nullable PlayerSkin requestedSkin, @Nullable PlayerSkin fallbackSkin) {
+        PlayerSkin mergedSkin = fallbackSkin == null ? new PlayerSkin() : new PlayerSkin(fallbackSkin);
+        if (requestedSkin == null) {
+            return mergedSkin;
+        }
+
+        if (requestedSkin.bodyCharacteristic != null) {
+            mergedSkin.bodyCharacteristic = requestedSkin.bodyCharacteristic;
+        }
+        if (requestedSkin.underwear != null) {
+            mergedSkin.underwear = requestedSkin.underwear;
+        }
+        if (requestedSkin.face != null) {
+            mergedSkin.face = requestedSkin.face;
+        }
+        if (requestedSkin.eyes != null) {
+            mergedSkin.eyes = requestedSkin.eyes;
+        }
+        if (requestedSkin.ears != null) {
+            mergedSkin.ears = requestedSkin.ears;
+        }
+        if (requestedSkin.mouth != null) {
+            mergedSkin.mouth = requestedSkin.mouth;
+        }
+        mergedSkin.facialHair = requestedSkin.facialHair;
+        mergedSkin.haircut = requestedSkin.haircut;
+        mergedSkin.eyebrows = requestedSkin.eyebrows;
+        mergedSkin.pants = requestedSkin.pants;
+        mergedSkin.overpants = requestedSkin.overpants;
+        if (requestedSkin.undertop != null) {
+            mergedSkin.undertop = requestedSkin.undertop;
+        }
+        mergedSkin.overtop = requestedSkin.overtop;
+        mergedSkin.shoes = requestedSkin.shoes;
+        mergedSkin.headAccessory = requestedSkin.headAccessory;
+        mergedSkin.faceAccessory = requestedSkin.faceAccessory;
+        mergedSkin.earAccessory = requestedSkin.earAccessory;
+        mergedSkin.skinFeature = requestedSkin.skinFeature;
+        mergedSkin.gloves = requestedSkin.gloves;
+        mergedSkin.cape = requestedSkin.cape;
+        return mergedSkin;
+    }
+
+    private boolean isValidPlayerSkin(@Nullable PlayerSkin playerSkin) {
+        if (playerSkin == null) {
+            return false;
+        }
+        try {
+            com.hypixel.hytale.server.core.cosmetics.CosmeticsModule.get().validateSkin(playerSkin);
+            return true;
+        } catch (com.hypixel.hytale.server.core.cosmetics.CosmeticsModule.InvalidSkinException exception) {
+            return false;
+        }
+    }
+
+    @Nonnull
+    private CurrencyActionResult chargeBarberCost(@Nonnull BarberShopSettings settings,
+            @Nonnull CharacterProfileData profile,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull Store<EntityStore> store,
+            int changes) {
+        if (!settings.isEnabled()) {
+            return CurrencyActionResult.success("Barber cost disabled.", null, 0L);
+        }
+
+        CurrencyAmountDefinition cost = switch (settings.getPricingMode()) {
+            case PerChangedSlot -> new CurrencyAmountDefinition(
+                    settings.getPerChangedSlotCost().getCurrencyId(),
+                    settings.getPerChangedSlotCost().getAmount() * Math.max(1, changes));
+            case Flat -> settings.getFlatCost();
+        };
+
+        if (cost.isFree()) {
+            return CurrencyActionResult.success("Appearance updated.", cost.getCurrencyId(), 0L);
+        }
+
+        CurrencyManager currencyManager = ExamplePlugin.get().getCurrencyManager();
+        String ownerId = resolveCurrencyOwnerId(settings.getCurrencyScope(), profile, playerRef);
+        CurrencyAccessContext accessContext = CurrencyAccessContext.fromInventory(resolveInventory(store, playerRef));
+        return currencyManager.spend(settings.getCurrencyScope(), ownerId, cost, accessContext);
+    }
+
+    @Nonnull
+    private Inventory resolveInventory(@Nonnull Store<EntityStore> store, @Nonnull PlayerRef playerRef) {
+        Ref<EntityStore> ref = playerRef.getReference();
+        if (ref != null && ref.isValid()) {
+            Player player = store.getComponent(ref, Player.getComponentType());
+            if (player != null && player.getInventory() != null) {
+                return player.getInventory();
+            }
+        }
+        return new Inventory();
+    }
+
+    @Nonnull
+    private String resolveCurrencyOwnerId(@Nonnull CurrencyScope scope,
+            @Nonnull CharacterProfileData profile,
+            @Nonnull PlayerRef playerRef) {
+        return switch (scope) {
+            case Character -> profile.getCharacterId();
+            case Account -> playerRef.getUuid().toString();
+            case Guild, Global, Custom -> profile.getCharacterId();
+        };
     }
 
     @Nonnull
@@ -794,13 +1531,68 @@ public final class CharacterManager {
             return new Inventory();
         }
 
-        return new Inventory(
-                inventory.getStorage().clone(),
-                inventory.getArmor().clone(),
-                inventory.getHotbar().clone(),
-                inventory.getUtility().clone(),
-                inventory.getTools().clone(),
-                inventory.getBackpack().clone());
+        Inventory copy = new Inventory();
+        copyContainerContents(inventory.getStorage(), copy.getStorage());
+        copyContainerContents(inventory.getArmor(), copy.getArmor());
+        copyContainerContents(inventory.getHotbar(), copy.getHotbar());
+        copyContainerContents(inventory.getUtility(), copy.getUtility());
+        copyContainerContents(inventory.getTools(), copy.getTools());
+        copyContainerContents(inventory.getBackpack(), copy.getBackpack());
+        return copy;
+    }
+
+        private void applyInventorySnapshot(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nullable Inventory inventory,
+            byte activeHotbarSlot,
+            byte activeUtilitySlot,
+            byte activeToolsSlot) {
+        Inventory snapshot = inventory == null ? new Inventory() : inventory;
+        store.putComponent(ref, InventoryComponent.Storage.getComponentType(),
+            new InventoryComponent.Storage(copyContainer(snapshot.getStorage())));
+        store.putComponent(ref, InventoryComponent.Armor.getComponentType(),
+            new InventoryComponent.Armor(copyContainer(snapshot.getArmor())));
+        store.putComponent(ref, InventoryComponent.Hotbar.getComponentType(),
+            new InventoryComponent.Hotbar(copyContainer(snapshot.getHotbar()), activeHotbarSlot));
+        store.putComponent(ref, InventoryComponent.Utility.getComponentType(),
+            new InventoryComponent.Utility(copyContainer(snapshot.getUtility()), activeUtilitySlot));
+        store.putComponent(ref, InventoryComponent.Tool.getComponentType(),
+            new InventoryComponent.Tool(copyContainer(snapshot.getTools()), activeToolsSlot));
+        store.putComponent(ref, InventoryComponent.Backpack.getComponentType(),
+            new InventoryComponent.Backpack(copyContainer(snapshot.getBackpack())));
+        }
+
+        @Nonnull
+        private ItemContainer copyContainer(@Nullable ItemContainer source) {
+        short capacity = source == null ? 0 : source.getCapacity();
+        ItemContainer target = capacity <= 0 ? EmptyItemContainer.INSTANCE : new SimpleItemContainer(capacity);
+        copyContainerContents(source, target);
+        return target;
+        }
+
+        private void copyContainerContents(@Nullable ItemContainer source, @Nonnull ItemContainer target) {
+        target.clear();
+        if (source == null) {
+            return;
+        }
+
+        short maxSlots = (short) Math.min(source.getCapacity(), target.getCapacity());
+        for (short slot = 0; slot < maxSlots; slot++) {
+            ItemStack itemStack = source.getItemStack(slot);
+            if (!ItemStack.isEmpty(itemStack)) {
+                target.setItemStackForSlot(slot, copyItemStack(itemStack));
+            }
+        }
+        }
+
+    @Nonnull
+    private ItemStack copyItemStack(@Nonnull ItemStack itemStack) {
+        return new ItemStack(
+                itemStack.getItemId(),
+                itemStack.getQuantity(),
+                itemStack.getDurability(),
+                itemStack.getMaxDurability(),
+                itemStack.getMetadata() == null ? null : itemStack.getMetadata().clone());
     }
 
     private void cleanupRosterState(@Nonnull CharacterRosterData roster) {
@@ -808,6 +1600,8 @@ public final class CharacterManager {
         boolean changed = false;
 
         pruneRecoveryHistory(roster, settings);
+        changed |= normalizeAccountTokens(roster);
+        roster.setUnlockedExtraCharacterSlots(roster.getUnlockedExtraCharacterSlots());
 
         long retentionMs = Math.max(0, settings.getDeletedCharacterRetentionHours()) * 3_600_000L;
         if (retentionMs > 0) {
@@ -824,10 +1618,7 @@ public final class CharacterManager {
 
             if (!expiredProfiles.isEmpty()) {
                 roster.getProfiles().removeAll(expiredProfiles);
-                if (!roster.getSelectedCharacterId().isBlank()
-                        && roster.getProfile(roster.getSelectedCharacterId()) == null) {
-                    roster.setSelectedCharacterId("");
-                }
+                normalizeSelectedCharacterId(roster);
                 changed = true;
             }
         }
@@ -835,6 +1626,36 @@ public final class CharacterManager {
         if (changed) {
             persistence.saveRoster(roster);
         }
+    }
+
+    private void sanitizeActiveAbilityBindings(@Nonnull UUID accountId,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store) {
+        if (!ref.isValid()) {
+            return;
+        }
+
+        AbilityBindingComponent bindingComponent = store.getComponent(ref, AbilityBindingComponent.getComponentType());
+        if (bindingComponent == null) {
+            return;
+        }
+
+        AbilityBindingService.BindingSanitizationResult result = abilityBindingService.sanitizeInvalidBindings(bindingComponent);
+        if (!result.changed()) {
+            return;
+        }
+
+        HotbarAbilityIconManager hotbarIconManager = ExamplePlugin.get().getHotbarIconManager();
+        if (hotbarIconManager != null) {
+            for (int slot : result.clearedHotbarSlots()) {
+                hotbarIconManager.updateHotbarSlot(ref, store, slot, null);
+            }
+            if (!bindingComponent.getHotbarBindings().isEmpty()) {
+                hotbarIconManager.syncHotbarIcons(ref, store);
+            }
+        }
+
+        saveActiveCharacter(accountId, ref, store);
     }
 
     private void pruneRecoveryHistory(@Nonnull CharacterRosterData roster, @Nonnull CharacterModSettings settings) {
@@ -845,6 +1666,139 @@ public final class CharacterManager {
 
         long cutoff = System.currentTimeMillis() - recoveryWindowHours * 3_600_000L;
         roster.getRecoveryHistoryEpochMs().removeIf(timestamp -> timestamp == null || timestamp < cutoff);
+    }
+
+    private boolean normalizeAccountTokens(@Nonnull CharacterRosterData roster) {
+        boolean changed = false;
+        Map<String, Long> balances = roster.getAccountTokens();
+
+        for (CharacterTokenDefinition definition : CharacterTokenRegistry.getEnabled()) {
+            if (definition == null) {
+                continue;
+            }
+
+            String tokenId = definition.getId();
+            long current = balances.getOrDefault(tokenId, definition.getStartingBalance());
+            long clamped = clampTokenBalance(definition, current);
+            if (!balances.containsKey(tokenId) || current != clamped) {
+                balances.put(tokenId, clamped);
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    @Nonnull
+    private CharacterActionResult ensureCharacterSlotAvailableForCreation(@Nonnull CharacterRosterData roster,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull CharacterModSettings settings) {
+        int activeProfileCount = roster.getActiveProfileCount();
+        int maxCharacterSlots = settings.getMaxCharacterSlots();
+        if (activeProfileCount >= maxCharacterSlots) {
+            return CharacterActionResult.failure("You have reached the maximum number of character slots.");
+        }
+
+        int currentCapacity = calculateCharacterSlotCapacity(roster, ref, store, playerRef, settings);
+        if (activeProfileCount < currentCapacity) {
+            return CharacterActionResult.success("Character slot available.");
+        }
+        if (currentCapacity >= maxCharacterSlots) {
+            return CharacterActionResult.failure("You have reached the maximum number of character slots.");
+        }
+
+        CharacterTokenActionResult spendResult = spendAccountToken(playerRef.getUuid(),
+                playerRef.getUsername(),
+                settings.getExtraCharacterSlotTokenId(),
+                1L);
+        if (!spendResult.isSuccess()) {
+            return CharacterActionResult.failure("Character slot unlock token is required.");
+        }
+
+        roster.setUnlockedExtraCharacterSlots(roster.getUnlockedExtraCharacterSlots() + 1);
+        persistRoster(roster);
+        return CharacterActionResult.success("Character slot unlocked.");
+    }
+
+    private int calculateCharacterSlotCapacity(@Nonnull CharacterRosterData roster,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull CharacterModSettings settings) {
+        int baseSlots = settings.getDefaultCharacterSlots();
+        int unlockedSlots = roster.getUnlockedExtraCharacterSlots();
+        int prerequisiteGrantedSlots = calculatePrerequisiteGrantedCharacterSlots(ref, store, playerRef, settings);
+        return Math.min(settings.getMaxCharacterSlots(), baseSlots + unlockedSlots + prerequisiteGrantedSlots);
+    }
+
+    private int calculatePrerequisiteGrantedCharacterSlots(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            @Nonnull CharacterModSettings settings) {
+        int grantedSlots = 0;
+        for (CharacterModSettings.ConditionalSlotGrant slotGrant : settings.getConditionalSlotGrants()) {
+            if (slotGrant == null || slotGrant.getSlotCount() <= 0) {
+                continue;
+            }
+            if (PrerequisiteEvaluator.meetsRequirements(slotGrant.getPrerequisites(), null, store, ref, playerRef)) {
+                grantedSlots += slotGrant.getSlotCount();
+            }
+        }
+        return Math.max(0, grantedSlots);
+    }
+
+    @Nonnull
+    private CharacterTokenActionResult mutateAccountTokenBalance(@Nonnull UUID accountId,
+            @Nullable String username,
+            @Nonnull String tokenId,
+            long amount,
+            @Nonnull TokenMutationType mutationType) {
+        if (amount < 0L) {
+            return CharacterTokenActionResult.failure("Amount must be zero or greater.", tokenId);
+        }
+
+        CharacterTokenDefinition definition = CharacterTokenRegistry.get(tokenId);
+        if (definition == null) {
+            return CharacterTokenActionResult.failure("Unknown token type.", tokenId);
+        }
+        if (!definition.isEnabled()) {
+            return CharacterTokenActionResult.failure("Token type is disabled.", tokenId);
+        }
+
+        CharacterRosterData roster = getOrCreateRoster(accountId, username);
+        Map<String, Long> balances = roster.getAccountTokens();
+        long current = balances.getOrDefault(definition.getId(), definition.getStartingBalance());
+        long updated = switch (mutationType) {
+            case Add -> current + amount;
+            case Remove, Spend -> current - amount;
+            case Set -> amount;
+        };
+
+        if ((mutationType == TokenMutationType.Remove || mutationType == TokenMutationType.Spend) && updated < 0L) {
+            return CharacterTokenActionResult.failure("Insufficient tokens.", tokenId);
+        }
+
+        long clamped = clampTokenBalance(definition, updated);
+        if ((mutationType == TokenMutationType.Remove || mutationType == TokenMutationType.Spend) && clamped > updated) {
+            return CharacterTokenActionResult.failure("Insufficient tokens.", tokenId);
+        }
+
+        balances.put(definition.getId(), clamped);
+        persistRoster(roster);
+
+        String message = switch (mutationType) {
+            case Add -> "Added token balance.";
+            case Remove -> "Removed token balance.";
+            case Set -> "Set token balance.";
+            case Spend -> "Spent token balance.";
+        };
+        return CharacterTokenActionResult.success(message, definition.getId(), clamped);
+    }
+
+    private long clampTokenBalance(@Nonnull CharacterTokenDefinition definition, long value) {
+        return Math.max(0L, Math.min(definition.getMaxBalance(), value));
     }
 
     private boolean isRecoveryRateLimited(@Nonnull CharacterRosterData roster, @Nonnull CharacterModSettings settings) {
@@ -878,7 +1832,7 @@ public final class CharacterManager {
 
             SpatialResource<Ref<EntityStore>, EntityStore> playerSpatialResource =
                     store.getResource(EntityModule.get().getPlayerSpatialResourceType());
-            ObjectList<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
+            List<Ref<EntityStore>> nearbyPlayers = SpatialResource.getThreadLocalReferenceList();
             playerSpatialResource.getSpatialStructure().collect(transform.getPosition(), 96.0, nearbyPlayers);
             for (Ref<EntityStore> playerRef : nearbyPlayers) {
                 if (!playerRef.isValid()) {
@@ -906,33 +1860,150 @@ public final class CharacterManager {
             @Nonnull Store<EntityStore> store,
             @Nonnull PlayerRef playerRef) {
         CharacterModSettings settings = getSettings();
-        if (!settings.isUseSharedLobbyWorld()) {
+        if (!settings.isUseLobbyInstance()) {
             return;
         }
-        World lobbyWorld = Universe.get().getWorld(settings.getLobbyWorldId());
-        if (lobbyWorld == null) {
+        String lobbyInstanceTemplateId = settings.getLobbyInstanceTemplateId();
+        if (lobbyInstanceTemplateId == null || lobbyInstanceTemplateId.isBlank()) {
             return;
         }
-        teleportToWorldSpawn(ref, store, lobbyWorld, playerRef.getUuid());
+        if (!InstancesPlugin.doesInstanceAssetExist(lobbyInstanceTemplateId)) {
+            return;
+        }
+
+        World currentWorld = store.getExternalData().getWorld();
+
+        Transform returnPoint = resolveCurrentTransform(store, ref, playerRef.getUuid(), currentWorld);
+        CompletableFuture<World> lobbyWorldFuture = InstancesPlugin.get().spawnInstance(lobbyInstanceTemplateId, currentWorld, returnPoint);
+        InstancesPlugin.teleportPlayerToLoadingInstance(ref, store, lobbyWorldFuture, null);
         playerRef.getPacketHandler().writeNoCache(new SetServerCamera(ClientCameraView.Custom, false, null));
+    }
+
+    private boolean isLobbyWorld(@Nullable World world) {
+        if (world == null) {
+            return false;
+        }
+
+        CharacterModSettings settings = getSettings();
+        if (!settings.isUseLobbyInstance()) {
+            return false;
+        }
+
+        String lobbyTemplateId = settings.getLobbyInstanceTemplateId();
+        if (lobbyTemplateId == null || lobbyTemplateId.isBlank()) {
+            return false;
+        }
+
+        String worldName = world.getName();
+        return worldName != null && (worldName.equals(lobbyTemplateId)
+                || worldName.startsWith("instance-" + lobbyTemplateId + "-"));
+    }
+
+    private void openCharacterSelectPage(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player == null) {
+            return;
+        }
+
+        CharacterProfileData previewProfile = getActiveProfile(playerRef.getUuid(), playerRef.getUsername());
+        if (previewProfile == null) {
+            List<CharacterProfileData> profiles = getSelectableProfilesFor(playerRef.getUuid(), playerRef.getUsername());
+            String lastSelectedCharacterId = getLastSelectedCharacterId(playerRef.getUuid(), playerRef.getUsername());
+            if (!lastSelectedCharacterId.isBlank()) {
+                previewProfile = profiles.stream()
+                        .filter(profile -> profile != null
+                                && lastSelectedCharacterId.equalsIgnoreCase(profile.getCharacterId()))
+                        .findFirst()
+                        .orElse(null);
+            }
+            if (previewProfile == null && !profiles.isEmpty()) {
+                previewProfile = profiles.getFirst();
+            }
+        }
+        if (previewProfile != null) {
+            applyCharacterPreview(ref, store, playerRef, previewProfile.getRaceId(), previewProfile.getAppearance());
+        } else {
+            applyCharacterAppearancePreviewCamera(ref, store, playerRef);
+        }
+
+        suppressNextCharacterUiReopen(playerRef);
+        player.getPageManager().openCustomPage(ref, store, new org.pixelbays.rpg.character.ui.CharacterSelectPage(playerRef));
+    }
+
+    public void reopenCharacterSelectPage(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            if (!ref.isValid()) {
+                return;
+            }
+            suppressNextCharacterUiReopen(playerRef);
+            openCharacterSelectPage(ref, store, playerRef);
+        });
+    }
+
+    public void openDeletedCharacterRecoveryPage(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef) {
+        World world = store.getExternalData().getWorld();
+        world.execute(() -> {
+            if (!ref.isValid()) {
+                return;
+            }
+            Player player = store.getComponent(ref, Player.getComponentType());
+            if (player == null) {
+                return;
+            }
+            suppressNextCharacterUiReopen(playerRef);
+            player.getPageManager().openCustomPage(ref, store,
+                    new org.pixelbays.rpg.character.ui.CharacterRecoveryPage(playerRef));
+        });
+    }
+
+    private void suppressNextCharacterUiReopen(@Nullable PlayerRef playerRef) {
+        if (playerRef == null || playerRef.getUuid() == null) {
+            return;
+        }
+        pendingUiTransitionSuppressions.put(playerRef.getUuid(), Boolean.TRUE);
+    }
+
+    private boolean consumePendingCharacterUiSuppression(@Nullable PlayerRef playerRef) {
+        if (playerRef == null || playerRef.getUuid() == null) {
+            return false;
+        }
+        return pendingUiTransitionSuppressions.remove(playerRef.getUuid()) != null;
     }
 
     private void moveToGameplayWorld(@Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store,
             @Nonnull PlayerRef playerRef,
             @Nonnull CharacterProfileData profile) {
-        World savedWorld = resolveSavedWorld(profile);
-        Transform savedTransform = resolveSavedTransform(profile);
-        if (savedWorld != null && savedTransform != null) {
-            store.addComponent(ref, Teleport.getComponentType(), Teleport.createForPlayer(savedWorld, savedTransform));
-            return;
+        LoginSpawnMode loginSpawnMode = getSettings().getLoginSpawnMode();
+
+        if (loginSpawnMode == LoginSpawnMode.LastSavedLocation) {
+            World savedWorld = resolveSavedWorld(profile);
+            Transform savedTransform = resolveSavedTransform(profile);
+            if (savedWorld != null && savedTransform != null && !isLobbyWorld(savedWorld)) {
+                store.addComponent(ref, Teleport.getComponentType(), Teleport.createForPlayer(savedWorld, savedTransform));
+                return;
+            }
+        }
+
+        if (loginSpawnMode == LoginSpawnMode.LocalSafeSpot) {
+            World localWorld = resolveSavedWorld(profile);
+            if (localWorld != null && !isLobbyWorld(localWorld)) {
+                teleportToWorldSpawn(ref, store, localWorld, playerRef.getUuid());
+                return;
+            }
         }
 
         World world = Universe.get().getDefaultWorld();
-        if (world == null) {
-            return;
+        if (world != null) {
+            teleportToWorldSpawn(ref, store, world, playerRef.getUuid());
         }
-        teleportToWorldSpawn(ref, store, world, playerRef.getUuid());
     }
 
     @Nullable
@@ -959,6 +2030,18 @@ public final class CharacterManager {
     }
 
     @Nonnull
+    private Transform resolveCurrentTransform(@Nonnull Store<EntityStore> store,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull UUID playerId,
+            @Nonnull World currentWorld) {
+        TransformComponent transformComponent = store.getComponent(ref, TransformComponent.getComponentType());
+        if (transformComponent != null) {
+            return new Transform(transformComponent.getPosition().clone(), transformComponent.getRotation().clone());
+        }
+        return resolveSpawnTransform(currentWorld, playerId, store, ref);
+    }
+
+    @Nonnull
     private Transform resolveSpawnTransform(@Nonnull World targetWorld,
             @Nonnull UUID playerId,
             @Nonnull Store<EntityStore> store,
@@ -977,6 +2060,25 @@ public final class CharacterManager {
         }
 
         return new Transform(0, 100, 0, 0.0f, 0.0f, 0.0f);
+    }
+
+    private void normalizeSelectedCharacterId(@Nonnull CharacterRosterData roster) {
+        String selectedCharacterId = roster.getSelectedCharacterId();
+        if (!selectedCharacterId.isBlank()) {
+            CharacterProfileData selectedProfile = roster.getProfile(selectedCharacterId);
+            if (selectedProfile != null && !selectedProfile.isSoftDeleted()) {
+                return;
+            }
+        }
+
+        for (CharacterProfileData profile : roster.getProfiles()) {
+            if (profile != null && !profile.isSoftDeleted() && !profile.getCharacterId().isBlank()) {
+                roster.setSelectedCharacterId(profile.getCharacterId());
+                return;
+            }
+        }
+
+        roster.setSelectedCharacterId("");
     }
 
     @Nullable
@@ -1064,6 +2166,30 @@ public final class CharacterManager {
     }
 
     @Nonnull
+    private String resolvePrimaryKnownClassId(@Nullable CharacterProfileData profile) {
+        if (profile == null) {
+            return "";
+        }
+
+        String primaryClassId = profile.getPrimaryClassId();
+        if (resolveClassDefinition(primaryClassId) != null) {
+            return primaryClassId;
+        }
+
+        return resolvePrimaryKnownClassId(profile.getClassProgression());
+    }
+
+    @Nonnull
+    private String resolvePrimaryKnownClassId(@Nullable ClassComponent classComponent) {
+        if (classComponent == null) {
+            return "";
+        }
+
+        String primaryClassId = ExamplePlugin.get().getClassManagementSystem().getPrimaryKnownClassId(classComponent);
+        return primaryClassId == null ? "" : primaryClassId;
+    }
+
+    @Nonnull
     private String resolveDefaultStarterClassId() {
         List<ClassDefinition> startingClasses = getStartingClassDefinitions();
         if (startingClasses.isEmpty()) {
@@ -1087,9 +2213,6 @@ public final class CharacterManager {
     private List<ClassDefinition> getStartingClassDefinitions() {
         List<ClassDefinition> startingClasses = new ArrayList<>();
         var classManagementSystem = ExamplePlugin.get().getClassManagementSystem();
-        if (classManagementSystem == null) {
-            return startingClasses;
-        }
 
         for (ClassDefinition classDefinition : classManagementSystem.getAllClassDefinitions().values()) {
             if (classDefinition == null || !classDefinition.isEnabled() || !classDefinition.isStartingClass()) {
@@ -1114,7 +2237,7 @@ public final class CharacterManager {
     }
 
     @Nonnull
-    private CharacterModSettings getSettings() {
+    public CharacterModSettings getSettings() {
         RpgModConfig config = resolveConfig();
         return config == null ? new CharacterModSettings() : config.getCharacterSettings();
     }
@@ -1138,6 +2261,13 @@ public final class CharacterManager {
         persistence.saveRoster(roster);
     }
 
+    private enum TokenMutationType {
+        Add,
+        Remove,
+        Set,
+        Spend
+    }
+
     @Nonnull
     private String resolvePlayerUsername(@Nonnull Store<EntityStore> store, @Nonnull Ref<EntityStore> ref) {
         PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
@@ -1154,12 +2284,15 @@ public final class CharacterManager {
             case "Logged out to character select." -> Message.translation("pixelbays.rpg.character.success.loggedOutToSelect");
             case "Logout timer started." -> Message.translation("pixelbays.rpg.character.success.logoutTimerStarted");
             case "Character created." -> Message.translation("pixelbays.rpg.character.success.created");
+                case "Character created and unlocked a new slot." -> Message.translation("pixelbays.rpg.character.success.createdUnlockedSlot");
             case "Selected character." -> Message.translation("pixelbays.rpg.character.success.selected");
             case "Character deleted." -> Message.translation("pixelbays.rpg.character.success.deleted");
             case "Character marked for recovery." -> Message.translation("pixelbays.rpg.character.success.markedForRecovery");
             case "Character recovered." -> Message.translation("pixelbays.rpg.character.success.recovered");
             case "Character creation is disabled." -> Message.translation("pixelbays.rpg.character.error.creationDisabled");
             case "You have reached the maximum number of character slots." -> Message.translation("pixelbays.rpg.character.error.maxSlots");
+                case "Character slot unlock token is required." -> Message.translation("pixelbays.rpg.character.error.slotUnlockTokenRequired")
+                    .param("token", resolveExtraCharacterSlotTokenDisplayName());
             case "Character id is required." -> Message.translation("pixelbays.rpg.character.error.idRequired");
             case "Character not found." -> Message.translation("pixelbays.rpg.character.error.notFound");
             case "Character is pending recovery and cannot be selected." -> Message.translation("pixelbays.rpg.character.error.pendingRecovery");
@@ -1204,6 +2337,17 @@ public final class CharacterManager {
         }
 
         return assetMap.getAssetMap().values().iterator().next();
+    }
+
+    @Nonnull
+    private String resolveExtraCharacterSlotTokenDisplayName() {
+        CharacterTokenDefinition definition = CharacterTokenRegistry.get(getSettings().getExtraCharacterSlotTokenId());
+        if (definition != null && definition.isEnabled()) {
+            return definition.getDisplayName();
+        }
+
+        String configuredTokenId = getSettings().getExtraCharacterSlotTokenId();
+        return configuredTokenId.isBlank() ? "Character Slot Token" : configuredTokenId;
     }
 
     private static final class LogoutThreadFactory implements ThreadFactory {

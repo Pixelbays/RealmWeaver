@@ -11,12 +11,14 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractPlayer
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
+import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class CharacterUiCommand extends AbstractPlayerCommand {
 
     public CharacterUiCommand() {
         super("ui", "Open the character select screen");
+        requirePermission(HytalePermissions.fromCommand("player"));
     }
 
     @Override
