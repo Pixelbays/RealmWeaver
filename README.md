@@ -30,7 +30,7 @@ Current implemented or active feature areas include:
 - currencies, banks, auction house, and mail
 - lockpicking UI and packet-driven gameplay input
 - XP HUD updates and NPC RPG support hooks
-Here are some early clips
+- Here are some early clips
 https://www.youtube.com/playlist?list=PLgjeVEYfxVrj5NQ-wwFIBY06_Y9bYcpOs
 
 
