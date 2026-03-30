@@ -64,7 +64,7 @@ Because the systems are asset-driven, Realmweaver is suited to both handcrafted 
 
 ## Asset pack ecosystem
 
-Realmweaver Core is a framework, itself adds nothing without a assetpack, which is all built by you! (or the example packs)
+Realmweaver Core is an framework, itself adds nothing without a assetpack, which is all built by you! (or the example packs)
 
 Recommended naming format:
 
@@ -101,7 +101,10 @@ The same framework can support multiple branded content packs, making it practic
 
 ## Project architecture
 
-The composition root is [src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java). It registers:
+The composition root is
+[src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java). 
+
+It registers:
 
 - asset stores
 - ECS components
