@@ -15,14 +15,16 @@ import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.item.metadata.RandomizedEquipmentData;
 import org.pixelbays.rpg.leveling.component.LevelProgressionComponent;
 
+import com.hypixel.hytale.component.ArchetypeChunk;
+import com.hypixel.hytale.component.CommandBuffer;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.event.EventRegistry;
+import com.hypixel.hytale.component.query.Query;
+import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
-import com.hypixel.hytale.server.core.entity.LivingEntity;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.event.events.entity.LivingEntityInventoryChangeEvent;
 import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryChangeEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.transaction.ItemStackTransaction;
@@ -60,28 +62,46 @@ public class EquipmentRestrictions {
 	}
 
 	/**
-	 * Register inventory change listener.
+	 * Create an ECS inventory change system for player equipment validation.
 	 */
-	public void register(@Nonnull EventRegistry eventRegistry) {
-		eventRegistry.registerGlobal(LivingEntityInventoryChangeEvent.class, this::onInventoryChange);
+	@Nonnull
+	public EntityEventSystem<EntityStore, InventoryChangeEvent> createInventoryChangeSystem() {
+		return new EntityEventSystem<>(InventoryChangeEvent.class) {
+			@Override
+			public void handle(int index,
+					@Nonnull ArchetypeChunk<EntityStore> archetypeChunk,
+					@Nonnull Store<EntityStore> store,
+					@Nonnull CommandBuffer<EntityStore> commandBuffer,
+					@Nonnull InventoryChangeEvent event) {
+				if (Boolean.TRUE.equals(suppressEvents.get())) {
+					return;
+				}
+
+				Player player = archetypeChunk.getComponent(index, Player.getComponentType());
+				if (player == null) {
+					return;
+				}
+
+				Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
+				if (ref == null || !ref.isValid()) {
+					return;
+				}
+
+				onInventoryChange(player, ref, store, event.getItemContainer());
+			}
+
+			@Nonnull
+			@Override
+			public Query<EntityStore> getQuery() {
+				return Query.any();
+			}
+		};
 	}
 
-	private void onInventoryChange(@Nonnull LivingEntityInventoryChangeEvent event) {
-		if (Boolean.TRUE.equals(suppressEvents.get())) {
-			return;
-		}
-
-		LivingEntity entity = event.getEntity();
-		if (!(entity instanceof Player)) {
-			return;
-		}
-
-		Ref<EntityStore> ref = entity.getReference();
-		if (ref == null || !ref.isValid()) {
-			return;
-		}
-
-		Store<EntityStore> store = ref.getStore();
+	private void onInventoryChange(@Nonnull Player player,
+			@Nonnull Ref<EntityStore> ref,
+			@Nonnull Store<EntityStore> store,
+			@Nullable ItemContainer container) {
 		ClassComponent classComponent = store.getComponent(ref, ClassComponent.getComponentType());
 		if (classComponent == null) {
 			return;
@@ -115,8 +135,7 @@ public class EquipmentRestrictions {
 			return;
 		}
 
-		Inventory inventory = entity.getInventory();
-		ItemContainer container = event.getItemContainer();
+		Inventory inventory = player.getInventory();
 		if (container == null || inventory == null) {
 			return;
 		}
