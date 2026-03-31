@@ -104,8 +104,8 @@ import org.pixelbays.rpg.guild.event.GuildMemberKickedEvent;
 import org.pixelbays.rpg.guild.event.GuildRoleAssignedEvent;
 import org.pixelbays.rpg.guild.event.GuildRoleCreatedEvent;
 import org.pixelbays.rpg.guild.event.GuildRolePermissionChangedEvent;
-import org.pixelbays.rpg.hud.XpBarHudService;
-import org.pixelbays.rpg.hud.XpBarHudUpdateSystem;
+import org.pixelbays.rpg.hud.PlayerHudService;
+import org.pixelbays.rpg.hud.PlayerHudUpdateSystem;
 import org.pixelbays.rpg.inventory.input.InventoryOpenFilter;
 import org.pixelbays.rpg.inventory.system.InventoryHandlingSystem;
 import org.pixelbays.rpg.item.config.RandomizedEquipmentDefinition;
@@ -223,7 +223,7 @@ public class Realmweavers extends JavaPlugin {
         private TalentSystem talentSystem;
         private AchievementSystem achievementSystem;
         private ChatManager chatManager;
-        private XpBarHudService xpBarHudService;
+        private PlayerHudService playerHudService;
         private WorldTravelManager worldTravelManager;
 
         private ComponentType<EntityStore, AchievementComponent> achievementComponentType;
@@ -594,14 +594,14 @@ public class Realmweavers extends JavaPlugin {
 
         private void registerHudSystems() {
 
-                this.xpBarHudService = new XpBarHudService(this.levelSystem);
-                this.getEntityStoreRegistry().registerSystem(new XpBarHudUpdateSystem(0.2f, this.xpBarHudService));
+                this.playerHudService = new PlayerHudService(this.levelSystem);
+                this.getEntityStoreRegistry().registerSystem(new PlayerHudUpdateSystem(0.2f, this.playerHudService));
                 this.getEventRegistry().registerGlobal(PlayerReadyEvent.class,
-                                event -> this.xpBarHudService.ensureAndUpdate(event.getPlayerRef(), event.getPlayerRef().getStore()));
+                                event -> this.playerHudService.ensureAndUpdate(event.getPlayerRef(), event.getPlayerRef().getStore()));
                 this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class,
-                                event -> this.xpBarHudService.remove(event.getPlayerRef().getUuid()));
+                                event -> this.playerHudService.remove(event.getPlayerRef().getUuid()));
                 this.getEventRegistry().register(ActiveClassChangedEvent.class,
-                                event -> this.xpBarHudService.ensureAndUpdate(event.entityRef(), event.entityRef().getStore()));
+                                event -> this.playerHudService.ensureAndUpdate(event.entityRef(), event.entityRef().getStore()));
         }
 
         private void initializeGameplayManagers() {
@@ -827,8 +827,8 @@ public class Realmweavers extends JavaPlugin {
         }
 
         @Nullable
-        public XpBarHudService getXpBarHudService() {
-                return xpBarHudService;
+        public PlayerHudService getPlayerHudService() {
+                return playerHudService;
         }
 
         @Nonnull

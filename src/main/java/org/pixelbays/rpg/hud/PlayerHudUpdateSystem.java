@@ -16,11 +16,11 @@ import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-public class XpBarHudUpdateSystem extends DelayedEntitySystem<EntityStore> {
+public class PlayerHudUpdateSystem extends DelayedEntitySystem<EntityStore> {
 
-    private final XpBarHudService hudService;
+    private final PlayerHudService hudService;
 
-    public XpBarHudUpdateSystem(float intervalSec, @Nonnull XpBarHudService hudService) {
+    public PlayerHudUpdateSystem(float intervalSec, @Nonnull PlayerHudService hudService) {
         super(intervalSec);
         this.hudService = hudService;
     }
@@ -51,15 +51,12 @@ public class XpBarHudUpdateSystem extends DelayedEntitySystem<EntityStore> {
         if (playerType == null && playerRefType == null) {
             return Query.any();
         }
-
         if (playerType == null) {
             return playerRefType;
         }
-
         if (playerRefType == null) {
             return playerType;
         }
-
         return Query.and(playerType, playerRefType);
     }
 

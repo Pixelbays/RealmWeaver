@@ -205,23 +205,6 @@ Group #LayoutRoot {
       Anchor: (Height: 138);
       Padding: (Right: 4);
     }
-
-    Group #HardcoreSection {
-      LayoutMode: Left;
-      Visible: false;
-      Anchor: (Height: 44, Top: 12);
-
-      Label {
-        Text: %rpg.character.creator.hardcoreLabel;
-        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
-        FlexWeight: 1;
-      }
-
-      $C.@CheckBox #HardcoreCheck {
-        Value: false;
-        Anchor: (Top: 10);
-      }
-    }
   }
 
   Group #RightSummaryPanel {
@@ -263,14 +246,12 @@ Group #LayoutRoot {
       Group { FlexWeight: 1; }
 
       TextButton #RotateLeftButton {
-        Visible: false;
         Text: "LEFT";
         Style: $C.@DefaultTextButtonStyle;
         Anchor: (Width: 54, Height: 46, Right: 8);
       }
 
       TextButton #RotateRightButton {
-        Visible: false;
         Text: "RIGHT";
         Style: $C.@DefaultTextButtonStyle;
         Anchor: (Width: 54, Height: 46);
@@ -316,7 +297,7 @@ Group #LayoutRoot {
       OutlineSize: 1;
 
       Label {
-        Text: %rpg.character.creator.confirmPopupTitle;
+        Text: %pixelbays.rpg.character.creator.confirmPopupTitle;
         Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, HorizontalAlignment: Center);
         Anchor: (Bottom: 10);
       }
@@ -334,13 +315,13 @@ Group #LayoutRoot {
         Anchor: (Height: 44);
 
         TextButton #CreateConfirmCancelButton {
-          Text: %rpg.character.creator.confirmPopupCancel;
+          Text: %pixelbays.rpg.character.creator.confirmPopupCancel;
           Style: $C.@DefaultTextButtonStyle;
           Anchor: (Width: 198, Height: 44, Right: 8);
         }
 
         TextButton #CreateConfirmAcceptButton {
-          Text: %rpg.character.creator.confirmPopupAccept;
+          Text: %pixelbays.rpg.character.creator.confirmPopupAccept;
           Style: $C.@DefaultTextButtonStyle;
           Anchor: (Width: 198, Height: 44);
         }

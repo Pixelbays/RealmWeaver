@@ -12,8 +12,9 @@ import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.config.settings.StatModSettings.RollModifierRange;
 import org.pixelbays.rpg.global.system.RNGSystem;
-import org.pixelbays.rpg.hud.XpBarHud;
-import org.pixelbays.rpg.hud.XpBarHudService;
+import org.pixelbays.rpg.hud.DiceOverlayHudModule;
+import org.pixelbays.rpg.hud.DiceOverlayHudServiceModule;
+import org.pixelbays.rpg.hud.PlayerHudService;
 
 import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.codec.KeyedCodec;
@@ -172,12 +173,12 @@ public class DiceRollInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        XpBarHudService hudService = Realmweavers.get().getXpBarHudService();
+        PlayerHudService hudService = Realmweavers.get().getPlayerHudService();
         if (hudService == null) {
             return;
         }
 
-        hudService.showDiceRoll(entityRef, entityRef.getStore(), new XpBarHudService.DiceRollRequest(
+        hudService.showDiceRoll(entityRef, entityRef.getStore(), new DiceOverlayHudServiceModule.DiceRollRequest(
                 displayMode.toHudMode(),
                 Math.max(0.2f, rollTimeSeconds),
                 resolveDiceNotation(localMin, localMax, rolledDice),
@@ -377,8 +378,8 @@ public class DiceRollInteraction extends SimpleInstantInteraction {
         LARGE;
 
         @Nonnull
-        private XpBarHud.DiceOverlayMode toHudMode() {
-            return this == LARGE ? XpBarHud.DiceOverlayMode.LARGE : XpBarHud.DiceOverlayMode.SMALL;
+        private DiceOverlayHudModule.DiceOverlayMode toHudMode() {
+            return this == LARGE ? DiceOverlayHudModule.DiceOverlayMode.LARGE : DiceOverlayHudModule.DiceOverlayMode.SMALL;
         }
     }
 

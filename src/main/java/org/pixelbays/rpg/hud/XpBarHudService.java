@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -87,6 +88,11 @@ public class XpBarHudService {
             return;
         }
 
+        String activeClassId = resolveActiveClassId(ref, store);
+        XpBarHud.DiceRollViewData diceRoll = resolveDiceRoll(playerRef.getUuid());
+        List<XpBarHud.ResourceBarData> resourceBars = resolveResourceBars(ref, store);
+        List<XpBarHud.PartyMemberHudData> partyMembers = resolvePartyMembers(playerRef);
+
         XpBarHud hud = hudByPlayerId.compute(playerRef.getUuid(), (id, existing) -> {
             if (existing == null) {
                 return new XpBarHud(playerRef);
@@ -96,6 +102,7 @@ public class XpBarHudService {
             }
             return existing;
         });
+        hud = Objects.requireNonNull(hud, "hud");
 
         HudManager hudManager = player.getHudManager();
         if (Realmweavers.get().getCharacterManager().requiresCharacterUiLock(playerRef)) {
@@ -106,14 +113,14 @@ public class XpBarHudService {
         }
 
         if (hudManager.getCustomHud() != hud) {
+            primeHud(hud, ref, store, activeClassId, diceRoll, resourceBars, partyMembers);
             hudManager.setCustomHud(playerRef, hud);
+            return;
         }
 
-        String activeClassId = resolveActiveClassId(ref, store);
-
-        hud.updateDiceRoll(resolveDiceRoll(playerRef.getUuid()));
-        hud.updateResources(resolveResourceBars(ref, store));
-        hud.updatePartyMembers(resolvePartyMembers(playerRef));
+        hud.updateDiceRoll(diceRoll);
+        hud.updateResources(resourceBars);
+        hud.updatePartyMembers(partyMembers);
 
         if (activeClassId == null || activeClassId.isBlank()) {
             hud.hideProgress();
@@ -142,6 +149,43 @@ public class XpBarHudService {
         int remaining = Math.max(0, next - current);
 
         hud.updateProgress(labelPrefix, level, ratio, current, next, remaining);
+    }
+
+    private void primeHud(
+            @Nonnull XpBarHud hud,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nullable String activeClassId,
+            @Nullable XpBarHud.DiceRollViewData diceRoll,
+            @Nonnull List<XpBarHud.ResourceBarData> resourceBars,
+            @Nonnull List<XpBarHud.PartyMemberHudData> partyMembers) {
+        hud.primeDiceRoll(diceRoll);
+        hud.primeResources(resourceBars);
+        hud.primePartyMembers(partyMembers);
+
+        if (activeClassId == null || activeClassId.isBlank()) {
+            hud.primeHideProgress();
+            return;
+        }
+
+        String systemId = resolveActiveClassSystemId(activeClassId);
+        String labelPrefix = resolveActiveClassLabel(activeClassId, systemId);
+        int level = levelSystem.getLevel(ref, systemId);
+        if (level <= 0) {
+            level = 1;
+        }
+
+        float currentExp = levelSystem.getExperience(ref, systemId);
+        float expToNext = levelSystem.getExpToNextLevel(ref, systemId);
+        if (expToNext <= 0.0001f) {
+            hud.primeMax(labelPrefix, level);
+            return;
+        }
+
+        int current = Math.max(0, Math.round(currentExp));
+        int next = Math.max(0, Math.round(expToNext));
+        int remaining = Math.max(0, next - current);
+        hud.primeProgress(labelPrefix, level, currentExp / expToNext, current, next, remaining);
     }
 
     @Nonnull

@@ -1,7 +1,48 @@
 $C = "../Common.ui";
 
 $C.@PageOverlay {}
+TabNavigation #GuildTabs {
+  Style: $C.@TopTabsStyle;
+  SelectedTab: "Tab1";
+  Anchor: (Top: 100, Width: 800, Height: 100);
+  // Basic Guild Info Tab, Name, Emblem, Description, Open Invites, how many members online, Message of the day, upcoming guild events, etc.
+  TabButton #overviewTab {
+    Icon: "icon.png";
+    TooltipText: "Guild Overview";
+    Id: "Tab1";
+  }
+  // Guild Roster Tab, List of members, their roles, online status, etc.
+  TabButton #RosterTab {
+    Icon: "icon.png";
+    TooltipText: "Guild Roster";
+    Id: "Tab2";
+  }
+  // Guild Invites Tab, List of pending invites, options to accept or decline invites, pending applications, etc. // and where to set if accecpting invites. 
+  TabButton #InvitesTab {
+    Icon: "icon.png";
+    TooltipText: "Guild Invites";
+    Id: "Tab3";
+  }
+  // Guild Calendar Tab, shows upcoming guild events, raids, meetings, etc. with options to RSVP or set reminders.
+  TabButton #CalendarTab {
+    Icon: "icon.png";
+    TooltipText: "Guild Calendar";
+    Id: "Tab4";
+  }
+    // Guild Management Tab - Only visible to players with appropriate permissions, options to manage guild settings, roles, permissions.
+  TabButton #GuildManagementTab {
+    Icon: "icon.png";
+    TooltipText: "Guild Management";
+    Id: "Tab5";
+  }
+   // Role Management Tab - Only visible to players with appropriate permissions, options to manage guild settings, roles, permissions.
+  TabButton #RoleManagementTab {
+    Icon: "icon.png";
+    TooltipText: "Role Management";
+    Id: "Tab6";
+  }
 
+}
 $C.@DecoratedContainer {
   Anchor: (Width: 820, Height: 640);
 
@@ -13,9 +54,11 @@ $C.@DecoratedContainer {
     }
   }
 
+
   #Content {
     LayoutMode: Top;
     Padding: (Full: 12);
+
 
     Label #StatusLabel {
       Text: "";
@@ -41,6 +84,7 @@ $C.@DecoratedContainer {
     }
 
     Group #RosterPanel {
+      Visible: false;
       LayoutMode: Top;
       Anchor: (Bottom: 12);
 
@@ -53,131 +97,699 @@ $C.@DecoratedContainer {
       Label #RosterLabel {
         Text: "";
         Style: (...$C.@DefaultLabelStyle, FontSize: 12);
-      }
-    }
-
-    Group #InviteRow {
-      LayoutMode: Left;
-      Anchor: (Height: 40, Bottom: 8);
-
-      $C.@TextField #InviteeField {
-        @Anchor = (Width: 420, Height: 40);
-        PlaceholderText: %pixelbays.rpg.ui.placeholder.playerName;
+        Anchor: (Bottom: 8);
       }
 
-      Group { FlexWeight: 1; }
-
-      TextButton #InviteButton {
-        Text: %pixelbays.rpg.guild.ui.inviteButton;
-        Style: $C.@DefaultTextButtonStyle;
-        Anchor: (Width: 170, Height: 40);
-      }
-    }
-
-    Group #ApplyRow {
-      LayoutMode: Left;
-      Anchor: (Height: 40, Bottom: 8);
-
-      $C.@TextField #GuildField {
-        @Anchor = (Width: 420, Height: 40);
-        PlaceholderText: %pixelbays.rpg.ui.placeholder.guildNameOrTag;
-      }
-
-      Group { FlexWeight: 1; }
-
-      TextButton #ApplyButton {
-        Text: %pixelbays.rpg.guild.ui.applyButton;
-        Style: $C.@DefaultTextButtonStyle;
-        Anchor: (Width: 170, Height: 40);
-      }
-    }
-
-    Group #RoleCreateRow {
-      LayoutMode: Left;
-      Anchor: (Height: 40, Bottom: 8);
-
-      $C.@TextField #RoleNameField {
-        @Anchor = (Width: 420, Height: 40);
-        PlaceholderText: %pixelbays.rpg.ui.placeholder.roleName;
-      }
-
-      Group { FlexWeight: 1; }
-
-      TextButton #CreateRoleButton {
-        Text: %pixelbays.rpg.guild.ui.createRoleButton;
-        Style: $C.@DefaultTextButtonStyle;
-        Anchor: (Width: 170, Height: 40);
-      }
-    }
-
-    Group #RoleAssignRow {
-      LayoutMode: Left;
-      Anchor: (Height: 40, Bottom: 8);
-
-      $C.@TextField #AssignPlayerField {
-        @Anchor = (Width: 260, Height: 40);
-        PlaceholderText: %pixelbays.rpg.ui.placeholder.playerName;
-      }
-
-      Group { Anchor: (Width: 8); }
-
-      $C.@TextField #AssignRoleField {
-        @Anchor = (Width: 260, Height: 40);
-        PlaceholderText: %pixelbays.rpg.ui.placeholder.roleId;
-      }
-
-      Group { FlexWeight: 1; }
-
-      TextButton #AssignRoleButton {
-        Text: %pixelbays.rpg.guild.ui.assignRoleButton;
-        Style: $C.@DefaultTextButtonStyle;
-        Anchor: (Width: 170, Height: 40);
-      }
-    }
-
-    Group #RolePermRow {
-      LayoutMode: Left;
-      Anchor: (Height: 44, Bottom: 12);
-
-      $C.@TextField #PermRoleField {
-        @Anchor = (Width: 210, Height: 44);
-        PlaceholderText: %pixelbays.rpg.ui.placeholder.roleId;
-      }
-
-      Group { Anchor: (Width: 8); }
-
-      $C.@TextField #PermNameField {
-        @Anchor = (Width: 210, Height: 44);
-        PlaceholderText: %pixelbays.rpg.ui.placeholder.permission;
-      }
-
-      Group { Anchor: (Width: 12); }
-
-      Group {
+      Group #RosterSelectionRow {
+        Visible: false;
         LayoutMode: Left;
-        Anchor: (Height: 44);
+        Anchor: (Height: 40, Bottom: 8);
 
         Label {
-          Text: %pixelbays.rpg.guild.ui.enabledLabel;
+          Text: %pixelbays.rpg.guild.ui.rosterMemberSelectLabel;
           Style: (...$C.@DefaultLabelStyle, FontSize: 12);
-          Anchor: (Right: 6);
+          Anchor: (Width: 150, Top: 12, Right: 8);
         }
 
-        $C.@CheckBox #PermEnabledCheck {
-          Value: false;
-          Anchor: (Top: 10);
+        $C.@DropdownBox #RosterMemberDropdown {
+          @Anchor = (Width: 610, Height: 40);
+          NoItemsText: %pixelbays.rpg.guild.ui.rosterNoSelectableMembers;
         }
       }
 
-      Group { FlexWeight: 1; }
+      Group #RosterRoleRow {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
 
-      TextButton #SetPermButton {
-        Text: %pixelbays.rpg.guild.ui.setPermButton;
-        Style: $C.@DefaultTextButtonStyle;
-        Anchor: (Width: 170, Height: 44);
+        Label {
+          Text: %pixelbays.rpg.guild.ui.rosterRoleSelectLabel;
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Width: 150, Top: 12, Right: 8);
+        }
+
+        $C.@DropdownBox #RosterRoleDropdown {
+          @Anchor = (Width: 440, Height: 40);
+          NoItemsText: %pixelbays.rpg.guild.ui.roleListEmpty;
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #RosterAssignRoleButton {
+          Text: %pixelbays.rpg.guild.ui.assignRoleButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group #RosterModerationRow {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        Group { Anchor: (Width: 158); }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #RosterKickButton {
+          Visible: false;
+          Text: %pixelbays.rpg.guild.ui.kickButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+
+        Group { Anchor: (Width: 8); }
+
+        TextButton #RosterPromoteButton {
+          Visible: false;
+          Text: %pixelbays.rpg.guild.ui.promoteLeaderButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 190, Height: 40);
+        }
       }
     }
 
+    Group #ManagementPanel {
+      Visible: false;
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label #ManagementHeadingLabel {
+        Text: %pixelbays.rpg.guild.ui.managementHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #ManagementSummaryLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+        Anchor: (Bottom: 8);
+      }
+
+      Group #ManagementModeRow {
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        TextButton #ManagementInfoButton {
+          Text: %pixelbays.rpg.guild.ui.managementInfoTab;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+
+        Group { Anchor: (Width: 8); }
+
+        TextButton #ManagementRolesButton {
+          Text: %pixelbays.rpg.guild.ui.managementRolesTab;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group #ManagementInfoPanel {
+        Visible: false;
+        LayoutMode: Top;
+        Anchor: (Bottom: 8);
+
+        Label #GuildInfoSummaryLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 8);
+        }
+
+        Group #GuildNameTagRow {
+          Visible: false;
+          LayoutMode: Left;
+          Anchor: (Height: 40, Bottom: 8);
+
+          Label {
+            Text: %pixelbays.rpg.guild.ui.guildIdentityRowLabel;
+            Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+            Anchor: (Width: 150, Top: 12, Right: 8);
+          }
+
+          $C.@TextField #GuildNameField {
+            @Anchor = (Width: 320, Height: 40);
+            PlaceholderText: %pixelbays.rpg.ui.placeholder.guildName;
+          }
+
+          Group { Anchor: (Width: 8); }
+
+          $C.@TextField #GuildTagField {
+            @Anchor = (Width: 120, Height: 40);
+            PlaceholderText: %pixelbays.rpg.ui.placeholder.guildTag;
+          }
+        }
+
+        Group #GuildDescriptionRow {
+          Visible: false;
+          LayoutMode: Left;
+          Anchor: (Height: 40, Bottom: 8);
+
+          Label {
+            Text: %pixelbays.rpg.guild.ui.guildDescriptionRowLabel;
+            Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+            Anchor: (Width: 150, Top: 12, Right: 8);
+          }
+
+          $C.@TextField #DescriptionField {
+            @Anchor = (Width: 610, Height: 40);
+            PlaceholderText: %pixelbays.rpg.guild.ui.descriptionPlaceholder;
+          }
+        }
+
+        Group #GuildMotdRow {
+          Visible: false;
+          LayoutMode: Left;
+          Anchor: (Height: 40, Bottom: 8);
+
+          Label {
+            Text: %pixelbays.rpg.guild.ui.guildMotdRowLabel;
+            Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+            Anchor: (Width: 150, Top: 12, Right: 8);
+          }
+
+          $C.@TextField #MotdField {
+            @Anchor = (Width: 610, Height: 40);
+            PlaceholderText: %pixelbays.rpg.guild.ui.motdPlaceholder;
+          }
+        }
+
+        Group #JoinPolicyRow {
+          Visible: false;
+          LayoutMode: Left;
+          Anchor: (Height: 40, Bottom: 8);
+
+          Label {
+            Text: %pixelbays.rpg.guild.ui.joinPolicyRowLabel;
+            Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+            Anchor: (Top: 12, Right: 8);
+          }
+
+          TextButton #JoinPolicyInviteButton {
+            Text: %pixelbays.rpg.guild.ui.inviteOnlyPolicyButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 150, Height: 40);
+          }
+
+          Group { Anchor: (Width: 8); }
+
+          TextButton #JoinPolicyOpenButton {
+            Text: %pixelbays.rpg.guild.ui.joinPolicyOpenButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 150, Height: 40);
+          }
+
+          Group { Anchor: (Width: 8); }
+
+          TextButton #JoinPolicyApplicationButton {
+            Text: %pixelbays.rpg.guild.ui.joinPolicyApplicationButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 150, Height: 40);
+          }
+        }
+
+        TextButton #SaveGuildInfoButton {
+          Visible: false;
+          Text: %pixelbays.rpg.guild.ui.saveGuildInfoButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 190, Height: 40, Bottom: 8);
+        }
+      }
+
+      Group #ManagementRolesPanel {
+        Visible: false;
+        LayoutMode: Top;
+        Anchor: (Bottom: 8);
+
+        Label #RoleListLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 8);
+        }
+
+        Group #RoleCreateRow {
+          Visible: false;
+          LayoutMode: Left;
+          Anchor: (Height: 40, Bottom: 8);
+
+          $C.@TextField #RoleNameField {
+            @Anchor = (Width: 420, Height: 40);
+            PlaceholderText: %pixelbays.rpg.ui.placeholder.roleName;
+          }
+
+          Group { FlexWeight: 1; }
+
+          TextButton #CreateRoleButton {
+            Text: %pixelbays.rpg.guild.ui.createRoleButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 170, Height: 40);
+          }
+        }
+
+        Group {
+          LayoutMode: Top;
+          Anchor: (Bottom: 8);
+
+          Label {
+            Text: %pixelbays.rpg.guild.ui.roleTabsHeading;
+            Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+            Anchor: (Bottom: 6);
+          }
+
+          Group {
+            LayoutMode: Left;
+            Anchor: (Height: 40, Bottom: 6);
+
+            TextButton #RoleTabPreviousButton {
+              Text: %pixelbays.rpg.guild.ui.roleTabPreviousButton;
+              Style: $C.@DefaultTextButtonStyle;
+              Anchor: (Width: 44, Height: 40);
+            }
+
+            Group { Anchor: (Width: 8); }
+
+            TextButton #RoleTabButton1 { Visible: false; Text: ""; Style: $C.@DefaultTextButtonStyle; Anchor: (Width: 106, Height: 40); }
+            Group { Anchor: (Width: 8); }
+            TextButton #RoleTabButton2 { Visible: false; Text: ""; Style: $C.@DefaultTextButtonStyle; Anchor: (Width: 106, Height: 40); }
+            Group { Anchor: (Width: 8); }
+            TextButton #RoleTabButton3 { Visible: false; Text: ""; Style: $C.@DefaultTextButtonStyle; Anchor: (Width: 106, Height: 40); }
+            Group { Anchor: (Width: 8); }
+            TextButton #RoleTabButton4 { Visible: false; Text: ""; Style: $C.@DefaultTextButtonStyle; Anchor: (Width: 106, Height: 40); }
+            Group { Anchor: (Width: 8); }
+            TextButton #RoleTabButton5 { Visible: false; Text: ""; Style: $C.@DefaultTextButtonStyle; Anchor: (Width: 106, Height: 40); }
+            Group { Anchor: (Width: 8); }
+            TextButton #RoleTabButton6 { Visible: false; Text: ""; Style: $C.@DefaultTextButtonStyle; Anchor: (Width: 106, Height: 40); }
+
+            Group { Anchor: (Width: 8); }
+
+            TextButton #RoleTabNextButton {
+              Text: %pixelbays.rpg.guild.ui.roleTabNextButton;
+              Style: $C.@DefaultTextButtonStyle;
+              Anchor: (Width: 44, Height: 40);
+            }
+          }
+
+          Label #RoleTabPageLabel {
+            Text: "";
+            Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+            Anchor: (Bottom: 6);
+          }
+
+          Group {
+            Visible: false;
+            LayoutMode: Left;
+            Anchor: (Height: 1);
+
+            $C.@TextField #RoleEditorRoleField { @Anchor = (Width: 1, Height: 1); }
+            $C.@TextField #RoleTabValueField1 { @Anchor = (Width: 1, Height: 1); }
+            $C.@TextField #RoleTabValueField2 { @Anchor = (Width: 1, Height: 1); }
+            $C.@TextField #RoleTabValueField3 { @Anchor = (Width: 1, Height: 1); }
+            $C.@TextField #RoleTabValueField4 { @Anchor = (Width: 1, Height: 1); }
+            $C.@TextField #RoleTabValueField5 { @Anchor = (Width: 1, Height: 1); }
+            $C.@TextField #RoleTabValueField6 { @Anchor = (Width: 1, Height: 1); }
+          }
+        }
+
+        Label #RoleEditorStatusLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Bottom: 8);
+        }
+
+        Group #RoleRenameRow {
+          Visible: false;
+          LayoutMode: Left;
+          Anchor: (Height: 40, Bottom: 8);
+
+          Label {
+            Text: %pixelbays.rpg.guild.ui.roleNameRowLabel;
+            Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+            Anchor: (Width: 120, Top: 12, Right: 8);
+          }
+
+          $C.@TextField #RoleEditorNameField {
+            @Anchor = (Width: 460, Height: 40);
+            PlaceholderText: %pixelbays.rpg.guild.ui.roleNamePlaceholder;
+          }
+
+          Group { FlexWeight: 1; }
+
+          TextButton #RenameRoleButton {
+            Text: %pixelbays.rpg.guild.ui.renameRoleButton;
+            Style: $C.@DefaultTextButtonStyle;
+            Anchor: (Width: 170, Height: 40);
+          }
+        }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Bottom: 8);
+
+          Group {
+            LayoutMode: Top;
+            Anchor: (Width: 390, Bottom: 8);
+
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #InvitePermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionInvite; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #KickPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionKick; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #PromotePermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionPromote; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageRolesPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageRoles; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #SetJoinPolicyPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionSetJoinPolicy; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #AcceptApplicationsPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionAcceptApplications; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #RejectApplicationsPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionRejectApplications; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+          }
+
+          Group { Anchor: (Width: 16); }
+
+          Group {
+            LayoutMode: Top;
+            Anchor: (Width: 390, Bottom: 8);
+
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildInfoPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildInfo; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildBankPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildBank; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildEventsPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildEvents; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildWarPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildWar; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildAlliancesPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildAlliances; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #UseGuildChatPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionUseGuildChat; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #UseGuildBankPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionUseGuildBank; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+          }
+        }
+
+        TextButton #SaveRolePermissionsButton {
+          Visible: false;
+          Text: %pixelbays.rpg.guild.ui.saveRolePermissionsButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 220, Height: 40, Bottom: 8);
+        }
+      }
+    }
+
+    Group #InvitesPanel {
+      Visible: false;
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.guild.ui.invitesHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #InvitesLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+        Anchor: (Bottom: 8);
+      }
+
+      Group #OutgoingInvitePagerRow {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        TextButton #OutgoingInvitePreviousButton {
+          Text: %pixelbays.rpg.guild.ui.roleTabPreviousButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 44, Height: 40);
+        }
+
+        Group { Anchor: (Width: 8); }
+
+        Label #OutgoingInvitePageLabel {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Top: 12, Right: 8);
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #OutgoingInviteNextButton {
+          Text: %pixelbays.rpg.guild.ui.roleTabNextButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 44, Height: 40);
+        }
+      }
+
+      Group #OutgoingInviteRow1 {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 6);
+
+        Label #OutgoingInviteLabel1 {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Width: 560, Top: 12, Right: 8);
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #OutgoingInviteCancelButton1 {
+          Text: %pixelbays.rpg.guild.ui.cancelInviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group #OutgoingInviteRow2 {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 6);
+
+        Label #OutgoingInviteLabel2 {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Width: 560, Top: 12, Right: 8);
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #OutgoingInviteCancelButton2 {
+          Text: %pixelbays.rpg.guild.ui.cancelInviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group #OutgoingInviteRow3 {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 6);
+
+        Label #OutgoingInviteLabel3 {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Width: 560, Top: 12, Right: 8);
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #OutgoingInviteCancelButton3 {
+          Text: %pixelbays.rpg.guild.ui.cancelInviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group #OutgoingInviteRow4 {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 6);
+
+        Label #OutgoingInviteLabel4 {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Width: 560, Top: 12, Right: 8);
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #OutgoingInviteCancelButton4 {
+          Text: %pixelbays.rpg.guild.ui.cancelInviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group #OutgoingInviteRow5 {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        Label #OutgoingInviteLabel5 {
+          Text: "";
+          Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+          Anchor: (Width: 560, Top: 12, Right: 8);
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #OutgoingInviteCancelButton5 {
+          Text: %pixelbays.rpg.guild.ui.cancelInviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 1);
+
+        $C.@TextField #OutgoingInviteTargetField1 { @Anchor = (Width: 1, Height: 1); }
+        $C.@TextField #OutgoingInviteTargetField2 { @Anchor = (Width: 1, Height: 1); }
+        $C.@TextField #OutgoingInviteTargetField3 { @Anchor = (Width: 1, Height: 1); }
+        $C.@TextField #OutgoingInviteTargetField4 { @Anchor = (Width: 1, Height: 1); }
+        $C.@TextField #OutgoingInviteTargetField5 { @Anchor = (Width: 1, Height: 1); }
+      }
+
+      Group #IncomingInviteRow {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        TextButton #AcceptInviteButton {
+          Text: %pixelbays.rpg.guild.ui.acceptInviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 180, Height: 40);
+        }
+
+        Group { Anchor: (Width: 8); }
+
+        TextButton #DeclineInviteButton {
+          Text: %pixelbays.rpg.guild.ui.declineInviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 180, Height: 40);
+        }
+      }
+
+      Group #ApplicationDecisionRow {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        $C.@TextField #ApplicantField {
+          @Anchor = (Width: 300, Height: 40);
+          PlaceholderText: %pixelbays.rpg.guild.ui.applicantPlaceholder;
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #AcceptApplicationButton {
+          Text: %pixelbays.rpg.guild.ui.acceptApplicationButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 180, Height: 40);
+        }
+
+        Group { Anchor: (Width: 8); }
+
+        TextButton #DenyApplicationButton {
+          Text: %pixelbays.rpg.guild.ui.denyApplicationButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 180, Height: 40);
+        }
+      }
+
+      Group #InviteRow {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        $C.@TextField #InviteeField {
+          @Anchor = (Width: 420, Height: 40);
+          PlaceholderText: %pixelbays.rpg.ui.placeholder.playerName;
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #InviteButton {
+          Text: %pixelbays.rpg.guild.ui.inviteButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+
+      Group #ApplyRow {
+        Visible: false;
+        LayoutMode: Left;
+        Anchor: (Height: 40, Bottom: 8);
+
+        $C.@TextField #GuildField {
+          @Anchor = (Width: 420, Height: 40);
+          PlaceholderText: %pixelbays.rpg.ui.placeholder.guildNameOrTag;
+        }
+
+        Group { FlexWeight: 1; }
+
+        TextButton #ApplyButton {
+          Text: %pixelbays.rpg.guild.ui.applyButton;
+          Style: $C.@DefaultTextButtonStyle;
+          Anchor: (Width: 170, Height: 40);
+        }
+      }
+    }
+
+    Group #CalendarPanel {
+      Visible: false;
+      LayoutMode: Top;
+      Anchor: (Bottom: 12);
+
+      Label {
+        Text: %pixelbays.rpg.guild.ui.calendarHeading;
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
+
+      Label #CalendarLabel {
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      }
+    }
+
+  }
+}
+
+Group #RosterModerationConfirmOverlay {
+  Visible: false;
+  Anchor: (Full: 0);
+  Background: PatchStyle(Color: #000000(0.62));
+  LayoutMode: CenterMiddle;
+
+  Group {
+    LayoutMode: Top;
+    Anchor: (Width: 440, Height: 212);
+    Padding: (Full: 16);
+    Background: PatchStyle(Color: #132033);
+    OutlineColor: #4f7097ff;
+    OutlineSize: 1;
+
+    Label #RosterModerationConfirmTitle {
+      Text: %pixelbays.rpg.guild.ui.confirmActionTitle;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, HorizontalAlignment: Center);
+      Anchor: (Bottom: 10);
+    }
+
+    Label #RosterModerationConfirmMessage {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 13, HorizontalAlignment: Center, VerticalAlignment: Center);
+      Anchor: (Height: 64, Bottom: 16);
+    }
+
+    Group { FlexWeight: 1; }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Height: 44);
+
+      TextButton #RosterModerationConfirmCancelButton {
+        Text: %pixelbays.rpg.guild.ui.confirmActionCancel;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 208, Height: 44, Right: 8);
+      }
+
+      TextButton #RosterModerationConfirmAcceptButton {
+        Text: %pixelbays.rpg.guild.ui.confirmActionAccept;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 208, Height: 44);
+      }
+    }
   }
 }
 

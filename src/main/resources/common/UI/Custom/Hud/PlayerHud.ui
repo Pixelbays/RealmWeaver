@@ -9,23 +9,25 @@ Group #DiceOverlaySmallHost {
   LayoutMode: Top;
 }
 
-Group #PartyMembers {
+Group #PartyRoot {
   Anchor: (Top: 36, Left: 20, Width: 248, Height: 0);
-  LayoutMode: Top;
+
+  Group #PartyMembers {
+    LayoutMode: Top;
+    Anchor: (Width: 248, Height: 0);
+  }
 }
 
 Group #ResourceBars {
-    LayoutMode: Bottom;
-    Anchor: (Width: 296, Bottom: 6);
-  }
+  LayoutMode: Bottom;
+  Anchor: (Width: 296, Bottom: 6);
+}
 
 Group #Root {
   Anchor: (Top: 190, Left: 20, Width: 320, Height: 60);
   LayoutMode: Top;
   Padding: (Horizontal: 12, Vertical: 8);
   Background: #000000(0.2);
-
-
 
   Label #XpText {
     Text: "";

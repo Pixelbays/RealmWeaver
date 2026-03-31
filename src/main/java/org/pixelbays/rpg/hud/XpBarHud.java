@@ -52,7 +52,7 @@ public class XpBarHud extends CustomUIHud {
     private static final String SELECTOR_FILL_ANCHOR = "#XpFill.Anchor";
     private static final String SELECTOR_TEXT = "#XpText.Text";
     private static final String SELECTOR_ROOT_ANCHOR = "#Root.Anchor";
-    private static final String SELECTOR_PARTY_ROOT_ANCHOR = "#PartyRoot.Anchor";
+    private static final String SELECTOR_PARTY_ROOT_ANCHOR = "#PartyMembers.Anchor";
     private static final String SELECTOR_DICE_SMALL_HOST = "#DiceOverlaySmallHost";
     private static final String SELECTOR_DICE_LARGE_HOST = "#DiceOverlayLargeHost";
 
@@ -69,10 +69,12 @@ public class XpBarHud extends CustomUIHud {
     private int[] lastResourceStates = new int[0];
 
     private String lastPartyLayoutSignature = "";
+    private List<PartyMemberHudData> lastPartyLayout = Collections.emptyList();
     private int[] lastPartyFillWidths = new int[0];
     private String[] lastPartyValueTexts = new String[0];
     private boolean progressHidden = false;
     private String lastDiceSignature = "";
+    private DiceRollViewData lastDiceViewData = null;
 
     public XpBarHud(@Nonnull PlayerRef playerRef) {
         super(playerRef);
@@ -81,6 +83,122 @@ public class XpBarHud extends CustomUIHud {
     @Override
     protected void build(@Nonnull UICommandBuilder cmd) {
         cmd.append("Hud/XpBarHud.ui");
+
+        if (!lastResourceLayout.isEmpty()) {
+            rebuildResourceBars(cmd, lastResourceLayout);
+            if (!progressHidden) {
+                applyRootHeight(cmd, computeRootHeight(lastResourceLayout));
+            }
+        }
+
+        if (!lastPartyLayout.isEmpty()) {
+            rebuildPartyMembers(cmd, lastPartyLayout);
+            applyPartyRootHeight(cmd, computePartyRootHeight(lastPartyLayout));
+        }
+
+        if (lastDiceViewData != null && !lastDiceSignature.isEmpty()) {
+            cmd.appendInline(
+                    lastDiceViewData.mode == DiceOverlayMode.LARGE ? SELECTOR_DICE_LARGE_HOST : SELECTOR_DICE_SMALL_HOST,
+                    buildDiceOverlayMarkup(lastDiceViewData));
+        }
+
+        if (progressHidden) {
+            applyHiddenRoot(cmd);
+            applyFillWidth(cmd, 0);
+            cmd.set(SELECTOR_TEXT, "");
+            return;
+        }
+
+        if (lastMax) {
+            applyFillWidth(cmd, BAR_WIDTH);
+            cmd.set(SELECTOR_TEXT, lastLabelPrefix + " Lv " + lastLevel + " — XP: MAX");
+            return;
+        }
+
+        if (lastLabelPrefix != null) {
+            applyFillWidth(cmd, lastFillWidth);
+            cmd.set(SELECTOR_TEXT,
+                    lastLabelPrefix + " Lv " + lastLevel + " — XP: " + lastCurrent + "/" + lastNext + " (" + lastRemaining
+                            + " to next)");
+        }
+    }
+
+    public void primeResources(@Nonnull List<ResourceBarData> bars) {
+        if (bars.isEmpty()) {
+            lastResourceLayoutSignature = "";
+            lastResourceLayout = Collections.emptyList();
+            lastResourceStates = new int[0];
+            return;
+        }
+
+        lastResourceLayoutSignature = buildResourceLayoutSignature(bars);
+        lastResourceLayout = List.copyOf(bars);
+        lastResourceStates = buildResourceStateSnapshot(lastResourceLayout);
+    }
+
+    public void primePartyMembers(@Nonnull List<PartyMemberHudData> members) {
+        if (members.isEmpty()) {
+            lastPartyLayoutSignature = "";
+            lastPartyLayout = Collections.emptyList();
+            lastPartyFillWidths = new int[0];
+            lastPartyValueTexts = new String[0];
+            return;
+        }
+
+        lastPartyLayoutSignature = buildPartyLayoutSignature(members);
+        lastPartyLayout = List.copyOf(members);
+        lastPartyFillWidths = buildPartyFillSnapshot(lastPartyLayout);
+        lastPartyValueTexts = buildPartyValueSnapshot(lastPartyLayout);
+    }
+
+    public void primeDiceRoll(@Nullable DiceRollViewData data) {
+        if (data == null || data.diceValues.length == 0) {
+            lastDiceSignature = "";
+            lastDiceViewData = null;
+            return;
+        }
+
+        lastDiceSignature = buildDiceSignature(data);
+        lastDiceViewData = data;
+    }
+
+    public void primeMax(@Nonnull String labelPrefix, int level) {
+        progressHidden = false;
+        lastMax = true;
+        lastLabelPrefix = labelPrefix;
+        lastLevel = level;
+        lastFillWidth = BAR_WIDTH;
+        lastCurrent = Integer.MIN_VALUE;
+        lastNext = Integer.MIN_VALUE;
+        lastRemaining = Integer.MIN_VALUE;
+    }
+
+    public void primeProgress(
+            @Nonnull String labelPrefix,
+            int level,
+            float ratio,
+            int current,
+            int next,
+            int remaining) {
+        progressHidden = false;
+        lastMax = false;
+        lastLabelPrefix = labelPrefix;
+        lastLevel = level;
+        lastFillWidth = Math.round(BAR_WIDTH * clampRatio(ratio));
+        lastCurrent = current;
+        lastNext = next;
+        lastRemaining = remaining;
+    }
+
+    public void primeHideProgress() {
+        progressHidden = true;
+        lastMax = false;
+        lastLabelPrefix = null;
+        lastLevel = Integer.MIN_VALUE;
+        lastFillWidth = -1;
+        lastCurrent = Integer.MIN_VALUE;
+        lastNext = Integer.MIN_VALUE;
+        lastRemaining = Integer.MIN_VALUE;
     }
 
     public enum ResourceDisplayMode {
@@ -226,10 +344,7 @@ public class XpBarHud extends CustomUIHud {
         if (layoutChanged) {
             lastResourceLayoutSignature = layoutSignature;
             lastResourceLayout = List.copyOf(bars);
-            lastResourceStates = new int[bars.size()];
-            for (int i = 0; i < lastResourceStates.length; i++) {
-                lastResourceStates[i] = -1;
-            }
+            lastResourceStates = buildResourceStateSnapshot(lastResourceLayout);
 
             UICommandBuilder cmd = new UICommandBuilder();
             rebuildResourceBars(cmd, lastResourceLayout);
@@ -287,6 +402,7 @@ public class XpBarHud extends CustomUIHud {
             }
 
             lastPartyLayoutSignature = "";
+            lastPartyLayout = Collections.emptyList();
             lastPartyFillWidths = new int[0];
             lastPartyValueTexts = new String[0];
 
@@ -303,16 +419,13 @@ public class XpBarHud extends CustomUIHud {
 
         if (layoutChanged) {
             lastPartyLayoutSignature = layoutSignature;
-            lastPartyFillWidths = new int[totalBars];
-            lastPartyValueTexts = new String[totalBars];
-            for (int i = 0; i < totalBars; i++) {
-                lastPartyFillWidths[i] = -1;
-                lastPartyValueTexts[i] = null;
-            }
+            lastPartyLayout = List.copyOf(members);
+            lastPartyFillWidths = buildPartyFillSnapshot(lastPartyLayout);
+            lastPartyValueTexts = buildPartyValueSnapshot(lastPartyLayout);
 
             UICommandBuilder cmd = new UICommandBuilder();
-            rebuildPartyMembers(cmd, members);
-            applyPartyRootHeight(cmd, computePartyRootHeight(members));
+            rebuildPartyMembers(cmd, lastPartyLayout);
+            applyPartyRootHeight(cmd, computePartyRootHeight(lastPartyLayout));
             update(false, cmd);
         } else if (lastPartyFillWidths.length != totalBars || lastPartyValueTexts.length != totalBars) {
             lastPartyFillWidths = new int[totalBars];
@@ -368,6 +481,7 @@ public class XpBarHud extends CustomUIHud {
             }
 
             lastDiceSignature = "";
+            lastDiceViewData = null;
             UICommandBuilder cmd = new UICommandBuilder();
             cmd.clear(SELECTOR_DICE_SMALL_HOST);
             cmd.clear(SELECTOR_DICE_LARGE_HOST);
@@ -381,6 +495,7 @@ public class XpBarHud extends CustomUIHud {
         }
 
         lastDiceSignature = signature;
+    lastDiceViewData = data;
 
         UICommandBuilder cmd = new UICommandBuilder();
         cmd.clear(SELECTOR_DICE_SMALL_HOST);
@@ -544,6 +659,7 @@ public class XpBarHud extends CustomUIHud {
         for (int i = 0; i < bars.size(); i++) {
             ResourceBarData bar = bars.get(i);
             boolean useChargeAsset = usesChargeAsset(bar);
+            int initialFillWidth = Math.round(RESOURCE_TRACK_WIDTH * clampRatio(bar.ratio));
 
             String barId = "ResBar" + i;
             String labelId = "ResLabel" + i;
@@ -604,7 +720,9 @@ public class XpBarHud extends CustomUIHud {
                     } else {
                         ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
                     }
-                    ui.append("        Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+                    ui.append("        Anchor: (Left: 0, Top: 0, Width: ")
+                            .append(chargeIndex < clampChargeCount(bar.currentCharges, bar.maxCharges) ? chargeWidth : 0)
+                            .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
                     ui.append("      }\n");
                     ui.append("    }\n");
                 }
@@ -612,7 +730,8 @@ public class XpBarHud extends CustomUIHud {
                 ui.append("\n");
                 ui.append("    Group #").append(fillId).append(" {\n");
                 ui.append("      Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.85));\n");
-                ui.append("      Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+                ui.append("      Anchor: (Left: 0, Top: 0, Width: ").append(initialFillWidth).append(", Height: ")
+                        .append(RESOURCE_BAR_HEIGHT).append(");\n");
                 ui.append("    }\n");
             }
 
@@ -714,7 +833,9 @@ public class XpBarHud extends CustomUIHud {
 
                 ui.append("      Group #").append(fillId).append(" {\n");
                 ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
-                ui.append("        Anchor: (Left: 0, Top: 0, Width: 0, Height: ").append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
+                ui.append("        Anchor: (Left: 0, Top: 0, Width: ")
+                    .append(Math.round(PARTY_BAR_TRACK_WIDTH * clampRatio(bar.ratio)))
+                    .append(", Height: ").append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
                 ui.append("      }\n");
                 ui.append("    }\n");
                 ui.append("  }\n\n");
@@ -821,6 +942,42 @@ public class XpBarHud extends CustomUIHud {
     }
 
     @Nonnull
+    private static int[] buildResourceStateSnapshot(@Nonnull List<ResourceBarData> bars) {
+        int[] states = new int[bars.size()];
+        for (int i = 0; i < bars.size(); i++) {
+            ResourceBarData bar = bars.get(i);
+            states[i] = bar.displayMode == ResourceDisplayMode.CHARGES
+                    ? clampChargeCount(bar.currentCharges, bar.maxCharges)
+                    : Math.round(RESOURCE_TRACK_WIDTH * clampRatio(bar.ratio));
+        }
+        return states;
+    }
+
+    @Nonnull
+    private static int[] buildPartyFillSnapshot(@Nonnull List<PartyMemberHudData> members) {
+        int[] fillWidths = new int[countPartyBars(members)];
+        int index = 0;
+        for (PartyMemberHudData member : members) {
+            for (PartyStatBarData bar : member.bars) {
+                fillWidths[index++] = Math.round(PARTY_BAR_TRACK_WIDTH * clampRatio(bar.ratio));
+            }
+        }
+        return fillWidths;
+    }
+
+    @Nonnull
+    private static String[] buildPartyValueSnapshot(@Nonnull List<PartyMemberHudData> members) {
+        String[] values = new String[countPartyBars(members)];
+        int index = 0;
+        for (PartyMemberHudData member : members) {
+            for (PartyStatBarData bar : member.bars) {
+                values[index++] = bar.valueText;
+            }
+        }
+        return values;
+    }
+
+    @Nonnull
     private static String buildResourceLayoutSignature(@Nonnull List<ResourceBarData> bars) {
         StringBuilder signature = new StringBuilder(bars.size() * 64);
         for (ResourceBarData bar : bars) {
@@ -879,7 +1036,11 @@ public class XpBarHud extends CustomUIHud {
     }
 
     private static String escapeUiString(@Nonnull String text) {
-        return text.replace("\\", "\\\\").replace("\"", "\\\"");
+        return text.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", " ")
+                .replace("\n", " ")
+                .replace("\t", " ");
     }
 
     private static boolean safeEquals(String a, String b) {
