@@ -30,6 +30,9 @@ Current implemented or active feature areas include:
 - currencies, banks, auction house, and mail
 - lockpicking UI and packet-driven gameplay input
 - XP HUD updates and NPC RPG support hooks
+- Here are some early clips
+https://www.youtube.com/playlist?list=PLgjeVEYfxVrj5NQ-wwFIBY06_Y9bYcpOs
+
 
 ## Why use Realmweaver
 
@@ -37,10 +40,11 @@ Current implemented or active feature areas include:
 Realmweaver already covers the core loops most RPG or MMO-style Hytale servers need: identity, progression, social play, and economy.
 
 ### 2. It is data-driven first
-Classes, races, abilities, currencies, banks, and much of the gameplay tuning live in assets under [src/main/resources/Server](src/main/resources/Server). That makes it easier to extend content without rewriting core logic.
+Classes, races, abilities, currencies, banks, and much of the gameplay tuning live in assets under in your assetpack! That makes it easier to extend content without rewriting core logic.
 
 ### 3. It is modular and live-configurable
-Major systems are toggled through [src/main/resources/Server/RpgModConfig/Default.json](src/main/resources/Server/RpgModConfig/Default.json), and the plugin reconciles dynamic registrations when config assets reload.
+Major systems are toggled through and settings are in the RpgModConfig/default.json file. 
+Plugin reconciles dynamic registrations of modules when config is updated, allowing for you to turn on and off features you don't need.
 
 ### 4. It supports real multiplayer server design
 Realmweaver is built around parties, guilds, shared progression flows, account-vs-character ownership, and service systems like mail and banking.
@@ -54,7 +58,7 @@ Realmweaver can support servers and experiences such as:
 
 - class-based adventure realms with race identity and talent builds
 - multiplayer co-op progression servers with parties, raids, and guild play
-- social sandbox realms with persistent mail, banking, and player economy tools
+- social sandbox realms with mail, banking, and player economy tools
 - progression-heavy survival servers with layered class, race, and stat systems
 - live-service content models with unlockable expansions, new classes, and new ability packs
 - NPC-driven service hubs for training, class unlocks, progression rewards, or lockpicking gameplay
@@ -63,11 +67,11 @@ Because the systems are asset-driven, Realmweaver is suited to both handcrafted 
 
 ## Asset pack ecosystem
 
-Realmweaver can also be positioned as a core framework with themed asset packs built on top of it.
+Realmweaver Core is an framework, itself adds nothing without a assetpack, which is all built by you! (or the example packs)
 
 Recommended naming format:
 
-**Realmweaver: Asset Pack Name**
+**Realmweaver Asset Pack Name**
 
 This makes it clear that Realmweaver is the systems backbone, while each asset pack defines the world theme, presentation, and content flavor.
 
@@ -76,7 +80,7 @@ Example starter packs:
 - **Realmweaver: MMAnywhere** — a basic framework example for a traditional MMO-style realm
 - **Realmweaver: Space Forged** — a space-themed variant showing how the same framework can support a very different world fantasy
 
-This gives Realmweaver room to grow as both a single mod and a broader product family.
+This gives Realmweaver room to grow as both a single mod and a broader family of assetpacks for the core framework.
 
 ## Core design pillars
 
@@ -93,14 +97,17 @@ Parties, guilds, routed chat, and shared-service systems help turn a collection 
 Currencies, banks, auction house flow, and mail provide the service layer needed for a deeper server economy.
 
 ### Content authoring flexibility
-Much of the gameplay surface is built around JSON assets and reusable interaction chains, so designers can author new content with less Java churn.
+Much of the gameplay surface is built around JSON assets and reusable interaction chains, so designers can author new content with less Java.
 
 ### Asset pack scalability
 The same framework can support multiple branded content packs, making it practical to launch one foundation and then ship very different realm experiences on top of it.
 
 ## Project architecture
 
-The composition root is [src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java). It registers:
+The composition root is
+[src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java). 
+
+It registers:
 
 - asset stores
 - ECS components
@@ -108,15 +115,6 @@ The composition root is [src/main/java/org/pixelbays/plugin/ExamplePlugin.java](
 - managers and commands
 - packet filters and custom interactions
 - HUD and UI wiring
-
-Important paths:
-
-- [src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java)
-- [src/main/java/org/pixelbays/rpg](src/main/java/org/pixelbays/rpg)
-- [src/main/resources/Server](src/main/resources/Server)
-- [src/main/resources/Common/UI/Custom/Pages](src/main/resources/Common/UI/Custom/Pages)
-- [wiki/Home.md](wiki/Home.md)
-- [docs/Realmweaver-Marketing-Guide.md](docs/Realmweaver-Marketing-Guide.md)
 
 ## Current maturity snapshot
 
@@ -126,30 +124,32 @@ Broadly mature systems:
 - leveling
 - classes
 - talent trees
-
 - abilities
+- lockpicking
+
+
+Functional but still evolving:
 - parties
 - guilds
 - currencies
 - banks
 - mail
-
-Functional but still evolving:
-
 - auction house
-- lockpicking
 - NPC RPG hooks
 - inventory overrides
 - randomized equipment
 - NPC using abilities
+- more presentation polish for character creation and selection
 
 Planned or earlier-stage areas:
 
 - professions and gathering loops
 - instance and encounter framework
 - broader camera or movement tooling
-- more presentation polish for character creation and selection
 - instanced content, worlds, zones
+
+A better road map comming soon
+
 
 ## Build and run
 
@@ -161,11 +161,14 @@ Planned or earlier-stage areas:
 
 ### Build the plugin
 
-Use the workspace task `build plugin`.
+Use the workspace task `build`.
+or in cmd `./gradlew build`
 
-### Build and deploy to your local Hytale Mods folder
+### Run the Dev server
 
-Use the workspace task `build and deploy`.
+Update your `asset_dir_pack_name` path in `gradle.properties` (default is currently star forged)
+Use the workspace task `runserver`.
+or in cmd `./gradlew runserver`.
 
 ### Dev server notes
 
@@ -186,7 +189,7 @@ Start with these pages:
 
 Realmweaver is best described as a Hytale MMO/RPG framework that already ships with meaningful progression, social, and economy foundations. It is suited to creators who want to build a realm with identity, persistence, and room to grow.
 
-It can also be presented as the base framework for a family of themed asset packs, such as **Realmweaver: MMAnywhere** and **Realmweaver: Space Forged**.
+It can also be presented as the base framework for a family of themed asset packs, such as **Realmweaver MMAnywhere** and **Realmweaver Space Forged**.
 
 
 
