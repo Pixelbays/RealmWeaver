@@ -22,31 +22,111 @@ public class ChatModSettings {
             .append(new KeyedCodec<>("Enabled", Codec.BOOLEAN, false, true),
                     (i, s) -> i.enabled = s, i -> i.enabled)
             .add()
+            .append(new KeyedCodec<>("DefaultFilterEnabled", Codec.BOOLEAN, false, true),
+                (i, s) -> i.defaultFilterEnabled = s, i -> i.defaultFilterEnabled)
+            .add()
+            .append(new KeyedCodec<>("CustomFilterEnabled", Codec.BOOLEAN, false, true),
+                (i, s) -> i.customFilterEnabled = s, i -> i.customFilterEnabled)
+            .add()
+            .append(new KeyedCodec<>("ChatLoggingEnabled", Codec.BOOLEAN, false, true),
+                (i, s) -> i.chatLoggingEnabled = s, i -> i.chatLoggingEnabled)
+            .add()
+            .append(new KeyedCodec<>("ChatLogMaxEntriesPerPlayer", Codec.INTEGER, false, true),
+                (i, s) -> i.chatLogMaxEntriesPerPlayer = s, i -> i.chatLogMaxEntriesPerPlayer)
+            .add()
+            .append(new KeyedCodec<>("BaseChatProximityEnabled", Codec.BOOLEAN, false, true),
+                (i, s) -> i.baseChatProximityEnabled = s, i -> i.baseChatProximityEnabled)
+            .add()
+            .append(new KeyedCodec<>("BaseChatRangeBlocks", Codec.INTEGER, false, true),
+                (i, s) -> i.baseChatRangeBlocks = s, i -> i.baseChatRangeBlocks)
+            .add()
             .append(new KeyedCodec<>("Channels", CHANNEL_LIST_CODEC, false, true),
                     (i, s) -> i.channels = s, i -> i.channels)
             .add()
             .build();
 
     private boolean enabled;
+    private boolean defaultFilterEnabled;
+    private boolean customFilterEnabled;
+    private boolean chatLoggingEnabled;
+    private int chatLogMaxEntriesPerPlayer;
+    private boolean baseChatProximityEnabled;
+    private int baseChatRangeBlocks;
     private List<ChatChannelDefinition> channels;
 
     public ChatModSettings() {
         this.enabled = true;
+        this.defaultFilterEnabled = false;
+        this.customFilterEnabled = false;
+        this.chatLoggingEnabled = false;
+        this.chatLogMaxEntriesPerPlayer = 250;
+        this.baseChatProximityEnabled = false;
+        this.baseChatRangeBlocks = 24;
         this.channels = new ArrayList<>();
         this.channels.add(ChatChannelDefinition.builtIn(
                 ChatChannelDefinition.ChannelType.Party,
                 "party",
                 List.of("p"),
-                "rpg.chat.party.message"));
+            ChatChannelDefinition.DEFAULT_PARTY_FORMAT_TRANSLATION_KEY,
+            "#79C8FF",
+            ChatChannelDefinition.NameDisplayType.AccountName));
         this.channels.add(ChatChannelDefinition.builtIn(
                 ChatChannelDefinition.ChannelType.Guild,
                 "guild",
                 List.of("g"),
-                "rpg.chat.guild.message"));
+            ChatChannelDefinition.DEFAULT_GUILD_FORMAT_TRANSLATION_KEY,
+            "#66D48F",
+            ChatChannelDefinition.NameDisplayType.AccountName));
+        this.channels.add(ChatChannelDefinition.builtIn(
+            ChatChannelDefinition.ChannelType.Global,
+            "global",
+            List.of("all"),
+            ChatChannelDefinition.DEFAULT_GLOBAL_FORMAT_TRANSLATION_KEY,
+            "#E0C061",
+            ChatChannelDefinition.NameDisplayType.AccountName));
+        this.channels.add(ChatChannelDefinition.builtIn(
+            ChatChannelDefinition.ChannelType.Zone,
+            "zone",
+            List.of("z"),
+            ChatChannelDefinition.DEFAULT_ZONE_FORMAT_TRANSLATION_KEY,
+            "#B78CFF",
+            ChatChannelDefinition.NameDisplayType.AccountName));
+        this.channels.add(ChatChannelDefinition.builtIn(
+            ChatChannelDefinition.ChannelType.Proximity,
+            "local",
+            List.of("l", "say"),
+            ChatChannelDefinition.DEFAULT_PROXIMITY_FORMAT_TRANSLATION_KEY,
+            "#F1A763",
+            ChatChannelDefinition.NameDisplayType.AccountName,
+            18));
     }
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean isDefaultFilterEnabled() {
+        return defaultFilterEnabled;
+    }
+
+    public boolean isCustomFilterEnabled() {
+        return customFilterEnabled;
+    }
+
+    public boolean isChatLoggingEnabled() {
+        return chatLoggingEnabled;
+    }
+
+    public int getChatLogMaxEntriesPerPlayer() {
+        return Math.max(chatLogMaxEntriesPerPlayer, 1);
+    }
+
+    public boolean isBaseChatProximityEnabled() {
+        return baseChatProximityEnabled;
+    }
+
+    public int getBaseChatRangeBlocks() {
+        return Math.max(baseChatRangeBlocks, 0);
     }
 
     public List<ChatChannelDefinition> getChannels() {
@@ -60,5 +140,13 @@ public class ChatModSettings {
             }
         }
         return false;
+    }
+
+    public boolean hasOperationalFeatures() {
+        return hasEnabledChannels()
+                || isBaseChatProximityEnabled()
+                || isDefaultFilterEnabled()
+                || isCustomFilterEnabled()
+                || isChatLoggingEnabled();
     }
 }

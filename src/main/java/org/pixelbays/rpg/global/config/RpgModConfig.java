@@ -412,7 +412,7 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
     }
 
     public boolean isChatModuleEnabled() {
-        return BuildFlags.CHAT_MODULE && getChatSettings().isEnabled() && getChatSettings().hasEnabledChannels();
+        return BuildFlags.CHAT_MODULE && getChatSettings().isEnabled() && getChatSettings().hasOperationalFeatures();
     }
 
     public boolean isLockpickingModuleEnabled() {

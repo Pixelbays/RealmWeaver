@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,12 +18,32 @@ import javax.annotation.Nullable;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
+import com.hypixel.hytale.server.core.universe.Universe;
 
 public final class ChatManager {
 
     private volatile Map<String, ChatChannel> channelsById = Map.of();
     private volatile Map<String, String> aliasToId = Map.of();
+    @Nullable
+    private volatile ChatFilterManager chatFilterManager;
+    @Nullable
+    private volatile ChatLogManager chatLogManager;
+    private volatile boolean baseChatProximityEnabled;
+    private volatile int baseChatRangeBlocks;
     private final Map<UUID, String> activeChannelByPlayer = new ConcurrentHashMap<>();
+    private final Map<UUID, Set<String>> joinedChannelsByPlayer = new ConcurrentHashMap<>();
+
+    public void configureModeration(
+            @Nullable ChatFilterManager chatFilterManager,
+            @Nullable ChatLogManager chatLogManager) {
+        this.chatFilterManager = chatFilterManager;
+        this.chatLogManager = chatLogManager;
+    }
+
+    public void configureBaseChatProximity(boolean enabled, int rangeBlocks) {
+        this.baseChatProximityEnabled = enabled;
+        this.baseChatRangeBlocks = Math.max(rangeBlocks, 0);
+    }
 
     public synchronized void registerChannel(@Nonnull ChatChannel channel) {
         List<ChatChannel> channels = new ArrayList<>(channelsById.values());
@@ -41,6 +62,10 @@ public final class ChatManager {
         channelsById = Collections.unmodifiableMap(nextChannelsById);
         aliasToId = Collections.unmodifiableMap(nextAliasToId);
         activeChannelByPlayer.entrySet().removeIf(entry -> !nextChannelsById.containsKey(entry.getValue()));
+        joinedChannelsByPlayer.entrySet().removeIf(entry -> {
+            entry.getValue().removeIf(channelId -> !nextChannelsById.containsKey(channelId));
+            return entry.getValue().isEmpty();
+        });
     }
 
     private static void registerChannel(
@@ -93,6 +118,10 @@ public final class ChatManager {
             return;
         }
 
+        if (channel.isJoinable()) {
+            joinChannel(playerId, channel.getId());
+        }
+
         activeChannelByPlayer.put(playerId, normalizeKey(channel.getId()));
     }
 
@@ -104,6 +133,79 @@ public final class ChatManager {
 
     public void clearActiveChannel(@Nonnull UUID playerId) {
         activeChannelByPlayer.remove(playerId);
+    }
+
+    public boolean joinChannel(@Nonnull UUID playerId, @Nullable String channelIdOrAlias) {
+        ChatChannel channel = channelIdOrAlias == null ? null : getChannel(channelIdOrAlias);
+        if (channel == null || !channel.isJoinable()) {
+            return false;
+        }
+
+        joinedChannelsByPlayer
+                .computeIfAbsent(playerId, ignored -> ConcurrentHashMap.newKeySet())
+                .add(normalizeKey(channel.getId()));
+        return true;
+    }
+
+    public boolean leaveChannel(@Nonnull UUID playerId, @Nullable String channelIdOrAlias) {
+        ChatChannel channel = channelIdOrAlias == null ? null : getChannel(channelIdOrAlias);
+        if (channel == null || !channel.isJoinable()) {
+            return false;
+        }
+
+        Set<String> joinedChannels = joinedChannelsByPlayer.get(playerId);
+        if (joinedChannels == null) {
+            return false;
+        }
+
+        String normalizedId = normalizeKey(channel.getId());
+        boolean removed = joinedChannels.remove(normalizedId);
+        if (joinedChannels.isEmpty()) {
+            joinedChannelsByPlayer.remove(playerId, joinedChannels);
+        }
+        if (removed && normalizedId.equals(activeChannelByPlayer.get(playerId))) {
+            clearActiveChannel(playerId);
+        }
+        return removed;
+    }
+
+    public boolean isJoined(@Nonnull UUID playerId, @Nullable String channelIdOrAlias) {
+        ChatChannel channel = channelIdOrAlias == null ? null : getChannel(channelIdOrAlias);
+        if (channel == null) {
+            return false;
+        }
+        if (!channel.isJoinable()) {
+            return true;
+        }
+
+        Set<String> joinedChannels = joinedChannelsByPlayer.get(playerId);
+        return joinedChannels != null && joinedChannels.contains(normalizeKey(channel.getId()));
+    }
+
+    @Nonnull
+    public List<PlayerRef> getJoinedPlayers(@Nonnull String channelIdOrAlias) {
+        String normalizedId = normalizeKey(channelIdOrAlias);
+        if (normalizedId.isEmpty()) {
+            return List.of();
+        }
+
+        ChatChannel channel = getChannel(normalizedId);
+        if (channel != null) {
+            normalizedId = normalizeKey(channel.getId());
+        }
+
+        List<PlayerRef> targets = new ArrayList<>();
+        for (Map.Entry<UUID, Set<String>> entry : joinedChannelsByPlayer.entrySet()) {
+            if (!entry.getValue().contains(normalizedId)) {
+                continue;
+            }
+
+            PlayerRef ref = Universe.get().getPlayer(entry.getKey());
+            if (ref != null) {
+                targets.add(ref);
+            }
+        }
+        return targets;
     }
 
     @Nonnull
@@ -125,6 +227,20 @@ public final class ChatManager {
 
         ChatRoute route = resolveRoute(sender, content);
         if (route == null) {
+            ChatFilterManager.FilterResult filtered = applyFilter(content);
+            if (filtered.changed()) {
+                event.setContent(filtered.filteredContent());
+            }
+            if (baseChatProximityEnabled && baseChatRangeBlocks > 0) {
+                event.setTargets(ChatTargetingSupport.resolvePlayersInRange(sender, baseChatRangeBlocks));
+            }
+                logMessage(
+                    sender,
+                    "base",
+                    content,
+                    filtered.filteredContent(),
+                    filtered.matchedWords(),
+                    event.getTargets() == null ? 0 : event.getTargets().size());
             return event;
         }
 
@@ -141,6 +257,8 @@ public final class ChatManager {
             return event;
         }
 
+        ChatFilterManager.FilterResult filteredRouteMessage = applyFilter(route.message);
+
         if (!channel.canSend(sender)) {
             sender.sendMessage(Message.translation("pixelbays.rpg.chat.error.cannotSend").param("channel", channel.getId()));
             event.setCancelled(true);
@@ -155,8 +273,15 @@ public final class ChatManager {
         }
 
         event.setTargets(targets);
-        event.setContent(route.message);
+        event.setContent(filteredRouteMessage.filteredContent());
         event.setFormatter(channel.getFormatter());
+        logMessage(
+            sender,
+            channel.getId(),
+            route.message,
+            filteredRouteMessage.filteredContent(),
+            filteredRouteMessage.matchedWords(),
+            targets.size());
         return event;
     }
 
@@ -200,6 +325,29 @@ public final class ChatManager {
     @Nonnull
     private static String normalizeKey(@Nonnull String key) {
         return key.trim().toLowerCase(Locale.ROOT);
+    }
+
+    @Nonnull
+    private ChatFilterManager.FilterResult applyFilter(@Nonnull String content) {
+        ChatFilterManager filterManager = this.chatFilterManager;
+        return filterManager == null
+                ? new ChatFilterManager.FilterResult(content, false)
+                : filterManager.filterMessage(content);
+    }
+
+    private void logMessage(
+            @Nonnull PlayerRef sender,
+            @Nonnull String channelId,
+            @Nonnull String originalMessage,
+            @Nonnull String deliveredMessage,
+            @Nonnull List<String> matchedWords,
+            int targetCount) {
+        ChatLogManager logManager = this.chatLogManager;
+        if (logManager == null) {
+            return;
+        }
+
+        logManager.recordMessage(sender, channelId, originalMessage, deliveredMessage, matchedWords, targetCount);
     }
 
     private record ChatRoute(@Nonnull String channelKey, @Nonnull String message) {

@@ -36,9 +36,18 @@ import org.pixelbays.rpg.character.config.CharacterRosterData;
 import org.pixelbays.rpg.character.input.CharacterLobbyInputFilter;
 import org.pixelbays.rpg.character.token.CharacterTokenDefinition;
 import org.pixelbays.rpg.chat.ChatManager;
+import org.pixelbays.rpg.chat.ChatFilterManager;
+import org.pixelbays.rpg.chat.ChatLogManager;
+import org.pixelbays.rpg.chat.GlobalChatChannel;
+import org.pixelbays.rpg.chat.ProximityChatChannel;
 import org.pixelbays.rpg.chat.GuildChatChannel;
 import org.pixelbays.rpg.chat.PartyChatChannel;
+import org.pixelbays.rpg.chat.ZoneChatChannel;
 import org.pixelbays.rpg.chat.command.ChatCommand;
+import org.pixelbays.rpg.chat.command.ChatFilterCommand;
+import org.pixelbays.rpg.chat.command.ChatLogCommand;
+import org.pixelbays.rpg.chat.config.ChatFilterData;
+import org.pixelbays.rpg.chat.config.ChatLogData;
 import org.pixelbays.rpg.chat.config.settings.ChatChannelDefinition;
 import org.pixelbays.rpg.chat.config.settings.ChatModSettings;
 import org.pixelbays.rpg.classes.command.ClassCommand;
@@ -223,6 +232,8 @@ public class Realmweavers extends JavaPlugin {
         private TalentSystem talentSystem;
         private AchievementSystem achievementSystem;
         private ChatManager chatManager;
+        private ChatFilterManager chatFilterManager;
+        private ChatLogManager chatLogManager;
         private PlayerHudService playerHudService;
         private WorldTravelManager worldTravelManager;
 
@@ -258,6 +269,8 @@ public class Realmweavers extends JavaPlugin {
         private CommandRegistration currencyCommandRegistration;
         private CommandRegistration mailCommandRegistration;
         private CommandRegistration chatCommandRegistration;
+        private CommandRegistration chatFilterCommandRegistration;
+        private CommandRegistration chatLogCommandRegistration;
         private CommandRegistration bindAbilityCommandRegistration;
         private CommandRegistration spellbookCommandRegistration;
         private CommandRegistration syncHotbarCommandRegistration;
@@ -325,6 +338,18 @@ public class Realmweavers extends JavaPlugin {
                                                 .setPath("GuildData")
                                                 .setCodec(GuildData.CODEC)
                                                 .setKeyFunction(GuildData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(ChatFilterData.class, new DefaultAssetMap<>())
+                                                .setPath("ChatFilterData")
+                                                .setCodec(ChatFilterData.CODEC)
+                                                .setKeyFunction(ChatFilterData::getId)
+                                                .build());
+                AssetRegistry.register(
+                                HytaleAssetStore.builder(ChatLogData.class, new DefaultAssetMap<>())
+                                                .setPath("ChatLogData")
+                                                .setCodec(ChatLogData.CODEC)
+                                                .setKeyFunction(ChatLogData::getId)
                                                 .build());
                 AssetRegistry.register(
                                 HytaleAssetStore.builder(AuctionData.class, new DefaultAssetMap<>())
@@ -618,7 +643,10 @@ public class Realmweavers extends JavaPlugin {
                 this.achievementSystem = new AchievementSystem(this.characterManager, this.currencyManager);
                 this.achievementSystem.register();
 
+                this.chatFilterManager = new ChatFilterManager();
+                this.chatLogManager = new ChatLogManager(this.characterManager);
                 this.chatManager = new ChatManager();
+                this.chatManager.configureModeration(this.chatFilterManager, this.chatLogManager);
                 reconcileChatChannels(resolveModConfig());
         }
 
@@ -795,6 +823,8 @@ public class Realmweavers extends JavaPlugin {
                 unregisterCommand(this.currencyCommandRegistration);
                 unregisterCommand(this.mailCommandRegistration);
                 unregisterCommand(this.chatCommandRegistration);
+                unregisterCommand(this.chatFilterCommandRegistration);
+                unregisterCommand(this.chatLogCommandRegistration);
                 unregisterCommand(this.bindAbilityCommandRegistration);
                 unregisterCommand(this.spellbookCommandRegistration);
                 unregisterCommand(this.syncHotbarCommandRegistration);
@@ -884,6 +914,16 @@ public class Realmweavers extends JavaPlugin {
         @Nonnull
         public MailManager getMailManager() {
                 return mailManager;
+        }
+
+        @Nonnull
+        public ChatFilterManager getChatFilterManager() {
+                return chatFilterManager;
+        }
+
+        @Nonnull
+        public ChatLogManager getChatLogManager() {
+                return chatLogManager;
         }
 
         @Nonnull
@@ -1102,6 +1142,14 @@ public class Realmweavers extends JavaPlugin {
                                 this.chatCommandRegistration,
                                 moduleFlags.chatModuleEnabled(),
                                 ChatCommand::new);
+                this.chatFilterCommandRegistration = refreshCommand(
+                                this.chatFilterCommandRegistration,
+                                moduleFlags.chatModuleEnabled(),
+                                ChatFilterCommand::new);
+                this.chatLogCommandRegistration = refreshCommand(
+                                this.chatLogCommandRegistration,
+                                moduleFlags.chatModuleEnabled(),
+                                ChatLogCommand::new);
                 this.bindAbilityCommandRegistration = refreshCommand(
                                 this.bindAbilityCommandRegistration,
                                 moduleFlags.abilityModuleEnabled(),
@@ -1176,6 +1224,13 @@ public class Realmweavers extends JavaPlugin {
                         this.mailManager.loadFromAssets();
                 } else {
                         this.mailManager.clear();
+                }
+                if (moduleFlags.chatModuleEnabled()) {
+                        this.chatFilterManager.loadFromAssets();
+                        this.chatLogManager.loadFromAssets();
+                } else {
+                        this.chatFilterManager.clear();
+                        this.chatLogManager.clear();
                 }
         }
 
@@ -1257,6 +1312,19 @@ public class Realmweavers extends JavaPlugin {
                 }
 
                 ChatModSettings chatSettings = config != null ? config.getChatSettings() : new ChatModSettings();
+                if (this.chatFilterManager != null) {
+                        this.chatFilterManager.configure(
+                                        chatSettings.isDefaultFilterEnabled(),
+                                        chatSettings.isCustomFilterEnabled());
+                }
+                if (this.chatLogManager != null) {
+                        this.chatLogManager.configure(
+                                        chatSettings.isChatLoggingEnabled(),
+                                        chatSettings.getChatLogMaxEntriesPerPlayer());
+                }
+                this.chatManager.configureBaseChatProximity(
+                                chatSettings.isBaseChatProximityEnabled(),
+                                chatSettings.getBaseChatRangeBlocks());
                 if (!chatSettings.isEnabled()) {
                         this.chatManager.replaceChannels(List.of());
                         return;
@@ -1284,8 +1352,11 @@ public class Realmweavers extends JavaPlugin {
                 }
 
                 return switch (definition.getType()) {
-                        case Party -> new PartyChatChannel(this.partyManager, definition);
-                        case Guild -> new GuildChatChannel(this.guildManager, definition);
+                        case Party -> new PartyChatChannel(this.partyManager, this.characterManager, definition);
+                        case Guild -> new GuildChatChannel(this.guildManager, this.characterManager, definition);
+                        case Global -> new GlobalChatChannel(this.chatManager, this.characterManager, definition);
+                        case Zone -> new ZoneChatChannel(this.characterManager, definition);
+                        case Proximity -> new ProximityChatChannel(this.characterManager, definition);
                 };
         }
 

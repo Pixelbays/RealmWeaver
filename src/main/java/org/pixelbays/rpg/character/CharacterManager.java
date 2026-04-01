@@ -798,6 +798,37 @@ public final class CharacterManager {
     }
 
     @Nonnull
+    public String resolveChatDisplayName(@Nonnull UUID accountId, @Nullable String username, boolean preferCharacterName) {
+        String accountName = username == null || username.isBlank() ? resolveAccountUsername(accountId) : username;
+        if (!preferCharacterName) {
+            return accountName == null || accountName.isBlank() ? accountId.toString() : accountName;
+        }
+
+        CharacterRosterData roster = rostersByAccountId.get(accountId);
+        if (roster != null) {
+            CharacterProfileData profile = null;
+            String activeCharacterId = activeCharacterIds.get(accountId);
+            if (activeCharacterId != null && !activeCharacterId.isBlank()) {
+                profile = roster.getProfile(activeCharacterId);
+            }
+            if (profile == null) {
+                String selectedCharacterId = roster.getSelectedCharacterId();
+                if (selectedCharacterId != null && !selectedCharacterId.isBlank()) {
+                    profile = roster.getProfile(selectedCharacterId);
+                }
+            }
+            if (profile != null && !profile.isSoftDeleted()) {
+                String characterName = profile.getCharacterName();
+                if (characterName != null && !characterName.isBlank()) {
+                    return characterName;
+                }
+            }
+        }
+
+        return accountName == null || accountName.isBlank() ? accountId.toString() : accountName;
+    }
+
+    @Nonnull
     public String resolveCharacterOwnerId(@Nonnull UUID accountId) {
         String activeCharacterId = getActiveCharacterId(accountId);
         if (!activeCharacterId.isBlank()) {

@@ -17,6 +17,10 @@ public interface ChatChannel {
         return List.of();
     }
 
+    default boolean isJoinable() {
+        return false;
+    }
+
     boolean canSend(@Nonnull PlayerRef sender);
 
     @Nonnull

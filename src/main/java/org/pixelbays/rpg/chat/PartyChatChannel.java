@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.chat.config.settings.ChatChannelDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.party.Party;
@@ -12,43 +14,28 @@ import org.pixelbays.rpg.party.PartyManager;
 import org.pixelbays.rpg.party.PartyMember;
 import org.pixelbays.rpg.party.PartyMemberType;
 
-import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 
-public final class PartyChatChannel implements ChatChannel {
+public final class PartyChatChannel extends BaseConfiguredChatChannel {
 
     private final PartyManager partyManager;
-    private final String id;
-    private final List<String> aliases;
-    private final String formatTranslationKey;
 
     public PartyChatChannel(@Nonnull PartyManager partyManager) {
-        this(partyManager, ChatChannelDefinition.builtIn(
+        this(partyManager, null, ChatChannelDefinition.builtIn(
                 ChatChannelDefinition.ChannelType.Party,
                 "party",
                 List.of("p"),
-                "rpg.chat.party.message"));
+                ChatChannelDefinition.DEFAULT_PARTY_FORMAT_TRANSLATION_KEY));
     }
 
-    public PartyChatChannel(@Nonnull PartyManager partyManager, @Nonnull ChatChannelDefinition definition) {
+    public PartyChatChannel(
+            @Nonnull PartyManager partyManager,
+            @Nullable CharacterManager characterManager,
+            @Nonnull ChatChannelDefinition definition) {
+        super(characterManager, definition);
         this.partyManager = partyManager;
-        this.id = definition.getId();
-        this.aliases = List.copyOf(definition.getAliases());
-        this.formatTranslationKey = definition.getFormatTranslationKey();
-    }
-
-    @Override
-    @Nonnull
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    @Nonnull
-    public List<String> getAliases() {
-        return aliases;
     }
 
     @Override
@@ -87,8 +74,6 @@ public final class PartyChatChannel implements ChatChannel {
     @Override
     @Nonnull
     public PlayerChatEvent.Formatter getFormatter() {
-        return (sender, msg) -> Message.translation(formatTranslationKey)
-                .param("username", sender.getUsername())
-                .param("message", msg);
+        return (sender, msg) -> finalizeMessage(createBaseMessage(sender, msg));
     }
 }
