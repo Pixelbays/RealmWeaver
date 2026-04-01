@@ -1,6 +1,7 @@
 package org.pixelbays.rpg.guild.command;
 
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
@@ -48,12 +49,20 @@ public class GuildInfoCommand extends AbstractPlayerCommand {
                 .collect(Collectors.joining(", "));
 
         player.sendMessage(Message.translation("pixelbays.rpg.guild.info.header")
-            .param("name", guild.getName())
-            .param("tag", guild.getTag()));
-        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.leader").param("leader", leaderName));
+            .param("name", safeText(guild.getName()))
+            .param("tag", safeText(guild.getTag())));
+        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.leader").param("leader", safeText(leaderName)));
         player.sendMessage(Message.translation("pixelbays.rpg.guild.info.members").param("count", guild.size()));
+        String noneValue = Message.translation("pixelbays.rpg.common.none").getFormattedMessage().rawText;
+        if (noneValue == null || noneValue.isBlank()) {
+            noneValue = "None";
+        }
         player.sendMessage(Message.translation("pixelbays.rpg.guild.info.joinPolicy")
-            .param("policy", GuildCommandUtil.joinPolicyMessage(guild.getJoinPolicy())));
+            .param("policy", Objects.requireNonNull(GuildCommandUtil.joinPolicyMessage(guild.getJoinPolicy()))));
+        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.description")
+            .param("description", safeText(guild.getDescription().isBlank() ? noneValue : guild.getDescription())));
+        player.sendMessage(Message.translation("pixelbays.rpg.guild.info.motd")
+            .param("motd", safeText(guild.getMotd().isBlank() ? noneValue : guild.getMotd())));
         if (roles.isEmpty()) {
             player.sendMessage(Message.translation("pixelbays.rpg.guild.info.roles")
                     .param("roles", Message.translation("pixelbays.rpg.common.none")));
@@ -61,5 +70,10 @@ public class GuildInfoCommand extends AbstractPlayerCommand {
             player.sendMessage(Message.translation("pixelbays.rpg.guild.info.roles")
                     .param("roles", roles));
         }
+    }
+
+    @Nonnull
+    private static String safeText(String value) {
+        return value == null ? "" : value;
     }
 }

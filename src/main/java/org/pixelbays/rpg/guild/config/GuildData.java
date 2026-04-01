@@ -37,6 +37,11 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
                     arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
                     list -> list == null ? null : list.toArray(GuildRoleData[]::new));
 
+        private static final FunctionCodec<GuildApplicationData[], List<GuildApplicationData>> APPLICATION_LIST_CODEC =
+            new FunctionCodec<>(new ArrayCodec<>(GuildApplicationData.CODEC, GuildApplicationData[]::new),
+                arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+                list -> list == null ? null : list.toArray(GuildApplicationData[]::new));
+
     public static final AssetBuilderCodec<String, GuildData> CODEC = AssetBuilderCodec.builder(
             GuildData.class,
             GuildData::new,
@@ -51,6 +56,12 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
             .append(new KeyedCodec<>("Tag", Codec.STRING, false, true),
                     (i, s) -> i.tag = s, i -> i.tag)
             .add()
+                .append(new KeyedCodec<>("Description", Codec.STRING, false, true),
+                    (i, s) -> i.description = s, i -> i.description)
+                .add()
+                .append(new KeyedCodec<>("Motd", Codec.STRING, false, true),
+                    (i, s) -> i.motd = s, i -> i.motd)
+                .add()
             .append(new KeyedCodec<>("LeaderId", Codec.UUID_STRING, false, true),
                     (i, s) -> i.leaderId = s, i -> i.leaderId)
             .add()
@@ -63,6 +74,9 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
             .append(new KeyedCodec<>("Members", MEMBER_LIST_CODEC, false, true),
                     (i, s) -> i.members = s, i -> i.members)
             .add()
+                .append(new KeyedCodec<>("Applications", APPLICATION_LIST_CODEC, false, true),
+                    (i, s) -> i.applications = s, i -> i.applications)
+                .add()
             .build();
 
     private static DefaultAssetMap<String, GuildData> ASSET_MAP;
@@ -71,19 +85,25 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
     private String id;
     private String name;
     private String tag;
+    private String description;
+    private String motd;
     private UUID leaderId;
     private GuildJoinPolicy joinPolicy;
     private List<GuildRoleData> roles;
     private List<GuildMemberData> members;
+    private List<GuildApplicationData> applications;
 
     public GuildData() {
         this.id = "";
         this.name = "";
         this.tag = "";
+        this.description = "";
+        this.motd = "";
         this.leaderId = new UUID(0L, 0L);
         this.joinPolicy = GuildJoinPolicy.INVITE_ONLY;
         this.roles = new ArrayList<>();
         this.members = new ArrayList<>();
+        this.applications = new ArrayList<>();
     }
 
     public static DefaultAssetMap<String, GuildData> getAssetMap() {
@@ -103,7 +123,7 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
     }
 
     public Guild toGuild() {
-        Guild guild = new Guild(UUID.fromString(id), name, tag, leaderId, joinPolicy);
+        Guild guild = new Guild(UUID.fromString(id), name, tag, leaderId, joinPolicy, description, motd);
 
         if (roles != null) {
             for (GuildRoleData roleData : roles) {
@@ -132,15 +152,29 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
         return guild;
     }
 
+    public List<GuildApplicationData> getApplications() {
+        if (applications == null || applications.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(applications);
+    }
+
     public static GuildData fromGuild(Guild guild) {
+        return fromGuild(guild, null);
+    }
+
+    public static GuildData fromGuild(Guild guild, List<GuildApplicationData> applications) {
         GuildData data = new GuildData();
         data.id = guild.getId().toString();
         data.name = guild.getName();
         data.tag = guild.getTag();
+        data.description = guild.getDescription();
+        data.motd = guild.getMotd();
         data.leaderId = guild.getLeaderId();
         data.joinPolicy = guild.getJoinPolicy();
         data.roles = new ArrayList<>();
         data.members = new ArrayList<>();
+        data.applications = applications == null ? new ArrayList<>() : new ArrayList<>(applications);
 
         for (GuildRole role : guild.getRoles().values()) {
             data.roles.add(GuildRoleData.fromRole(role));
@@ -151,6 +185,59 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
         }
 
         return data;
+    }
+
+    public static class GuildApplicationData {
+        public static final BuilderCodec<GuildApplicationData> CODEC = BuilderCodec
+                .builder(GuildApplicationData.class, GuildApplicationData::new)
+                .append(new KeyedCodec<>("ApplicantId", Codec.UUID_STRING, false, true),
+                        (i, s) -> i.applicantId = s, i -> i.applicantId)
+                .add()
+                .append(new KeyedCodec<>("ApplicationMessage", Codec.STRING, false, true),
+                        (i, s) -> i.applicationMessage = s, i -> i.applicationMessage)
+                .add()
+                .append(new KeyedCodec<>("CreatedAtMillis", Codec.LONG, false, true),
+                        (i, s) -> i.createdAtMillis = s, i -> i.createdAtMillis)
+                .add()
+                .append(new KeyedCodec<>("ExpiresAtMillis", Codec.LONG, false, true),
+                        (i, s) -> i.expiresAtMillis = s, i -> i.expiresAtMillis)
+                .add()
+                .build();
+
+        private UUID applicantId;
+        private String applicationMessage;
+        private long createdAtMillis;
+        private long expiresAtMillis;
+
+        public GuildApplicationData() {
+            this.applicantId = new UUID(0L, 0L);
+            this.applicationMessage = "";
+            this.createdAtMillis = 0L;
+            this.expiresAtMillis = 0L;
+        }
+
+        public GuildApplicationData(UUID applicantId, String applicationMessage, long createdAtMillis, long expiresAtMillis) {
+            this.applicantId = applicantId;
+            this.applicationMessage = applicationMessage == null ? "" : applicationMessage;
+            this.createdAtMillis = createdAtMillis;
+            this.expiresAtMillis = expiresAtMillis;
+        }
+
+        public UUID getApplicantId() {
+            return applicantId;
+        }
+
+        public String getApplicationMessage() {
+            return applicationMessage == null ? "" : applicationMessage;
+        }
+
+        public long getCreatedAtMillis() {
+            return createdAtMillis;
+        }
+
+        public long getExpiresAtMillis() {
+            return expiresAtMillis;
+        }
     }
 
     public static class GuildRoleData {
@@ -183,9 +270,9 @@ public class GuildData implements JsonAssetWithMap<String, DefaultAssetMap<Strin
         }
 
         public GuildRole toRole() {
-            EnumSet<GuildPermission> permissionSet = permissions == null
-                    ? EnumSet.noneOf(GuildPermission.class)
-                    : EnumSet.copyOf(permissions);
+            EnumSet<GuildPermission> permissionSet = permissions == null || permissions.isEmpty()
+                ? EnumSet.noneOf(GuildPermission.class)
+                : EnumSet.copyOf(permissions);
             return new GuildRole(id, name, permissionSet);
         }
 

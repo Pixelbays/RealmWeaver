@@ -606,6 +606,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         return getGuildSettings().getGuildInviteExpirySeconds();
     }
 
+    public int getGuildApplicationExpirySeconds() {
+        return getGuildSettings().getGuildApplicationExpirySeconds();
+    }
+
     public int getGuildNameMinLength() {
         return getGuildSettings().getGuildNameMinLength();
     }
@@ -620,6 +624,22 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public int getGuildTagMaxLength() {
         return getGuildSettings().getGuildTagMaxLength();
+    }
+
+    public int getGuildDescriptionMaxLength() {
+        return getGuildSettings().getGuildDescriptionMaxLength();
+    }
+
+    public int getGuildApplicationMessageMaxLength() {
+        return getGuildSettings().getGuildApplicationMessageMaxLength();
+    }
+
+    public int getGuildMotdMaxLength() {
+        return getGuildSettings().getGuildMotdMaxLength();
+    }
+
+    public boolean isGuildAllowNameTagUpdates() {
+        return getGuildSettings().isGuildAllowNameTagUpdates();
     }
 
     public GuildJoinPolicy getGuildDefaultJoinPolicy() {

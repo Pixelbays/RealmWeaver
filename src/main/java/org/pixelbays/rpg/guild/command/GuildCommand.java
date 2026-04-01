@@ -9,7 +9,7 @@ import com.hypixel.hytale.server.core.command.system.basecommands.AbstractComman
  *   /guild invite <player>
  *   /guild join <name|tag>
  *   /guild apply <name|tag>
- *   /guild accept <player>
+ *   /guild accept [player]
  *   /guild deny <player>
  *   /guild leave
  *   /guild kick <player>

@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.ability.ui.SpellbookPage;
 import org.pixelbays.rpg.economy.banks.ui.BankPage;
 import org.pixelbays.rpg.economy.currency.ui.CurrencyPage;
@@ -15,6 +16,7 @@ import org.pixelbays.rpg.global.config.settings.UiInputModSettings;
 import org.pixelbays.rpg.global.config.settings.UiInputModSettings.UiInputPageTarget;
 import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.guild.ui.GuildPage;
+import org.pixelbays.rpg.guild.ui.GuildApplicationsPage;
 import org.pixelbays.rpg.inventory.ui.RpgInventoryPage;
 import org.pixelbays.rpg.mail.ui.MailPage;
 import org.pixelbays.rpg.party.finder.ui.GroupFinderPage;
@@ -150,7 +152,12 @@ public class UiInputFilter implements PlayerPacketFilter {
             case Spellbook -> player.getPageManager().openCustomPage(ref, store, new SpellbookPage(playerRef));
             case RpgInventory -> player.getPageManager().openCustomPage(ref, store, new RpgInventoryPage(playerRef));
             case Party -> player.getPageManager().openCustomPage(ref, store, new PartyPage(playerRef));
-            case Guild -> player.getPageManager().openCustomPage(ref, store, new GuildPage(playerRef));
+                case Guild -> player.getPageManager().openCustomPage(
+                    ref,
+                    store,
+                    Realmweavers.get().getGuildManager().getGuildForMember(playerRef.getUuid()) == null
+                        ? new GuildApplicationsPage(playerRef)
+                        : new GuildPage(playerRef));
             case Mail -> player.getPageManager().openCustomPage(ref, store, new MailPage(playerRef));
             case Bank -> player.getPageManager().openCustomPage(ref, store, new BankPage(playerRef));
             case Currency -> player.getPageManager().openCustomPage(ref, store, new CurrencyPage(playerRef));

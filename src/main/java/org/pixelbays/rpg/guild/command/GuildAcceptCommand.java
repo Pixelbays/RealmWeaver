@@ -19,14 +19,22 @@ import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.permissions.HytalePermissions;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
+@SuppressWarnings("null")
 public class GuildAcceptCommand extends AbstractPlayerCommand {
 
     private final RequiredArg<String> playerArg;
     private final GuildManager guildManager;
 
     public GuildAcceptCommand() {
-        super("accept", "Accept a guild application");
+        super("accept", "Accept your guild invite or approve a guild application");
         requirePermission(HytalePermissions.fromCommand("player"));
+        this.playerArg = null;
+        this.addUsageVariant(new GuildAcceptCommand("Accept your guild invite or approve a guild application"));
+        this.guildManager = Realmweavers.get().getGuildManager();
+    }
+
+    private GuildAcceptCommand(String description) {
+        super(description);
         this.playerArg = this.withRequiredArg("player", "Player name", ArgTypes.STRING);
         this.guildManager = Realmweavers.get().getGuildManager();
     }
@@ -39,9 +47,10 @@ public class GuildAcceptCommand extends AbstractPlayerCommand {
             @Nonnull World world) {
 
         Player player = store.getComponent(ref, Player.getComponentType());
-        String targetName = playerArg.get(ctx);
+        String targetName = playerArg != null ? playerArg.get(ctx) : null;
         if (targetName == null || targetName.isBlank()) {
-            player.sendMessage(Message.translation("pixelbays.rpg.guild.usage.accept"));
+            GuildActionResult result = guildManager.acceptInvite(playerRef.getUuid());
+            player.sendMessage(GuildCommandUtil.managerResultMessage(result.getMessage()));
             return;
         }
 

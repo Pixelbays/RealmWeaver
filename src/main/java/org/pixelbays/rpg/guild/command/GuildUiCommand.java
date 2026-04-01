@@ -2,6 +2,8 @@ package org.pixelbays.rpg.guild.command;
 
 import javax.annotation.Nonnull;
 
+import org.pixelbays.plugin.Realmweavers;
+import org.pixelbays.rpg.guild.ui.GuildApplicationsPage;
 import org.pixelbays.rpg.guild.ui.GuildPage;
 
 import com.hypixel.hytale.component.Ref;
@@ -30,6 +32,11 @@ public class GuildUiCommand extends AbstractPlayerCommand {
 
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
+            return;
+        }
+
+        if (Realmweavers.get().getGuildManager().getGuildForMember(playerRef.getUuid()) == null) {
+            player.getPageManager().openCustomPage(ref, store, new GuildApplicationsPage(playerRef));
             return;
         }
 

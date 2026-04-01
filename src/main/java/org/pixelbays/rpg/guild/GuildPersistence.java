@@ -13,19 +13,17 @@ import javax.annotation.Nullable;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
 import org.pixelbays.plugin.Realmweavers;
+import org.pixelbays.rpg.global.util.RpgLogging;
 import org.pixelbays.rpg.guild.config.GuildData;
 
 import com.hypixel.hytale.assetstore.AssetPack;
 import com.hypixel.hytale.codec.ExtraInfo;
 import com.hypixel.hytale.common.plugin.PluginIdentifier;
 import com.hypixel.hytale.common.plugin.PluginManifest;
-import com.hypixel.hytale.logger.HytaleLogger;
 import com.hypixel.hytale.server.core.asset.AssetModule;
 import com.hypixel.hytale.server.core.util.BsonUtil;
 
 public class GuildPersistence {
-
-    private static final HytaleLogger LOGGER = HytaleLogger.forEnclosingClass();
 
     public List<GuildData> loadAll() {
         var assetMap = GuildData.getAssetMap();
@@ -37,6 +35,10 @@ public class GuildPersistence {
     }
 
     public void saveGuild(Guild guild) {
+        saveGuild(guild, null);
+    }
+
+    public void saveGuild(Guild guild, List<GuildData.GuildApplicationData> applications) {
         Path guildDir = resolveGuildDirectory();
         if (guildDir == null) {
             return;
@@ -46,10 +48,10 @@ public class GuildPersistence {
             return;
         }
 
-        GuildData data = GuildData.fromGuild(guild);
+        GuildData data = GuildData.fromGuild(guild, applications);
         BsonValue value = GuildData.CODEC.encode(data, new ExtraInfo());
         if (!(value instanceof BsonDocument document)) {
-            LOGGER.atWarning().log("Guild persistence failed: encoded data is not a document");
+            RpgLogging.warn("Guild persistence failed: encoded data is not a document");
             return;
         }
 
@@ -67,7 +69,7 @@ public class GuildPersistence {
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException ex) {
-            LOGGER.atWarning().withCause(ex).log("Failed to delete guild file %s", filePath);
+            RpgLogging.error(ex, "Failed to delete guild file %s", filePath);
         }
     }
 
@@ -75,7 +77,7 @@ public class GuildPersistence {
     private Path resolveGuildDirectory() {
         AssetPack pack = findWritablePack();
         if (pack == null) {
-            LOGGER.atWarning().log("Guild persistence disabled: no writable asset pack found");
+            RpgLogging.warn("Guild persistence disabled: no writable asset pack found");
             return null;
         }
 
@@ -85,27 +87,31 @@ public class GuildPersistence {
 
     @Nullable
     private AssetPack findWritablePack() {
-        AssetModule assetModule = AssetModule.get();
-        if (assetModule == null) {
+        try {
+            AssetModule assetModule = AssetModule.get();
+            if (assetModule == null) {
+                return null;
+            }
+
+            PluginManifest manifest = Realmweavers.get().getManifest();
+            String pluginId = new PluginIdentifier(manifest).toString();
+
+            AssetPack fallback = null;
+            for (AssetPack pack : assetModule.getAssetPacks()) {
+                if (pack.isImmutable()) {
+                    continue;
+                }
+                if (fallback == null) {
+                    fallback = pack;
+                }
+                if (pack.getName().equalsIgnoreCase(pluginId)) {
+                    return pack;
+                }
+            }
+
+            return fallback;
+        } catch (Throwable ex) {
             return null;
         }
-
-        PluginManifest manifest = Realmweavers.get().getManifest();
-        String pluginId = new PluginIdentifier(manifest).toString();
-
-        AssetPack fallback = null;
-        for (AssetPack pack : assetModule.getAssetPacks()) {
-            if (pack.isImmutable()) {
-                continue;
-            }
-            if (fallback == null) {
-                fallback = pack;
-            }
-            if (pack.getName().equalsIgnoreCase(pluginId)) {
-                return pack;
-            }
-        }
-
-        return fallback;
     }
 }

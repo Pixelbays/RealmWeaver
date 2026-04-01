@@ -10,17 +10,25 @@ import java.util.UUID;
 public class Guild {
 
     private final UUID id;
-    private final String name;
-    private final String tag;
+    private String name;
+    private String tag;
+    private String description;
+    private String motd;
     private UUID leaderId;
     private GuildJoinPolicy joinPolicy;
     private final Map<UUID, GuildMember> members;
     private final Map<String, GuildRole> roles;
 
     public Guild(UUID id, String name, String tag, UUID leaderId, GuildJoinPolicy joinPolicy) {
+        this(id, name, tag, leaderId, joinPolicy, "", "");
+    }
+
+    public Guild(UUID id, String name, String tag, UUID leaderId, GuildJoinPolicy joinPolicy, String description, String motd) {
         this.id = id;
         this.name = name;
         this.tag = tag;
+        this.description = description;
+        this.motd = motd;
         this.leaderId = leaderId;
         this.joinPolicy = joinPolicy;
         this.members = new HashMap<>();
@@ -36,8 +44,32 @@ public class Guild {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getTag() {
         return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public String getDescription() {
+        return description == null ? "" : description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description == null ? "" : description;
+    }
+
+    public String getMotd() {
+        return motd == null ? "" : motd;
+    }
+
+    public void setMotd(String motd) {
+        this.motd = motd == null ? "" : motd;
     }
 
     public UUID getLeaderId() {

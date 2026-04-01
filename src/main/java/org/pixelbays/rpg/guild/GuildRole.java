@@ -16,9 +16,14 @@ public class GuildRole {
     public GuildRole(String id, String name, Set<GuildPermission> permissions) {
         this.id = id;
         this.name = name;
-        this.permissions = permissions == null
-                ? EnumSet.noneOf(GuildPermission.class)
-                : EnumSet.copyOf(permissions);
+        this.permissions = copyPermissions(permissions);
+    }
+
+    private static EnumSet<GuildPermission> copyPermissions(Set<GuildPermission> permissions) {
+        if (permissions == null || permissions.isEmpty()) {
+            return EnumSet.noneOf(GuildPermission.class);
+        }
+        return EnumSet.copyOf(permissions);
     }
 
     public static GuildRole leaderRole() {
@@ -28,7 +33,7 @@ public class GuildRole {
     public static GuildRole officerRole() {
         return new GuildRole(OFFICER_ID, "Officer",
                 EnumSet.of(GuildPermission.INVITE, GuildPermission.KICK, GuildPermission.PROMOTE,
-                        GuildPermission.ACCEPT_APPLICATIONS));
+                GuildPermission.ACCEPT_APPLICATIONS, GuildPermission.REJECT_APPLICATIONS));
     }
 
     public static GuildRole memberRole() {
@@ -60,6 +65,6 @@ public class GuildRole {
     }
 
     public Set<GuildPermission> getPermissions() {
-        return EnumSet.copyOf(permissions);
+        return copyPermissions(permissions);
     }
 }

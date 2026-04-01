@@ -1,34 +1,19 @@
 package org.pixelbays.rpg.guild.ui;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.plugin.Realmweavers;
 import org.pixelbays.rpg.guild.Guild;
-import org.pixelbays.rpg.guild.GuildActionResult;
 import org.pixelbays.rpg.guild.GuildManager;
-import org.pixelbays.rpg.guild.GuildPermission;
-import org.pixelbays.rpg.guild.GuildRole;
-import org.pixelbays.rpg.guild.command.GuildCommandUtil;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.protocol.BoolParamValue;
-import com.hypixel.hytale.protocol.DoubleParamValue;
-import com.hypixel.hytale.protocol.IntParamValue;
-import com.hypixel.hytale.protocol.LongParamValue;
-import com.hypixel.hytale.protocol.ParamValue;
-import com.hypixel.hytale.protocol.StringParamValue;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
-import com.hypixel.hytale.server.core.ui.LocalizableString;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -39,30 +24,55 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 @SuppressWarnings("null")
 public class GuildPage extends CustomUIPage {
 
-    private static final String STATUS_LABEL = "#StatusLabel";
-    private static final String OVERVIEW_LABEL = "#OverviewLabel";
-    private static final String ROSTER_LABEL = "#RosterLabel";
+    static final String GUILD_TABS = "#GuildTabs";
+    static final String STATUS_LABEL = "#StatusLabel";
+    static final String OVERVIEW_PANEL = "#OverviewPanel";
+    static final String ROSTER_PANEL = "#RosterPanel";
+    static final String MANAGEMENT_PANEL = "#ManagementPanel";
+    static final String MANAGEMENT_HEADING_LABEL = "#ManagementHeadingLabel";
+    static final String MANAGEMENT_SUMMARY_LABEL = "#ManagementSummaryLabel";
+    static final String MANAGEMENT_INFO_PANEL = "#ManagementInfoPanel";
+    static final String MANAGEMENT_ROLES_PANEL = "#ManagementRolesPanel";
+    static final String INVITES_PANEL = "#InvitesPanel";
+    static final String CALENDAR_PANEL = "#CalendarPanel";
 
-    private static final String INVITE_FIELD = "#InviteeField";
-    private static final String GUILD_FIELD = "#GuildField";
-    private static final String ROLE_NAME_FIELD = "#RoleNameField";
-    private static final String ASSIGN_PLAYER_FIELD = "#AssignPlayerField";
-    private static final String ASSIGN_ROLE_FIELD = "#AssignRoleField";
-    private static final String PERM_ROLE_FIELD = "#PermRoleField";
-    private static final String PERM_NAME_FIELD = "#PermNameField";
-    private static final String PERM_ENABLED_CHECK = "#PermEnabledCheck";
+    final GuildManager guildManager;
+    final GuildOverviewTab overviewTab;
+    final GuildRosterTab rosterTab;
+    final GuildInvitesTab invitesTab;
+    final GuildCalendarTab calendarTab;
+    final GuildManagementTab managementTab;
+    final GuildRolesTab rolesTab;
 
-    private static final String INVITE_BUTTON = "#InviteButton";
-    private static final String APPLY_BUTTON = "#ApplyButton";
-    private static final String CREATE_ROLE_BUTTON = "#CreateRoleButton";
-    private static final String ASSIGN_ROLE_BUTTON = "#AssignRoleButton";
-    private static final String SET_PERM_BUTTON = "#SetPermButton";
-
-    private final GuildManager guildManager;
+    GuildTab activeTab = GuildTab.OVERVIEW;
+    int outgoingInvitePage;
+    int roleTabPage;
+    @Nullable
+    String selectedRoleEditorId;
+    @Nullable
+    String selectedApplicationApplicantId;
+    @Nullable
+    String selectedRosterMemberId;
+    @Nullable
+    String selectedRosterRoleId;
+    @Nullable
+    GuildRosterTab.RosterModerationAction pendingRosterModerationAction;
+    @Nullable
+    String pendingRosterModerationTargetId;
+    @Nullable
+    Message lastStatusMessage;
+    int rosterRowCapacity = GuildRosterTab.DEFAULT_ROSTER_ROW_CAPACITY;
+    int applicationRowCapacity = GuildInvitesTab.DEFAULT_APPLICATION_ROW_CAPACITY;
 
     public GuildPage(@Nonnull PlayerRef playerRef) {
         super(playerRef, CustomPageLifetime.CanDismiss);
         this.guildManager = Realmweavers.get().getGuildManager();
+        this.overviewTab = new GuildOverviewTab();
+        this.rosterTab = new GuildRosterTab(this);
+        this.invitesTab = new GuildInvitesTab(this);
+        this.calendarTab = new GuildCalendarTab();
+        this.managementTab = new GuildManagementTab(this);
+        this.rolesTab = new GuildRolesTab(this);
     }
 
     @Override
@@ -71,321 +81,161 @@ public class GuildPage extends CustomUIPage {
             @Nonnull UIEventBuilder eventBuilder,
             @Nonnull Store<EntityStore> store) {
         commandBuilder.append("Pages/GuildPage.ui");
-        bindEvents(eventBuilder);
-        appendView(commandBuilder, null);
+        bindTabEvents(eventBuilder);
+        rosterTab.build(commandBuilder, eventBuilder);
+        invitesTab.build(commandBuilder, eventBuilder);
+        managementTab.bindEvents(eventBuilder);
+        rolesTab.build(eventBuilder);
+        appendView(commandBuilder);
     }
 
     @Override
-    public void handleDataEvent(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, String rawData) {
-        String action = extractString(rawData, "Action");
+    public void handleDataEvent(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull String rawData) {
+        String action = GuildPageSupport.extractString(rawData, "Action");
         if (action == null) {
             return;
         }
 
-        String invitee = extractString(rawData, "@Invitee");
-        String guildNameOrTag = extractString(rawData, "@Guild");
-        String roleName = extractString(rawData, "@RoleName");
-        String assignTarget = extractString(rawData, "@AssignTarget");
-        String assignRoleId = extractString(rawData, "@AssignRoleId");
-        String permRoleId = extractString(rawData, "@PermRoleId");
-        String permission = extractString(rawData, "@Permission");
-        Boolean enabled = extractBoolean(rawData, "@Enabled");
-
+        GuildPageActionData actionData = GuildPageActionData.from(action, rawData);
         World world = store.getExternalData().getWorld();
-        if (world == null) {
-            return;
-        }
+        world.execute(() -> handleAction(ref, store, actionData));
+    }
 
-        world.execute(() -> handleAction(ref, store, action, invitee, guildNameOrTag, roleName, assignTarget, assignRoleId,
-                permRoleId, permission, enabled));
+    private void bindTabEvents(@Nonnull UIEventBuilder eventBuilder) {
+        bindTabEvent(eventBuilder, "#overviewTab", GuildTab.OVERVIEW);
+        bindTabEvent(eventBuilder, "#RosterTab", GuildTab.ROSTER);
+        bindTabEvent(eventBuilder, "#InvitesTab", GuildTab.INVITES);
+        bindTabEvent(eventBuilder, "#CalendarTab", GuildTab.CALENDAR);
+        bindTabEvent(eventBuilder, "#GuildManagementTab", GuildTab.MANAGEMENT);
+        bindTabEvent(eventBuilder, "#RoleManagementTab", GuildTab.ROLE_MANAGEMENT);
+    }
+
+    private void bindTabEvent(@Nonnull UIEventBuilder eventBuilder,
+            @Nonnull String selector,
+            @Nonnull GuildTab tab) {
+        eventBuilder.addEventBinding(
+                CustomUIEventBindingType.Activating,
+                selector,
+                new EventData().append("Action", "SelectTab").append("Tab", tab.wireId));
     }
 
     private void handleAction(@Nonnull Ref<EntityStore> ref,
             @Nonnull Store<EntityStore> store,
-            @Nonnull String action,
-            @Nullable String invitee,
-            @Nullable String guildNameOrTag,
-            @Nullable String roleName,
-            @Nullable String assignTarget,
-            @Nullable String assignRoleId,
-            @Nullable String permRoleId,
-            @Nullable String permission,
-            @Nullable Boolean enabled) {
-
+            @Nonnull GuildPageActionData actionData) {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
             return;
         }
 
-        Message statusMessage = null;
+        rosterTab.updateRosterSelection(actionData.rosterMemberId(), actionData.rosterRoleId());
 
-        if ("Invite".equals(action)) {
-            statusMessage = handleInvite(invitee);
-        } else if ("Apply".equals(action)) {
-            statusMessage = handleApply(guildNameOrTag);
-        } else if ("CreateRole".equals(action)) {
-            statusMessage = handleCreateRole(roleName);
-        } else if ("AssignRole".equals(action)) {
-            statusMessage = handleAssignRole(assignTarget, assignRoleId);
-        } else if ("SetPerm".equals(action)) {
-            statusMessage = handleSetPerm(permRoleId, permission, enabled);
+        Message statusMessage = switch (actionData.action()) {
+            case "SelectTab" -> handleSelectTab(actionData.tab());
+            case "UpdateRosterSelection", "AssignRole", "RequestKickMember", "RequestPromoteMember",
+                    "CancelRosterModeration", "ConfirmRosterModeration" -> rosterTab.handleAction(actionData);
+            case "PreviousOutgoingInvitePage", "NextOutgoingInvitePage", "Invite", "UpdateApplicationSelection",
+                    "CancelOutgoingInvite", "AcceptApplication", "DenyApplication" -> invitesTab.handleAction(actionData);
+            case "SetJoinPolicy", "UpdateGuildInfo" -> managementTab.handleAction(actionData);
+            case "PreviousRoleTabPage", "NextRoleTabPage", "CreateRole", "LoadRoleEditor", "RenameRole",
+                    "SaveRolePermissions" -> rolesTab.handleAction(actionData);
+            default -> null;
+        };
+
+        if (statusMessage != null) {
+            lastStatusMessage = statusMessage;
         }
 
         UICommandBuilder commandBuilder = new UICommandBuilder();
-        appendView(commandBuilder, statusMessage);
+        appendView(commandBuilder);
         sendUpdate(commandBuilder);
     }
 
-    private Message handleInvite(@Nullable String invitee) {
-        if (invitee == null || invitee.trim().isEmpty()) {
-            return Message.translation("pixelbays.rpg.guild.usage.invite");
-        }
-
-        PlayerRef targetRef = GuildCommandUtil.findPlayerByName(invitee.trim());
-        if (targetRef == null) {
-            return Message.translation("pixelbays.rpg.common.playerNotFound");
-        }
-
-        GuildActionResult result = guildManager.invitePlayer(playerRef.getUuid(), targetRef.getUuid());
-        Message message = GuildCommandUtil.managerResultMessage(result.getMessage());
-        if (result.isSuccess()) {
-            targetRef.sendMessage(Message.translation("pixelbays.rpg.guild.notify.invitedBy").param("player", playerRef.getUsername()));
-        }
-
-        return message;
+    @Nullable
+    private Message handleSelectTab(@Nullable String tab) {
+        activeTab = GuildTab.fromWire(tab);
+        clearPendingRosterModeration();
+        return null;
     }
 
-    private Message handleApply(@Nullable String nameOrTag) {
-        if (nameOrTag == null || nameOrTag.trim().isEmpty()) {
-            return Message.translation("pixelbays.rpg.guild.usage.apply");
-        }
-
-        GuildActionResult result = guildManager.applyToGuild(playerRef.getUuid(), nameOrTag.trim());
-        return GuildCommandUtil.managerResultMessage(result.getMessage());
-    }
-
-    private Message handleCreateRole(@Nullable String roleName) {
-        if (roleName == null || roleName.trim().isEmpty()) {
-            return Message.translation("pixelbays.rpg.guild.usage.roleCreate");
-        }
-
-        GuildActionResult result = guildManager.createRole(playerRef.getUuid(), roleName.trim());
-        return GuildCommandUtil.managerResultMessage(result.getMessage());
-    }
-
-    private Message handleAssignRole(@Nullable String targetName, @Nullable String roleId) {
-        if (targetName == null || targetName.trim().isEmpty() || roleId == null || roleId.trim().isEmpty()) {
-            return Message.translation("pixelbays.rpg.guild.usage.roleAssign");
-        }
-
-        PlayerRef targetRef = GuildCommandUtil.findPlayerByName(targetName.trim());
-        if (targetRef == null) {
-            return Message.translation("pixelbays.rpg.common.playerNotFound");
-        }
-
-        GuildActionResult result = guildManager.assignRole(playerRef.getUuid(), targetRef.getUuid(), roleId.trim());
-        return GuildCommandUtil.managerResultMessage(result.getMessage());
-    }
-
-    private Message handleSetPerm(@Nullable String roleId, @Nullable String permission, @Nullable Boolean enabled) {
-        if (roleId == null || roleId.trim().isEmpty() || permission == null || permission.trim().isEmpty()
-                || enabled == null) {
-            return Message.translation("pixelbays.rpg.guild.usage.roleSetPerm");
-        }
-
-        GuildPermission perm;
-        try {
-            perm = GuildPermission.valueOf(permission.trim().toUpperCase(Locale.ROOT));
-        } catch (IllegalArgumentException e) {
-            return Message.translation("pixelbays.rpg.guild.error.unknownPermission");
-        }
-
-        GuildActionResult result = guildManager.setRolePermission(playerRef.getUuid(), roleId.trim(), perm, enabled);
-        return GuildCommandUtil.managerResultMessage(result.getMessage());
-    }
-
-    private void bindEvents(@Nonnull UIEventBuilder eventBuilder) {
-        eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                INVITE_BUTTON,
-                new EventData()
-                        .append("Action", "Invite")
-                        .append("@Invitee", INVITE_FIELD + ".Value"));
-
-        eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                APPLY_BUTTON,
-                new EventData()
-                        .append("Action", "Apply")
-                        .append("@Guild", GUILD_FIELD + ".Value"));
-
-        eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                CREATE_ROLE_BUTTON,
-                new EventData()
-                        .append("Action", "CreateRole")
-                        .append("@RoleName", ROLE_NAME_FIELD + ".Value"));
-
-        eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                ASSIGN_ROLE_BUTTON,
-                new EventData()
-                        .append("Action", "AssignRole")
-                        .append("@AssignTarget", ASSIGN_PLAYER_FIELD + ".Value")
-                        .append("@AssignRoleId", ASSIGN_ROLE_FIELD + ".Value"));
-
-        eventBuilder.addEventBinding(
-                CustomUIEventBindingType.Activating,
-                SET_PERM_BUTTON,
-                new EventData()
-                        .append("Action", "SetPerm")
-                        .append("@PermRoleId", PERM_ROLE_FIELD + ".Value")
-                        .append("@Permission", PERM_NAME_FIELD + ".Value")
-                        .append("@Enabled", PERM_ENABLED_CHECK + ".Value"));
-    }
-
-    private void appendView(@Nonnull UICommandBuilder commandBuilder, @Nullable Message statusMessage) {
-        if (statusMessage != null) {
-            commandBuilder.setObject(STATUS_LABEL + ".Text", toLocalizableString(statusMessage));
+    private void appendView(@Nonnull UICommandBuilder commandBuilder) {
+        if (lastStatusMessage != null) {
+            commandBuilder.setObject(STATUS_LABEL + ".Text", GuildPageSupport.toLocalizableString(lastStatusMessage));
         } else {
             commandBuilder.set(STATUS_LABEL + ".Text", "");
         }
 
+        commandBuilder.set(GUILD_TABS + ".SelectedTab", activeTab.clientTabId);
+        commandBuilder.set(OVERVIEW_PANEL + ".Visible", activeTab == GuildTab.OVERVIEW);
+        commandBuilder.set(ROSTER_PANEL + ".Visible", activeTab == GuildTab.ROSTER);
+        commandBuilder.set(
+                MANAGEMENT_PANEL + ".Visible",
+                activeTab == GuildTab.MANAGEMENT || activeTab == GuildTab.ROLE_MANAGEMENT);
+        commandBuilder.set(INVITES_PANEL + ".Visible", activeTab == GuildTab.INVITES);
+        commandBuilder.set(CALENDAR_PANEL + ".Visible", activeTab == GuildTab.CALENDAR);
+
         Guild guild = guildManager.getGuildForMember(playerRef.getUuid());
-        if (guild == null) {
-            commandBuilder.set(OVERVIEW_LABEL + ".Text", "");
-            commandBuilder.set(ROSTER_LABEL + ".Text", "");
-            return;
+        GuildPageSupport.setLocalizedText(
+                commandBuilder,
+                MANAGEMENT_HEADING_LABEL,
+                activeTab == GuildTab.ROLE_MANAGEMENT
+                        ? "pixelbays.rpg.guild.ui.managementRolesTab"
+                        : "pixelbays.rpg.guild.ui.managementHeading");
+        commandBuilder.set(MANAGEMENT_INFO_PANEL + ".Visible", activeTab == GuildTab.MANAGEMENT && guild != null);
+        commandBuilder.set(MANAGEMENT_ROLES_PANEL + ".Visible", activeTab == GuildTab.ROLE_MANAGEMENT && guild != null);
+        if (guild == null && (activeTab == GuildTab.MANAGEMENT || activeTab == GuildTab.ROLE_MANAGEMENT)) {
+            GuildPageSupport.setLocalizedText(commandBuilder, MANAGEMENT_SUMMARY_LABEL, "pixelbays.rpg.guild.ui.noGuild");
+        } else {
+            commandBuilder.set(MANAGEMENT_SUMMARY_LABEL + ".Text", "");
         }
 
-        Map<String, String> overviewParams = new HashMap<>();
-        overviewParams.put("name", guild.getName());
-        overviewParams.put("tag", guild.getTag() != null ? guild.getTag() : "");
-        overviewParams.put("leader", GuildCommandUtil.resolveDisplayName(guild.getLeaderId()));
-        overviewParams.put("members", String.valueOf(guild.size()));
-        overviewParams.put("policy", String.valueOf(guild.getJoinPolicy()).toLowerCase(Locale.ROOT));
+        overviewTab.populate(commandBuilder, guild);
+        rosterTab.populate(commandBuilder, guild);
+        managementTab.populate(commandBuilder, guild);
+        rolesTab.populate(commandBuilder, guild);
+        invitesTab.populate(commandBuilder, guild);
+        calendarTab.populate(commandBuilder, guild);
+    }
 
-        commandBuilder.setObject(OVERVIEW_LABEL + ".Text",
-                LocalizableString.fromMessageId("pixelbays.rpg.guild.ui.overviewBody", overviewParams));
-
-        StringBuilder rosterBuilder = new StringBuilder();
-        for (var member : guild.getMemberList()) {
-            if (rosterBuilder.length() > 0) {
-                rosterBuilder.append("\n");
-            }
-
-            String memberName = GuildCommandUtil.resolveDisplayName(member.getMemberId());
-            String roleId = member.getRoleId();
-            GuildRole role = guild.getRole(roleId);
-            String roleName = role != null ? role.getName() : roleId;
-
-            rosterBuilder.append(memberName).append(" (").append(roleName).append(")");
-        }
-
-        commandBuilder.set(ROSTER_LABEL + ".Text", rosterBuilder.toString());
+    void clearPendingRosterModeration() {
+        pendingRosterModerationAction = null;
+        pendingRosterModerationTargetId = null;
     }
 
     @Nonnull
-    private static LocalizableString toLocalizableString(@Nonnull Message message) {
-        var formatted = message.getFormattedMessage();
+    PlayerRef playerRef() {
+        return playerRef;
+    }
 
-        if (formatted.messageId != null) {
-            Map<String, String> params = null;
-            if (formatted.params != null && !formatted.params.isEmpty()) {
-                params = new HashMap<>();
-                for (var entry : formatted.params.entrySet()) {
-                    String key = entry.getKey();
-                    ParamValue value = entry.getValue();
-                    String resolved = paramToString(value);
-                    if (resolved != null) {
-                        params.put(key, resolved);
-                    }
+    enum GuildTab {
+        OVERVIEW("overview", "Tab1"),
+        ROSTER("roster", "Tab2"),
+        INVITES("invites", "Tab3"),
+        CALENDAR("calendar", "Tab4"),
+        MANAGEMENT("management", "Tab5"),
+        ROLE_MANAGEMENT("role_management", "Tab6");
+
+        final String wireId;
+        final String clientTabId;
+
+        GuildTab(String wireId, String clientTabId) {
+            this.wireId = wireId;
+            this.clientTabId = clientTabId;
+        }
+
+        @Nonnull
+        static GuildTab fromWire(@Nullable String wireId) {
+            if (wireId == null) {
+                return OVERVIEW;
+            }
+
+            for (GuildTab tab : values()) {
+                if (tab.wireId.equalsIgnoreCase(wireId)) {
+                    return tab;
                 }
             }
-            return LocalizableString.fromMessageId(formatted.messageId, params);
+            return OVERVIEW;
         }
-
-        if (formatted.rawText != null) {
-            return LocalizableString.fromString(formatted.rawText);
-        }
-
-        return LocalizableString.fromString("");
-    }
-
-    @Nullable
-    private static String paramToString(@Nullable ParamValue value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof StringParamValue sp) {
-            return sp.value;
-        }
-        if (value instanceof IntParamValue ip) {
-            return String.valueOf(ip.value);
-        }
-        if (value instanceof LongParamValue lp) {
-            return String.valueOf(lp.value);
-        }
-        if (value instanceof DoubleParamValue dp) {
-            return String.valueOf(dp.value);
-        }
-        if (value instanceof BoolParamValue bp) {
-            return String.valueOf(bp.value);
-        }
-        return String.valueOf(value);
-    }
-
-    @Nullable
-    private static String extractString(@Nonnull String rawData, @Nonnull String key) {
-        String quotedKey = "\"" + key + "\"";
-        int keyIndex = rawData.indexOf(quotedKey);
-        if (keyIndex == -1) {
-            return null;
-        }
-
-        int colonIndex = rawData.indexOf(':', keyIndex + quotedKey.length());
-        if (colonIndex == -1) {
-            return null;
-        }
-
-        int firstQuote = rawData.indexOf('"', colonIndex + 1);
-        if (firstQuote == -1) {
-            return null;
-        }
-
-        int secondQuote = rawData.indexOf('"', firstQuote + 1);
-        if (secondQuote == -1) {
-            return null;
-        }
-
-        return rawData.substring(firstQuote + 1, secondQuote);
-    }
-
-    @Nullable
-    private static Boolean extractBoolean(@Nonnull String rawData, @Nonnull String key) {
-        String quotedKey = "\"" + key + "\"";
-        int keyIndex = rawData.indexOf(quotedKey);
-        if (keyIndex == -1) {
-            return null;
-        }
-
-        int colonIndex = rawData.indexOf(':', keyIndex + quotedKey.length());
-        if (colonIndex == -1) {
-            return null;
-        }
-
-        int valueStart = colonIndex + 1;
-        while (valueStart < rawData.length() && Character.isWhitespace(rawData.charAt(valueStart))) {
-            valueStart++;
-        }
-
-        if (rawData.startsWith("true", valueStart)) {
-            return Boolean.TRUE;
-        }
-        if (rawData.startsWith("false", valueStart)) {
-            return Boolean.FALSE;
-        }
-
-        return null;
     }
 }
