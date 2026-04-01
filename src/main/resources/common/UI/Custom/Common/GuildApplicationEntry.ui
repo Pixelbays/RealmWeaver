@@ -1,0 +1,48 @@
+$C = "../Common.ui";
+
+Group {
+  Anchor: (Height: 84, Bottom: 8);
+  Background: PatchStyle(Color: #18283d);
+  OutlineColor: #345171ff;
+  OutlineSize: 1;
+
+  Group #SelectedBar {
+    Visible: false;
+    Anchor: (Width: 4, Left: 0, Top: 0, Bottom: 0);
+    Background: PatchStyle(Color: #f0c46c);
+  }
+
+  TextButton #Button {
+    Anchor: (Full: 0);
+    Padding: (Full: 0);
+    Style: (Hovered: (Background: #233956), Pressed: (Background: #2a4467));
+  }
+
+  Group {
+    LayoutMode: Top;
+    Anchor: (Full: 0);
+    Padding: (Left: 12, Right: 10, Top: 10, Bottom: 10);
+
+    Label #TitleLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+      Anchor: (Height: 20, Bottom: 2);
+    }
+
+    Label #SubtitleLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Height: 18, Bottom: 2);
+    }
+
+    Label #MetaLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 11, TextColor: #9fb1c8);
+      Anchor: (Height: 16, Bottom: 2);
+    }
+
+    $C.@TextField #ApplicantIdField {
+      @Anchor = (Width: 1, Height: 1);
+    }
+  }
+}

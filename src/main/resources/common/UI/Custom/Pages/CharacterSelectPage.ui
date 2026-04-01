@@ -98,9 +98,8 @@ Group #LayoutRoot {
       LayoutMode: Left;
       Anchor: (Height: 44);
 
-      TextButton #DeleteButton {
+      $C.@CancelTextButton #DeleteButton {
         Text: %pixelbays.rpg.character.ui.deleteButton;
-        Style: $C.@DefaultTextButtonStyle;
         Anchor: (Width: 152, Height: 44, Right: 8);
       }
 
