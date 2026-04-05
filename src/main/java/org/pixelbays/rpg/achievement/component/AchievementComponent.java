@@ -68,18 +68,30 @@ public class AchievementComponent implements Component<EntityStore>, Cloneable {
                     (component, value) -> component.displayedTitle = value,
                     component -> component.displayedTitle)
             .add()
+                .append(new KeyedCodec<>("DisplayedTitlePrefix", Codec.STRING, false, true),
+                    (component, value) -> component.displayedTitlePrefix = value,
+                    component -> component.displayedTitlePrefix)
+                .add()
+                .append(new KeyedCodec<>("DisplayedTitleSuffix", Codec.STRING, false, true),
+                    (component, value) -> component.displayedTitleSuffix = value,
+                    component -> component.displayedTitleSuffix)
+                .add()
             .build();
 
     private Map<String, AchievementUnlockRecord> unlockedAchievements;
     private Map<String, AchievementProgress> progressTracking;
     private int totalAchievementPoints;
     private String displayedTitle;
+    private String displayedTitlePrefix;
+    private String displayedTitleSuffix;
 
     public AchievementComponent() {
         this.unlockedAchievements = new HashMap<>();
         this.progressTracking = new HashMap<>();
         this.totalAchievementPoints = 0;
         this.displayedTitle = "";
+        this.displayedTitlePrefix = "";
+        this.displayedTitleSuffix = "";
     }
 
     public static ComponentType<EntityStore, AchievementComponent> getComponentType() {
@@ -118,6 +130,36 @@ public class AchievementComponent implements Component<EntityStore>, Cloneable {
         this.displayedTitle = displayedTitle == null ? "" : displayedTitle;
     }
 
+    @Nonnull
+    public String getDisplayedTitlePrefix() {
+        return displayedTitlePrefix == null ? "" : displayedTitlePrefix;
+    }
+
+    public void setDisplayedTitlePrefix(String displayedTitlePrefix) {
+        this.displayedTitlePrefix = displayedTitlePrefix == null ? "" : displayedTitlePrefix;
+    }
+
+    @Nonnull
+    public String getDisplayedTitleSuffix() {
+        return displayedTitleSuffix == null ? "" : displayedTitleSuffix;
+    }
+
+    public void setDisplayedTitleSuffix(String displayedTitleSuffix) {
+        this.displayedTitleSuffix = displayedTitleSuffix == null ? "" : displayedTitleSuffix;
+    }
+
+    public void applyDisplayedTitle(String displayedTitle, String displayedTitlePrefix, String displayedTitleSuffix) {
+        setDisplayedTitle(displayedTitle);
+        setDisplayedTitlePrefix(displayedTitlePrefix);
+        setDisplayedTitleSuffix(displayedTitleSuffix);
+    }
+
+    public boolean hasDisplayedTitle() {
+        return !getDisplayedTitle().isBlank()
+                || !getDisplayedTitlePrefix().isBlank()
+                || !getDisplayedTitleSuffix().isBlank();
+    }
+
     public boolean unlock(@Nonnull String achievementId, int pointsAwarded) {
         if (achievementId.isBlank() || isUnlocked(achievementId)) {
             return false;
@@ -135,6 +177,8 @@ public class AchievementComponent implements Component<EntityStore>, Cloneable {
         AchievementComponent cloned = new AchievementComponent();
         cloned.totalAchievementPoints = this.totalAchievementPoints;
         cloned.displayedTitle = this.getDisplayedTitle();
+        cloned.displayedTitlePrefix = this.getDisplayedTitlePrefix();
+        cloned.displayedTitleSuffix = this.getDisplayedTitleSuffix();
         cloned.unlockedAchievements = new HashMap<>();
         for (Map.Entry<String, AchievementUnlockRecord> entry : this.unlockedAchievements.entrySet()) {
             cloned.unlockedAchievements.put(entry.getKey(), entry.getValue().copy());

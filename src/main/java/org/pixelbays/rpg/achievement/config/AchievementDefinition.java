@@ -327,6 +327,22 @@ public class AchievementDefinition implements JsonAssetWithMap<String, DefaultAs
                         (reward, value) -> reward.displayedTitleTranslationKey = value,
                         reward -> reward.displayedTitleTranslationKey)
                 .add()
+            .append(new KeyedCodec<>("DisplayedTitlePrefix", Codec.STRING, false, true),
+                (reward, value) -> reward.displayedTitlePrefix = value,
+                reward -> reward.displayedTitlePrefix)
+            .add()
+            .append(new KeyedCodec<>("DisplayedTitlePrefixTranslationKey", Codec.STRING, false, true),
+                (reward, value) -> reward.displayedTitlePrefixTranslationKey = value,
+                reward -> reward.displayedTitlePrefixTranslationKey)
+            .add()
+            .append(new KeyedCodec<>("DisplayedTitleSuffix", Codec.STRING, false, true),
+                (reward, value) -> reward.displayedTitleSuffix = value,
+                reward -> reward.displayedTitleSuffix)
+            .add()
+            .append(new KeyedCodec<>("DisplayedTitleSuffixTranslationKey", Codec.STRING, false, true),
+                (reward, value) -> reward.displayedTitleSuffixTranslationKey = value,
+                reward -> reward.displayedTitleSuffixTranslationKey)
+            .add()
                 .append(new KeyedCodec<>("CurrencyRewards", new MapCodec<>(Codec.LONG, java.util.LinkedHashMap::new, false), false, true),
                         (reward, value) -> reward.currencyRewards = value,
                         reward -> reward.currencyRewards)
@@ -343,6 +359,10 @@ public class AchievementDefinition implements JsonAssetWithMap<String, DefaultAs
 
         private String displayedTitle;
         private String displayedTitleTranslationKey;
+        private String displayedTitlePrefix;
+        private String displayedTitlePrefixTranslationKey;
+        private String displayedTitleSuffix;
+        private String displayedTitleSuffixTranslationKey;
         private Map<String, Long> currencyRewards;
         private NotificationConfig notification;
         private EventTitleConfig eventTitle;
@@ -350,6 +370,10 @@ public class AchievementDefinition implements JsonAssetWithMap<String, DefaultAs
         public AchievementReward() {
             this.displayedTitle = "";
             this.displayedTitleTranslationKey = "";
+            this.displayedTitlePrefix = "";
+            this.displayedTitlePrefixTranslationKey = "";
+            this.displayedTitleSuffix = "";
+            this.displayedTitleSuffixTranslationKey = "";
             this.currencyRewards = new java.util.LinkedHashMap<>();
             this.notification = null;
             this.eventTitle = null;
@@ -363,6 +387,26 @@ public class AchievementDefinition implements JsonAssetWithMap<String, DefaultAs
         @Nonnull
         public String getDisplayedTitleTranslationKey() {
             return displayedTitleTranslationKey == null ? "" : displayedTitleTranslationKey;
+        }
+
+        @Nonnull
+        public String getDisplayedTitlePrefix() {
+            return displayedTitlePrefix == null ? "" : displayedTitlePrefix;
+        }
+
+        @Nonnull
+        public String getDisplayedTitlePrefixTranslationKey() {
+            return displayedTitlePrefixTranslationKey == null ? "" : displayedTitlePrefixTranslationKey;
+        }
+
+        @Nonnull
+        public String getDisplayedTitleSuffix() {
+            return displayedTitleSuffix == null ? "" : displayedTitleSuffix;
+        }
+
+        @Nonnull
+        public String getDisplayedTitleSuffixTranslationKey() {
+            return displayedTitleSuffixTranslationKey == null ? "" : displayedTitleSuffixTranslationKey;
         }
 
         @Nonnull
@@ -384,6 +428,10 @@ public class AchievementDefinition implements JsonAssetWithMap<String, DefaultAs
         public boolean hasAnyReward() {
             return !getDisplayedTitle().isBlank()
                     || !getDisplayedTitleTranslationKey().isBlank()
+                    || !getDisplayedTitlePrefix().isBlank()
+                    || !getDisplayedTitlePrefixTranslationKey().isBlank()
+                    || !getDisplayedTitleSuffix().isBlank()
+                    || !getDisplayedTitleSuffixTranslationKey().isBlank()
                     || !getCurrencyRewards().isEmpty()
                     || notification != null
                     || eventTitle != null;

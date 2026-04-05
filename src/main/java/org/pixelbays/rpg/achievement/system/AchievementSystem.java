@@ -56,7 +56,6 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.EventTitleUtil;
 import com.hypixel.hytale.server.core.util.NotificationUtil;
 
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import com.hypixel.hytale.component.spatial.SpatialResource;
 
 @SuppressWarnings("null")
@@ -383,12 +382,18 @@ public final class AchievementSystem {
             @Nonnull AchievementComponent state,
             @Nonnull Snapshot snapshot) {
         AchievementReward reward = definition.getReward();
-        String resolvedTitle = resolveRewardTitle(reward);
-        if (!resolvedTitle.isBlank()) {
-            state.setDisplayedTitle(resolvedTitle);
+        ResolvedDisplayedTitle resolvedTitle = resolveRewardTitle(reward);
+        if (!resolvedTitle.isEmpty()) {
+            state.applyDisplayedTitle(
+                    resolvedTitle.legacyTitle(),
+                    resolvedTitle.prefix(),
+                    resolvedTitle.suffix());
             AchievementComponent characterState = getOrCreateCharacterState(snapshot.entityRef(), snapshot.store());
-            if (characterState.getDisplayedTitle().isBlank()) {
-                characterState.setDisplayedTitle(resolvedTitle);
+            if (!characterState.hasDisplayedTitle()) {
+                characterState.applyDisplayedTitle(
+                        resolvedTitle.legacyTitle(),
+                        resolvedTitle.prefix(),
+                        resolvedTitle.suffix());
             }
         }
 
@@ -655,11 +660,30 @@ public final class AchievementSystem {
     }
 
     @Nonnull
-    private String resolveRewardTitle(@Nonnull AchievementReward reward) {
-        if (!reward.getDisplayedTitleTranslationKey().isBlank()) {
-            return Message.translation(reward.getDisplayedTitleTranslationKey()).getFormattedMessage().toString();
+    private ResolvedDisplayedTitle resolveRewardTitle(@Nonnull AchievementReward reward) {
+        String prefix = resolveRewardTitleSegment(
+                reward.getDisplayedTitlePrefixTranslationKey(),
+                reward.getDisplayedTitlePrefix());
+        String suffix = resolveRewardTitleSegment(
+                reward.getDisplayedTitleSuffixTranslationKey(),
+                reward.getDisplayedTitleSuffix());
+
+        if (!prefix.isBlank() || !suffix.isBlank()) {
+            return new ResolvedDisplayedTitle("", prefix, suffix);
         }
-        return reward.getDisplayedTitle();
+
+        return new ResolvedDisplayedTitle(
+                resolveRewardTitleSegment(reward.getDisplayedTitleTranslationKey(), reward.getDisplayedTitle()),
+                "",
+                "");
+    }
+
+    @Nonnull
+    private String resolveRewardTitleSegment(@Nonnull String translationKey, @Nonnull String rawValue) {
+        if (!translationKey.isBlank()) {
+            return Message.translation(translationKey).getFormattedMessage().toString();
+        }
+        return rawValue;
     }
 
     @Nonnull
@@ -743,5 +767,15 @@ public final class AchievementSystem {
             @Nonnull String criterionId,
             int currentValue,
             int targetValue) {
+    }
+
+    private record ResolvedDisplayedTitle(
+            @Nonnull String legacyTitle,
+            @Nonnull String prefix,
+            @Nonnull String suffix) {
+
+        private boolean isEmpty() {
+            return legacyTitle.isBlank() && prefix.isBlank() && suffix.isBlank();
+        }
     }
 }
