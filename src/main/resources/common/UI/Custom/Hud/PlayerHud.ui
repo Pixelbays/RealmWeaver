@@ -20,7 +20,27 @@ Group #PartyRoot {
 
 Group #ResourceBars {
   LayoutMode: Bottom;
-  Anchor: (Width: 296, Bottom: 6);
+  Anchor: (Top: 10, Left: 750, Width: 100, Bottom: 150);
+}
+
+Group #HotbarUsableRoot {
+  Anchor: (Left: 0, Right: 0, Bottom: 12, Height: 108);
+  LayoutMode: CenterMiddle;
+
+  Group #HotbarUsableHost {
+    LayoutMode: Left;
+    Anchor: (Width: 0, Height: 108);
+  }
+}
+
+Group #HotbarSpellRoot {
+  Anchor: (Right: 24, Bottom: 18, Width: 320, Height: 116);
+  LayoutMode: Right;
+
+  Group #HotbarSpellHost {
+    LayoutMode: Right;
+    Anchor: (Right: 10 ,Width: 0, Height: 116);
+  }
 }
 
 Group #Root {
