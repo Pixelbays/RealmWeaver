@@ -115,6 +115,7 @@ import org.pixelbays.rpg.guild.event.GuildRoleCreatedEvent;
 import org.pixelbays.rpg.guild.event.GuildRolePermissionChangedEvent;
 import org.pixelbays.rpg.hud.PlayerHudService;
 import org.pixelbays.rpg.hud.PlayerHudUpdateSystem;
+import org.pixelbays.rpg.hud.command.UiDebugCommand;
 import org.pixelbays.rpg.inventory.input.InventoryOpenFilter;
 import org.pixelbays.rpg.inventory.system.InventoryHandlingSystem;
 import org.pixelbays.rpg.item.config.RandomizedEquipmentDefinition;
@@ -142,6 +143,10 @@ import org.pixelbays.rpg.mail.MailManager;
 import org.pixelbays.rpg.mail.command.MailCommand;
 import org.pixelbays.rpg.mail.config.MailData;
 import org.pixelbays.rpg.mail.interaction.OpenMailInteraction;
+import org.pixelbays.rpg.nameplate.PlayerSecondaryNameplateCleanupSystem;
+import org.pixelbays.rpg.nameplate.PlayerSecondaryNameplateFollowSystem;
+import org.pixelbays.rpg.nameplate.PlayerNameplateUpdateSystem;
+import org.pixelbays.rpg.nameplate.component.PlayerSecondaryNameplateComponent;
 import org.pixelbays.rpg.npc.command.NpcRpgDebugCommand;
 import org.pixelbays.rpg.npc.component.NpcRpgDebugComponent;
 import org.pixelbays.rpg.npc.component.NpcRpgSetupComponent;
@@ -258,6 +263,7 @@ public class Realmweavers extends JavaPlugin {
         private LockpickingSystem lockpickingSystem;
         private CommandRegistration raceCommandRegistration;
         private CommandRegistration npcRpgDebugCommandRegistration;
+        private CommandRegistration uiDebugCommandRegistration;
         private CommandRegistration testLevelCommandRegistration;
         private CommandRegistration levelTestCommandRegistration;
         private CommandRegistration resetLevelCommandRegistration;
@@ -528,6 +534,12 @@ public class Realmweavers extends JavaPlugin {
                                                 "LockpickingSession",
                                                 LockpickingSessionComponent.CODEC);
 
+                PlayerSecondaryNameplateComponent.setComponentType(this.getEntityStoreRegistry()
+                                .registerComponent(
+                                                PlayerSecondaryNameplateComponent.class,
+                                                "PlayerSecondaryNameplate",
+                                                PlayerSecondaryNameplateComponent.CODEC));
+
                 if (BuildFlags.NPC_MODULE) {
                         this.npcRpgDebugComponentType = this.getEntityStoreRegistry()
                                         .registerComponent(
@@ -685,6 +697,9 @@ public class Realmweavers extends JavaPlugin {
 
                 // Register hardcore death handler
                 this.getEntityStoreRegistry().registerSystem(new org.pixelbays.rpg.leveling.handlers.HardcoreHandler());
+                this.getEntityStoreRegistry().registerSystem(new PlayerNameplateUpdateSystem());
+                this.getEntityStoreRegistry().registerSystem(new PlayerSecondaryNameplateFollowSystem());
+                this.getEntityStoreRegistry().registerSystem(new PlayerSecondaryNameplateCleanupSystem());
         }
 
         private void registerNpcSystems() {
@@ -773,6 +788,7 @@ public class Realmweavers extends JavaPlugin {
         private void registerAlwaysAvailableCommands() {
 
                 this.raceCommandRegistration = refreshCommand(this.raceCommandRegistration, true, RaceCommand::new);
+                this.uiDebugCommandRegistration = refreshCommand(this.uiDebugCommandRegistration, true, UiDebugCommand::new);
                 if (BuildFlags.NPC_MODULE) {
                         this.npcRpgDebugCommandRegistration = refreshCommand(this.npcRpgDebugCommandRegistration, true,
                                         NpcRpgDebugCommand::new);
@@ -812,6 +828,7 @@ public class Realmweavers extends JavaPlugin {
                 }
                 unregisterCommand(this.raceCommandRegistration);
                 unregisterCommand(this.npcRpgDebugCommandRegistration);
+                unregisterCommand(this.uiDebugCommandRegistration);
                 unregisterCommand(this.testLevelCommandRegistration);
                 unregisterCommand(this.levelTestCommandRegistration);
                 unregisterCommand(this.resetLevelCommandRegistration);
