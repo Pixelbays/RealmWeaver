@@ -14,6 +14,7 @@ import org.pixelbays.rpg.economy.auctions.config.settings.AuctionHouseModSetting
 import org.pixelbays.rpg.economy.banks.config.settings.BankModSettings;
 import org.pixelbays.rpg.economy.currency.config.settings.CurrencyModSettings;
 import org.pixelbays.rpg.global.config.settings.GeneralModSettings;
+import org.pixelbays.rpg.global.config.settings.NameplateModSettings;
 import org.pixelbays.rpg.global.config.settings.StatModSettings;
 import org.pixelbays.rpg.global.config.settings.UiInputModSettings;
 import org.pixelbays.rpg.guild.GuildJoinPolicy;
@@ -87,6 +88,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
                     .metadata(new UIEditorSectionStart("Characters")).metadata(UIDefaultCollapsedState.UNCOLLAPSED)
                     .add();
         }
+        b = b.append(new KeyedCodec<>("NameplateSettings", NameplateModSettings.CODEC, false, true),
+                (i, s) -> i.nameplateSettings = s, i -> i.nameplateSettings)
+            .metadata(new UIEditorSectionStart("Nameplates")).metadata(UIDefaultCollapsedState.UNCOLLAPSED)
+            .add();
         if (BuildFlags.ACHIEVEMENT_MODULE) {
             b = b.append(new KeyedCodec<>("AchievementSettings", AchievementModSettings.CODEC, false, true),
                             (i, s) -> i.achievementSettings = s, i -> i.achievementSettings)
@@ -202,6 +207,7 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
     private StatModSettings statSettings;
     private ClassModSettings classSettings;
     private CharacterModSettings characterSettings;
+    private NameplateModSettings nameplateSettings;
     private AchievementModSettings achievementSettings;
     private TalentModSettings talentSettings;
     private LevelingModSettings levelingSettings;
@@ -227,6 +233,7 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
         this.statSettings = new StatModSettings();
         this.classSettings = new ClassModSettings();
         this.characterSettings = new CharacterModSettings();
+        this.nameplateSettings = new NameplateModSettings();
         this.achievementSettings = new AchievementModSettings();
         this.talentSettings = new TalentModSettings();
         this.levelingSettings = new LevelingModSettings();
@@ -281,6 +288,10 @@ public class RpgModConfig implements JsonAssetWithMap<String, DefaultAssetMap<St
 
     public CharacterModSettings getCharacterSettings() {
         return characterSettings != null ? characterSettings : new CharacterModSettings();
+    }
+
+    public NameplateModSettings getNameplateSettings() {
+        return nameplateSettings != null ? nameplateSettings : new NameplateModSettings();
     }
 
     public AchievementModSettings getAchievementSettings() {

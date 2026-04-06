@@ -135,6 +135,17 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
         return ProgressionHudModule.ROOT_BASE_HEIGHT + (lastLayout.size() * (RESOURCE_BAR_HEIGHT + RESOURCE_BAR_GAP));
     }
 
+    void appendDebugUi(@Nonnull StringBuilder ui) {
+        ui.append("Group #ResourceBars {\n");
+        ui.append("  LayoutMode: Bottom;\n");
+        ui.append("  Anchor: (Top: 10, Left: 750, Width: 100, Bottom: 150);\n");
+        if (!lastLayout.isEmpty()) {
+            ui.append('\n');
+            HudModuleSupport.appendIndentedBlock(ui, buildResourceBarsMarkup(lastLayout), 2);
+        }
+        ui.append("}\n\n");
+    }
+
     public enum ResourceDisplayMode {
         BAR,
         CHARGES
@@ -179,84 +190,96 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
         cmd.clear("#ResourceBars");
 
         for (int i = 0; i < bars.size(); i++) {
-            ResourceBarData bar = bars.get(i);
-            boolean useChargeAsset = usesChargeAsset(bar);
-            int initialFillWidth = Math.round(RESOURCE_TRACK_WIDTH * HudModuleSupport.clampRatio(bar.ratio));
-            int trackWidth = bar.displayMode == ResourceDisplayMode.CHARGES && useChargeAsset
-                    ? computeChargeTrackWidth(bar.maxCharges, true)
-                    : RESOURCE_TRACK_WIDTH;
-
             StringBuilder ui = new StringBuilder(1024);
-            ui.append("Group #ResBar").append(i).append(" {\n");
-            ui.append("  LayoutMode: Left;\n");
-            ui.append("  Anchor: (Width: 296, Height: ").append(RESOURCE_BAR_HEIGHT)
-                    .append(", Bottom: ").append(RESOURCE_BAR_GAP).append(");\n\n");
-
-            ui.append("  Label #ResLabel").append(i).append(" {\n");
-            ui.append("    Text: \"").append(HudModuleSupport.escapeUiString(bar.label)).append("\";\n");
-            ui.append("    Anchor: (Width: ").append(RESOURCE_LABEL_WIDTH)
-                    .append(", Height: ").append(RESOURCE_BAR_HEIGHT)
-                    .append(", Right: ").append(RESOURCE_LABEL_GAP).append(");\n");
-            ui.append("    Style: (FontSize: 10, RenderBold: true);\n");
-            ui.append("  }\n\n");
-
-            ui.append("  Group #ResTrack").append(i).append(" {\n");
-            ui.append("    Anchor: (Width: ").append(trackWidth)
-                    .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
-            if (!useChargeAsset) {
-                ui.append("    Background: PatchStyle(Color: #000000(0.35));\n");
-                ui.append("    OutlineColor: #000000(0.5);\n");
-                ui.append("    OutlineSize: 1;\n");
-            }
-
-            if (bar.displayMode == ResourceDisplayMode.CHARGES) {
-                int safeMaxCharges = Math.max(1, bar.maxCharges);
-                int chargeWidth = computeChargeSegmentWidth(safeMaxCharges, useChargeAsset);
-                int filledCharges = clampChargeCount(bar.currentCharges, bar.maxCharges);
-                ui.append("    LayoutMode: Left;\n\n");
-                for (int chargeIndex = 0; chargeIndex < safeMaxCharges; chargeIndex++) {
-                    ui.append("    Group #ResChargeSlot").append(i).append('_').append(chargeIndex).append(" {\n");
-                    ui.append("      Anchor: (Width: ").append(chargeWidth)
-                            .append(", Height: ").append(RESOURCE_BAR_HEIGHT);
-                    if (chargeIndex < safeMaxCharges - 1) {
-                        ui.append(", Right: ").append(RESOURCE_CHARGE_GAP);
-                    }
-                    ui.append(");\n");
-                    if (!useChargeAsset) {
-                        ui.append("      Background: PatchStyle(Color: #000000(0.45));\n");
-                        ui.append("      OutlineColor: #000000(0.65);\n");
-                        ui.append("      OutlineSize: 1;\n\n");
-                    } else {
-                        ui.append("\n");
-                    }
-
-                    ui.append("      Group #ResChargeFill").append(i).append('_').append(chargeIndex).append(" {\n");
-                    if (useChargeAsset) {
-                        ui.append("        Background: (TexturePath: \"")
-                                .append(HudModuleSupport.escapeUiString(bar.assetPath))
-                                .append("\");\n");
-                    } else {
-                        ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
-                    }
-                    ui.append("        Anchor: (Left: 0, Top: 0, Width: ")
-                            .append(chargeIndex < filledCharges ? chargeWidth : 0)
-                            .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
-                    ui.append("      }\n");
-                    ui.append("    }\n");
-                }
-            } else {
-                ui.append("\n");
-                ui.append("    Group #ResFill").append(i).append(" {\n");
-                ui.append("      Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.85));\n");
-                ui.append("      Anchor: (Left: 0, Top: 0, Width: ").append(initialFillWidth)
-                        .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
-                ui.append("    }\n");
-            }
-
-            ui.append("  }\n");
-            ui.append("}\n");
+            appendResourceBarMarkup(ui, i, bars.get(i));
             cmd.appendInline("#ResourceBars", ui.toString());
         }
+    }
+
+    @Nonnull
+    private static String buildResourceBarsMarkup(@Nonnull List<ResourceBarData> bars) {
+        StringBuilder ui = new StringBuilder(Math.max(1024, bars.size() * 1024));
+        for (int i = 0; i < bars.size(); i++) {
+            appendResourceBarMarkup(ui, i, bars.get(i));
+        }
+        return ui.toString();
+    }
+
+    private static void appendResourceBarMarkup(@Nonnull StringBuilder ui, int index, @Nonnull ResourceBarData bar) {
+        boolean useChargeAsset = usesChargeAsset(bar);
+        int initialFillWidth = Math.round(RESOURCE_TRACK_WIDTH * HudModuleSupport.clampRatio(bar.ratio));
+        int trackWidth = bar.displayMode == ResourceDisplayMode.CHARGES && useChargeAsset
+                ? computeChargeTrackWidth(bar.maxCharges, true)
+                : RESOURCE_TRACK_WIDTH;
+
+        ui.append("Group #ResBar").append(index).append(" {\n");
+        ui.append("  LayoutMode: Left;\n");
+        ui.append("  Anchor: (Width: 296, Height: ").append(RESOURCE_BAR_HEIGHT)
+                .append(", Bottom: ").append(RESOURCE_BAR_GAP).append(");\n\n");
+
+        ui.append("  Label #ResLabel").append(index).append(" {\n");
+        ui.append("    Text: \"").append(HudModuleSupport.escapeUiString(bar.label)).append("\";\n");
+        ui.append("    Anchor: (Width: ").append(RESOURCE_LABEL_WIDTH)
+                .append(", Height: ").append(RESOURCE_BAR_HEIGHT)
+                .append(", Right: ").append(RESOURCE_LABEL_GAP).append(");\n");
+        ui.append("    Style: (FontSize: 10, RenderBold: true);\n");
+        ui.append("  }\n\n");
+
+        ui.append("  Group #ResTrack").append(index).append(" {\n");
+        ui.append("    Anchor: (Width: ").append(trackWidth)
+                .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+        if (!useChargeAsset) {
+            ui.append("    Background: PatchStyle(Color: #000000(0.35));\n");
+            ui.append("    OutlineColor: #000000(0.5);\n");
+            ui.append("    OutlineSize: 1;\n");
+        }
+
+        if (bar.displayMode == ResourceDisplayMode.CHARGES) {
+            int safeMaxCharges = Math.max(1, bar.maxCharges);
+            int chargeWidth = computeChargeSegmentWidth(safeMaxCharges, useChargeAsset);
+            int filledCharges = clampChargeCount(bar.currentCharges, bar.maxCharges);
+            ui.append("    LayoutMode: Left;\n\n");
+            for (int chargeIndex = 0; chargeIndex < safeMaxCharges; chargeIndex++) {
+                ui.append("    Group #ResChargeSlot").append(index).append('_').append(chargeIndex).append(" {\n");
+                ui.append("      Anchor: (Width: ").append(chargeWidth)
+                        .append(", Height: ").append(RESOURCE_BAR_HEIGHT);
+                if (chargeIndex < safeMaxCharges - 1) {
+                    ui.append(", Right: ").append(RESOURCE_CHARGE_GAP);
+                }
+                ui.append(");\n");
+                if (!useChargeAsset) {
+                    ui.append("      Background: PatchStyle(Color: #000000(0.45));\n");
+                    ui.append("      OutlineColor: #000000(0.65);\n");
+                    ui.append("      OutlineSize: 1;\n\n");
+                } else {
+                    ui.append("\n");
+                }
+
+                ui.append("      Group #ResChargeFill").append(index).append('_').append(chargeIndex).append(" {\n");
+                if (useChargeAsset) {
+                    ui.append("        Background: (TexturePath: \"")
+                            .append(HudModuleSupport.escapeUiString(bar.assetPath))
+                            .append("\");\n");
+                } else {
+                    ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
+                }
+                ui.append("        Anchor: (Left: 0, Top: 0, Width: ")
+                        .append(chargeIndex < filledCharges ? chargeWidth : 0)
+                        .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+                ui.append("      }\n");
+                ui.append("    }\n");
+            }
+        } else {
+            ui.append("\n");
+            ui.append("    Group #ResFill").append(index).append(" {\n");
+            ui.append("      Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.85));\n");
+            ui.append("      Anchor: (Left: 0, Top: 0, Width: ").append(initialFillWidth)
+                    .append(", Height: ").append(RESOURCE_BAR_HEIGHT).append(");\n");
+            ui.append("    }\n");
+        }
+
+        ui.append("  }\n");
+        ui.append("}\n");
     }
 
     private static void applyResourceFillWidth(@Nonnull UICommandBuilder cmd, int index, int fillWidth) {

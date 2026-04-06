@@ -12,6 +12,7 @@ public class PlayerHud extends CustomUIHud {
 
     private static final String UI_ASSET_PATH = "Hud/PlayerHud.ui";
 
+    private final HotbarHudModule hotbarModule;
     private final ProgressionHudModule progressionModule;
     private final ResourceBarsHudModule resourceBarsModule;
     private final PartyMembersHudModule partyMembersModule;
@@ -20,11 +21,13 @@ public class PlayerHud extends CustomUIHud {
 
     public PlayerHud(@Nonnull PlayerRef playerRef) {
         super(playerRef);
+        this.hotbarModule = new HotbarHudModule(this);
         this.progressionModule = new ProgressionHudModule(this);
         this.resourceBarsModule = new ResourceBarsHudModule(this);
         this.partyMembersModule = new PartyMembersHudModule(this);
         this.diceOverlayModule = new DiceOverlayHudModule(this);
         this.modules = List.of(
+            this.hotbarModule,
                 this.resourceBarsModule,
                 this.partyMembersModule,
                 this.diceOverlayModule,
@@ -41,6 +44,23 @@ public class PlayerHud extends CustomUIHud {
 
     void applyModuleUpdate(@Nonnull UICommandBuilder cmd) {
         update(false, cmd);
+    }
+
+    @Nonnull
+    public String buildDebugDocument() {
+        StringBuilder ui = new StringBuilder(12_288);
+        ui.append("$C = \"../Common.ui\";\n\n");
+        this.diceOverlayModule.appendDebugUi(ui);
+        this.partyMembersModule.appendDebugUi(ui);
+        this.resourceBarsModule.appendDebugUi(ui);
+        this.hotbarModule.appendDebugUi(ui);
+        this.progressionModule.appendDebugUi(ui);
+        return ui.toString();
+    }
+
+    @Nonnull
+    public HotbarHudModule getHotbarModule() {
+        return hotbarModule;
     }
 
     @Nonnull

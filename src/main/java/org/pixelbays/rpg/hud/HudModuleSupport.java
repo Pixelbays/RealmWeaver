@@ -32,4 +32,21 @@ final class HudModuleSupport {
     static boolean safeEquals(@Nullable String a, @Nullable String b) {
         return Objects.equals(a, b);
     }
+
+    static void appendIndentedBlock(@Nonnull StringBuilder target, @Nonnull String text, int indentSpaces) {
+        if (text.isEmpty()) {
+            return;
+        }
+
+        String indent = " ".repeat(Math.max(0, indentSpaces));
+        String[] lines = text.split("\\n", -1);
+        int lastIndex = lines.length - 1;
+        if (lastIndex >= 0 && lines[lastIndex].isEmpty()) {
+            lastIndex--;
+        }
+
+        for (int i = 0; i <= lastIndex; i++) {
+            target.append(indent).append(lines[i]).append('\n');
+        }
+    }
 }

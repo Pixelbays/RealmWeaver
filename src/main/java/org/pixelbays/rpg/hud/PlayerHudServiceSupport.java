@@ -1,12 +1,18 @@
 package org.pixelbays.rpg.hud;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.pixelbays.plugin.Realmweavers;
+import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
+import org.pixelbays.rpg.global.config.RpgModConfig;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
@@ -15,6 +21,7 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 final class PlayerHudServiceSupport {
 
     static final String BASE_SYSTEM_ID = "Base_Character_Level";
+    static final String DEFAULT_PROGRESSION_FILL_COLOR = "#FFFFFF";
 
     private PlayerHudServiceSupport() {
     }
@@ -62,6 +69,74 @@ final class PlayerHudServiceSupport {
             case "signatureenergy" -> "#B86BFF";
             default -> "#C8CCD4";
         };
+    }
+
+    @Nonnull
+    static String resolveProgressionFillColor(@Nullable ClassDefinition classDef) {
+        if (classDef == null) {
+            return DEFAULT_PROGRESSION_FILL_COLOR;
+        }
+
+        return normalizeUiPatchColor(classDef.getClassColorPrimary(), DEFAULT_PROGRESSION_FILL_COLOR);
+    }
+
+    @Nonnull
+    static String normalizeUiPatchColor(@Nullable String color, @Nonnull String fallback) {
+        String normalized = color == null ? "" : color.trim();
+        if (normalized.isEmpty()) {
+            return fallback;
+        }
+
+        if (!normalized.startsWith("#")) {
+            normalized = "#" + normalized;
+        }
+
+        int alphaStart = normalized.indexOf('(');
+        if (alphaStart >= 0) {
+            normalized = normalized.substring(0, alphaStart).trim();
+        }
+
+        return normalized;
+    }
+
+    @Nonnull
+    static List<Integer> resolveConfiguredAbilityHotbarSlots() {
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        if (config == null || config.getAbilityControlType() != AbilityControlType.Hotbar) {
+            return List.of();
+        }
+
+        int[] configuredSlots = config.getHotbarAbilitySlots();
+        if (configuredSlots == null || configuredSlots.length == 0) {
+            return List.of();
+        }
+
+        boolean oneBased = false;
+        for (int configuredSlot : configuredSlots) {
+            if (configuredSlot == 9) {
+                oneBased = true;
+                break;
+            }
+            if (configuredSlot == 0) {
+                oneBased = false;
+                break;
+            }
+        }
+
+        LinkedHashSet<Integer> normalizedSlots = new LinkedHashSet<>();
+        for (int configuredSlot : configuredSlots) {
+            int internalSlot = oneBased ? configuredSlot - 1 : configuredSlot;
+            if (internalSlot < 0 || internalSlot > 8) {
+                continue;
+            }
+            normalizedSlots.add(internalSlot);
+        }
+
+        if (normalizedSlots.isEmpty()) {
+            return List.of();
+        }
+
+        return new ArrayList<>(normalizedSlots);
     }
 
     @Nonnull

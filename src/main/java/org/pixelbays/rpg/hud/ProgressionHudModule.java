@@ -17,6 +17,7 @@ public final class ProgressionHudModule implements PlayerHudModule {
     public static final int ROOT_BASE_HEIGHT = 60;
 
     private static final String SELECTOR_FILL_ANCHOR = "#XpFill.Anchor";
+    private static final String SELECTOR_FILL_BACKGROUND = "#XpFill.Background";
     private static final String SELECTOR_TEXT = "#XpText.Text";
     private static final String SELECTOR_ROOT_ANCHOR = "#Root.Anchor";
 
@@ -28,6 +29,8 @@ public final class ProgressionHudModule implements PlayerHudModule {
     private int lastCurrent = Integer.MIN_VALUE;
     private int lastNext = Integer.MIN_VALUE;
     private int lastRemaining = Integer.MIN_VALUE;
+    @Nonnull
+    private String lastFillColor = PlayerHudServiceSupport.DEFAULT_PROGRESSION_FILL_COLOR;
     private boolean lastMax = false;
     private boolean progressHidden = false;
 
@@ -45,6 +48,7 @@ public final class ProgressionHudModule implements PlayerHudModule {
         }
 
         applyRootHeight(cmd, hud.getResourceBarsModule().computeRootHeight());
+        applyFillColor(cmd, lastFillColor);
 
         if (lastMax) {
             applyFillWidth(cmd, BAR_WIDTH);
@@ -64,7 +68,7 @@ public final class ProgressionHudModule implements PlayerHudModule {
                         + lastRemaining + " to next)");
     }
 
-    public void primeMax(@Nonnull String labelPrefix, int level) {
+    public void primeMax(@Nonnull String labelPrefix, int level, @Nonnull String fillColor) {
         progressHidden = false;
         lastMax = true;
         lastLabelPrefix = labelPrefix;
@@ -73,9 +77,17 @@ public final class ProgressionHudModule implements PlayerHudModule {
         lastCurrent = Integer.MIN_VALUE;
         lastNext = Integer.MIN_VALUE;
         lastRemaining = Integer.MIN_VALUE;
+        lastFillColor = fillColor;
     }
 
-    public void primeProgress(@Nonnull String labelPrefix, int level, float ratio, int current, int next, int remaining) {
+    public void primeProgress(
+            @Nonnull String labelPrefix,
+            int level,
+            float ratio,
+            int current,
+            int next,
+            int remaining,
+            @Nonnull String fillColor) {
         progressHidden = false;
         lastMax = false;
         lastLabelPrefix = labelPrefix;
@@ -84,6 +96,7 @@ public final class ProgressionHudModule implements PlayerHudModule {
         lastCurrent = current;
         lastNext = next;
         lastRemaining = remaining;
+        lastFillColor = fillColor;
     }
 
     public void primeHide() {
@@ -97,8 +110,11 @@ public final class ProgressionHudModule implements PlayerHudModule {
         lastRemaining = Integer.MIN_VALUE;
     }
 
-    public void updateMax(@Nonnull String labelPrefix, int level) {
-        if (lastMax && HudModuleSupport.safeEquals(labelPrefix, lastLabelPrefix) && level == lastLevel) {
+    public void updateMax(@Nonnull String labelPrefix, int level, @Nonnull String fillColor) {
+        if (lastMax
+                && HudModuleSupport.safeEquals(labelPrefix, lastLabelPrefix)
+                && level == lastLevel
+                && HudModuleSupport.safeEquals(fillColor, lastFillColor)) {
             return;
         }
 
@@ -110,15 +126,24 @@ public final class ProgressionHudModule implements PlayerHudModule {
         lastCurrent = Integer.MIN_VALUE;
         lastNext = Integer.MIN_VALUE;
         lastRemaining = Integer.MIN_VALUE;
+        lastFillColor = fillColor;
 
         UICommandBuilder cmd = new UICommandBuilder();
         ensureProgressVisible(cmd);
+        applyFillColor(cmd, fillColor);
         applyFillWidth(cmd, BAR_WIDTH);
         cmd.set(SELECTOR_TEXT, labelPrefix + " Lv " + level + " - XP: MAX");
         hud.applyModuleUpdate(cmd);
     }
 
-    public void updateProgress(@Nonnull String labelPrefix, int level, float ratio, int current, int next, int remaining) {
+    public void updateProgress(
+            @Nonnull String labelPrefix,
+            int level,
+            float ratio,
+            int current,
+            int next,
+            int remaining,
+            @Nonnull String fillColor) {
         int fillWidth = Math.round(BAR_WIDTH * HudModuleSupport.clampRatio(ratio));
 
         if (!lastMax
@@ -127,7 +152,8 @@ public final class ProgressionHudModule implements PlayerHudModule {
                 && fillWidth == lastFillWidth
                 && current == lastCurrent
                 && next == lastNext
-                && remaining == lastRemaining) {
+                && remaining == lastRemaining
+                && HudModuleSupport.safeEquals(fillColor, lastFillColor)) {
             return;
         }
 
@@ -139,9 +165,11 @@ public final class ProgressionHudModule implements PlayerHudModule {
         lastCurrent = current;
         lastNext = next;
         lastRemaining = remaining;
+        lastFillColor = fillColor;
 
         UICommandBuilder cmd = new UICommandBuilder();
         ensureProgressVisible(cmd);
+        applyFillColor(cmd, fillColor);
         applyFillWidth(cmd, fillWidth);
         cmd.set(SELECTOR_TEXT,
                 labelPrefix + " Lv " + level + " - XP: " + current + "/" + next + " (" + remaining + " to next)");
@@ -177,6 +205,44 @@ public final class ProgressionHudModule implements PlayerHudModule {
         applyRootHeight(cmd, hud.getResourceBarsModule().computeRootHeight());
     }
 
+    void appendDebugUi(@Nonnull StringBuilder ui) {
+        int rootHeight = progressHidden ? 0 : hud.getResourceBarsModule().computeRootHeight();
+        int fillWidth = progressHidden ? 0 : Math.max(0, Math.min(BAR_WIDTH, lastMax ? BAR_WIDTH : Math.max(0, lastFillWidth)));
+
+        ui.append("Group #Root {\n");
+        if (progressHidden) {
+            ui.append("  Anchor: (Top: -10000, Left: -10000, Width: 0, Height: 0);\n");
+        } else {
+            ui.append("  Anchor: (Top: ").append(ROOT_TOP)
+                    .append(", Left: ").append(ROOT_LEFT)
+                    .append(", Width: ").append(ROOT_WIDTH)
+                    .append(", Height: ").append(Math.max(ROOT_BASE_HEIGHT, rootHeight)).append(");\n");
+        }
+        ui.append("  LayoutMode: Top;\n");
+        ui.append("  Padding: (Horizontal: 12, Vertical: 8);\n");
+        ui.append("  Background: #000000(0.2);\n\n");
+
+        ui.append("  Label #XpText {\n");
+        ui.append("    Text: \"").append(HudModuleSupport.escapeUiString(buildCurrentText())).append("\";\n");
+        ui.append("    Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true);\n");
+        ui.append("    Anchor: (Height: 16, Bottom: 6);\n");
+        ui.append("  }\n\n");
+
+        ui.append("  Group #XpBar {\n");
+        ui.append("    Anchor: (Width: ").append(BAR_WIDTH).append(", Height: ").append(BAR_HEIGHT).append(");\n");
+        ui.append("    Background: PatchStyle(Color: #000000(0.35));\n");
+        ui.append("    OutlineColor: #000000(0.5);\n");
+        ui.append("    OutlineSize: 1;\n\n");
+
+        ui.append("    Group #XpFill {\n");
+        ui.append("      Background: PatchStyle(Color: ").append(lastFillColor).append(");\n");
+        ui.append("      Anchor: (Left: 0, Top: 0, Width: ").append(fillWidth)
+                .append(", Height: ").append(BAR_HEIGHT).append(");\n");
+        ui.append("    }\n");
+        ui.append("  }\n");
+        ui.append("}\n");
+    }
+
     private void ensureProgressVisible(@Nonnull UICommandBuilder cmd) {
         if (!progressHidden) {
             return;
@@ -204,6 +270,10 @@ public final class ProgressionHudModule implements PlayerHudModule {
         cmd.setObject(SELECTOR_ROOT_ANCHOR, rootAnchor);
     }
 
+    private static void applyFillColor(@Nonnull UICommandBuilder cmd, @Nonnull String fillColor) {
+        cmd.set(SELECTOR_FILL_BACKGROUND, fillColor);
+    }
+
     private static void applyFillWidth(@Nonnull UICommandBuilder cmd, int fillWidth) {
         int clamped = Math.max(0, Math.min(BAR_WIDTH, fillWidth));
 
@@ -213,5 +283,19 @@ public final class ProgressionHudModule implements PlayerHudModule {
         fillAnchor.setWidth(Value.of(clamped));
         fillAnchor.setHeight(Value.of(BAR_HEIGHT));
         cmd.setObject(SELECTOR_FILL_ANCHOR, fillAnchor);
+    }
+
+    @Nonnull
+    private String buildCurrentText() {
+        if (progressHidden || lastLabelPrefix == null) {
+            return "";
+        }
+
+        if (lastMax) {
+            return lastLabelPrefix + " Lv " + lastLevel + " - XP: MAX";
+        }
+
+        return lastLabelPrefix + " Lv " + lastLevel + " - XP: " + lastCurrent + "/" + lastNext + " ("
+                + lastRemaining + " to next)";
     }
 }

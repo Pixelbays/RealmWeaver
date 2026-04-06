@@ -192,6 +192,26 @@ public final class PartyMembersHudModule implements PlayerHudModule {
         }
     }
 
+    void appendDebugUi(@Nonnull StringBuilder ui) {
+        int rootHeight = computePartyRootHeight(lastLayout);
+
+        ui.append("Group #PartyRoot {\n");
+        ui.append("  Anchor: (Top: ").append(PARTY_ROOT_TOP)
+                .append(", Left: ").append(PARTY_ROOT_LEFT)
+                .append(", Width: ").append(PARTY_ROOT_WIDTH)
+                .append(", Height: ").append(Math.max(0, rootHeight)).append(");\n\n");
+        ui.append("  Group #PartyMembers {\n");
+        ui.append("    LayoutMode: Top;\n");
+        ui.append("    Anchor: (Width: ").append(PARTY_ROOT_WIDTH)
+                .append(", Height: ").append(Math.max(0, rootHeight)).append(");\n");
+        if (!lastLayout.isEmpty()) {
+            ui.append('\n');
+            HudModuleSupport.appendIndentedBlock(ui, buildPartyMembersMarkup(lastLayout), 4);
+        }
+        ui.append("  }\n");
+        ui.append("}\n\n");
+    }
+
     private static void applyPartyRootHeight(@Nonnull UICommandBuilder cmd, int height) {
         Anchor rootAnchor = new Anchor();
         rootAnchor.setTop(Value.of(PARTY_ROOT_TOP));
@@ -230,95 +250,110 @@ public final class PartyMembersHudModule implements PlayerHudModule {
         cmd.clear("#PartyMembers");
 
         for (int memberIndex = 0; memberIndex < members.size(); memberIndex++) {
-            PartyMemberHudData member = members.get(memberIndex);
-            int entryHeight = computePartyEntryHeight(member.bars.size());
-
             StringBuilder ui = new StringBuilder(2048);
-            ui.append("Group #PartyEntry").append(memberIndex).append(" {\n");
-            ui.append("  LayoutMode: Top;\n");
-            ui.append("  Anchor: (Width: ").append(PARTY_ENTRY_WIDTH).append(", Height: ").append(entryHeight)
-                    .append(", Bottom: ").append(PARTY_ENTRY_GAP).append(");\n");
-            ui.append("  Padding: (Full: ").append(PARTY_ENTRY_PADDING).append(");\n");
-            ui.append("  Background: PatchStyle(Color: #000000(0.32));\n");
-            ui.append("  OutlineColor: ").append(member.accentColor).append("(0.95);\n");
-            ui.append("  OutlineSize: 1;\n\n");
-
-            ui.append("  Group #PartyHeader").append(memberIndex).append(" {\n");
-            ui.append("    LayoutMode: Left;\n");
-            ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ").append(PARTY_HEADER_HEIGHT)
-                    .append(", Bottom: ").append(PARTY_HEADER_GAP).append(");\n\n");
-
-            ui.append("    Group #PartyAccent").append(memberIndex).append(" {\n");
-            ui.append("      Background: PatchStyle(Color: ").append(member.accentColor).append("(0.95));\n");
-            ui.append("      Anchor: (Width: 8, Height: 8, Right: 6);\n");
-            ui.append("    }\n\n");
-
-            ui.append("    Label #PartyName").append(memberIndex).append(" {\n");
-            ui.append("      Text: \"").append(HudModuleSupport.escapeUiString(member.displayName)).append("\";\n");
-            ui.append("      Anchor: (Width: 120, Height: ").append(PARTY_HEADER_HEIGHT).append(");\n");
-            ui.append("      Style: (FontSize: 12, RenderBold: true);\n");
-            ui.append("    }\n\n");
-
-            ui.append("    Group { FlexWeight: 1; }\n\n");
-
-            ui.append("    Label #PartyClass").append(memberIndex).append(" {\n");
-            ui.append("      Text: \"").append(HudModuleSupport.escapeUiString(member.classLabel)).append("\";\n");
-            ui.append("      Anchor: (Width: 92, Height: ").append(PARTY_HEADER_HEIGHT).append(");\n");
-            ui.append("      Style: (FontSize: 10, RenderBold: true);\n");
-            ui.append("    }\n");
-            ui.append("  }\n\n");
-
-            for (int barIndex = 0; barIndex < member.bars.size(); barIndex++) {
-                PartyStatBarData bar = member.bars.get(barIndex);
-                ui.append("  Group #PartyBarBlock").append(memberIndex).append('_').append(barIndex).append(" {\n");
-                ui.append("    LayoutMode: Top;\n");
-                ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ")
-                        .append(PARTY_BAR_LABEL_HEIGHT + PARTY_BAR_LABEL_GAP + PARTY_BAR_TRACK_HEIGHT)
-                        .append(", Bottom: ").append(PARTY_BAR_GAP).append(");\n\n");
-
-                ui.append("    Group #PartyBarHeader").append(memberIndex).append('_').append(barIndex).append(" {\n");
-                ui.append("      LayoutMode: Left;\n");
-                ui.append("      Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ")
-                        .append(PARTY_BAR_LABEL_HEIGHT).append(", Bottom: ").append(PARTY_BAR_LABEL_GAP).append(");\n\n");
-
-                ui.append("      Label #PartyBarLabel").append(memberIndex).append('_').append(barIndex).append(" {\n");
-                ui.append("        Text: \"").append(HudModuleSupport.escapeUiString(bar.label)).append("\";\n");
-                ui.append("        Anchor: (Width: ").append(PARTY_BAR_LABEL_WIDTH).append(", Height: ")
-                        .append(PARTY_BAR_LABEL_HEIGHT).append(");\n");
-                ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
-                ui.append("      }\n\n");
-
-                ui.append("      Group { FlexWeight: 1; }\n\n");
-
-                ui.append("      Label #PartyBarValue").append(memberIndex).append('_').append(barIndex).append(" {\n");
-                ui.append("        Text: \"").append(HudModuleSupport.escapeUiString(bar.valueText)).append("\";\n");
-                ui.append("        Anchor: (Width: ").append(PARTY_BAR_VALUE_WIDTH).append(", Height: ")
-                        .append(PARTY_BAR_LABEL_HEIGHT).append(");\n");
-                ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
-                ui.append("      }\n");
-                ui.append("    }\n\n");
-
-                ui.append("    Group #PartyBarTrack").append(memberIndex).append('_').append(barIndex).append(" {\n");
-                ui.append("      Anchor: (Width: ").append(PARTY_BAR_TRACK_WIDTH).append(", Height: ")
-                        .append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
-                ui.append("      Background: PatchStyle(Color: #000000(0.52));\n");
-                ui.append("      OutlineColor: #000000(0.65);\n");
-                ui.append("      OutlineSize: 1;\n\n");
-
-                ui.append("      Group #PartyBarFill").append(memberIndex).append('_').append(barIndex).append(" {\n");
-                ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
-                ui.append("        Anchor: (Left: 0, Top: 0, Width: ")
-                        .append(Math.round(PARTY_BAR_TRACK_WIDTH * HudModuleSupport.clampRatio(bar.ratio)))
-                        .append(", Height: ").append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
-                ui.append("      }\n");
-                ui.append("    }\n");
-                ui.append("  }\n\n");
-            }
-
-            ui.append("}\n");
+            appendPartyMemberMarkup(ui, memberIndex, members.get(memberIndex));
             cmd.appendInline("#PartyMembers", ui.toString());
         }
     }
+
+        @Nonnull
+        private static String buildPartyMembersMarkup(@Nonnull List<PartyMemberHudData> members) {
+        StringBuilder ui = new StringBuilder(Math.max(2048, members.size() * 2048));
+        for (int memberIndex = 0; memberIndex < members.size(); memberIndex++) {
+            appendPartyMemberMarkup(ui, memberIndex, members.get(memberIndex));
+        }
+        return ui.toString();
+        }
+
+        private static void appendPartyMemberMarkup(
+            @Nonnull StringBuilder ui,
+            int memberIndex,
+            @Nonnull PartyMemberHudData member) {
+        int entryHeight = computePartyEntryHeight(member.bars.size());
+
+        ui.append("Group #PartyEntry").append(memberIndex).append(" {\n");
+        ui.append("  LayoutMode: Top;\n");
+        ui.append("  Anchor: (Width: ").append(PARTY_ENTRY_WIDTH).append(", Height: ").append(entryHeight)
+            .append(", Bottom: ").append(PARTY_ENTRY_GAP).append(");\n");
+        ui.append("  Padding: (Full: ").append(PARTY_ENTRY_PADDING).append(");\n");
+        ui.append("  Background: PatchStyle(Color: #000000(0.32));\n");
+        ui.append("  OutlineColor: ").append(member.accentColor).append("(0.95);\n");
+        ui.append("  OutlineSize: 1;\n\n");
+
+        ui.append("  Group #PartyHeader").append(memberIndex).append(" {\n");
+        ui.append("    LayoutMode: Left;\n");
+        ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ").append(PARTY_HEADER_HEIGHT)
+            .append(", Bottom: ").append(PARTY_HEADER_GAP).append(");\n\n");
+
+        ui.append("    Group #PartyAccent").append(memberIndex).append(" {\n");
+        ui.append("      Background: PatchStyle(Color: ").append(member.accentColor).append("(0.95));\n");
+        ui.append("      Anchor: (Width: 8, Height: 8, Right: 6);\n");
+        ui.append("    }\n\n");
+
+        ui.append("    Label #PartyName").append(memberIndex).append(" {\n");
+        ui.append("      Text: \"").append(HudModuleSupport.escapeUiString(member.displayName)).append("\";\n");
+        ui.append("      Anchor: (Width: 120, Height: ").append(PARTY_HEADER_HEIGHT).append(");\n");
+        ui.append("      Style: (FontSize: 12, RenderBold: true);\n");
+        ui.append("    }\n\n");
+
+        ui.append("    Group { FlexWeight: 1; }\n\n");
+
+        ui.append("    Label #PartyClass").append(memberIndex).append(" {\n");
+        ui.append("      Text: \"").append(HudModuleSupport.escapeUiString(member.classLabel)).append("\";\n");
+        ui.append("      Anchor: (Width: 92, Height: ").append(PARTY_HEADER_HEIGHT).append(");\n");
+        ui.append("      Style: (FontSize: 10, RenderBold: true);\n");
+        ui.append("    }\n");
+        ui.append("  }\n\n");
+
+        for (int barIndex = 0; barIndex < member.bars.size(); barIndex++) {
+            PartyStatBarData bar = member.bars.get(barIndex);
+            ui.append("  Group #PartyBarBlock").append(memberIndex).append('_').append(barIndex).append(" {\n");
+            ui.append("    LayoutMode: Top;\n");
+            ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ")
+                .append(PARTY_BAR_LABEL_HEIGHT + PARTY_BAR_LABEL_GAP + PARTY_BAR_TRACK_HEIGHT)
+                .append(", Bottom: ").append(PARTY_BAR_GAP).append(");\n\n");
+
+            ui.append("    Group #PartyBarHeader").append(memberIndex).append('_').append(barIndex).append(" {\n");
+            ui.append("      LayoutMode: Left;\n");
+            ui.append("      Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ")
+                .append(PARTY_BAR_LABEL_HEIGHT).append(", Bottom: ").append(PARTY_BAR_LABEL_GAP).append(");\n\n");
+
+            ui.append("      Label #PartyBarLabel").append(memberIndex).append('_').append(barIndex).append(" {\n");
+            ui.append("        Text: \"").append(HudModuleSupport.escapeUiString(bar.label)).append("\";\n");
+            ui.append("        Anchor: (Width: ").append(PARTY_BAR_LABEL_WIDTH).append(", Height: ")
+                .append(PARTY_BAR_LABEL_HEIGHT).append(");\n");
+            ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
+            ui.append("      }\n\n");
+
+            ui.append("      Group { FlexWeight: 1; }\n\n");
+
+            ui.append("      Label #PartyBarValue").append(memberIndex).append('_').append(barIndex).append(" {\n");
+            ui.append("        Text: \"").append(HudModuleSupport.escapeUiString(bar.valueText)).append("\";\n");
+            ui.append("        Anchor: (Width: ").append(PARTY_BAR_VALUE_WIDTH).append(", Height: ")
+                .append(PARTY_BAR_LABEL_HEIGHT).append(");\n");
+            ui.append("        Style: (FontSize: 9, RenderBold: true);\n");
+            ui.append("      }\n");
+            ui.append("    }\n\n");
+
+            ui.append("    Group #PartyBarTrack").append(memberIndex).append('_').append(barIndex).append(" {\n");
+            ui.append("      Anchor: (Width: ").append(PARTY_BAR_TRACK_WIDTH).append(", Height: ")
+                .append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
+            ui.append("      Background: PatchStyle(Color: #000000(0.52));\n");
+            ui.append("      OutlineColor: #000000(0.65);\n");
+            ui.append("      OutlineSize: 1;\n\n");
+
+            ui.append("      Group #PartyBarFill").append(memberIndex).append('_').append(barIndex).append(" {\n");
+            ui.append("        Background: PatchStyle(Color: ").append(bar.fillColor).append("(0.90));\n");
+            ui.append("        Anchor: (Left: 0, Top: 0, Width: ")
+                .append(Math.round(PARTY_BAR_TRACK_WIDTH * HudModuleSupport.clampRatio(bar.ratio)))
+                .append(", Height: ").append(PARTY_BAR_TRACK_HEIGHT).append(");\n");
+            ui.append("      }\n");
+            ui.append("    }\n");
+            ui.append("  }\n\n");
+        }
+
+        ui.append("}\n");
+        }
 
     private static void applyPartyBarFillWidth(@Nonnull UICommandBuilder cmd, int memberIndex, int barIndex, int fillWidth) {
         int clamped = Math.max(0, Math.min(PARTY_BAR_TRACK_WIDTH, fillWidth));

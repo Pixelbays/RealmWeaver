@@ -58,7 +58,7 @@ public class HotbarAbilityIconManager {
             
             if (abilityId != null && !abilityId.isEmpty()) {
                 // Ability is bound to this slot - create virtual item
-                ItemStack abilityIcon = createAbilityIcon(abilityId);
+                ItemStack abilityIcon = createAbilityIconItem(abilityId);
                 if (abilityIcon != null) {
                     // hotbar.setItemStackForSlot((short) slot, abilityIcon);
                 }
@@ -86,7 +86,7 @@ public class HotbarAbilityIconManager {
         
         if (abilityId != null && !abilityId.isEmpty()) {
             // Create and place ability icon
-            ItemStack abilityIcon = createAbilityIcon(abilityId);
+            ItemStack abilityIcon = createAbilityIconItem(abilityId);
             if (abilityIcon != null) {
                 hotbar.setItemStackForSlot((short) slot, abilityIcon);
             }
@@ -109,7 +109,7 @@ public class HotbarAbilityIconManager {
      * @return The ItemStack, or null if ability not found
      */
     @Nullable
-    private ItemStack createAbilityIcon(@Nonnull String abilityId) {
+    public static ItemStack createAbilityIconItem(@Nonnull String abilityId) {
         ClassAbilityDefinition abilityDef = ClassAbilityDefinition.getAssetMap().getAsset(abilityId);
         if (abilityDef == null) {
             return null;

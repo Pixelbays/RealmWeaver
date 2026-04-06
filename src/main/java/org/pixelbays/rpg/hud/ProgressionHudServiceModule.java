@@ -1,6 +1,7 @@
 package org.pixelbays.rpg.hud;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
@@ -23,20 +24,22 @@ public final class ProgressionHudServiceModule implements PlayerHudServiceModule
         }
 
         String systemId = PlayerHudServiceSupport.resolveActiveClassSystemId(activeClassId);
-        String labelPrefix = resolveActiveClassLabel(activeClassId, systemId);
+        ClassDefinition classDef = PlayerHudServiceSupport.getClassDefinition(activeClassId);
+        String labelPrefix = resolveActiveClassLabel(activeClassId, systemId, classDef);
+        String fillColor = PlayerHudServiceSupport.resolveProgressionFillColor(classDef);
         int level = Math.max(1, levelSystem.getLevel(context.getRef(), systemId));
 
         float currentExp = levelSystem.getExperience(context.getRef(), systemId);
         float expToNext = levelSystem.getExpToNextLevel(context.getRef(), systemId);
         if (expToNext <= 0.0001f) {
-            hud.getProgressionModule().primeMax(labelPrefix, level);
+            hud.getProgressionModule().primeMax(labelPrefix, level, fillColor);
             return;
         }
 
         int current = Math.max(0, Math.round(currentExp));
         int next = Math.max(0, Math.round(expToNext));
         int remaining = Math.max(0, next - current);
-        hud.getProgressionModule().primeProgress(labelPrefix, level, currentExp / expToNext, current, next, remaining);
+        hud.getProgressionModule().primeProgress(labelPrefix, level, currentExp / expToNext, current, next, remaining, fillColor);
     }
 
     @Override
@@ -48,26 +51,35 @@ public final class ProgressionHudServiceModule implements PlayerHudServiceModule
         }
 
         String systemId = PlayerHudServiceSupport.resolveActiveClassSystemId(activeClassId);
-        String labelPrefix = resolveActiveClassLabel(activeClassId, systemId);
+        ClassDefinition classDef = PlayerHudServiceSupport.getClassDefinition(activeClassId);
+        String labelPrefix = resolveActiveClassLabel(activeClassId, systemId, classDef);
+        String fillColor = PlayerHudServiceSupport.resolveProgressionFillColor(classDef);
         int level = Math.max(1, levelSystem.getLevel(context.getRef(), systemId));
 
         float currentExp = levelSystem.getExperience(context.getRef(), systemId);
         float expToNext = levelSystem.getExpToNextLevel(context.getRef(), systemId);
         if (expToNext <= 0.0001f) {
-            hud.getProgressionModule().updateMax(labelPrefix, level);
+            hud.getProgressionModule().updateMax(labelPrefix, level, fillColor);
             return;
         }
 
         int current = Math.max(0, Math.round(currentExp));
         int next = Math.max(0, Math.round(expToNext));
         int remaining = Math.max(0, next - current);
-        hud.getProgressionModule().updateProgress(labelPrefix, level, currentExp / expToNext, current, next, remaining);
+        hud.getProgressionModule().updateProgress(labelPrefix, level, currentExp / expToNext, current, next, remaining, fillColor);
     }
 
     @Nonnull
     private String resolveActiveClassLabel(@Nonnull String activeClassId, @Nonnull String resolvedSystemId) {
+        return resolveActiveClassLabel(activeClassId, resolvedSystemId, PlayerHudServiceSupport.getClassDefinition(activeClassId));
+    }
+
+    @Nonnull
+    private String resolveActiveClassLabel(
+            @Nonnull String activeClassId,
+            @Nonnull String resolvedSystemId,
+            @Nullable ClassDefinition classDef) {
         if (!activeClassId.isEmpty()) {
-            ClassDefinition classDef = PlayerHudServiceSupport.getClassDefinition(activeClassId);
             if (classDef != null) {
                 String display = classDef.getDisplayName();
                 if (display != null && !display.isBlank()) {

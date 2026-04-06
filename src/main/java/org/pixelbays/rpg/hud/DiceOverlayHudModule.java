@@ -103,6 +103,26 @@ public final class DiceOverlayHudModule implements PlayerHudModule {
         }
     }
 
+    void appendDebugUi(@Nonnull StringBuilder ui) {
+        ui.append("Group #DiceOverlayLargeHost {\n");
+        ui.append("  Anchor: (Left: 0, Right: 0, Top: 40, Bottom: 200);\n");
+        ui.append("  LayoutMode: CenterMiddle;\n");
+        if (lastViewData != null && lastViewData.mode == DiceOverlayMode.LARGE && !lastSignature.isEmpty()) {
+            ui.append('\n');
+            HudModuleSupport.appendIndentedBlock(ui, buildDiceOverlayMarkup(lastViewData), 2);
+        }
+        ui.append("}\n\n");
+
+        ui.append("Group #DiceOverlaySmallHost {\n");
+        ui.append("  Anchor: (Top: 78, Right: 20, Width: 240, Height: 120);\n");
+        ui.append("  LayoutMode: Top;\n");
+        if (lastViewData != null && lastViewData.mode == DiceOverlayMode.SMALL && !lastSignature.isEmpty()) {
+            ui.append('\n');
+            HudModuleSupport.appendIndentedBlock(ui, buildDiceOverlayMarkup(lastViewData), 2);
+        }
+        ui.append("}\n\n");
+    }
+
     @Nonnull
     private static String buildSignature(@Nonnull DiceRollViewData data) {
         StringBuilder signature = new StringBuilder(64 + (data.diceValues.length * 4));

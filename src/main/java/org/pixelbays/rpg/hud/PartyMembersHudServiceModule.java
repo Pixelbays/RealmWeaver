@@ -96,17 +96,26 @@ public final class PartyMembersHudServiceModule implements PlayerHudServiceModul
             List<PartyMembersHudModule.PartyStatBarData> bars = new ArrayList<>(3);
             appendPartyStatBar(bars, statMap, "Health", "HP", "#4FD36F");
 
-            if (classDefinition != null && classDefinition.getResourceStats() != null) {
-                for (String statId : classDefinition.getResourceStats()) {
-                    if (statId == null || statId.isBlank() || "Health".equalsIgnoreCase(statId)) {
+            if (classDefinition != null) {
+                for (ClassDefinition.ResourceDisplayDefinition resourceDisplay : classDefinition.getResolvedResourceDisplays()) {
+                    if (resourceDisplay == null) {
                         continue;
                     }
+
+                    String statId = resourceDisplay.getStatId();
+                    if (statId.isBlank() || "Health".equalsIgnoreCase(statId)) {
+                        continue;
+                    }
+
+                    String fillColor = resourceDisplay.getFillColor();
                     appendPartyStatBar(
                             bars,
                             statMap,
                             statId,
                             PlayerHudServiceSupport.shortStatLabel(statId),
-                            PlayerHudServiceSupport.resolveStatColor(statId));
+                            fillColor == null || fillColor.isBlank()
+                                    ? PlayerHudServiceSupport.resolveStatColor(statId)
+                                    : fillColor);
                 }
             }
 

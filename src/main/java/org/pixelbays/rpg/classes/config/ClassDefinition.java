@@ -3,7 +3,9 @@ package org.pixelbays.rpg.classes.config;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.bson.BsonType;
 import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
 import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
@@ -98,15 +101,17 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         private static final Codec<String> ABILITY_REF_CODEC = new AbilityRefCodec();
         private static final Codec<String> LEVEL_SYSTEM_REF_CODEC = new LevelSystemRefCodec();
 
-        private static final FunctionCodec<String[], List<String>> STAT_ID_LIST_CODEC = new FunctionCodec<>(
-            new ArrayCodec<>(ENTITY_STAT_REF_CODEC, String[]::new),
-            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
-            list -> list == null ? null : list.toArray(String[]::new));
+        private static final Codec<ResourceStatDefinition> RESOURCE_STAT_CODEC = new ResourceStatDefinitionCodec();
 
-            private static final FunctionCodec<ResourceDisplayDefinition[], List<ResourceDisplayDefinition>> RESOURCE_DISPLAY_LIST_CODEC = new FunctionCodec<>(
-                new ArrayCodec<>(ResourceDisplayDefinition.CODEC, ResourceDisplayDefinition[]::new),
-                arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
-                list -> list == null ? null : list.toArray(ResourceDisplayDefinition[]::new));
+        private static final FunctionCodec<ResourceStatDefinition[], List<ResourceStatDefinition>> RESOURCE_STAT_LIST_CODEC = new FunctionCodec<>(
+            new ArrayCodec<>(RESOURCE_STAT_CODEC, ResourceStatDefinition[]::new),
+            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+            list -> list == null ? null : list.toArray(ResourceStatDefinition[]::new));
+
+        private static final FunctionCodec<ResourceDisplayDefinition[], List<ResourceDisplayDefinition>> RESOURCE_DISPLAY_LIST_CODEC = new FunctionCodec<>(
+            new ArrayCodec<>(ResourceDisplayDefinition.CODEC, ResourceDisplayDefinition[]::new),
+            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+            list -> list == null ? null : list.toArray(ResourceDisplayDefinition[]::new));
 
     private static final FunctionCodec<String[], List<String>> CLASS_ID_LIST_CODEC = new FunctionCodec<>(
             new ArrayCodec<>(CLASS_REF_CODEC, String[]::new),
@@ -207,6 +212,14 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                     i -> i.Visible,
                     (i, parent) -> i.Visible = parent.Visible)
             .add()
+                .appendInherited(new KeyedCodec<>("ClassColorPrimary", Codec.STRING, false, true),
+                    (i, s) -> i.ClassColorPrimary = s, i -> i.ClassColorPrimary,
+                    (i, parent) -> i.ClassColorPrimary = parent.ClassColorPrimary)
+                .add()
+                .appendInherited(new KeyedCodec<>("ClassColorAlt", Codec.STRING, false, true),
+                    (i, s) -> i.ClassColorAlt = s, i -> i.ClassColorAlt,
+                    (i, parent) -> i.ClassColorAlt = parent.ClassColorAlt)
+                .add()
                 .appendInherited(new KeyedCodec<>("RequiredExpansionIds", STRING_LIST_CODEC, false, true),
                     (i, s) -> i.requiredExpansionIds = s, i -> i.requiredExpansionIds,
                     (i, parent) -> i.requiredExpansionIds = parent.requiredExpansionIds)
@@ -255,7 +268,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
                     (i, parent) -> i.HeroStartingLevel = parent.HeroStartingLevel)
                 .add()
                 .append(
-                    new KeyedCodec<>("ResourceStats", STAT_ID_LIST_CODEC, false, true),
+                    new KeyedCodec<>("ResourceStats", RESOURCE_STAT_LIST_CODEC, false, true),
                     (i, s) -> i.ResourceStats = s,
                     i -> i.ResourceStats)
             .add()
@@ -354,6 +367,143 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     public enum ResourceDisplayMode {
         BAR,
         CHARGES
+    }
+
+    public static final class ResourceStatDefinition {
+
+        public static final BuilderCodec<ResourceStatDefinition> CODEC = BuilderCodec
+                .builder(ResourceStatDefinition.class, ResourceStatDefinition::new)
+                .append(new KeyedCodec<>("StatId", ENTITY_STAT_REF_CODEC),
+                        (i, s) -> i.statId = s,
+                        i -> i.statId)
+                .add()
+                .append(new KeyedCodec<>("Color", Codec.STRING, false, true),
+                        (i, s) -> i.color = s,
+                        i -> i.color)
+                .add()
+                .append(new KeyedCodec<>("Icon", Codec.STRING, false, true),
+                        (i, s) -> i.icon = s,
+                        i -> i.icon)
+                .add()
+                .append(new KeyedCodec<>("Priority", Codec.INTEGER, false, true),
+                        (i, s) -> i.priority = s,
+                        i -> i.priority)
+                .add()
+                .build();
+
+        private String statId;
+        private String color;
+        private String icon;
+        private int priority;
+
+        public ResourceStatDefinition() {
+            this.statId = "";
+            this.color = "";
+            this.icon = "";
+            this.priority = 0;
+        }
+
+        @Nonnull
+        public static ResourceStatDefinition legacy(@Nonnull String statId) {
+            ResourceStatDefinition definition = new ResourceStatDefinition();
+            definition.statId = statId;
+            return definition;
+        }
+
+        @Nonnull
+        public String getStatId() {
+            return statId == null ? "" : statId;
+        }
+
+        public void setStatId(String statId) {
+            this.statId = statId;
+        }
+
+        @Nullable
+        public String getColor() {
+            return color;
+        }
+
+        public void setColor(String color) {
+            this.color = color;
+        }
+
+        @Nullable
+        public String getIcon() {
+            return icon;
+        }
+
+        public void setIcon(String icon) {
+            this.icon = icon;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+
+        public void setPriority(int priority) {
+            this.priority = priority;
+        }
+    }
+
+    @SuppressWarnings("null")
+    private static final class ResourceStatDefinitionCodec implements ValidatableCodec<ResourceStatDefinition> {
+
+        @Override
+        @Nullable
+        public ResourceStatDefinition decode(org.bson.BsonValue bsonValue, ExtraInfo extraInfo) {
+            if (bsonValue == null || bsonValue.getBsonType() == BsonType.NULL) {
+                return null;
+            }
+            if (bsonValue.getBsonType() == BsonType.STRING) {
+                String statId = ENTITY_STAT_REF_CODEC.decode(bsonValue, extraInfo);
+                return statId == null ? null : ResourceStatDefinition.legacy(statId);
+            }
+            return ResourceStatDefinition.CODEC.decode(bsonValue, extraInfo);
+        }
+
+        @Override
+        public org.bson.BsonValue encode(ResourceStatDefinition value, ExtraInfo extraInfo) {
+            return ResourceStatDefinition.CODEC.encode(value, extraInfo);
+        }
+
+        @Override
+        @Nullable
+        public ResourceStatDefinition decodeJson(@Nonnull RawJsonReader reader, ExtraInfo extraInfo) throws IOException {
+            int read = reader.peek();
+            if (read == -1) {
+                throw new IOException("Unexpected EOF!");
+            }
+            if (read == 'n' || read == 'N') {
+                reader.readNullValue();
+                return null;
+            }
+            if (read == '"') {
+                String statId = ENTITY_STAT_REF_CODEC.decodeJson(reader, extraInfo);
+                return statId == null ? null : ResourceStatDefinition.legacy(statId);
+            }
+            return ResourceStatDefinition.CODEC.decodeJson(reader, extraInfo);
+        }
+
+        @Override
+        @Nonnull
+        public Schema toSchema(@Nonnull SchemaContext context) {
+            return ResourceStatDefinition.CODEC.toSchema(context);
+        }
+
+        @Override
+        public void validate(ResourceStatDefinition value, ExtraInfo extraInfo) {
+            if (value != null) {
+                ResourceStatDefinition.CODEC.validate(value, extraInfo);
+            }
+        }
+
+        @Override
+        public void validateDefaults(ExtraInfo extraInfo, java.util.Set<Codec<?>> tested) {
+            if (tested.add(this)) {
+                ResourceStatDefinition.CODEC.validateDefaults(extraInfo, tested);
+            }
+        }
     }
 
     public static final class ResourceDisplayDefinition {
@@ -497,6 +647,8 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     private String Icon; // Icon asset ID
     private boolean Enabled; // Can this class be learned?
     private boolean Visible; // Show in class selection UI?
+    private String ClassColorPrimary; // Primary accent color for the class UI
+    private String ClassColorAlt; // Alternate accent color for the class UI
     private List<String> requiredExpansionIds;
     // === Inheritance ===
     private String Parent; // Parent class to extend from (e.g., "warrior" for Paladin)
@@ -515,7 +667,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
     private int HeroStartingLevel; // Starting level used for hero classes
 
     // === Resources ===
-    private List<String> ResourceStats; // Priority list of resource stats (e.g., ["Mana", "Energy"])
+    private List<ResourceStatDefinition> ResourceStats; // Resource stat config with optional color, icon, and priority metadata
     private List<ResourceDisplayDefinition> ResourceDisplays; // Explicit HUD display config for class resources
 
     // === Stat Bonuses ===
@@ -543,6 +695,8 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         this.Icon = null;
         this.Enabled = true;
         this.Visible = true;
+        this.ClassColorPrimary = "";
+        this.ClassColorAlt = "";
         this.requiredExpansionIds = new ArrayList<>();
         this.Prerequisites = new Object2IntOpenHashMap<>();
         this.RequiredClasses = new ArrayList<>();
@@ -627,6 +781,24 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
 
     public void setVisible(boolean Visible) {
         this.Visible = Visible;
+    }
+
+    @Nullable
+    public String getClassColorPrimary() {
+        return normalizeOptionalText(ClassColorPrimary);
+    }
+
+    public void setClassColorPrimary(@Nullable String classColorPrimary) {
+        this.ClassColorPrimary = classColorPrimary;
+    }
+
+    @Nullable
+    public String getClassColorAlt() {
+        return normalizeOptionalText(ClassColorAlt);
+    }
+
+    public void setClassColorAlt(@Nullable String classColorAlt) {
+        this.ClassColorAlt = classColorAlt;
     }
 
     public List<String> getRequiredExpansionIds() {
@@ -748,31 +920,176 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         return isHeroClass() ? getHeroStartingLevel() : 1;
     }
 
+    @Nonnull
     public List<String> getResourceStats() {
-        return ResourceStats;
+        return getResourceStatIds();
+    }
+
+    @Nonnull
+    public List<ResourceStatDefinition> getResourceStatDefinitions() {
+        List<ResourceStatDefinition> resourceStats = ResourceStats;
+        return resourceStats == null ? new ArrayList<>() : resourceStats;
     }
 
     public List<ResourceDisplayDefinition> getResourceDisplays() {
         return ResourceDisplays;
     }
 
-    public List<ResourceDisplayDefinition> getResolvedResourceDisplays() {
-        if (ResourceDisplays != null && !ResourceDisplays.isEmpty()) {
-            return ResourceDisplays;
+    @Nullable
+    public ResourceStatDefinition getResourceStat(@Nullable String statId) {
+        if (statId == null || statId.isBlank() || ResourceStats == null || ResourceStats.isEmpty()) {
+            return null;
         }
 
+        for (ResourceStatDefinition resourceStat : ResourceStats) {
+            if (resourceStat == null) {
+                continue;
+            }
+            if (statId.equalsIgnoreCase(resourceStat.getStatId())) {
+                return resourceStat;
+            }
+        }
+
+        return null;
+    }
+
+    @Nonnull
+    public List<String> getResourceStatIds() {
         if (ResourceStats == null || ResourceStats.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        ArrayList<String> statIds = new ArrayList<>(ResourceStats.size());
+        for (ResourceStatDefinition resourceStat : ResourceStats) {
+            if (resourceStat == null) {
+                continue;
+            }
+
+            String statId = resourceStat.getStatId();
+            if (!statId.isBlank()) {
+                statIds.add(statId);
+            }
+        }
+        return statIds;
+    }
+
+    public List<ResourceDisplayDefinition> getResolvedResourceDisplays() {
+        boolean hasResourceDisplays = ResourceDisplays != null && !ResourceDisplays.isEmpty();
+        boolean hasResourceStats = ResourceStats != null && !ResourceStats.isEmpty();
+        if (!hasResourceDisplays && !hasResourceStats) {
             return List.of();
         }
 
-        ArrayList<ResourceDisplayDefinition> resolved = new ArrayList<>(ResourceStats.size());
-        for (String statId : ResourceStats) {
-            if (statId == null || statId.isBlank()) {
+        Map<String, ResourceStatDefinition> resourceStatsById = new LinkedHashMap<>();
+        if (hasResourceStats) {
+            for (ResourceStatDefinition resourceStat : ResourceStats) {
+                if (resourceStat == null) {
+                    continue;
+                }
+
+                String statId = resourceStat.getStatId();
+                if (statId.isBlank()) {
+                    continue;
+                }
+
+                resourceStatsById.put(normalizeResourceKey(statId), resourceStat);
+            }
+        }
+
+        ArrayList<ResourceDisplayDefinition> resolved = new ArrayList<>(
+                (hasResourceDisplays ? ResourceDisplays.size() : 0) + resourceStatsById.size());
+        LinkedHashSet<String> includedStatIds = new LinkedHashSet<>();
+
+        if (hasResourceDisplays) {
+            for (ResourceDisplayDefinition resourceDisplay : ResourceDisplays) {
+                if (resourceDisplay == null) {
+                    continue;
+                }
+
+                String statId = resourceDisplay.getStatId();
+                if (statId.isBlank()) {
+                    continue;
+                }
+
+                ResourceStatDefinition resourceStat = resourceStatsById.get(normalizeResourceKey(statId));
+                resolved.add(mergeResourceDisplay(resourceDisplay, resourceStat));
+                includedStatIds.add(normalizeResourceKey(statId));
+            }
+        }
+
+        for (ResourceStatDefinition resourceStat : resourceStatsById.values()) {
+            String statId = resourceStat.getStatId();
+            String normalizedStatId = normalizeResourceKey(statId);
+            if (includedStatIds.contains(normalizedStatId)) {
                 continue;
             }
-            resolved.add(ResourceDisplayDefinition.legacy(statId));
+
+            resolved.add(createResourceDisplay(resourceStat));
+            includedStatIds.add(normalizedStatId);
         }
+
+        resolved.sort(Comparator.comparingInt(resourceDisplay -> resolveResourcePriority(resourceStatsById, resourceDisplay.getStatId())));
         return resolved;
+    }
+
+    @Nonnull
+    private static ResourceDisplayDefinition mergeResourceDisplay(
+            @Nonnull ResourceDisplayDefinition resourceDisplay,
+            @Nullable ResourceStatDefinition resourceStat) {
+        ResourceDisplayDefinition merged = new ResourceDisplayDefinition();
+        merged.statId = resourceDisplay.getStatId();
+        merged.label = resourceDisplay.label;
+        merged.displayMode = resourceDisplay.displayMode;
+        merged.maxCharges = resourceDisplay.maxCharges;
+        merged.fillColor = normalizeOptionalText(resourceDisplay.fillColor);
+        merged.asset = normalizeOptionalText(resourceDisplay.asset);
+
+        if (resourceStat != null) {
+            if (merged.fillColor == null) {
+                merged.fillColor = normalizeOptionalText(resourceStat.color);
+            }
+            if (merged.asset == null) {
+                merged.asset = normalizeOptionalText(resourceStat.icon);
+            }
+        }
+
+        return merged;
+    }
+
+    @Nonnull
+    private static ResourceDisplayDefinition createResourceDisplay(@Nonnull ResourceStatDefinition resourceStat) {
+        ResourceDisplayDefinition resourceDisplay = new ResourceDisplayDefinition();
+        resourceDisplay.statId = resourceStat.getStatId();
+        resourceDisplay.fillColor = normalizeOptionalText(resourceStat.color);
+        resourceDisplay.asset = normalizeOptionalText(resourceStat.icon);
+        return resourceDisplay;
+    }
+
+    private static int resolveResourcePriority(
+            @Nonnull Map<String, ResourceStatDefinition> resourceStatsById,
+            @Nullable String statId) {
+        if (statId == null || statId.isBlank()) {
+            return Integer.MAX_VALUE;
+        }
+
+        ResourceStatDefinition resourceStat = resourceStatsById.get(normalizeResourceKey(statId));
+        return resourceStat == null ? Integer.MAX_VALUE : resourceStat.getPriority();
+    }
+
+    @SuppressWarnings("null")
+    @Nonnull
+    private static String normalizeResourceKey(@Nonnull String statId) {
+        return statId.trim().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    @Nullable
+    private static String normalizeOptionalText(@Nullable String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     public Map<String, List<String>> getTags() {
@@ -782,7 +1099,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         }
 
         Map<String, String[]> rawTags = data.getRawTags();
-        if (rawTags == null || rawTags.isEmpty()) {
+        if (rawTags.isEmpty()) {
             return result;
         }
 
@@ -814,7 +1131,7 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         }
 
         Map<String, String[]> rawTags = data.getRawTags();
-        if (rawTags == null || rawTags.isEmpty()) {
+        if (rawTags.isEmpty()) {
             return false;
         }
 
@@ -924,7 +1241,10 @@ public class ClassDefinition implements JsonAssetWithMap<String, DefaultAssetMap
         
         RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
         if (config != null) {
-            return config.getAbilityControlType();
+            AbilityControlType configuredType = config.getAbilityControlType();
+            if (configuredType != null) {
+                return configuredType;
+            }
         }
         
         // Fallback to Hotbar if config not found
