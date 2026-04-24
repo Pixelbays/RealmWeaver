@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage",
+    "Passive"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.guiding_lines.name",
+    "Description": "mma.rpg.abilities.guiding_lines.description"
+  },
+  "AbilityType": "Passive",
+  "Parent": "PassiveBase",
+  "GlobalCooldown": 0.0,
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Guiding_Lines"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Nearby allies constantly gain brief movement and support-focused buffs.",
+  "Icon": "Icons/ItemsGenerated/Weapon_Staff_Wizard.png"
+}

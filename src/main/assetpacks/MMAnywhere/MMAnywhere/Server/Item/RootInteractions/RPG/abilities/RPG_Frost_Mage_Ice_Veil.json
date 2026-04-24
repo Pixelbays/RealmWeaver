@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Frost_Mage_Ice_Veil"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Frost_Mage_Ice_Veil",
+    "Cooldown": 12.0
+  }
+}

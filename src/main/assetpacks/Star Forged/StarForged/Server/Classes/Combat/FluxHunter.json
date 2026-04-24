@@ -281,5 +281,19 @@
         }
       ]
     }
+  ],
+  "ClassColorPrimary": "#ff8709",
+  "ClassColorAlt": "#ffe317",
+  "ResourceStats": [
+    {
+      "StatId": "Focus",
+      "Color": "#ff8709",
+      "Priority": 1
+    },
+    {
+      "StatId": "Runes",
+      "Color": "#ffe317",
+      "Priority": 2
+    }
   ]
 }

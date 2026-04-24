@@ -15,7 +15,7 @@ import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.ui.ItemGridSlot;
@@ -54,9 +54,9 @@ public class RpgInventoryPage extends CustomUIPage {
             return;
         }
 
-        populateGrids(commandBuilder, player.getInventory());
+        populateGrids(commandBuilder, ref, store);
         bindSlotEvents(eventBuilder);
-        registerInventoryListeners(player.getInventory());
+        registerInventoryListeners(ref, store);
     }
 
     @Override
@@ -161,7 +161,11 @@ public class RpgInventoryPage extends CustomUIPage {
         }
 
         if ("Hotbar".equals(grid)) {
-            player.getInventory().setActiveSlot(ref, Inventory.HOTBAR_SECTION_ID, (byte) slotIndex, store);
+            InventoryComponent.Hotbar hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+            if (hotbarComp != null) {
+                hotbarComp.setActiveSlot((byte) slotIndex);
+                hotbarComp.markDirty();
+            }
         }
 
         if (mouseButton == null || mouseButton != 1) {
@@ -183,17 +187,22 @@ public class RpgInventoryPage extends CustomUIPage {
         }
 
         int quantity = itemQuantity != null && itemQuantity > 0 ? itemQuantity : 1;
-        player.getInventory().moveItem(sourceSectionId, pendingSourceSlot, quantity, targetSectionId, slotIndex);
+        ItemContainer sourceContainer = getContainerBySectionId(ref, store, sourceSectionId);
+        ItemContainer targetContainer = getContainerBySectionId(ref, store, targetSectionId);
+        if (sourceContainer != null && targetContainer != null) {
+            sourceContainer.moveItemStackFromSlotToSlot(
+                    (short) (int) pendingSourceSlot, quantity, targetContainer, (short) slotIndex);
+        }
         pendingSourceGrid = null;
         pendingSourceSlot = null;
     }
 
     private static Integer gridToSectionId(@Nonnull String grid) {
         return switch (grid) {
-            case "Storage" -> Inventory.STORAGE_SECTION_ID;
-            case "Hotbar" -> Inventory.HOTBAR_SECTION_ID;
-            case "Armor" -> Inventory.ARMOR_SECTION_ID;
-            case "Utility" -> Inventory.UTILITY_SECTION_ID;
+            case "Storage" -> InventoryComponent.STORAGE_SECTION_ID;
+            case "Hotbar" -> InventoryComponent.HOTBAR_SECTION_ID;
+            case "Armor" -> InventoryComponent.ARMOR_SECTION_ID;
+            case "Utility" -> InventoryComponent.UTILITY_SECTION_ID;
             default -> null;
         };
     }
@@ -256,16 +265,20 @@ public class RpgInventoryPage extends CustomUIPage {
         return rawData.substring(firstQuote + 1, secondQuote);
     }
 
-    private void registerInventoryListeners(@Nonnull Inventory inventory) {
+    private void registerInventoryListeners(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         if (listenersRegistered) {
             return;
         }
 
         listenersRegistered = true;
-        registerContainerListener(inventory.getStorage());
-        registerContainerListener(inventory.getHotbar());
-        registerContainerListener(inventory.getArmor());
-        registerContainerListener(inventory.getUtility());
+        InventoryComponent.Storage storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        InventoryComponent.Armor armorComp = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+        InventoryComponent.Utility utilityComp = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+        registerContainerListener(storageComp != null ? storageComp.getInventory() : null);
+        registerContainerListener(hotbarComp != null ? hotbarComp.getInventory() : null);
+        registerContainerListener(armorComp != null ? armorComp.getInventory() : null);
+        registerContainerListener(utilityComp != null ? utilityComp.getInventory() : null);
     }
 
     private void registerContainerListener(ItemContainer container) {
@@ -289,7 +302,7 @@ public class RpgInventoryPage extends CustomUIPage {
         }
 
         UICommandBuilder commandBuilder = new UICommandBuilder();
-        populateGrids(commandBuilder, player.getInventory());
+        populateGrids(commandBuilder, ref, store);
         UIEventBuilder eventBuilder = new UIEventBuilder();
         bindSlotEvents(eventBuilder);
         sendUpdateWithEvents(commandBuilder, eventBuilder);
@@ -317,11 +330,37 @@ public class RpgInventoryPage extends CustomUIPage {
                         eventBuilder.getEvents()));
     }
 
-    private void populateGrids(@Nonnull UICommandBuilder commandBuilder, @Nonnull Inventory inventory) {
-        populateGrid(commandBuilder, STORAGE_GRID_SELECTOR, inventory.getStorage());
-        populateGrid(commandBuilder, HOTBAR_GRID_SELECTOR, inventory.getHotbar());
-        populateGrid(commandBuilder, ARMOR_GRID_SELECTOR, inventory.getArmor());
-        populateGrid(commandBuilder, UTILITY_GRID_SELECTOR, inventory.getUtility());
+    private void populateGrids(@Nonnull UICommandBuilder commandBuilder,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store) {
+        InventoryComponent.Storage storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        InventoryComponent.Armor armorComp = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+        InventoryComponent.Utility utilityComp = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+        populateGrid(commandBuilder, STORAGE_GRID_SELECTOR, storageComp != null ? storageComp.getInventory() : null);
+        populateGrid(commandBuilder, HOTBAR_GRID_SELECTOR, hotbarComp != null ? hotbarComp.getInventory() : null);
+        populateGrid(commandBuilder, ARMOR_GRID_SELECTOR, armorComp != null ? armorComp.getInventory() : null);
+        populateGrid(commandBuilder, UTILITY_GRID_SELECTOR, utilityComp != null ? utilityComp.getInventory() : null);
+    }
+
+    private static ItemContainer getContainerBySectionId(
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            int sectionId) {
+        if (sectionId == InventoryComponent.STORAGE_SECTION_ID) {
+            InventoryComponent.Storage c = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+            return c != null ? c.getInventory() : null;
+        } else if (sectionId == InventoryComponent.HOTBAR_SECTION_ID) {
+            InventoryComponent.Hotbar c = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+            return c != null ? c.getInventory() : null;
+        } else if (sectionId == InventoryComponent.ARMOR_SECTION_ID) {
+            InventoryComponent.Armor c = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+            return c != null ? c.getInventory() : null;
+        } else if (sectionId == InventoryComponent.UTILITY_SECTION_ID) {
+            InventoryComponent.Utility c = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+            return c != null ? c.getInventory() : null;
+        }
+        return null;
     }
 
     private void populateGrid(@Nonnull UICommandBuilder commandBuilder,

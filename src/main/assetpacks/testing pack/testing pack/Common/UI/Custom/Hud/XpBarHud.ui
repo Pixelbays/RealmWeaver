@@ -1,11 +1,7 @@
 $C = "../Common.ui";
-Group #PartyRoot {
+Group #PartyMembers {
   Anchor: (Top: 36, Left: 20, Width: 248, Height: 0);
-
-  Group #PartyMembers {
-    LayoutMode: Top;
-    Anchor: (Width: 248, Height: 0);
-  }
+  LayoutMode: Top;
 }
 
 Group #ResourceBars {

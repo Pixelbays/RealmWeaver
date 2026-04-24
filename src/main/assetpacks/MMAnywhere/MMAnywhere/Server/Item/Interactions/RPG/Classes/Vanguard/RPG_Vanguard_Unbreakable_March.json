@@ -1,0 +1,30 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Guard": 2
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Guard": -2
+        }
+      },
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Health": 30
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Vanguard_UnbreakableMarch",
+        "Entity": "User"
+      }
+    ]
+  }
+}

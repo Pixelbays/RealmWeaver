@@ -1,8 +1,17 @@
 package org.pixelbays.plugin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -52,10 +61,12 @@ import org.pixelbays.rpg.chat.config.settings.ChatChannelDefinition;
 import org.pixelbays.rpg.chat.config.settings.ChatModSettings;
 import org.pixelbays.rpg.classes.command.ClassCommand;
 import org.pixelbays.rpg.classes.component.ClassComponent;
+import org.pixelbays.rpg.classes.component.StarterClassSelectionComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.classes.event.ActiveClassChangedEvent;
 import org.pixelbays.rpg.classes.event.ClassLearnedEvent;
 import org.pixelbays.rpg.classes.event.ClassUnlearnedEvent;
+import org.pixelbays.rpg.classes.system.FirstJoinClassSelectionManager;
 import org.pixelbays.rpg.classes.system.ClassManagementSystem;
 import org.pixelbays.rpg.classes.talent.TalentSystem;
 import org.pixelbays.rpg.economy.auctions.AuctionHouseManager;
@@ -81,6 +92,7 @@ import org.pixelbays.rpg.global.event.ClassStatBonusesRecalculatedEvent;
 import org.pixelbays.rpg.global.event.RaceStatBonusesRecalculatedEvent;
 import org.pixelbays.rpg.global.event.StatGrowthAppliedEvent;
 import org.pixelbays.rpg.global.event.StatIncreasesAppliedEvent;
+import org.pixelbays.rpg.global.input.AbilityInputDebugWatcher;
 import org.pixelbays.rpg.global.input.AbilityInputFilter;
 import org.pixelbays.rpg.global.input.UiInputFilter;
 import org.pixelbays.rpg.global.interaction.DiceRollInteraction;
@@ -143,10 +155,7 @@ import org.pixelbays.rpg.mail.MailManager;
 import org.pixelbays.rpg.mail.command.MailCommand;
 import org.pixelbays.rpg.mail.config.MailData;
 import org.pixelbays.rpg.mail.interaction.OpenMailInteraction;
-import org.pixelbays.rpg.nameplate.PlayerSecondaryNameplateCleanupSystem;
-import org.pixelbays.rpg.nameplate.PlayerSecondaryNameplateFollowSystem;
 import org.pixelbays.rpg.nameplate.PlayerNameplateUpdateSystem;
-import org.pixelbays.rpg.nameplate.component.PlayerSecondaryNameplateComponent;
 import org.pixelbays.rpg.npc.command.NpcRpgDebugCommand;
 import org.pixelbays.rpg.npc.component.NpcRpgDebugComponent;
 import org.pixelbays.rpg.npc.component.NpcRpgSetupComponent;
@@ -176,6 +185,7 @@ import org.pixelbays.rpg.race.event.RaceAbilityUnlockedEvent;
 import org.pixelbays.rpg.race.event.RaceChangedEvent;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
 import org.pixelbays.rpg.race.system.RaceSystem;
+import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.world.WorldTravelManager;
 import org.pixelbays.rpg.world.command.TravelRouteCommand;
 import org.pixelbays.rpg.world.config.WorldRouteDefinition;
@@ -186,11 +196,15 @@ import com.hypixel.hytale.assetstore.event.LoadedAssetsEvent;
 import com.hypixel.hytale.assetstore.event.RemovedAssetsEvent;
 import com.hypixel.hytale.assetstore.map.DefaultAssetMap;
 import com.hypixel.hytale.assetstore.map.IndexedLookupTableAssetMap;
+import com.hypixel.hytale.component.Ref;
+import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.component.ComponentType;
 import com.hypixel.hytale.server.core.asset.HytaleAssetStore;
 import com.hypixel.hytale.server.core.asset.type.item.config.container.ItemDropContainer;
 import com.hypixel.hytale.server.core.command.system.AbstractCommand;
 import com.hypixel.hytale.server.core.command.system.CommandRegistration;
+import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
@@ -201,7 +215,9 @@ import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Int
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
 import com.hypixel.hytale.server.core.plugin.JavaPlugin;
 import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import com.hypixel.hytale.server.core.plugin.PluginManager;
 import com.hypixel.hytale.server.core.plugin.PluginState;
+import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.npc.NPCPlugin;
 import com.hypixel.hytale.server.npc.entities.NPCEntity;
@@ -229,6 +245,7 @@ public class Realmweavers extends JavaPlugin {
         private GroupFinderManager groupFinderManager;
         private GuildManager guildManager;
         private AuctionHouseManager auctionHouseManager;
+        private FirstJoinClassSelectionManager firstJoinClassSelectionManager;
         private BankManager bankManager;
         private CurrencyManager currencyManager;
         private ExpansionManager expansionManager;
@@ -245,6 +262,7 @@ public class Realmweavers extends JavaPlugin {
         private ComponentType<EntityStore, AchievementComponent> achievementComponentType;
         private ComponentType<EntityStore, LevelProgressionComponent> levelProgressionComponentType;
         private ComponentType<EntityStore, ClassComponent> classComponentType;
+        private ComponentType<EntityStore, StarterClassSelectionComponent> starterClassSelectionComponentType;
         private ComponentType<EntityStore, ClassAbilityComponent> classAbilityComponentType;
         private ComponentType<EntityStore, AbilityEmpowerComponent> abilityEmpowerComponentType;
         private ComponentType<EntityStore, RaceComponent> raceComponentType;
@@ -256,6 +274,7 @@ public class Realmweavers extends JavaPlugin {
         private ComponentType<EntityStore, LockpickingSessionComponent> lockpickingSessionComponentType;
 
         private PacketFilter uiInputFilter;
+        private PacketFilter abilityInputDebugWatcher;
         private PacketFilter abilityInputFilter;
         private PacketFilter characterLobbyInputFilter;
         private PacketFilter inventoryOpenFilter;
@@ -263,7 +282,7 @@ public class Realmweavers extends JavaPlugin {
         private LockpickingSystem lockpickingSystem;
         private CommandRegistration raceCommandRegistration;
         private CommandRegistration npcRpgDebugCommandRegistration;
-        private CommandRegistration uiDebugCommandRegistration;
+                private CommandRegistration uiDebugCommandRegistration;
         private CommandRegistration testLevelCommandRegistration;
         private CommandRegistration levelTestCommandRegistration;
         private CommandRegistration resetLevelCommandRegistration;
@@ -293,6 +312,8 @@ public class Realmweavers extends JavaPlugin {
         @Override
         protected void setup() {
                 RpgLogging.debugDeveloper("Setting up Realmweaver plugin %s", this.getName());
+
+                ensureLooseCoreAssetPackInstalled();
 
                 registerAssetStores();
                 registerComponents();
@@ -476,6 +497,115 @@ public class Realmweavers extends JavaPlugin {
                                                 .build());
         }
 
+        private void ensureLooseCoreAssetPackInstalled() {
+                Path loosePackPath = PluginManager.MODS_PATH.resolve(this.getManifest().getName()).toAbsolutePath().normalize();
+                if (Files.isDirectory(loosePackPath)) {
+                        return;
+                }
+                if (Files.exists(loosePackPath)) {
+                        throw new IllegalStateException(
+                                        "Expected loose asset-pack directory at " + loosePackPath + " but found a non-directory entry.");
+                }
+
+                RpgLogging.debugDeveloper("Bootstrapping loose RealmweaverCore asset pack into %s", loosePackPath);
+                try {
+                        Files.createDirectories(loosePackPath);
+                        copyBundledCoreAssetPack(loosePackPath);
+                } catch (IOException ex) {
+                        throw new IllegalStateException(
+                                        "Failed to bootstrap bundled RealmweaverCore asset pack into " + loosePackPath,
+                                        ex);
+                }
+
+                throw new IllegalStateException(
+                                "Realmweaver Core Requires you to restart the server to finish it's installation. Thank you.");
+        }
+
+        private void copyBundledCoreAssetPack(@Nonnull Path targetPackPath) throws IOException {
+                Path pluginFile = this.getFile().toAbsolutePath().normalize();
+                String lowerFileName = pluginFile.getFileName().toString().toLowerCase();
+                if (lowerFileName.endsWith(".jar") || lowerFileName.endsWith(".zip")) {
+                        try (FileSystem fileSystem = FileSystems.newFileSystem(pluginFile, (ClassLoader) null)) {
+                                copyBundledCoreAssetPack(fileSystem.getPath("").toAbsolutePath().normalize(), targetPackPath);
+                        }
+                        return;
+                }
+
+                copyBundledCoreAssetPack(pluginFile, targetPackPath);
+        }
+
+        private void copyBundledCoreAssetPack(@Nonnull Path sourceRoot, @Nonnull Path targetPackPath) throws IOException {
+                Path manifestSource = sourceRoot.resolve("manifest.json");
+                if (!Files.isRegularFile(manifestSource)) {
+                        throw new IOException("Bundled asset-pack manifest missing from " + sourceRoot);
+                }
+
+                Files.copy(
+                                manifestSource,
+                                targetPackPath.resolve("manifest.json"),
+                                StandardCopyOption.REPLACE_EXISTING);
+                copyBundledAssetDirectory(sourceRoot, targetPackPath, "Common");
+                copyBundledAssetDirectory(sourceRoot, targetPackPath, "Server");
+                copyBundledAssetDirectory(sourceRoot, targetPackPath, "Cosmetics");
+        }
+
+        private void copyBundledAssetDirectory(@Nonnull Path sourceRoot, @Nonnull Path targetPackPath,
+                        @Nonnull String directoryName) throws IOException {
+                Path sourceDirectory = resolveBundledAssetDirectory(sourceRoot, directoryName);
+                if (sourceDirectory == null) {
+                        return;
+                }
+
+                copyDirectoryTree(sourceDirectory, targetPackPath.resolve(directoryName));
+        }
+
+        @Nullable
+        private Path resolveBundledAssetDirectory(@Nonnull Path sourceRoot, @Nonnull String directoryName) {
+                Path exactDirectory = sourceRoot.resolve(directoryName);
+                if (Files.isDirectory(exactDirectory)) {
+                        return exactDirectory;
+                }
+
+                Path lowercaseDirectory = sourceRoot.resolve(directoryName.toLowerCase());
+                if (Files.isDirectory(lowercaseDirectory)) {
+                        return lowercaseDirectory;
+                }
+
+                return null;
+        }
+
+        private void copyDirectoryTree(@Nonnull Path sourceDirectory, @Nonnull Path targetDirectory) throws IOException {
+                Files.walkFileTree(sourceDirectory, new SimpleFileVisitor<>() {
+                        @Override
+                        @Nonnull
+                        public FileVisitResult preVisitDirectory(@Nonnull Path directory,
+                                        @Nonnull BasicFileAttributes attributes) throws IOException {
+                                Path relativePath = sourceDirectory.relativize(directory);
+                                Path destinationDirectory = relativePath.getNameCount() == 0
+                                                ? targetDirectory
+                                                : targetDirectory.resolve(relativePath.toString());
+                                Files.createDirectories(destinationDirectory);
+                                return FileVisitResult.CONTINUE;
+                        }
+
+                        @Override
+                        @Nonnull
+                        public FileVisitResult visitFile(@Nonnull Path file,
+                                        @Nonnull BasicFileAttributes attributes) throws IOException {
+                                if ("CommonAssetsIndex.hashes".equals(file.getFileName().toString())) {
+                                        return FileVisitResult.CONTINUE;
+                                }
+
+                                Path relativePath = sourceDirectory.relativize(file);
+                                Files.copy(
+                                                file,
+                                                targetDirectory.resolve(relativePath.toString()),
+                                                StandardCopyOption.REPLACE_EXISTING);
+                                return FileVisitResult.CONTINUE;
+                        }
+                });
+        }
+
         private void registerComponents() {
 
                 // Register components with ECS (with Codec for persistence)
@@ -496,6 +626,12 @@ public class Realmweavers extends JavaPlugin {
                                                 ClassComponent.class,
                                                 "Class",
                                                 ClassComponent.CODEC);
+
+                this.starterClassSelectionComponentType = this.getEntityStoreRegistry()
+                                .registerComponent(
+                                                StarterClassSelectionComponent.class,
+                                                "StarterClassSelection",
+                                                StarterClassSelectionComponent.CODEC);
 
                 this.classAbilityComponentType = this.getEntityStoreRegistry()
                                 .registerComponent(
@@ -533,12 +669,6 @@ public class Realmweavers extends JavaPlugin {
                                                 LockpickingSessionComponent.class,
                                                 "LockpickingSession",
                                                 LockpickingSessionComponent.CODEC);
-
-                PlayerSecondaryNameplateComponent.setComponentType(this.getEntityStoreRegistry()
-                                .registerComponent(
-                                                PlayerSecondaryNameplateComponent.class,
-                                                "PlayerSecondaryNameplate",
-                                                PlayerSecondaryNameplateComponent.CODEC));
 
                 if (BuildFlags.NPC_MODULE) {
                         this.npcRpgDebugComponentType = this.getEntityStoreRegistry()
@@ -639,6 +769,12 @@ public class Realmweavers extends JavaPlugin {
                                 event -> this.playerHudService.remove(event.getPlayerRef().getUuid()));
                 this.getEventRegistry().register(ActiveClassChangedEvent.class,
                                 event -> this.playerHudService.ensureAndUpdate(event.entityRef(), event.entityRef().getStore()));
+                this.getEventRegistry().register(ClassLearnedEvent.class,
+                                event -> this.playerHudService.ensureAndUpdate(event.entityRef(), event.entityRef().getStore()));
+                this.getEventRegistry().register(ClassUnlearnedEvent.class,
+                                event -> this.playerHudService.ensureAndUpdate(event.entityRef(), event.entityRef().getStore()));
+                this.getEventRegistry().register(LoadedAssetsEvent.class, ClassAbilityDefinition.class,
+                                this::onAbilityDefinitionsLoaded);
         }
 
         private void initializeGameplayManagers() {
@@ -651,6 +787,7 @@ public class Realmweavers extends JavaPlugin {
                 this.expansionManager = new ExpansionManager();
                 this.mailManager = new MailManager();
                 this.characterManager = new CharacterManager();
+                this.firstJoinClassSelectionManager = new FirstJoinClassSelectionManager(this.classManagementSystem);
                 this.worldTravelManager = new WorldTravelManager();
                 this.achievementSystem = new AchievementSystem(this.characterManager, this.currencyManager);
                 this.achievementSystem.register();
@@ -669,8 +806,60 @@ public class Realmweavers extends JavaPlugin {
                                 event -> this.chatManager.clearActiveChannel(event.getPlayerRef().getUuid()));
                 this.getEventRegistry().registerGlobal(PlayerReadyEvent.class,
                                 event -> this.characterManager.handlePlayerReady(event));
+                this.getEventRegistry().registerGlobal(PlayerReadyEvent.class,
+                                event -> this.firstJoinClassSelectionManager.handlePlayerReady(event));
+                this.getEventRegistry().registerGlobal(PlayerReadyEvent.class,
+                                this::sendGuildLoginMotd);
                 this.getEventRegistry().registerGlobal(PlayerDisconnectEvent.class,
                                 event -> this.characterManager.handlePlayerDisconnect(event));
+                this.getEventRegistry().register(ActiveClassChangedEvent.class,
+                                event -> this.characterManager.handleActiveClassChanged(
+                                                event.entityRef(),
+                                                event.entityRef().getStore(),
+                                                event.newClassId()));
+        }
+
+        private void sendGuildLoginMotd(@Nonnull PlayerReadyEvent event) {
+
+                RpgModConfig config = resolveModConfig();
+                if (config != null && !config.isGuildEnabled()) {
+                        return;
+                }
+
+                Player player = event.getPlayer();
+                Ref<EntityStore> ref = event.getPlayerRef();
+                if (player == null || ref == null || !ref.isValid()) {
+                        return;
+                }
+
+                Store<EntityStore> store = ref.getStore();
+                PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+                if (playerRef == null) {
+                        return;
+                }
+
+                Guild guild = this.guildManager.getGuildForMember(playerRef.getUuid());
+                if (guild == null) {
+                        return;
+                }
+
+                String motd = guild.getMotd();
+                if (motd.isBlank()) {
+                        return;
+                }
+
+                GuildChatChannel guildChannel = this.chatManager.getChannel("guild") instanceof GuildChatChannel configuredGuildChannel
+                                ? configuredGuildChannel
+                                : new GuildChatChannel(this.guildManager, this.characterManager,
+                                                ChatChannelDefinition.builtIn(
+                                                                ChatChannelDefinition.ChannelType.Guild,
+                                                                "guild",
+                                                                List.of("g"),
+                                                                ChatChannelDefinition.DEFAULT_GUILD_FORMAT_TRANSLATION_KEY));
+                player.sendMessage(guildChannel.formatNotice(
+                                playerRef,
+                                Message.translation("pixelbays.rpg.guild.notice.motd"),
+                                motd));
         }
 
         private void registerGameplaySystems() {
@@ -698,8 +887,6 @@ public class Realmweavers extends JavaPlugin {
                 // Register hardcore death handler
                 this.getEntityStoreRegistry().registerSystem(new org.pixelbays.rpg.leveling.handlers.HardcoreHandler());
                 this.getEntityStoreRegistry().registerSystem(new PlayerNameplateUpdateSystem());
-                this.getEntityStoreRegistry().registerSystem(new PlayerSecondaryNameplateFollowSystem());
-                this.getEntityStoreRegistry().registerSystem(new PlayerSecondaryNameplateCleanupSystem());
         }
 
         private void registerNpcSystems() {
@@ -788,11 +975,12 @@ public class Realmweavers extends JavaPlugin {
         private void registerAlwaysAvailableCommands() {
 
                 this.raceCommandRegistration = refreshCommand(this.raceCommandRegistration, true, RaceCommand::new);
-                this.uiDebugCommandRegistration = refreshCommand(this.uiDebugCommandRegistration, true, UiDebugCommand::new);
                 if (BuildFlags.NPC_MODULE) {
                         this.npcRpgDebugCommandRegistration = refreshCommand(this.npcRpgDebugCommandRegistration, true,
                                         NpcRpgDebugCommand::new);
                 }
+                this.uiDebugCommandRegistration = refreshCommand(this.uiDebugCommandRegistration, true,
+                                UiDebugCommand::new);
         }
         
         @Override
@@ -809,6 +997,10 @@ public class Realmweavers extends JavaPlugin {
                 if (this.uiInputFilter != null) {
                         PacketAdapters.deregisterInbound(this.uiInputFilter);
                         RpgLogging.debugDeveloper("Deregistered UI input packet filter");
+                }
+                if (this.abilityInputDebugWatcher != null) {
+                        PacketAdapters.deregisterInbound(this.abilityInputDebugWatcher);
+                        RpgLogging.debugDeveloper("Deregistered ability input debug packet watcher");
                 }
                 if (this.abilityInputFilter != null) {
                         PacketAdapters.deregisterInbound(this.abilityInputFilter);
@@ -828,7 +1020,7 @@ public class Realmweavers extends JavaPlugin {
                 }
                 unregisterCommand(this.raceCommandRegistration);
                 unregisterCommand(this.npcRpgDebugCommandRegistration);
-                unregisterCommand(this.uiDebugCommandRegistration);
+                                unregisterCommand(this.uiDebugCommandRegistration);
                 unregisterCommand(this.testLevelCommandRegistration);
                 unregisterCommand(this.levelTestCommandRegistration);
                 unregisterCommand(this.resetLevelCommandRegistration);
@@ -861,6 +1053,11 @@ public class Realmweavers extends JavaPlugin {
         @Nonnull
         public ClassManagementSystem getClassManagementSystem() {
                 return classManagementSystem;
+        }
+
+        @Nullable
+        public FirstJoinClassSelectionManager getFirstJoinClassSelectionManager() {
+                return firstJoinClassSelectionManager;
         }
 
         @Nonnull
@@ -989,6 +1186,11 @@ public class Realmweavers extends JavaPlugin {
         }
 
         @Nonnull
+        public ComponentType<EntityStore, StarterClassSelectionComponent> getStarterClassSelectionComponentType() {
+                return starterClassSelectionComponentType;
+        }
+
+        @Nonnull
         public ComponentType<EntityStore, ClassAbilityComponent> getClassAbilityComponentType() {
                 return classAbilityComponentType;
         }
@@ -1096,6 +1298,14 @@ public class Realmweavers extends JavaPlugin {
                 RpgModConfig config = resolveModConfig();
                 reconcileSavedAbilityBindings(config);
                 reconcileDynamicRegistrations(config);
+        }
+
+        @SuppressWarnings("unused")
+        private void onAbilityDefinitionsLoaded(
+                        @Nonnull LoadedAssetsEvent<String, ClassAbilityDefinition, DefaultAssetMap<String, ClassAbilityDefinition>> ignoredEvent) {
+                if (this.playerHudService != null) {
+                        this.playerHudService.invalidateAllSpellSlots();
+                }
         }
 
         @SuppressWarnings("unused")
@@ -1252,6 +1462,17 @@ public class Realmweavers extends JavaPlugin {
         }
 
         private void reconcileInboundFilters(@Nonnull ModuleFlags moduleFlags) {
+                if (moduleFlags.abilityModuleEnabled()) {
+                        if (this.abilityInputDebugWatcher == null) {
+                                this.abilityInputDebugWatcher = PacketAdapters.registerInbound(new AbilityInputDebugWatcher());
+                                RpgLogging.debugDeveloper("Registered ability input debug packet watcher");
+                        }
+                } else if (this.abilityInputDebugWatcher != null) {
+                        PacketAdapters.deregisterInbound(this.abilityInputDebugWatcher);
+                        this.abilityInputDebugWatcher = null;
+                        RpgLogging.debugDeveloper("Deregistered ability input debug packet watcher");
+                }
+
                 if (moduleFlags.characterModuleEnabled()) {
                         if (this.characterLobbyInputFilter == null) {
                                 this.characterLobbyInputFilter = PacketAdapters

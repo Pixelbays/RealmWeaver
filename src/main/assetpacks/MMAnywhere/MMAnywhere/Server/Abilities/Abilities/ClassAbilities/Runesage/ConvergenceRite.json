@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.convergence_rite.name",
+    "Description": "mma.rpg.abilities.convergence_rite.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Convergence_Rite"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Invoke a large ritual circle that restores allies and suppresses enemies. At 2 Sigils it becomes a stronger grand rite.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Weapon_Staff_Crystal_Purple.png"
+}

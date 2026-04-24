@@ -20,7 +20,6 @@ import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.event.EventRegistry;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
-import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
@@ -51,12 +50,11 @@ public class InventoryHandlingSystem implements Consumer<PlayerReadyEvent> {
         }
 
         Store<EntityStore> store = ref.getStore();
-        Player player = event.getPlayer();
-        if (player == null) {
+        if (event.getPlayer() == null) {
             return;
         }
 
-        applyInventorySize(player, store, ref);
+        applyInventorySize(store, ref);
     }
 
     private void onStatChanged(@Nonnull Ref<EntityStore> ref) {
@@ -65,15 +63,14 @@ public class InventoryHandlingSystem implements Consumer<PlayerReadyEvent> {
         }
 
         Store<EntityStore> store = ref.getStore();
-        Player player = store.getComponent(ref, Player.getComponentType());
-        if (player == null) {
+        if (store.getComponent(ref, Player.getComponentType()) == null) {
             return;
         }
 
-        applyInventorySize(player, store, ref);
+        applyInventorySize(store, ref);
     }
 
-    private void applyInventorySize(@Nonnull Player player,
+    private void applyInventorySize(
             @Nonnull Store<EntityStore> store,
             @Nonnull Ref<EntityStore> ref) {
         RpgModConfig config = resolveConfig();
@@ -92,8 +89,12 @@ public class InventoryHandlingSystem implements Consumer<PlayerReadyEvent> {
             return;
         }
 
-        Inventory inventory = player.getInventory();
-        short currentSlots = inventory.getStorage().getCapacity();
+        InventoryComponent.Storage storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        ItemContainer currentStorage = storageComp != null ? storageComp.getInventory() : null;
+        if (currentStorage == null) {
+            return;
+        }
+        short currentSlots = currentStorage.getCapacity();
         if (currentSlots == targetSlots) {
             return;
         }
@@ -107,12 +108,12 @@ public class InventoryHandlingSystem implements Consumer<PlayerReadyEvent> {
 
         List<ItemStack> remainder = new ArrayList<>();
         ItemContainer newStorage = ItemContainer.ensureContainerCapacity(
-                inventory.getStorage(),
+                currentStorage,
                 (short) targetSlots,
                 SimpleItemContainer::new,
                 remainder);
 
-        if (newStorage == inventory.getStorage()) {
+        if (newStorage == currentStorage) {
             return;
         }
 

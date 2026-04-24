@@ -22,10 +22,13 @@ import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class PlayerHudService {
 
+    private static final long INITIAL_HUD_ATTACH_DELAY_MS = 1500L;
+
     private static final Path PLAYER_HUD_SOURCE = Path.of("src", "main", "resources", "common", "UI", "Custom", "Hud", "PlayerHud.ui");
     private static final Path PLAYER_HUD_DEBUG_OUTPUT = Path.of("src", "main", "resources", "common", "debug", "ui", "Player_Hud_UI.ui");
 
     private final ConcurrentHashMap<UUID, PlayerHud> hudByPlayerId = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, Long> pendingAttachByPlayerId = new ConcurrentHashMap<>();
     private final HotbarHudServiceModule hotbarModule;
     private final DiceOverlayHudServiceModule diceOverlayModule;
     private final ResourceBarsHudServiceModule resourceBarsModule;
@@ -49,6 +52,7 @@ public class PlayerHudService {
 
     public void remove(@Nonnull UUID playerId) {
         hudByPlayerId.remove(playerId);
+        pendingAttachByPlayerId.remove(playerId);
         for (PlayerHudServiceModule module : this.modules) {
             module.remove(playerId);
         }
@@ -68,7 +72,12 @@ public class PlayerHudService {
             return;
         }
 
+        if (context.getPlayer().isWaitingForClientReady()) {
+            return;
+        }
+
         PlayerHud hud = getOrCreateHud(context);
+        UUID playerId = context.getPlayerRef().getUuid();
 
         HudManager hudManager = context.getPlayer().getHudManager();
         if (org.pixelbays.plugin.Realmweavers.get().getCharacterManager().requiresCharacterUiLock(context.getPlayerRef())) {
@@ -76,6 +85,7 @@ public class PlayerHudService {
                 hudManager.setCustomHud(context.getPlayerRef(), null);
                 hudManager.showHudComponents(context.getPlayerRef(), HudComponent.Hotbar, HudComponent.InputBindings);
             }
+            pendingAttachByPlayerId.remove(playerId);
             return;
         }
 
@@ -85,13 +95,35 @@ public class PlayerHudService {
         }
 
         if (hudManager.getCustomHud() != hud) {
+            long now = System.currentTimeMillis();
+            long attachReadyAt = pendingAttachByPlayerId.computeIfAbsent(
+                    playerId,
+                    ignored -> now + INITIAL_HUD_ATTACH_DELAY_MS);
+            if (now < attachReadyAt) {
+                return;
+            }
+
             primeHud(hud, context);
             hudManager.setCustomHud(context.getPlayerRef(), hud);
+            pendingAttachByPlayerId.remove(playerId);
             return;
         }
 
+        pendingAttachByPlayerId.remove(playerId);
+
         for (PlayerHudServiceModule module : this.modules) {
             module.update(hud, context);
+        }
+    }
+
+    /**
+     * Invalidates the cached hotbar signature on all active player HUDs so the
+     * next periodic update tick forces a full spell-slot rebuild. Call this when
+     * ability-definition assets are reloaded (e.g. an icon changes in the asset editor).
+     */
+    public void invalidateAllSpellSlots() {
+        for (PlayerHud hud : hudByPlayerId.values()) {
+            hud.getHotbarModule().invalidateSignature();
         }
     }
 
@@ -134,7 +166,7 @@ public class PlayerHudService {
     @Nonnull
     private static Path resolveDebugOutputPath() throws IOException {
         Path root = resolveProjectRoot();
-        return root.resolve(PLAYER_HUD_DEBUG_OUTPUT);
+        return Objects.requireNonNull(root.resolve(PLAYER_HUD_DEBUG_OUTPUT));
     }
 
     @Nonnull

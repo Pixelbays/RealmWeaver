@@ -33,12 +33,17 @@ public class PlayerHudUpdateSystem extends DelayedEntitySystem<EntityStore> {
             @Nonnull Store<EntityStore> store,
             @Nonnull CommandBuffer<EntityStore> commandBuffer) {
 
-        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
+        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("Default");
         if (config == null || !config.isLevelingModuleEnabled()) {
             return;
         }
 
         Ref<EntityStore> ref = archetypeChunk.getReferenceTo(index);
+        Player player = store.getComponent(ref, Player.getComponentType());
+        if (player != null && player.isWaitingForClientReady()) {
+            return;
+        }
+
         hudService.ensureAndUpdate(ref, store);
     }
 

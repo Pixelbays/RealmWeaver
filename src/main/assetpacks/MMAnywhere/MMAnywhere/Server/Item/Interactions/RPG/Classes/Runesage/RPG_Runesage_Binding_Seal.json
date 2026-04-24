@@ -1,0 +1,110 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Sigils": 1
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": -1
+        }
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 5.0,
+          "Offset": {
+            "Z": -2.5
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Vulnerable"
+              },
+              {
+                "Type": "Player",
+                "Invert": true
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Parent": "DamageEntityParent",
+                  "DamageCalculator": {
+                    "BaseDamage": {
+                      "Lightning": 8
+                    }
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Bound",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "Failed": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": 1
+        }
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 4.0,
+          "Offset": {
+            "Z": -2.5
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Vulnerable"
+              },
+              {
+                "Type": "Player",
+                "Invert": true
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Parent": "DamageEntityParent",
+                  "DamageCalculator": {
+                    "BaseDamage": {
+                      "Lightning": 6
+                    }
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Weakened",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

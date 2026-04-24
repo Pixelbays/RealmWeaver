@@ -12,6 +12,7 @@ rpg.ability.bind.unknownAbility = Unknown ability: {abilityId}
 rpg.ability.bind.usage = Usage: /bindability <slot> <abilityId|clear> or /bindability list
 
 rpg.ability.error.cooldown = {ability} is on cooldown for {time}s more.
+rpg.ability.error.requirements = You do not meet the resource requirements for {ability}.
 
 rpg.ability.sync.none = No ability bindings to sync. Use /bindability to bind abilities.
 rpg.ability.sync.success = Hotbar ability icons synced! ({count} bindings)
@@ -167,8 +168,6 @@ rpg.character.creator.namePlaceholder = Character name
 rpg.character.creator.nextButton = Next
 rpg.character.creator.noneOption = None
 rpg.character.creator.prevButton = Previous
-rpg.character.creator.previewHeading = Character Preview
-rpg.character.creator.previewSubheading = Preview your character appearance as you customize
 rpg.character.creator.raceHeading = Available Races
 rpg.character.creator.racePlaceholder = Race id
 rpg.character.creator.randomizeButton = Randomize Appearance
@@ -252,6 +251,19 @@ rpg.character.ui.settingsHeading = Session
 rpg.character.ui.title = Character Select
 rpg.character.ui.tokensEmpty = No account tokens configured.
 rpg.character.ui.tokensHeading = Account Tokens
+
+rpg.class.onboarding.title = Choose Your Class
+rpg.class.onboarding.subtitle = Pick a starting class before entering the world.
+rpg.class.onboarding.listHeading = Starting Classes
+rpg.class.onboarding.listSubheading = This fallback picker is only used when the character module is unavailable.
+rpg.class.onboarding.detailsHeading = Class Details
+rpg.class.onboarding.detailsSubheading = Review the selected class, then confirm your choice.
+rpg.class.onboarding.confirmButton = Confirm Class
+rpg.class.onboarding.noDescription = No description configured for this class yet.
+
+rpg.ui.debug.exported = Exported the current player HUD UI to {path}
+rpg.ui.debug.failed = Failed to export the current player HUD UI: {error}
+rpg.ui.debug.unavailable = The player HUD service is not available right now.
 
 rpg.chat.usage = Usage: /chat <channel|off> or /chat <join|leave> <channel>
 rpg.chat.filter.error.invalidWord = Enter a valid filtered word or phrase.
@@ -647,6 +659,8 @@ rpg.guild.notify.invitedBy = {player} invited you to a guild.
 rpg.guild.notify.kicked = You were kicked from the guild.
 rpg.guild.notify.nowLeader = You are now the guild leader.
 rpg.guild.notify.roleUpdated = Your guild role was updated.
+
+rpg.guild.notice.motd = Message of the Day
 
 rpg.guild.role.listEntry = {name} ({id}) - {permissions}
 

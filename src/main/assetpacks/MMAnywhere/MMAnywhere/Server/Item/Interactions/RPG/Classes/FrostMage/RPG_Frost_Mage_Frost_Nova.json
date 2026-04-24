@@ -1,0 +1,57 @@
+{
+  "Type": "Simple",
+  "RunTime": 0.25,
+  "Effects": {
+    "ItemAnimationId": "CastHurlCharged",
+    "WorldSoundEventId": "SFX_Ice_Ball_Death",
+    "LocalSoundEventId": "SFX_Ice_Ball_Death"
+  },
+  "Next": {
+    "Type": "Selector",
+    "RunTime": 0.1,
+    "Selector": {
+      "Id": "AOECircle",
+      "Range": 4.0
+    },
+    "Effects": {
+      "Particles": [
+        {
+          "SystemId": "IceBall_Explosion",
+          "TargetEntityPart": "Entity",
+          "Scale": 0.9
+        }
+      ]
+    },
+    "HitEntity": {
+      "Interactions": [
+        {
+          "Parent": "DamageEntityParent",
+          "DamageCalculator": {
+            "BaseDamage": {
+              "Ice": 14
+            }
+          },
+          "DamageEffects": {
+            "WorldParticles": [
+              {
+                "SystemId": "Impact_Ice",
+                "Scale": 1
+              }
+            ],
+            "WorldSoundEventId": "SFX_Ice_Break"
+          }
+        },
+        {
+          "Type": "ApplyEffect",
+          "EffectId": "FrostMage_Rooted",
+          "Entity": "Target"
+        },
+        {
+          "Type": "ApplyEffect",
+          "EffectId": "FrostMage_Chilled",
+          "Entity": "Target"
+        }
+      ]
+    }
+  }
+}

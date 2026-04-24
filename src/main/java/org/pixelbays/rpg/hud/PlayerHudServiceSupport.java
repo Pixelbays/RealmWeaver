@@ -101,8 +101,8 @@ final class PlayerHudServiceSupport {
 
     @Nonnull
     static List<Integer> resolveConfiguredAbilityHotbarSlots() {
-        RpgModConfig config = RpgModConfig.getAssetMap().getAsset("default");
-        if (config == null || config.getAbilityControlType() != AbilityControlType.Hotbar) {
+        RpgModConfig config = resolveConfig();
+        if (config == null) {
             return List.of();
         }
 
@@ -137,6 +137,23 @@ final class PlayerHudServiceSupport {
         }
 
         return new ArrayList<>(normalizedSlots);
+    }
+
+    @Nonnull
+    static AbilityControlType resolveEffectiveAbilityControlType(@Nullable String activeClassId) {
+        if (activeClassId != null && !activeClassId.isBlank()) {
+            ClassDefinition classDef = getClassDefinition(activeClassId);
+            if (classDef != null && classDef.getAbilityControlTypeOverride() != null) {
+                return classDef.getAbilityControlTypeOverride();
+            }
+        }
+
+        RpgModConfig config = resolveConfig();
+        if (config != null && config.getAbilityControlType() != null) {
+            return config.getAbilityControlType();
+        }
+
+        return AbilityControlType.Hotbar;
     }
 
     @Nonnull
@@ -214,5 +231,29 @@ final class PlayerHudServiceSupport {
     @Nonnull
     static ClassManagementSystem getClassManagementSystem() {
         return Realmweavers.get().getClassManagementSystem();
+    }
+
+    @Nullable
+    private static RpgModConfig resolveConfig() {
+        var assetMap = RpgModConfig.getAssetMap();
+        if (assetMap == null) {
+            return null;
+        }
+
+        RpgModConfig config = assetMap.getAsset("default");
+        if (config != null) {
+            return config;
+        }
+
+        config = assetMap.getAsset("Default");
+        if (config != null) {
+            return config;
+        }
+
+        if (assetMap.getAssetMap().isEmpty()) {
+            return null;
+        }
+
+        return assetMap.getAssetMap().values().iterator().next();
     }
 }

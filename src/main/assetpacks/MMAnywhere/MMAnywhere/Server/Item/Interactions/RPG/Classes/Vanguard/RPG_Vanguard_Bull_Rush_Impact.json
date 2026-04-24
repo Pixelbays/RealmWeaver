@@ -1,0 +1,34 @@
+{
+    "Type": "Selector",
+    "RunTime": 0.1,
+    "Selector": {
+        "Id": "Raycast",
+        "Distance": 5,
+        "IgnoreFluids": true,
+        "IgnoreEmptyCollisionMaterial": true
+    },
+    "HitEntity": {
+        "Interactions": [
+            {
+                "Parent": "DamageEntityParent",
+                "DamageCalculator": {
+                    "BaseDamage": {
+                        "Physical": 18
+                    }
+                }
+            },
+            {
+                "Type": "ApplyEffect",
+                "EffectId": "Vanguard_OffBalance",
+                "Entity": "Target"
+            },
+            {
+                "Type": "ChangeStat",
+                "Entity": "User",
+                "StatModifiers": {
+                    "Guard": 1
+                }
+            }
+        ]
+    }
+}

@@ -23,6 +23,7 @@ import org.pixelbays.rpg.economy.currency.CurrencyManager;
 import org.pixelbays.rpg.economy.currency.config.CurrencyAmountDefinition;
 import org.pixelbays.rpg.economy.currency.config.CurrencyScope;
 import org.pixelbays.rpg.expansion.ExpansionManager;
+import org.pixelbays.rpg.global.config.BuildFlags;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.global.system.StatSystem;
 import org.pixelbays.rpg.global.util.RpgLogging;
@@ -577,9 +578,27 @@ public class ClassManagementSystem {
     public boolean ensureStartingClass(@Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store) {
         pruneUnknownClasses(entityRef, store);
 
+        RpgModConfig config = resolveConfig();
+        if ((config != null && !config.isClassModuleEnabled())
+                || (config == null && !BuildFlags.CLASS_MODULE)) {
+            return false;
+        }
+
         ClassComponent classComp = store.getComponent(entityRef, ClassComponent.getComponentType());
         if (hasKnownLearnedClasses(classComp)) {
             return false;
+        }
+
+        FirstJoinClassSelectionManager firstJoinClassSelectionManager = Realmweavers.get()
+                .getFirstJoinClassSelectionManager();
+        if (firstJoinClassSelectionManager != null
+                && firstJoinClassSelectionManager.shouldDeferAutomaticStartingClass(entityRef, store)) {
+            return false;
+        }
+
+        if (firstJoinClassSelectionManager != null
+                && firstJoinClassSelectionManager.restoreSelectedStarterClassIfNeeded(entityRef, store)) {
+            return true;
         }
 
         getOrCreateClassComponent(entityRef, store);

@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Shield_Strike"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Shield_Strike",
+    "Cooldown": 4.0
+  }
+}

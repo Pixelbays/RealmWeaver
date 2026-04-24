@@ -1,0 +1,209 @@
+{
+  "DisplayName": "Vanguard",
+  "Description": "Frontline bruisers who build Guard through pressure and defense, then spend it on shield breaks, counters, and relentless marches.",
+  "Icon": "Icons/ItemsGenerated/Weapon_Shield_Iron.png",
+  "Enabled": true,
+  "Visible": true,
+  "Roles": [
+    "tank",
+    "dps"
+  ],
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "AbilityControlTypeOverride": "AbilitySlots123",
+  "LevelSystemId": "Vanguard",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "ShieldStrike",
+      "UnlockLevel": 1
+    },
+    {
+      "AbilityId": "BullRush",
+      "UnlockLevel": 4
+    },
+    {
+      "AbilityId": "BastionStance",
+      "UnlockLevel": 8
+    },
+    {
+      "AbilityId": "BreakerSlam",
+      "UnlockLevel": 12
+    }
+  ],
+  "TalentTrees": [
+    {
+      "TreeId": "bastion",
+      "DisplayName": "Bastion",
+      "Description": "Mix shield pressure, defensive anchors, and decisive Guard spenders into a bruiser front line.",
+      "Roles": [
+        "tank",
+        "dps"
+      ],
+      "MaxPoints": 10,
+      "Nodes": [
+        {
+          "NodeId": "iron_discipline",
+          "DisplayName": "Iron Discipline",
+          "Description": "Increase Health by 60 and Versatility by 2.",
+          "MaxRank": 1,
+          "RequiredLevel": 1,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 60,
+              "Versatility": 2
+            }
+          }
+        },
+        {
+          "NodeId": "shield_hook",
+          "DisplayName": "Shield Hook",
+          "Description": "Unlocks the Shield Hook ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "iron_discipline"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "GrantsAbilityId": "ShieldHook"
+        },
+        {
+          "NodeId": "reinforced_guard",
+          "DisplayName": "Reinforced Guard",
+          "Description": "Increase Health by 40 and Mastery by 4.",
+          "MaxRank": 1,
+          "RequiredLevel": 4,
+          "RequiredNodes": [
+            "iron_discipline"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 40,
+              "Mastery": 4
+            }
+          }
+        },
+        {
+          "NodeId": "crushing_tempo",
+          "DisplayName": "Crushing Tempo",
+          "Description": "Unlocks the Crushing Tempo passive ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 8,
+          "RequiredNodes": [
+            "shield_hook",
+            "reinforced_guard"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "GrantsAbilityId": "CrushingTempo"
+        },
+        {
+          "NodeId": "war_banner",
+          "DisplayName": "War Banner",
+          "Description": "Unlocks the War Banner ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 10,
+          "RequiredNodes": [
+            "crushing_tempo"
+          ],
+          "PositionX": -1,
+          "PositionY": 3,
+          "GrantsAbilityId": "WarBanner"
+        },
+        {
+          "NodeId": "steadfast",
+          "DisplayName": "Steadfast",
+          "Description": "Unlocks the Steadfast passive ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 10,
+          "RequiredNodes": [
+            "crushing_tempo"
+          ],
+          "PositionX": 1,
+          "PositionY": 3,
+          "GrantsAbilityId": "Steadfast"
+        },
+        {
+          "NodeId": "counterblow",
+          "DisplayName": "Counterblow",
+          "Description": "Unlocks the Counterblow ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 14,
+          "RequiredNodes": [
+            "war_banner"
+          ],
+          "PositionX": -1,
+          "PositionY": 4,
+          "GrantsAbilityId": "Counterblow"
+        },
+        {
+          "NodeId": "rallying_presence",
+          "DisplayName": "Rallying Presence",
+          "Description": "Increase Health by 80 and Versatility by 4.",
+          "MaxRank": 1,
+          "RequiredLevel": 14,
+          "RequiredNodes": [
+            "steadfast"
+          ],
+          "PositionX": 1,
+          "PositionY": 4,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 80,
+              "Versatility": 4
+            }
+          }
+        },
+        {
+          "NodeId": "unbreakable_march",
+          "DisplayName": "Unbreakable March",
+          "Description": "Unlocks the Unbreakable March ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 18,
+          "RequiredNodes": [
+            "counterblow",
+            "rallying_presence"
+          ],
+          "PositionX": 0,
+          "PositionY": 5,
+          "GrantsAbilityId": "UnbreakableMarch"
+        },
+        {
+          "NodeId": "last_stand",
+          "DisplayName": "Last Stand",
+          "Description": "Unlocks the Last Stand passive ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 20,
+          "RequiredNodes": [
+            "unbreakable_march"
+          ],
+          "PositionX": 0,
+          "PositionY": 6,
+          "GrantsAbilityId": "LastStand"
+        }
+      ]
+    }
+  ],
+  "ClassColorPrimary": "#d1a956",
+  "ClassColorAlt": "#fff1c7",
+  "ResourceStats": [
+    {
+      "StatId": "Guard",
+      "Color": "#d1a956",
+      "Priority": 1
+    }
+  ],
+  "ResourceDisplays": [
+    {
+      "StatId": "Guard",
+      "Label": "Guard",
+      "DisplayMode": "Charges",
+      "MaxCharges": 3,
+      "FillColor": "#d1a956"
+    }
+  ]
+}

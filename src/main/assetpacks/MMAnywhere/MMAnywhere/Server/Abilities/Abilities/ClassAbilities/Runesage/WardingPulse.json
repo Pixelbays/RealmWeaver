@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.warding_pulse.name",
+    "Description": "mma.rpg.abilities.warding_pulse.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Warding_Pulse"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Release a protective pulse around you. At 2 Sigils it becomes a stronger stabilizing cleanse.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Prototype_Human_Ruins_Sign_Shield.png"
+}

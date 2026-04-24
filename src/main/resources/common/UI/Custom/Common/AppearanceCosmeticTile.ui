@@ -1,55 +1,96 @@
 $C = "../Common.ui";
 
 Group {
-  Anchor: (Width: 136, Height: 92, Right: 10);
-  Background: PatchStyle(Color: #1a2b42);
-  OutlineColor: #39587dff;
-  OutlineSize: 1;
+  Anchor: (Width: 82, Height: 124, Right: 8);
 
   TextButton #Button {
     Anchor: (Full: 0);
     Padding: (Full: 0);
-    Style: (Hovered: (Background: #263d5d), Pressed: (Background: #315079));
+    MaskTexturePath: "AvatarEditor/PartMask.png";
+    Style: (
+      Default: (Background: (TexturePath: "AvatarEditor/PartBackgroundPatch.png", Border: 18, Color: #253246)),
+      Hovered: (Background: (TexturePath: "AvatarEditor/PartBackgroundPatch.png", Border: 18, Color: #30415a)),
+      Pressed: (Background: (TexturePath: "AvatarEditor/PartBackgroundSelected.png", Border: 18, Color: #3c5069))
+    );
+  }
+
+  Group #PreviewFrame {
+    Visible: false;
+    Anchor: (Left: 10, Right: 10, Top: 10, Height: 70);
+
+    Group {
+      Anchor: (Full: 0);
+      Background: (TexturePath: "AvatarEditor/PartBackgroundPatch.png", Border: 18, Color: #162233(0.94));
+    }
+
+    Group {
+      Anchor: (Full: 0);
+      Background: (TexturePath: "AvatarEditor/GradientOverlay.png", Color: #101a28(0.72));
+    }
+
+    Group {
+      Anchor: (Width: 56, Height: 56, Top: 7);
+      Background: (TexturePath: "AvatarEditor/ColorOptionFrame.png");
+      LayoutMode: CenterMiddle;
+
+      Group #PreviewTexture {
+        Visible: false;
+        Anchor: (Width: 44, Height: 44);
+        Background: PatchStyle(Color: #ffffff(0));
+        MaskTexturePath: "AvatarEditor/PartMask.png";
+
+        AssetImage #PreviewImage {
+          Visible: false;
+          Anchor: (Full: 0);
+          FallbackTexturePath: "AvatarEditor/EmptyPartIcon@2x.png";
+        }
+      }
+
+      Label #PreviewLabel {
+        Visible: false;
+        Text: "";
+        Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center, VerticalAlignment: Center);
+        Anchor: (Left: 5, Right: 5, Top: 5, Bottom: 5);
+      }
+    }
   }
 
   Group {
+    Anchor: (Width: 82, Height: 124);
+    Background: PatchStyle(TexturePath: "AvatarEditor/PartFrame.png");
+  }
+
+  Group {
+    Anchor: (Left: 8, Right: 8, Bottom: 8, Height: 30);
+    Background: (TexturePath: "AvatarEditor/ButtonPatch.png", Border: 16, Color: #1d293b(0.96));
     LayoutMode: Top;
-    Anchor: (Full: 0);
-    Padding: (Left: 9, Right: 9, Top: 10, Bottom: 10);
-
-    Group #PreviewFrame {
-      Visible: false;
-      Anchor: (Width: 46, Height: 46, Bottom: 6);
-      Background: PatchStyle(Color: #2a4365);
-      OutlineColor: #5b7da5ff;
-      OutlineSize: 1;
-      LayoutMode: CenterMiddle;
-
-      Label #PreviewLabel {
-        Text: "";
-        Style: (...$C.@DefaultLabelStyle, FontSize: 15, RenderBold: true, HorizontalAlignment: Center, VerticalAlignment: Center);
-        Anchor: (Full: 0);
-      }
-    }
+    Padding: (Left: 5, Right: 5, Top: 4, Bottom: 4);
 
     Label #TitleLabel {
       Text: "";
-      Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true);
-      Anchor: (Height: 18, Bottom: 4);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true, RenderUppercase: true, HorizontalAlignment: Center);
+      Anchor: (Height: 12, Bottom: 2);
     }
 
     Label #SubtitleLabel {
       Text: "";
-      Style: (...$C.@DefaultLabelStyle, FontSize: 10, TextColor: #b9c7d8);
-      Anchor: (Height: 14);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 8, TextColor: #9bb0c6, HorizontalAlignment: Center);
+      Anchor: (Height: 9);
     }
   }
 
-  Label #SelectedBadge {
+  Group #SelectedBadge {
     Visible: false;
-    Text: "SELECTED";
-    Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true, HorizontalAlignment: Center, TextColor: #0f1c2f);
-    Anchor: (Width: 60, Height: 16, Right: 6, Bottom: 6);
-    Background: PatchStyle(Color: #e5be6b);
+    Anchor: (Full: 0);
+
+    Group {
+      Anchor: (Width: 88, Height: 130, Left: -3, Top: -3);
+      Background: PatchStyle(TexturePath: "AvatarEditor/PartFrameSelected.png");
+    }
+
+    Group {
+      Anchor: (Width: 18, Height: 18, Right: 8, Top: 8);
+      Background: (TexturePath: "AvatarEditor/EquippedIcon.png");
+    }
   }
 }

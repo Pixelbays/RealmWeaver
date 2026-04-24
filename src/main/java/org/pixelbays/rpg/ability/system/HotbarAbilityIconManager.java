@@ -8,12 +8,9 @@ import javax.annotation.Nullable;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
 
-import com.hypixel.hytale.codec.Codec;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
-import com.hypixel.hytale.server.core.asset.type.item.config.ItemTranslationProperties;
-import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -38,18 +35,13 @@ public class HotbarAbilityIconManager {
      * @param store The entity store
      */
     public void syncHotbarIcons(@Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store) {
-        Player player = store.getComponent(entityRef, Player.getComponentType());
-        if (player == null) {
-            return;
-        }
-        
         AbilityBindingComponent bindingComp = store.getComponent(entityRef, AbilityBindingComponent.getComponentType());
         if (bindingComp == null) {
             return;
         }
-        
-        Inventory inventory = player.getInventory();
-        ItemContainer hotbar = inventory.getHotbar();
+
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(entityRef, InventoryComponent.Hotbar.getComponentType());
+        ItemContainer hotbar = hotbarComp != null ? hotbarComp.getInventory() : null;
         Map<Integer, String> hotbarBindings = bindingComp.getHotbarBindings();
         
         // Update each hotbar slot
@@ -76,13 +68,11 @@ public class HotbarAbilityIconManager {
      * @param abilityId The ability ID to display, or null to clear
      */
     public void updateHotbarSlot(@Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store, int slot, @Nullable String abilityId) {
-        Player player = store.getComponent(entityRef, Player.getComponentType());
-        if (player == null) {
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(entityRef, InventoryComponent.Hotbar.getComponentType());
+        if (hotbarComp == null) {
             return;
         }
-        
-        Inventory inventory = player.getInventory();
-        ItemContainer hotbar = inventory.getHotbar();
+        ItemContainer hotbar = hotbarComp.getInventory();
         
         if (abilityId != null && !abilityId.isEmpty()) {
             // Create and place ability icon
@@ -114,41 +104,11 @@ public class HotbarAbilityIconManager {
         if (abilityDef == null) {
             return null;
         }
-        
-        // Create item stack with placeholder item ID
-        // Using the item ID directly - the ItemStack constructor will look up the item
-        ItemStack itemStack = new ItemStack(PLACEHOLDER_ITEM_ID, 1);
 
-        // Apply ability icon metadata when available
-        String iconPath = abilityDef.getIcon();
-        if (iconPath != null && !iconPath.isEmpty()) {
-            itemStack = itemStack.withMetadata("Icon", Codec.STRING, iconPath);
-
-            var iconProps = abilityDef.getIconProperties();
-            if (iconProps != null) {
-            com.hypixel.hytale.server.core.asset.type.item.config.AssetIconProperties props =
-                new com.hypixel.hytale.server.core.asset.type.item.config.AssetIconProperties(
-                    iconProps.scale,
-                    iconProps.translation,
-                    iconProps.rotation);
-            itemStack = itemStack.withMetadata(
-                "IconProperties",
-                com.hypixel.hytale.server.core.asset.type.item.config.AssetIconProperties.CODEC,
-                props);
-            }
-        }
-
-        // Apply ability translation keys so the client can resolve the name/description
-        String abilityNameKey = abilityDef.getTranslationKey();
-        String abilityDescriptionKey = abilityDef.getDescriptionTranslationKey();
-        if (abilityNameKey != null || abilityDescriptionKey != null) {
-            ItemTranslationProperties translation = new ItemTranslationProperties(
-                abilityNameKey != null ? abilityNameKey : "",
-                abilityDescriptionKey != null ? abilityDescriptionKey : "");
-            itemStack = itemStack.withMetadata("TranslationProperties", ItemTranslationProperties.CODEC, translation);
-        }
-        
-        return itemStack;
+        // Keep the backing ItemStack free of custom metadata. CustomUI item grids serialize
+        // ItemStack metadata as raw JSON, and object-valued metadata can disconnect clients
+        // when spell slot payloads are applied.
+        return new ItemStack(PLACEHOLDER_ITEM_ID, 1);
     }
     
     /**
@@ -161,13 +121,11 @@ public class HotbarAbilityIconManager {
      * @param store The entity store
      */
     public void clearAllIcons(@Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store) {
-        Player player = store.getComponent(entityRef, Player.getComponentType());
-        if (player == null) {
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(entityRef, InventoryComponent.Hotbar.getComponentType());
+        if (hotbarComp == null) {
             return;
         }
-        
-        Inventory inventory = player.getInventory();
-        ItemContainer hotbar = inventory.getHotbar();
+        ItemContainer hotbar = hotbarComp.getInventory();
         
         // Clear all slots
         // WARNING: This deletes ALL items, not just ability icons!

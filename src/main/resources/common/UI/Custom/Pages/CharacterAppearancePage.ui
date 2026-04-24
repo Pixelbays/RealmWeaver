@@ -48,44 +48,79 @@ Group #LayoutRoot {
 
   Group #LeftPanel {
     LayoutMode: Top;
-    Anchor: (Width: 560, Left: 56, Top: 88, Bottom: 52);
-    Padding: (Full: 12);
-    Background: PatchStyle(Color: #132033(0.94));
-    OutlineColor: #4f7097ff;
-    OutlineSize: 1;
+    Anchor: (Width: 580, Left: 40, Top: 88, Bottom: 52);
+    Padding: (Full: 8);
+    Background: (TexturePath: "../Common/AvatarEditor/CategoryMenuPatch.png", Border: 16);
 
     Group #AppearanceLayout {
       LayoutMode: Left;
-      Anchor: (Bottom: 10);
+      Anchor: (Bottom: 12);
       FlexWeight: 1;
+      Padding: (Left: 2, Right: 2, Top: 6);
 
       Group #CategoryRail {
         LayoutMode: TopScrolling;
         ScrollbarStyle: $C.@DefaultScrollbarStyle;
-        Anchor: (Width: 98, Right: 12);
-        Padding: (Right: 4);
+        Anchor: (Width: 60, Right: 12);
+        Padding: (Top: 6, Bottom: 4);
+      }
+
+      Group {
+        Anchor: (Width: 1, Top: 8, Bottom: 8, Right: 14);
+        Background: #2b3542;
       }
 
       Group #CosmeticsColumn {
         LayoutMode: Top;
-        Anchor: (Width: 426);
         FlexWeight: 1;
+        Padding: (Top: 10, Right: 8);
 
         Label #CategoryHeadingLabel {
           Text: "";
-          Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+          Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, RenderUppercase: true, TextColor: #96a9be);
           Anchor: (Bottom: 8);
         }
 
-        $C.@TextField #SearchField {
-          @Anchor = (Height: 38, Bottom: 10);
-          PlaceholderText: %pixelbays.rpg.character.creator.searchPlaceholder;
+        Group {
+          Anchor: (Height: 1, Bottom: 10);
+          Background: #2b3542;
+        }
+
+        Group {
+          LayoutMode: Left;
+          Anchor: (Height: 32, Bottom: 10);
+
+          TextField #SearchField {
+            Anchor: (Height: 32);
+            FlexWeight: 1;
+            PlaceholderText: %pixelbays.rpg.character.creator.searchPlaceholder;
+            Style: (FontSize: 15, TextColor: #c3d1df);
+            PlaceholderStyle: (TextColor: #4b576c, FontSize: 15);
+            Padding: (Horizontal: 12, Left: 28);
+            Decoration: (
+              Default: (
+                Background: (TexturePath: "../Common/AvatarEditor/SearchFieldPatch.png", Border: 8),
+                Icon: (Texture: "../Common/AvatarEditor/SearchFieldIcon.png", Width: 15, Height: 15, Offset: 8)
+              )
+            );
+          }
+
+          Group {
+            Anchor: (Width: 36, Height: 32, Left: 7);
+            Background: (TexturePath: "../Common/AvatarEditor/ButtonPatch.png", Border: 16);
+            LayoutMode: CenterMiddle;
+
+            Group {
+              Anchor: (Width: 15, Height: 17);
+              Background: (TexturePath: "../Common/AvatarEditor/TagsIcon.png");
+            }
+          }
         }
 
         Group #CosmeticGrid {
           LayoutMode: TopScrolling;
           ScrollbarStyle: $C.@DefaultScrollbarStyle;
-          Anchor: (Bottom: 12);
+          Anchor: (Bottom: 16);
           FlexWeight: 1;
           Padding: (Right: 6);
         }
@@ -93,18 +128,23 @@ Group #LayoutRoot {
         Group #ColorSection {
           LayoutMode: Top;
           Visible: false;
-          Anchor: (Height: 108, Bottom: 12);
+          Anchor: (Height: 110, Bottom: 12);
 
           Label {
             Text: "COLOR";
-            Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+            Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #96a9be);
             Anchor: (Bottom: 6);
+          }
+
+          Group {
+            Anchor: (Height: 1, Bottom: 10);
+            Background: #2b3542;
           }
 
           Group #ColorList {
             LayoutMode: TopScrolling;
             ScrollbarStyle: $C.@DefaultScrollbarStyle;
-            Anchor: (Height: 78);
+            Anchor: (Height: 78, Top: 0);
             Padding: (Right: 4);
           }
         }
@@ -112,35 +152,43 @@ Group #LayoutRoot {
         Group #VariantSection {
           LayoutMode: Top;
           Visible: false;
-          Anchor: (Height: 108, Bottom: 12);
+          Anchor: (Height: 110, Bottom: 12);
 
           Label {
             Text: "OPTION";
-            Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true);
+            Style: (...$C.@DefaultLabelStyle, FontSize: 14, RenderBold: true, RenderUppercase: true, TextColor: #96a9be);
             Anchor: (Bottom: 6);
+          }
+
+          Group {
+            Anchor: (Height: 1, Bottom: 10);
+            Background: #2b3542;
           }
 
           Group #VariantList {
             LayoutMode: TopScrolling;
             ScrollbarStyle: $C.@DefaultScrollbarStyle;
-            Anchor: (Height: 78);
+            Anchor: (Height: 78, Top: 0);
             Padding: (Right: 4);
           }
         }
       }
     }
 
-    TextButton #RandomizeButton {
-      Text: %pixelbays.rpg.character.creator.randomizeButton;
-      Style: $C.@DefaultTextButtonStyle;
-      Anchor: (Width: 250, Height: 46);
-    }
-    
-  }
+    Group {
+      LayoutMode: Left;
+      Anchor: (Height: 36);
 
-  Group #PreviewArea {
-    Visible: false;
-    Anchor: (Left: 652, Right: 420, Top: 100, Bottom: 200);
+      TextButton #RandomizeButton {
+        Text: %pixelbays.rpg.character.creator.randomizeButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 220, Height: 36);
+      }
+
+      Group {
+        FlexWeight: 1;
+      }
+    }
   }
 
   Group #RightInfoPanel {
@@ -204,6 +252,23 @@ Group #LayoutRoot {
       ScrollbarStyle: $C.@DefaultScrollbarStyle;
       Anchor: (Height: 138);
       Padding: (Right: 4);
+    }
+
+    Group #HardcoreSection {
+      Visible: false;
+      LayoutMode: Left;
+      Anchor: (Height: 34, Top: 10);
+
+      $C.@CheckBox #HardcoreCheck {
+        Value: false;
+        Anchor: (Width: 24, Height: 24, Top: 4, Right: 10);
+      }
+
+      Label {
+        Text: %pixelbays.rpg.character.creator.hardcoreLabel;
+        Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true);
+        Anchor: (Top: 6);
+      }
     }
   }
 

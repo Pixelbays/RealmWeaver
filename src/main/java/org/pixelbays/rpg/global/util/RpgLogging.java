@@ -104,7 +104,12 @@ public final class RpgLogging {
 			return null;
 		}
 
-		RpgModConfig config = assetMap.getAsset("Default");
+		RpgModConfig config = assetMap.getAsset("default");
+		if (config != null) {
+			return config;
+		}
+
+		config = assetMap.getAsset("Default");
 		if (config != null) {
 			return config;
 		}

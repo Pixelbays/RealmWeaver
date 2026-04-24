@@ -1,0 +1,21 @@
+{
+    "Categories": [
+        "FrostMage"
+    ],
+    "TranslationProperties": {
+        "Name": "mma.rpg.abilities.snap_freeze.name",
+        "Description": "mma.rpg.abilities.snap_freeze.description"
+    },
+    "AbilityType": "Active",
+    "Parent": "GlobalBase",
+    "GlobalCooldownCategories": [],
+    "StatRequirements": {},
+    "Interactions": {
+        "Primary": "RPG_Frost_Mage_Snap_Freeze"
+    },
+    "InteractionVars": {},
+    "Enabled": true,
+    "Tooltip": "Spend 1 Frost Rune to freeze a chilled target or root an unprepared one.",
+    "UsePlayerAnimations": true,
+    "PlayerAnimationsId": "Staff"
+}

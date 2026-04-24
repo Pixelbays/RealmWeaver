@@ -1,0 +1,15 @@
+{
+  "Duration": 3.0,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": true,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#5970bf",
+    "EntityTopTint": "#d7e0ff",
+    "HorizontalSpeedMultiplier": 0.65,
+    "KnockbackMultiplier": 1.1
+  },
+  "StatModifiers": {
+    "Speed": -4,
+    "Versatility": -6
+  }
+}

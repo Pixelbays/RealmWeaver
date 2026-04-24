@@ -1,5 +1,5 @@
 Group {
-  Anchor: (Height: 92, Bottom: 8);
+  Anchor: (Height: 124, Bottom: 8);
 
   Group #Cells {
     LayoutMode: Left;

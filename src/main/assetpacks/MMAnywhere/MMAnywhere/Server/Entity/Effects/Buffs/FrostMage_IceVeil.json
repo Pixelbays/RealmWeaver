@@ -1,0 +1,17 @@
+{
+  "Duration": 4.0,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": false,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#5ecfff",
+    "EntityTopTint": "#ecfbff",
+    "Particles": [
+      {
+        "SystemId": "Dust_Sparkles_Fine"
+      }
+    ],
+    "KnockbackMultiplier": 0.5,
+    "WorldSoundEventId": "SFX_Ice_Break",
+    "LocalSoundEventId": "SFX_Ice_Break"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "Categories": [
+    "FrostMage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.frozen_ground.name",
+    "Description": "mma.rpg.abilities.frozen_ground.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Frost_Mage_Frozen_Ground"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Spend 1 Frost Rune to chill a wide circle, rooting foes already touched by frost.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff"
+}

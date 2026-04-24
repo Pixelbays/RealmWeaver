@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "FrostMage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.ice_bolt.name",
+    "Description": "mma.rpg.abilities.ice_bolt.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Frost_Mage_Ice_Bolt"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Fire a quick frost bolt that chills the target and grants 1 Frost Rune.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Rock_Ice_Stalactite_Large.png"
+}

@@ -1,0 +1,15 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Sigils": 2
+  },
+  "Failed": {
+    "Type": "Simple",
+    "RunTime": 0.0
+  },
+  "Next": {
+    "Type": "ApplyEffect",
+    "EffectId": "Runesage_AttunedInscription",
+    "Entity": "User"
+  }
+}

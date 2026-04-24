@@ -1,0 +1,24 @@
+{
+  "Type": "Serial",
+  "Interactions": [
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Health": 18
+      }
+    },
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Guard": 1
+      }
+    },
+    {
+      "Type": "ApplyEffect",
+      "EffectId": "Vanguard_BastionStance",
+      "Entity": "User"
+    }
+  ]
+}

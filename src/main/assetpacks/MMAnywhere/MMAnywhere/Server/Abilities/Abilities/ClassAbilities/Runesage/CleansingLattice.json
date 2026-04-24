@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.cleansing_lattice.name",
+    "Description": "mma.rpg.abilities.cleansing_lattice.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Cleansing_Lattice"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Weave a restorative lattice that heals allies. At 2 Sigils it clears the trio's authored debuffs as well.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Rock_Crystal_White.png"
+}

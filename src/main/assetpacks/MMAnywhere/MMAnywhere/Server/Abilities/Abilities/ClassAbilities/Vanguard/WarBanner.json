@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Vanguard"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.war_banner.name",
+    "Description": "mma.rpg.abilities.war_banner.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_War_Banner"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Raise a banner to strengthen yourself, rattle nearby foes, and build 1 Guard.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace",
+  "Icon": "Icons/ItemsGenerated/Furniture_Human_Ruins_Banner.png"
+}

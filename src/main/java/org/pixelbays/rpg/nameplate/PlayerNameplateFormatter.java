@@ -88,63 +88,6 @@ public final class PlayerNameplateFormatter {
     }
 
     @Nonnull
-    public static Layout layout(@Nonnull NameplateModSettings settings, @Nonnull Content content) {
-        List<String> mainParts = new ArrayList<>();
-        List<String> secondaryParts = new ArrayList<>();
-
-        String resolvedName = settings.isShowName() ? resolveName(settings, content) : "";
-        String legacyTitle = sanitize(content.legacyTitle());
-        String titlePrefix = sanitize(content.titlePrefix());
-        String titleSuffix = sanitize(content.titleSuffix());
-        String guildName = sanitize(content.guildName());
-        String guildTag = formatGuildTag(content.guildTag());
-
-        if (settings.isShowTitle() && !legacyTitle.isBlank()) {
-            switch (settings.getTitlePlacement()) {
-                case Prefix -> mainParts.add(legacyTitle);
-                case Suffix -> {
-                }
-                case AboveName, BelowName -> secondaryParts.add(legacyTitle);
-                default -> {
-                }
-            }
-        }
-
-        if (settings.isShowTitle() && !titlePrefix.isBlank()) {
-            mainParts.add(titlePrefix);
-        }
-
-        if (settings.isShowGuildTag() && !guildTag.isBlank()
-                && settings.getGuildTagPlacement() == NameplateModSettings.GuildTagPlacement.Prefix) {
-            mainParts.add(guildTag);
-        }
-
-        if (!resolvedName.isBlank()) {
-            mainParts.add(resolvedName);
-        }
-
-        if (settings.isShowTitle() && !legacyTitle.isBlank()
-                && settings.getTitlePlacement() == NameplateModSettings.TitlePlacement.Suffix) {
-            mainParts.add(legacyTitle);
-        }
-
-        if (settings.isShowTitle() && !titleSuffix.isBlank()) {
-            mainParts.add(titleSuffix);
-        }
-
-        if (settings.isShowGuildTag() && !guildTag.isBlank()
-                && settings.getGuildTagPlacement() == NameplateModSettings.GuildTagPlacement.Suffix) {
-            mainParts.add(guildTag);
-        }
-
-        if (settings.isShowGuildName() && !guildName.isBlank()) {
-            secondaryParts.add(guildName);
-        }
-
-        return new Layout(joinNonBlank(mainParts, " "), joinNonBlank(secondaryParts, " | "));
-    }
-
-    @Nonnull
     private static String resolveName(@Nonnull NameplateModSettings settings, @Nonnull Content content) {
         String accountName = sanitize(content.accountName());
         String characterName = sanitize(content.characterName());
@@ -166,11 +109,6 @@ public final class PlayerNameplateFormatter {
 
     @Nonnull
     private static String joinNonBlank(@Nonnull List<String> parts) {
-        return joinNonBlank(parts, " ");
-    }
-
-    @Nonnull
-    private static String joinNonBlank(@Nonnull List<String> parts, @Nonnull String delimiter) {
         List<String> filtered = new ArrayList<>();
         for (String part : parts) {
             String sanitized = sanitize(part);
@@ -178,7 +116,7 @@ public final class PlayerNameplateFormatter {
                 filtered.add(sanitized);
             }
         }
-        return filtered.isEmpty() ? "" : String.join(delimiter, filtered);
+        return filtered.isEmpty() ? "" : String.join(" ", filtered);
     }
 
     @Nonnull
@@ -195,9 +133,4 @@ public final class PlayerNameplateFormatter {
             @Nullable String guildName,
             @Nullable String guildTag) {
     }
-
-        public record Layout(
-            @Nonnull String mainLine,
-            @Nonnull String secondaryLine) {
-        }
 }

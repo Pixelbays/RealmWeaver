@@ -29,10 +29,10 @@ public class CharacterModSettings {
             Codec.STRING_ARRAY,
             arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
             list -> list == null ? null : list.toArray(String[]::new));
-        private static final FunctionCodec<ConditionalSlotGrant[], List<ConditionalSlotGrant>> SLOT_GRANT_LIST_CODEC =
-            new FunctionCodec<>(new ArrayCodec<>(ConditionalSlotGrant.CODEC, ConditionalSlotGrant[]::new),
-                arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
-                list -> list == null ? null : list.toArray(ConditionalSlotGrant[]::new));
+    private static final FunctionCodec<ConditionalSlotGrant[], List<ConditionalSlotGrant>> SLOT_GRANT_LIST_CODEC = new FunctionCodec<>(
+            new ArrayCodec<>(ConditionalSlotGrant.CODEC, ConditionalSlotGrant[]::new),
+            arr -> arr == null ? new ArrayList<>() : new ArrayList<>(Arrays.asList(arr)),
+            list -> list == null ? null : list.toArray(ConditionalSlotGrant[]::new));
 
     public enum DeletionMode {
         HardDelete,
@@ -70,15 +70,15 @@ public class CharacterModSettings {
             .append(new KeyedCodec<>("MaxCharacterSlots", Codec.INTEGER, false, true),
                     (i, s) -> i.maxCharacterSlots = s, i -> i.maxCharacterSlots)
             .add()
-                .append(new KeyedCodec<>("DefaultCharacterSlots", Codec.INTEGER, false, true),
+            .append(new KeyedCodec<>("DefaultCharacterSlots", Codec.INTEGER, false, true),
                     (i, s) -> i.defaultCharacterSlots = s, i -> i.defaultCharacterSlots)
-                .add()
-                .append(new KeyedCodec<>("ExtraCharacterSlotTokenId", Codec.STRING, false, true),
+            .add()
+            .append(new KeyedCodec<>("ExtraCharacterSlotTokenId", Codec.STRING, false, true),
                     (i, s) -> i.extraCharacterSlotTokenId = s, i -> i.extraCharacterSlotTokenId)
-                .add()
-                .append(new KeyedCodec<>("ConditionalSlotGrants", SLOT_GRANT_LIST_CODEC, false, true),
+            .add()
+            .append(new KeyedCodec<>("ConditionalSlotGrants", SLOT_GRANT_LIST_CODEC, false, true),
                     (i, s) -> i.conditionalSlotGrants = s, i -> i.conditionalSlotGrants)
-                .add()
+            .add()
             .append(new KeyedCodec<>("AllowCharacterCreation", Codec.BOOLEAN, false, true),
                     (i, s) -> i.allowCharacterCreation = s, i -> i.allowCharacterCreation)
             .add()
@@ -94,33 +94,33 @@ public class CharacterModSettings {
             .append(new KeyedCodec<>("SoftDeleteRecoveryDays", Codec.INTEGER, false, true),
                     (i, s) -> i.softDeleteRecoveryDays = s, i -> i.softDeleteRecoveryDays)
             .add()
-                .append(new KeyedCodec<>("DeletedCharacterRetentionHours", Codec.INTEGER, false, true),
+            .append(new KeyedCodec<>("DeletedCharacterRetentionHours", Codec.INTEGER, false, true),
                     (i, s) -> i.deletedCharacterRetentionHours = s, i -> i.deletedCharacterRetentionHours)
-                .add()
-                .append(new KeyedCodec<>("MaxRecoveriesPerWindow", Codec.INTEGER, false, true),
+            .add()
+            .append(new KeyedCodec<>("MaxRecoveriesPerWindow", Codec.INTEGER, false, true),
                     (i, s) -> i.maxRecoveriesPerWindow = s, i -> i.maxRecoveriesPerWindow)
-                .add()
-                .append(new KeyedCodec<>("RecoveryWindowHours", Codec.INTEGER, false, true),
+            .add()
+            .append(new KeyedCodec<>("RecoveryWindowHours", Codec.INTEGER, false, true),
                     (i, s) -> i.recoveryWindowHours = s, i -> i.recoveryWindowHours)
-                .add()
-                .append(new KeyedCodec<>("LogoutTimerSeconds", Codec.INTEGER, false, true),
+            .add()
+            .append(new KeyedCodec<>("LogoutTimerSeconds", Codec.INTEGER, false, true),
                     (i, s) -> i.logoutTimerSeconds = s, i -> i.logoutTimerSeconds)
-                .add()
-                .append(new KeyedCodec<>("LoginSpawnMode", new EnumCodec<>(LoginSpawnMode.class), false, true),
+            .add()
+            .append(new KeyedCodec<>("LoginSpawnMode", new EnumCodec<>(LoginSpawnMode.class), false, true),
                     (i, s) -> i.loginSpawnMode = s, i -> i.loginSpawnMode)
-                .add()
-                .append(new KeyedCodec<>("LoginVfxId", Codec.STRING, false, true),
+            .add()
+            .append(new KeyedCodec<>("LoginVfxId", Codec.STRING, false, true),
                     CharacterModSettings::applyLegacyLoginVfxId, i -> i.loginVfxId)
-                .add()
-                .append(new KeyedCodec<>("LogoutVfxId", Codec.STRING, false, true),
+            .add()
+            .append(new KeyedCodec<>("LogoutVfxId", Codec.STRING, false, true),
                     CharacterModSettings::applyLegacyLogoutVfxId, i -> i.logoutVfxId)
-                .add()
-                .append(new KeyedCodec<>("LoginVfx", ModelParticle.ARRAY_CODEC, false, true),
+            .add()
+            .append(new KeyedCodec<>("LoginVfx", ModelParticle.ARRAY_CODEC, false, true),
                     (i, s) -> i.loginVfx = s, i -> i.loginVfx)
-                .add()
-                .append(new KeyedCodec<>("LogoutVfx", ModelParticle.ARRAY_CODEC, false, true),
+            .add()
+            .append(new KeyedCodec<>("LogoutVfx", ModelParticle.ARRAY_CODEC, false, true),
                     (i, s) -> i.logoutVfx = s, i -> i.logoutVfx)
-                .add()
+            .add()
             .append(new KeyedCodec<>("AutoMigrateLegacyPlayerData", Codec.BOOLEAN, false, true),
                     (i, s) -> i.autoMigrateLegacyPlayerData = s, i -> i.autoMigrateLegacyPlayerData)
             .add()
@@ -150,11 +150,11 @@ public class CharacterModSettings {
             .add()
             .append(new KeyedCodec<>("LobbyWorldId", Codec.STRING, false, true),
                     (i, s) -> i.lobbyInstanceTemplateId = s, i -> i.lobbyInstanceTemplateId)
-                .add()
-                .append(new KeyedCodec<>("UseLobbyInstance", Codec.BOOLEAN, false, true),
+            .add()
+            .append(new KeyedCodec<>("UseLobbyInstance", Codec.BOOLEAN, false, true),
                     (i, s) -> i.useLobbyInstance = s, i -> i.useLobbyInstance)
-                .add()
-                .append(new KeyedCodec<>("LobbyInstanceTemplateId", Codec.STRING, false, true),
+            .add()
+            .append(new KeyedCodec<>("LobbyInstanceTemplateId", Codec.STRING, false, true),
                     (i, s) -> i.lobbyInstanceTemplateId = s, i -> i.lobbyInstanceTemplateId)
             .add()
             .append(new KeyedCodec<>("DefaultLobbySpawnPointId", Codec.STRING, false, true),
@@ -181,12 +181,13 @@ public class CharacterModSettings {
             .append(new KeyedCodec<>("DefaultPreviewCameraPresetId", Codec.STRING, false, true),
                     (i, s) -> i.defaultPreviewCameraPresetId = s, i -> i.defaultPreviewCameraPresetId)
             .add()
-            .append(new KeyedCodec<>("RacePreviewCameraPresetIds", new MapCodec<>(Codec.STRING, HashMap::new, false), true),
+            .append(new KeyedCodec<>("RacePreviewCameraPresetIds", new MapCodec<>(Codec.STRING, HashMap::new, false),
+                    true),
                     (i, s) -> i.racePreviewCameraPresetIds = s, i -> i.racePreviewCameraPresetIds)
             .add()
-                .append(new KeyedCodec<>("BarberShopSettings", BarberShopSettings.CODEC, false, true),
+            .append(new KeyedCodec<>("BarberShopSettings", BarberShopSettings.CODEC, false, true),
                     (i, s) -> i.barberShopSettings = s, i -> i.barberShopSettings)
-                .add()
+            .add()
             .build();
 
     private boolean enabled;
@@ -312,7 +313,8 @@ public class CharacterModSettings {
     }
 
     public int getDeletedCharacterRetentionHours() {
-        return deletedCharacterRetentionHours > 0 ? deletedCharacterRetentionHours : Math.max(0, softDeleteRecoveryDays) * 24;
+        return deletedCharacterRetentionHours > 0 ? deletedCharacterRetentionHours
+                : Math.max(0, softDeleteRecoveryDays) * 24;
     }
 
     public int getMaxRecoveriesPerWindow() {

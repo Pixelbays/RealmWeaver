@@ -45,7 +45,7 @@
     "Enabled": true,
     "MaxCharacterSlots": 12,
     "AllowCharacterCreation": true,
-    "AllowCharacterDeletion": false,
+    "AllowCharacterDeletion": true,
     "AllowLogoutToCharacterSelect": true,
     "DeletionMode": "SoftDeleteRecovery",
     "SoftDeleteRecoveryDays": 14,
@@ -74,6 +74,17 @@
     "PreviewCameraMode": "RaceSpecific",
     "DefaultPreviewCameraPresetId": "character_select_default",
     "RacePreviewCameraPresetIds": {}
+  },
+  "NameplateSettings": {
+    "Enabled": true,
+    "ShowName": true,
+    "NameSource": "CharacterName",
+    "ShowTitle": true,
+    "TitlePlacement": "Prefix",
+    "ShowGuildName": true,
+    "GuildNamePlacement": "BelowName",
+    "ShowGuildTag": true,
+    "GuildTagPlacement": "Suffix"
   },
   "AchievementSettings": {
     "Enabled": false,
@@ -112,8 +123,11 @@
     "HotbarAbilitySlots": [
       7,
       8,
-      9
+      9,
+      6,
+      5
     ],
+    "HotbarScrollWrapWindowMs": 200,
     "AbilityControlType": "Hotbar"
   },
   "InventorySettings": {
@@ -157,6 +171,9 @@
     "GuildNameMaxLength": 24,
     "GuildTagMinLength": 2,
     "GuildTagMaxLength": 5,
+    "GuildDescriptionMaxLength": 256,
+    "GuildMotdMaxLength": 128,
+    "GuildAllowNameTagUpdates": false,
     "GuildDefaultJoinPolicy": "InviteOnly",
     "GuildMembershipScope": "ACCOUNT",
     "GuildMaxMembershipsPerOwner": 1,
@@ -202,7 +219,13 @@
     "AllowItemAttachments": false
   },
   "ChatSettings": {
-    "Enabled": false,
+    "Enabled": true,
+    "DefaultFilterEnabled": true,
+    "CustomFilterEnabled": false,
+    "ChatLoggingEnabled": true,
+    "ChatLogMaxEntriesPerPlayer": 250,
+    "BaseChatProximityEnabled": true,
+    "BaseChatRangeBlocks": 24,
     "Channels": [
       {
         "Enabled": true,
@@ -211,7 +234,9 @@
         "Aliases": [
           "p"
         ],
-        "FormatTranslationKey": "rpg.chat.party.message"
+        "Color": "#79C8FF",
+        "NameType": "AccountName",
+        "FormatTranslationKey": "pixelbays.rpg.chat.party.message"
       },
       {
         "Enabled": true,
@@ -220,19 +245,60 @@
         "Aliases": [
           "g"
         ],
-        "FormatTranslationKey": "rpg.chat.guild.message"
+        "Color": "#66D48F",
+        "NameType": "AccountName",
+        "FormatTranslationKey": "pixelbays.rpg.chat.guild.message"
+      },
+      {
+        "Enabled": true,
+        "Type": "Global",
+        "Id": "global",
+        "Aliases": [
+          "all"
+        ],
+        "Color": "#E0C061",
+        "NameType": "AccountName",
+        "FormatTranslationKey": "pixelbays.rpg.chat.global.message"
+      },
+      {
+        "Enabled": true,
+        "Type": "Zone",
+        "Id": "zone",
+        "Aliases": [
+          "z"
+        ],
+        "Color": "#B78CFF",
+        "NameType": "AccountName",
+        "FormatTranslationKey": "pixelbays.rpg.chat.zone.message"
+      },
+      {
+        "Enabled": true,
+        "Type": "Proximity",
+        "Id": "local",
+        "Aliases": [
+          "l",
+          "say"
+        ],
+        "Color": "#F1A763",
+        "NameType": "AccountName",
+        "RangeBlocks": 18,
+        "FormatTranslationKey": "pixelbays.rpg.chat.proximity.message"
       }
     ]
   },
   "LockpickingSettings": {
-    "Enabled": true
+    "Enabled": true,
+    "LockpickingDifficultyTiers": {
+      "Hard": {},
+      "Easy": {}
+    }
   },
   "ExpansionSettings": {
     "Enabled": false
   },
   "WorldSettings": {
-    "Enabled": true,
+    "Enabled": false,
     "WorldMode": "VanillaWorld",
-    "AllowTravelCommands": true
+    "AllowTravelCommands": false
   }
 }

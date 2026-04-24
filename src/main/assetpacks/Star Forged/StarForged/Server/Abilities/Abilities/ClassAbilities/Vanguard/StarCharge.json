@@ -10,10 +10,7 @@
   "AbilityType": "Active",
   "Parent": "GlobalBase",
   "GlobalCooldownCategories": [],
-  "PrerequisiteAbilities": [],
   "StatRequirements": {},
-  "HasRanks": false,
-  "MaxRank": 1,
   "Interactions": {
     "Primary": "RPG_Star_Charge"
   },

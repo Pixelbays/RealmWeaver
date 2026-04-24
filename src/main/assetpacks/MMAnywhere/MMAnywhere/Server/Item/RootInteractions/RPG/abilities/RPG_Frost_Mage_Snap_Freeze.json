@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Frost_Mage_Snap_Freeze"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Frost_Mage_Snap_Freeze",
+    "Cooldown": 10.0
+  }
+}

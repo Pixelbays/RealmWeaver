@@ -1,0 +1,22 @@
+{
+  "Container": {
+    "Type": "Multiple",
+    "Containers": [
+      {
+        "Type": "Single",
+        "Item": {
+          "ItemId": "Plant_Crop_Mushroom_Cap_Red",
+          "QuantityMin": 1,
+          "QuantityMax": 1
+        },
+        "Weight": 100
+      },
+      {
+        "Type": "Exp",
+        "ExpMin": 40,
+        "ExpMax": 80,
+        "SystemId": "combat"
+      }
+    ]
+  }
+}

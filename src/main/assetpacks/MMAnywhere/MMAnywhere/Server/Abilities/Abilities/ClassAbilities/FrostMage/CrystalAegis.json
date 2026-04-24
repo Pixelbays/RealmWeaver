@@ -1,0 +1,21 @@
+{
+  "Categories": [
+    "FrostMage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.crystal_aegis.name",
+    "Description": "mma.rpg.abilities.crystal_aegis.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Frost_Mage_Crystal_Aegis"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Spend 2 Frost Runes to restore health and harden yourself in crystal ice.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff"
+}

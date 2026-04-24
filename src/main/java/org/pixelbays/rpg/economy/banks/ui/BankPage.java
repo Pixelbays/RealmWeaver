@@ -14,6 +14,7 @@ import org.pixelbays.rpg.economy.banks.BankManager;
 import org.pixelbays.rpg.economy.banks.command.BankCommandUtil;
 import org.pixelbays.rpg.economy.banks.config.BankScope;
 import org.pixelbays.rpg.economy.banks.config.BankTypeDefinition;
+import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
 import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildManager;
 
@@ -96,12 +97,12 @@ public class BankPage extends CustomUIPage {
 
         switch (action) {
             case "OpenPersonal" -> {
-                BankActionResult result = bankManager.getOrCreateDefaultPersonalBank(playerRef.getUuid(), player.getInventory());
+                BankActionResult result = bankManager.getOrCreateDefaultPersonalBank(playerRef.getUuid(), CurrencyAccessContext.fromRef(store, ref));
                 statusMessage = BankCommandUtil.managerResultMessage(result.getMessage());
                 selectedBank = result.getBankAccount();
             }
             case "OpenAccount" -> {
-                BankActionResult result = bankManager.getOrCreateDefaultAccountBank(playerRef.getUuid(), player.getInventory());
+                BankActionResult result = bankManager.getOrCreateDefaultAccountBank(playerRef.getUuid(), CurrencyAccessContext.fromRef(store, ref));
                 statusMessage = BankCommandUtil.managerResultMessage(result.getMessage());
                 selectedBank = result.getBankAccount();
             }
@@ -111,7 +112,7 @@ public class BankPage extends CustomUIPage {
                     statusMessage = Message.translation("pixelbays.rpg.guild.error.notInGuild");
                 } else {
                     BankActionResult result = bankManager.getOrCreateDefaultGuildBank(guild.getId(), playerRef.getUuid(),
-                            player.getInventory());
+                            CurrencyAccessContext.fromRef(store, ref));
                     statusMessage = BankCommandUtil.managerResultMessage(result.getMessage());
                     selectedBank = result.getBankAccount();
                 }
@@ -121,7 +122,7 @@ public class BankPage extends CustomUIPage {
                     statusMessage = Message.translation("pixelbays.rpg.bank.error.professionRequired");
                 } else {
                     BankActionResult result = bankManager.getOrCreateDefaultProfessionBank(playerRef.getUuid(),
-                            professionId.trim(), player.getInventory());
+                            professionId.trim(), CurrencyAccessContext.fromRef(store, ref));
                     statusMessage = BankCommandUtil.managerResultMessage(result.getMessage());
                     selectedBank = result.getBankAccount();
                 }

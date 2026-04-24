@@ -4,47 +4,47 @@ $C.@PageOverlay {}
 TabNavigation #GuildTabs {
   Style: $C.@TopTabsStyle;
   SelectedTab: "Tab1";
-  Anchor: (Top: 100, Width: 800, Height: 120);
+  Anchor: (Top: 100, Width: 800, Height: 80);
   // Basic Guild Info Tab, Name, Emblem, Description, Open Invites, how many members online, Message of the day, upcoming guild events, etc.
   TabButton #overviewTab {
-    Icon: "icon.png";
+    Icon: "../Common/SearchIcon.png";
     TooltipText: "Guild Overview";
     Id: "Tab1";
   }
   // Guild Roster Tab, List of members, their roles, online status, etc.
   TabButton #RosterTab {
-    Icon: "icon.png";
+    Icon: "../Common/RecipesIcon.png";
     TooltipText: "Guild Roster";
     Id: "Tab2";
   }
   // Guild Invites Tab, List of pending invites, options to accept or decline invites, pending applications, etc. // and where to set if accecpting invites. 
   TabButton #InvitesTab {
-    Icon: "icon.png";
+    Icon: "../Common/Checkmark.png";
     TooltipText: "Guild Invites";
     Id: "Tab3";
   }
   // Guild Calendar Tab, shows upcoming guild events, raids, meetings, etc. with options to RSVP or set reminders.
   TabButton #CalendarTab {
-    Icon: "icon.png";
+    Icon: "../Common/ClearInputIcon.png";
     TooltipText: "Guild Calendar";
     Id: "Tab4";
   }
     // Guild Management Tab - Only visible to players with appropriate permissions, options to manage guild settings, roles, permissions.
   TabButton #GuildManagementTab {
-    Icon: "icon.png";
+    Icon: "../Common/IconMaskSettings.png";
     TooltipText: "Guild Management";
     Id: "Tab5";
   }
    // Role Management Tab - Only visible to players with appropriate permissions, options to manage guild settings, roles, permissions.
   TabButton #RoleManagementTab {
-    Icon: "icon.png";
+    Icon: "../Common/IconMaskSettings.png";
     TooltipText: "Role Management";
     Id: "Tab6";
   }
 
 }
 $C.@DecoratedContainer {
-  Anchor: (Width: 820, Height: 640);
+  Anchor: (Width: 820, Height: 700);
 
   #Title {
     Group {
@@ -176,29 +176,12 @@ $C.@DecoratedContainer {
         Anchor: (Bottom: 8);
       }
 
-      Group #ManagementModeRow {
-        LayoutMode: Left;
-        Anchor: (Height: 40, Bottom: 8);
-
-        TextButton #ManagementInfoButton {
-          Text: %pixelbays.rpg.guild.ui.managementInfoTab;
-          Style: $C.@DefaultTextButtonStyle;
-          Anchor: (Width: 170, Height: 40);
-        }
-
-        Group { Anchor: (Width: 8); }
-
-        TextButton #ManagementRolesButton {
-          Text: %pixelbays.rpg.guild.ui.managementRolesTab;
-          Style: $C.@DefaultTextButtonStyle;
-          Anchor: (Width: 170, Height: 40);
-        }
-      }
-
       Group #ManagementInfoPanel {
         Visible: false;
-        LayoutMode: Top;
-        Anchor: (Bottom: 8);
+        LayoutMode: TopScrolling;
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        Anchor: (Height: 476, Bottom: 8);
+        Padding: (Right: 6);
 
         Label #GuildInfoSummaryLabel {
           Text: "";
@@ -233,12 +216,12 @@ $C.@DecoratedContainer {
         Group #GuildDescriptionRow {
           Visible: false;
           LayoutMode: Left;
-          Anchor: (Height: 40, Bottom: 8);
+          Anchor: (Height: 148, Bottom: 8);
 
           Label {
             Text: %pixelbays.rpg.guild.ui.guildDescriptionRowLabel;
             Style: (...$C.@DefaultLabelStyle, FontSize: 12);
-            Anchor: (Width: 150, Top: 12, Right: 8);
+            Anchor: (Width: 150, Top: 8, Right: 8);
           }
 
           $C.@MultilineTextField #DescriptionField {
@@ -250,12 +233,12 @@ $C.@DecoratedContainer {
         Group #GuildMotdRow {
           Visible: false;
           LayoutMode: Left;
-          Anchor: (Height: 40, Bottom: 8);
+          Anchor: (Height: 148, Bottom: 8);
 
           Label {
             Text: %pixelbays.rpg.guild.ui.guildMotdRowLabel;
             Style: (...$C.@DefaultLabelStyle, FontSize: 12);
-            Anchor: (Width: 150, Top: 12, Right: 8);
+            Anchor: (Width: 150, Top: 8, Right: 8);
           }
 
           $C.@MultilineTextField #MotdField {
@@ -308,8 +291,10 @@ $C.@DecoratedContainer {
 
       Group #ManagementRolesPanel {
         Visible: false;
-        LayoutMode: Top;
-        Anchor: (Bottom: 8);
+        LayoutMode: TopScrolling;
+        ScrollbarStyle: $C.@DefaultScrollbarStyle;
+        Anchor: (Height: 476, Bottom: 8);
+        Padding: (Right: 6);
 
         Label #RoleListLabel {
           Text: "";
@@ -432,35 +417,42 @@ $C.@DecoratedContainer {
         }
 
         Group {
-          LayoutMode: Left;
-          Anchor: (Bottom: 8);
+          LayoutMode: TopScrolling;
+          ScrollbarStyle: $C.@DefaultScrollbarStyle;
+          Anchor: (Height: 318, Bottom: 8);
+          Padding: (Right: 4);
 
           Group {
-            LayoutMode: Top;
-            Anchor: (Width: 390, Bottom: 8);
+            LayoutMode: Left;
+            Anchor: (Bottom: 8);
 
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #InvitePermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionInvite; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #KickPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionKick; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #PromotePermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionPromote; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageRolesPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageRoles; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #SetJoinPolicyPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionSetJoinPolicy; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #AcceptApplicationsPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionAcceptApplications; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #RejectApplicationsPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionRejectApplications; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-          }
+            Group {
+              LayoutMode: Top;
+              Anchor: (Width: 386, Bottom: 8);
 
-          Group { Anchor: (Width: 16); }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #InvitePermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionInvite; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #KickPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionKick; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #PromotePermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionPromote; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #ManageRolesPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageRoles; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #SetJoinPolicyPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionSetJoinPolicy; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #AcceptApplicationsPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionAcceptApplications; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #RejectApplicationsPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionRejectApplications; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+            }
 
-          Group {
-            LayoutMode: Top;
-            Anchor: (Width: 390, Bottom: 8);
+            Group { Anchor: (Width: 20); }
 
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildInfoPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildInfo; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildBankPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildBank; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildEventsPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildEvents; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildWarPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildWar; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #ManageGuildAlliancesPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildAlliances; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #UseGuildChatPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionUseGuildChat; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
-            Group { LayoutMode: Left; Anchor: (Height: 28, Bottom: 4); $C.@CheckBox #UseGuildBankPermissionCheck { Value: false; Anchor: (Top: 4, Right: 8); } Label { Text: %pixelbays.rpg.guild.ui.permissionUseGuildBank; Style: (...$C.@DefaultLabelStyle, FontSize: 12); } }
+            Group {
+              LayoutMode: Top;
+              Anchor: (Width: 386, Bottom: 8);
+
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #ManageGuildInfoPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildInfo; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #ManageGuildBankPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildBank; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #ManageGuildEventsPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildEvents; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #ManageGuildWarPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildWar; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #ManageGuildAlliancesPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionManageGuildAlliances; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #UseGuildChatPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionUseGuildChat; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+              Group { LayoutMode: Left; Anchor: (Height: 34, Bottom: 6); $C.@CheckBox #UseGuildBankPermissionCheck { Value: false; Anchor: (Width: 24, Height: 24, Top: 4, Right: 10); } Label { Text: %pixelbays.rpg.guild.ui.permissionUseGuildBank; Style: (...$C.@DefaultLabelStyle, FontSize: 12); Anchor: (Top: 6); } }
+            }
           }
         }
 
@@ -739,7 +731,11 @@ $C.@DecoratedContainer {
         Style: (...$C.@DefaultLabelStyle, RenderBold: true);
         Anchor: (Bottom: 6);
       }
-
+      Label {
+        Text: "WIP - Calendar UI is still being designed and not fully implemented yet.";
+        Style: (...$C.@DefaultLabelStyle, RenderBold: true);
+        Anchor: (Bottom: 6);
+      }
       Label #CalendarLabel {
         Text: "";
         Style: (...$C.@DefaultLabelStyle, FontSize: 12);
@@ -747,6 +743,7 @@ $C.@DecoratedContainer {
     }
 
   }
+
 }
 
 Group #RosterModerationConfirmOverlay {

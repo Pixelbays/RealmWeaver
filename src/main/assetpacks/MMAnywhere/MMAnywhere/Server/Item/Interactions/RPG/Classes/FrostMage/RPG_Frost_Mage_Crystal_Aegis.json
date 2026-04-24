@@ -1,0 +1,45 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "FrostRunes": 2
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "FrostRunes": -2
+        }
+      },
+      {
+        "Type": "Simple",
+        "RunTime": 0.1,
+        "Effects": {
+          "ItemAnimationId": "CastLeftCharged",
+          "WorldSoundEventId": "SFX_Divine_Respawn",
+          "LocalSoundEventId": "SFX_Divine_Respawn",
+          "Particles": [
+            {
+              "SystemId": "Blue_Beam",
+              "TargetEntityPart": "Entity"
+            }
+          ]
+        }
+      },
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Health": 30
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "FrostMage_CrystalAegis",
+        "Entity": "User"
+      }
+    ]
+  }
+}

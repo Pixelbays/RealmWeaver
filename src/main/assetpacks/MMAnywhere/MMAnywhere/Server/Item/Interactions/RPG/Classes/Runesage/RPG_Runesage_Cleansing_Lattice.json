@@ -1,0 +1,201 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Sigils": 2
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": -2,
+          "Health": 16
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_Lattice",
+        "Entity": "User"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "FrostMage_Chilled"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "FrostMage_Rooted"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "FrostMage_Frozen"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "Vanguard_OffBalance"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "Vanguard_Staggered"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "Runesage_Marked"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "Runesage_Weakened"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "Runesage_Fractured"
+      },
+      {
+        "Type": "ClearEntityEffect",
+        "Entity": "User",
+        "EntityEffectId": "Runesage_Bound"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 5.0,
+          "Offset": {
+            "Z": -2.0
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 14
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Lattice",
+                  "Entity": "Target"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "FrostMage_Chilled"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "FrostMage_Rooted"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "FrostMage_Frozen"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "Vanguard_OffBalance"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "Vanguard_Staggered"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "Runesage_Marked"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "Runesage_Weakened"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "Runesage_Fractured"
+                },
+                {
+                  "Type": "ClearEntityEffect",
+                  "Entity": "Target",
+                  "EntityEffectId": "Runesage_Bound"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "Failed": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Health": 10
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_Lattice",
+        "Entity": "User"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 4.5,
+          "Offset": {
+            "Z": -2.0
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 10
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Lattice",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

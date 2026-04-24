@@ -1,0 +1,10 @@
+{
+  "Duration": 0.35,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": false,
+  "StatModifiers": {
+    "Mastery": 10,
+    "Versatility": 12,
+    "Speed": 2
+  }
+}

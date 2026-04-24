@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Vanguard"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.shield_hook.name",
+    "Description": "mma.rpg.abilities.shield_hook.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_Shield_Hook"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Snap a shield throw through a target line, exposing foes and gaining 1 Guard.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace",
+  "Icon": "Icons/ItemsGenerated/Weapon_Shield_Scrap_Spiked.png"
+}

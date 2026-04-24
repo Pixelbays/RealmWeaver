@@ -1,0 +1,8 @@
+Group {
+  Anchor: (Height: 30, Bottom: 8);
+
+  Group #Cells {
+    LayoutMode: Left;
+    Anchor: (Full: 0);
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "Duration": 2.0,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": true,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#80ecff",
+    "ModelVFXId": "Freeze",
+    "ScreenEffect": "ScreenEffects/Snow.png",
+    "Particles": [
+      {
+        "SystemId": "Effect_Snow"
+      },
+      {
+        "SystemId": "Effect_Snow_Impact"
+      }
+    ],
+    "EntityTopTint": "#da72ff",
+    "MovementEffects": {
+      "DisableAll": true
+    }
+  }
+}

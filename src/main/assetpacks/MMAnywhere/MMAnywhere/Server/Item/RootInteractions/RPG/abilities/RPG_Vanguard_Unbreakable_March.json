@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Unbreakable_March"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Unbreakable_March",
+    "Cooldown": 24.0
+  }
+}

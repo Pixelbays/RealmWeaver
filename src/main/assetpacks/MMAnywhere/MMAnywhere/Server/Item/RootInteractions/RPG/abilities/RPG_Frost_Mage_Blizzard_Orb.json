@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Frost_Mage_Blizzard_Orb"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Frost_Mage_Blizzard_Orb",
+    "Cooldown": 16.0
+  }
+}

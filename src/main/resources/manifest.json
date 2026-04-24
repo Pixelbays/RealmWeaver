@@ -1,7 +1,7 @@
 {
     "Group": "pixelbays",
     "Name": "RealmweaverCore",
-    "Version": "0.0.7",
+    "Version": "0.0.9",
     "Description": "A data-driven MMO/RPG framework for Hytale with characters, classes, abilities, social systems, and economy features.",
     "Authors": [
         {

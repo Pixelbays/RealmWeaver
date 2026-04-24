@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.renewal_circle.name",
+    "Description": "mma.rpg.abilities.renewal_circle.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Renewal_Circle"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Project a restorative rune circle that heals nearby allies. Spend 1 Sigil to reinforce it with warding.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Healing_Totem.png"
+}

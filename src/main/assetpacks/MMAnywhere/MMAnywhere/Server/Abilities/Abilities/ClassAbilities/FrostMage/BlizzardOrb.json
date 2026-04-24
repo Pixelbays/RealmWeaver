@@ -1,0 +1,21 @@
+{
+    "Categories": [
+        "FrostMage"
+    ],
+    "TranslationProperties": {
+        "Name": "mma.rpg.abilities.blizzard_orb.name",
+        "Description": "mma.rpg.abilities.blizzard_orb.description"
+    },
+    "AbilityType": "Active",
+    "Parent": "GlobalBase",
+    "GlobalCooldownCategories": [],
+    "StatRequirements": {},
+    "Interactions": {
+        "Primary": "RPG_Frost_Mage_Blizzard_Orb"
+    },
+    "InteractionVars": {},
+    "Enabled": true,
+    "Tooltip": "Spend 2 Frost Runes to launch a dense frost orb that freezes chilled targets on impact.",
+    "UsePlayerAnimations": true,
+    "PlayerAnimationsId": "Staff"
+}

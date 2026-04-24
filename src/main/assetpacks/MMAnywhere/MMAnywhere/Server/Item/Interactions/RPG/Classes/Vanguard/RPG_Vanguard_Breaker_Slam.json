@@ -1,0 +1,132 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Guard": 1
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Guard": -1
+        }
+      },
+      {
+        "Type": "Simple",
+        "RunTime": 0.15
+      },
+      {
+        "Type": "Selector",
+        "RunTime": 0.1,
+        "Selector": {
+          "Id": "Horizontal",
+          "Direction": "ToLeft",
+          "TestLineOfSight": false,
+          "ExtendTop": 0.5,
+          "ExtendBottom": 1.5,
+          "StartDistance": 0.1,
+          "EndDistance": 3.5,
+          "Length": 150,
+          "RollOffset": 0,
+          "YawStartOffset": -75
+        },
+        "HitEntity": {
+          "Interactions": [
+            {
+              "Type": "EffectCondition",
+              "Entity": "Target",
+              "EntityEffectIds": [
+                "Vanguard_OffBalance"
+              ],
+              "Match": "All",
+              "Next": {
+                "Type": "Serial",
+                "Interactions": [
+                  {
+                    "Type": "ClearEntityEffect",
+                    "Entity": "Target",
+                    "EntityEffectId": "Vanguard_OffBalance"
+                  },
+                  {
+                    "Type": "ClearEntityEffect",
+                    "Entity": "Target",
+                    "EntityEffectId": "Vanguard_Staggered"
+                  },
+                  {
+                    "Parent": "DamageEntityParent",
+                    "DamageCalculator": {
+                      "BaseDamage": {
+                        "Physical": 28
+                      }
+                    }
+                  },
+                  {
+                    "Type": "ApplyEffect",
+                    "EffectId": "Vanguard_Staggered",
+                    "Entity": "Target"
+                  }
+                ]
+              },
+              "Failed": {
+                "Type": "EffectCondition",
+                "Entity": "Target",
+                "EntityEffectIds": [
+                  "Vanguard_Staggered"
+                ],
+                "Match": "All",
+                "Next": {
+                  "Type": "Serial",
+                  "Interactions": [
+                    {
+                      "Type": "ClearEntityEffect",
+                      "Entity": "Target",
+                      "EntityEffectId": "Vanguard_OffBalance"
+                    },
+                    {
+                      "Type": "ClearEntityEffect",
+                      "Entity": "Target",
+                      "EntityEffectId": "Vanguard_Staggered"
+                    },
+                    {
+                      "Parent": "DamageEntityParent",
+                      "DamageCalculator": {
+                        "BaseDamage": {
+                          "Physical": 28
+                        }
+                      }
+                    },
+                    {
+                      "Type": "ApplyEffect",
+                      "EffectId": "Vanguard_Staggered",
+                      "Entity": "Target"
+                    }
+                  ]
+                },
+                "Failed": {
+                  "Type": "Serial",
+                  "Interactions": [
+                    {
+                      "Parent": "DamageEntityParent",
+                      "DamageCalculator": {
+                        "BaseDamage": {
+                          "Physical": 20
+                        }
+                      }
+                    },
+                    {
+                      "Type": "ApplyEffect",
+                      "EffectId": "Vanguard_OffBalance",
+                      "Entity": "Target"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

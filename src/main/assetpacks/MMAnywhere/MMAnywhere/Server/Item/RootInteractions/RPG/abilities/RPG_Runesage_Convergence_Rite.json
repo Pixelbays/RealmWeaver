@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Convergence_Rite"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Convergence_Rite",
+    "Cooldown": 24.0
+  }
+}

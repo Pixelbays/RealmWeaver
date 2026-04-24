@@ -13,6 +13,7 @@ import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildManager;
 import org.pixelbays.rpg.guild.GuildMember;
 
+import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.event.events.player.PlayerChatEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
@@ -80,5 +81,13 @@ public final class GuildChatChannel extends BaseConfiguredChatChannel {
             return finalizeMessage(createBaseMessage(sender, msg)
                     .param("tag", tag));
         };
+    }
+
+    @Nonnull
+    public Message formatNotice(@Nonnull PlayerRef contextPlayer, @Nonnull Message label, @Nonnull String message) {
+        Guild guild = guildManager.getGuildForMember(contextPlayer.getUuid());
+        String tag = guild != null ? guild.getTag() : "";
+        return finalizeMessage(createBaseMessage(label, message)
+                .param("tag", tag));
     }
 }

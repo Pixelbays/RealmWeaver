@@ -1,0 +1,220 @@
+{
+    "DisplayName": "Frost Mage",
+    "Description": "Control-focused ice casters who slow, root, and freeze enemies while spending Frost Runes on heavier spells.",
+    "Icon": "Icons/ItemsGenerated/Weapon_Staff_Frost.png",
+    "Enabled": true,
+    "Visible": true,
+    "Roles": [
+        "dps"
+    ],
+    "UsesCharacterLevel": false,
+    "IsStartingClass": true,
+    "AbilityControlTypeOverride": "AbilitySlots123",
+    "LevelSystemId": "FrostMage",
+    "AbilityUnlocks": [
+        {
+            "AbilityId": "IceBolt",
+            "UnlockLevel": 1
+        },
+        {
+            "AbilityId": "FrostNova",
+            "UnlockLevel": 4
+        },
+        {
+            "AbilityId": "GlacialLance",
+            "UnlockLevel": 8
+        },
+        {
+            "AbilityId": "IceVeil",
+            "UnlockLevel": 12
+        }
+    ],
+    "TalentTrees": [
+        {
+            "TreeId": "frostweaving",
+            "DisplayName": "Frostweaving",
+            "Description": "Shape control magic into escalating freezes, barriers, and rune-powered bursts.",
+            "Roles": [
+                "dps"
+            ],
+            "MaxPoints": 20,
+            "Nodes": [
+                {
+                    "NodeId": "chilled_core",
+                    "DisplayName": "Chilled Core",
+                    "Description": "Increase Mastery by 4 per rank.",
+                    "MaxRank": 3,
+                    "RequiredLevel": 1,
+                    "PositionX": 0,
+                    "PositionY": 0,
+                    "StatModifiers": {
+                        "AdditiveModifiers": {
+                            "Mastery": 4
+                        }
+                    }
+                },
+                {
+                    "NodeId": "rimeflow",
+                    "DisplayName": "Rimeflow",
+                    "Description": "Increase Haste by 3 per rank.",
+                    "MaxRank": 3,
+                    "RequiredLevel": 4,
+                    "RequiredNodes": [
+                        "chilled_core"
+                    ],
+                    "PositionX": -1,
+                    "PositionY": 1,
+                    "StatModifiers": {
+                        "AdditiveModifiers": {
+                            "Haste": 3
+                        }
+                    }
+                },
+                {
+                    "NodeId": "snap_freeze",
+                    "DisplayName": "Snap Freeze",
+                    "Description": "Unlocks the Snap Freeze ability.",
+                    "MaxRank": 1,
+                    "RequiredLevel": 4,
+                    "RequiredNodes": [
+                        "chilled_core"
+                    ],
+                    "PositionX": 1,
+                    "PositionY": 1,
+                    "GrantsAbilityId": "SnapFreeze"
+                },
+                {
+                    "NodeId": "deep_permafrost",
+                    "DisplayName": "Deep Permafrost",
+                    "Description": "Increase Mastery by 3 and Versatility by 2 per rank.",
+                    "MaxRank": 3,
+                    "RequiredLevel": 8,
+                    "RequiredNodes": [
+                        "rimeflow",
+                        "snap_freeze"
+                    ],
+                    "PositionX": 0,
+                    "PositionY": 2,
+                    "StatModifiers": {
+                        "AdditiveModifiers": {
+                            "Mastery": 3,
+                            "Versatility": 2
+                        }
+                    }
+                },
+                {
+                    "NodeId": "frozen_ground",
+                    "DisplayName": "Frozen Ground",
+                    "Description": "Unlocks the Frozen Ground ability.",
+                    "MaxRank": 1,
+                    "RequiredLevel": 10,
+                    "RequiredNodes": [
+                        "deep_permafrost"
+                    ],
+                    "PositionX": -1,
+                    "PositionY": 3,
+                    "GrantsAbilityId": "FrozenGround"
+                },
+                {
+                    "NodeId": "winter_discipline",
+                    "DisplayName": "Winter Discipline",
+                    "Description": "Increase Health by 40 and Versatility by 2 per rank.",
+                    "MaxRank": 3,
+                    "RequiredLevel": 10,
+                    "RequiredNodes": [
+                        "deep_permafrost"
+                    ],
+                    "PositionX": 1,
+                    "PositionY": 3,
+                    "StatModifiers": {
+                        "AdditiveModifiers": {
+                            "Health": 40,
+                            "Versatility": 2
+                        }
+                    }
+                },
+                {
+                    "NodeId": "crystal_aegis",
+                    "DisplayName": "Crystal Aegis",
+                    "Description": "Unlocks the Crystal Aegis ability.",
+                    "MaxRank": 1,
+                    "RequiredLevel": 14,
+                    "RequiredNodes": [
+                        "frozen_ground"
+                    ],
+                    "PositionX": -1,
+                    "PositionY": 4,
+                    "GrantsAbilityId": "CrystalAegis"
+                },
+                {
+                    "NodeId": "shatter_instinct",
+                    "DisplayName": "Shatter Instinct",
+                    "Description": "Increase Critical Strike by 4 per rank.",
+                    "MaxRank": 3,
+                    "RequiredLevel": 14,
+                    "RequiredNodes": [
+                        "winter_discipline"
+                    ],
+                    "PositionX": 1,
+                    "PositionY": 4,
+                    "StatModifiers": {
+                        "AdditiveModifiers": {
+                            "CriticalStrike": 4
+                        }
+                    }
+                },
+                {
+                    "NodeId": "blizzard_orb",
+                    "DisplayName": "Blizzard Orb",
+                    "Description": "Unlocks the Blizzard Orb ability.",
+                    "MaxRank": 1,
+                    "RequiredLevel": 18,
+                    "RequiredNodes": [
+                        "crystal_aegis",
+                        "shatter_instinct"
+                    ],
+                    "PositionX": 0,
+                    "PositionY": 5,
+                    "GrantsAbilityId": "BlizzardOrb"
+                },
+                {
+                    "NodeId": "eternal_winter",
+                    "DisplayName": "Eternal Winter",
+                    "Description": "Increase Health by 100, Mastery by 6, and Haste by 4.",
+                    "MaxRank": 1,
+                    "RequiredLevel": 20,
+                    "RequiredNodes": [
+                        "blizzard_orb"
+                    ],
+                    "PositionX": 0,
+                    "PositionY": 6,
+                    "StatModifiers": {
+                        "AdditiveModifiers": {
+                            "Health": 100,
+                            "Mastery": 6,
+                            "Haste": 4
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "ClassColorPrimary": "#73d8ff",
+    "ClassColorAlt": "#dff7ff",
+    "ResourceStats": [
+        {
+            "StatId": "FrostRunes",
+            "Color": "#73d8ff",
+            "Priority": 1
+        }
+    ],
+    "ResourceDisplays": [
+        {
+            "StatId": "FrostRunes",
+            "Label": "Frost Runes",
+            "DisplayMode": "Charges",
+            "MaxCharges": 3,
+            "FillColor": "#73d8ff"
+        }
+    ]
+}

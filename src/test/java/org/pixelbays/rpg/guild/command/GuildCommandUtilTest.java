@@ -25,6 +25,16 @@ class GuildCommandUtilTest {
     }
 
     @Test
+    void managerResultMessage_newInviteMessages_mapToExpectedKeys() {
+        assertEquals(
+                "pixelbays.rpg.guild.error.noPendingInvite",
+                GuildCommandUtil.managerResultMessage("You do not have a pending guild invite.").getMessageId());
+        assertEquals(
+                "pixelbays.rpg.guild.success.inviteDeclined",
+                GuildCommandUtil.managerResultMessage("Guild invite declined.").getMessageId());
+    }
+
+    @Test
     void managerResultMessage_createdGuild_extractsNameParam() {
         Message msg = GuildCommandUtil.managerResultMessage("Created guild Knights of Pixelbays.");
         assertEquals("pixelbays.rpg.guild.success.created", msg.getMessageId());

@@ -1,0 +1,27 @@
+{
+  "Duration": 2.5,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": true,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#7ac8ff",
+    "EntityTopTint": "#c7f1ff",
+    "Particles": [
+      {
+        "SystemId": "Effect_Snow_Impact",
+        "Scale": 2,
+        "DetachedFromModel": false
+      }
+    ],
+    "MovementEffects": {
+      "DisableAll": true,
+      "DisableForward": false,
+      "DisableBackward": false,
+      "DisableLeft": false,
+      "DisableRight": false,
+      "DisableSprint": false,
+      "DisableCrouch": false,
+      "DisableJump": false
+    },
+    "ScreenEffect": "ScreenEffects/Snow.png"
+  }
+}

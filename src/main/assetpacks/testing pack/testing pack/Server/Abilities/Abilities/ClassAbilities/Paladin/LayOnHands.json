@@ -10,11 +10,8 @@
   "AbilityType": "Active",
   "GlobalCooldown": 6.0,
   "GlobalCooldownCategories": [],
-  "PrerequisiteAbilities": [],
   "Parent": "GlobalBase",
   "StatRequirements": {},
-  "HasRanks": true,
-  "MaxRank": 3,
   "Interactions": {
     "Primary": "RPG_LayOnHands"
   },

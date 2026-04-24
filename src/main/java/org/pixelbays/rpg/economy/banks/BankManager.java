@@ -28,7 +28,6 @@ import org.pixelbays.rpg.global.util.RpgLogging;
 
 import com.hypixel.hytale.assetstore.AssetRegistry;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
-import com.hypixel.hytale.server.core.inventory.Inventory;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
@@ -137,7 +136,7 @@ public class BankManager {
     public BankActionResult getOrCreateBank(@Nonnull BankTypeDefinition definition,
             @Nonnull String ownerId,
             @Nonnull UUID payerId,
-            @Nonnull Inventory payerInventory) {
+            @Nonnull CurrencyAccessContext payerContext) {
         if (!definition.isEnabled()) {
             return BankActionResult.failure("Bank type is disabled: " + definition.getId());
         }
@@ -151,7 +150,7 @@ public class BankManager {
             return BankActionResult.success("Loaded existing bank.", existing);
         }
 
-        BankActionResult costResult = chargeCost(definition, definition.getOpenCost(), ownerId, payerId, payerInventory);
+        BankActionResult costResult = chargeCost(definition, definition.getOpenCost(), ownerId, payerId, payerContext);
         if (!costResult.isSuccess()) {
             return costResult;
         }
@@ -259,12 +258,12 @@ public class BankManager {
     public BankActionResult getOrCreateConfiguredBank(@Nonnull BankScope scope,
             @Nonnull String ownerId,
             @Nonnull UUID payerId,
-            @Nonnull Inventory payerInventory) {
+            @Nonnull CurrencyAccessContext payerContext) {
         BankTypeDefinition definition = resolveDefaultBankType(scope);
         if (definition == null) {
             return BankActionResult.failure("No default bank type available for scope " + scope.name() + '.');
         }
-        return getOrCreateBank(definition, ownerId, payerId, payerInventory);
+        return getOrCreateBank(definition, ownerId, payerId, payerContext);
     }
 
     @Nonnull
@@ -274,12 +273,12 @@ public class BankManager {
     }
 
     @Nonnull
-    public BankActionResult getOrCreateDefaultPersonalBank(@Nonnull UUID ownerId, @Nonnull Inventory payerInventory) {
+    public BankActionResult getOrCreateDefaultPersonalBank(@Nonnull UUID ownerId, @Nonnull CurrencyAccessContext payerContext) {
         String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
         return getOrCreateConfiguredBank(BankScope.Character,
                 characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId,
                 ownerId,
-                payerInventory);
+                payerContext);
     }
 
     @Nonnull
@@ -288,8 +287,8 @@ public class BankManager {
     }
 
     @Nonnull
-    public BankActionResult getOrCreateDefaultAccountBank(@Nonnull UUID ownerId, @Nonnull Inventory payerInventory) {
-        return getOrCreateConfiguredBank(BankScope.Account, ownerId.toString(), ownerId, payerInventory);
+    public BankActionResult getOrCreateDefaultAccountBank(@Nonnull UUID ownerId, @Nonnull CurrencyAccessContext payerContext) {
+        return getOrCreateConfiguredBank(BankScope.Account, ownerId.toString(), ownerId, payerContext);
     }
 
     @Nonnull
@@ -300,8 +299,8 @@ public class BankManager {
     @Nonnull
     public BankActionResult getOrCreateDefaultGuildBank(@Nonnull UUID guildId,
             @Nonnull UUID payerId,
-            @Nonnull Inventory payerInventory) {
-        return getOrCreateConfiguredBank(BankScope.Guild, guildId.toString(), payerId, payerInventory);
+            @Nonnull CurrencyAccessContext payerContext) {
+        return getOrCreateConfiguredBank(BankScope.Guild, guildId.toString(), payerId, payerContext);
     }
 
     @Nonnull
@@ -336,7 +335,7 @@ public class BankManager {
     @Nonnull
     public BankActionResult getOrCreateDefaultProfessionBank(@Nonnull UUID ownerId,
             @Nonnull String professionId,
-            @Nonnull Inventory payerInventory) {
+            @Nonnull CurrencyAccessContext payerContext) {
         BankTypeDefinition definition = resolveDefaultBankType(BankScope.Profession);
         if (definition == null) {
             return BankActionResult.failure("No default bank type available for scope " + BankScope.Profession.name() + '.');
@@ -344,7 +343,7 @@ public class BankManager {
         String characterOwnerId = Realmweavers.get().getCharacterManager().resolveCharacterOwnerId(ownerId);
         return getOrCreateBank(definition,
             createQualifiedOwnerId(characterOwnerId.isBlank() ? ownerId.toString() : characterOwnerId, professionId), ownerId,
-                payerInventory);
+                payerContext);
     }
 
     @Nullable
@@ -393,7 +392,7 @@ public class BankManager {
     @Nonnull
     public BankActionResult unlockNextTab(@Nonnull BankAccount bankAccount,
             @Nonnull UUID payerId,
-            @Nonnull Inventory payerInventory) {
+            @Nonnull CurrencyAccessContext payerContext) {
         BankTypeDefinition definition = getDefinition(bankAccount);
         if (definition == null) {
             return BankActionResult.failure("Unknown bank type: " + bankAccount.getBankTypeId());
@@ -405,7 +404,7 @@ public class BankManager {
         }
 
         BankActionResult costResult = chargeCost(definition, getNextTabUnlockCost(bankAccount), bankAccount.getOwnerId(),
-                payerId, payerInventory);
+                payerId, payerContext);
         if (!costResult.isSuccess()) {
             return costResult;
         }
@@ -451,7 +450,7 @@ public class BankManager {
 
     public long getSourceCurrencyBalance(@Nonnull BankAccount bankAccount,
             @Nonnull UUID playerId,
-            @Nonnull Inventory inventory,
+            @Nonnull CurrencyAccessContext payerContext,
             @Nonnull String currencyId) {
         CurrencyScope playerScope = resolveBankWalletPlayerScope(bankAccount);
         String playerOwnerId = resolveBankWalletPlayerOwnerId(bankAccount, playerId);
@@ -460,7 +459,7 @@ public class BankManager {
         }
 
         CurrencyAccessContext playerAccess = playerScope == CurrencyScope.Character
-                ? CurrencyAccessContext.fromInventory(inventory)
+                ? payerContext
                 : CurrencyAccessContext.empty();
         return getCurrencyManager().getBalance(playerScope, playerOwnerId, currencyId, playerAccess);
     }
@@ -468,7 +467,7 @@ public class BankManager {
     @Nonnull
     public BankActionResult depositCurrency(@Nonnull BankAccount bankAccount,
             @Nonnull UUID playerId,
-            @Nonnull Inventory inventory,
+            @Nonnull CurrencyAccessContext payerContext,
             @Nonnull String currencyId,
             long amount) {
         if (!supportsCurrencyStorage(bankAccount)) {
@@ -498,7 +497,7 @@ public class BankManager {
         }
 
         CurrencyAccessContext playerAccess = playerScope == CurrencyScope.Character
-                ? CurrencyAccessContext.fromInventory(inventory)
+                ? payerContext
                 : CurrencyAccessContext.empty();
         CurrencyActionResult spendResult = getCurrencyManager().spend(playerScope, playerOwnerId,
                 new CurrencyAmountDefinition(currencyId, amount), playerAccess);
@@ -519,7 +518,7 @@ public class BankManager {
     @Nonnull
     public BankActionResult withdrawCurrency(@Nonnull BankAccount bankAccount,
             @Nonnull UUID playerId,
-            @Nonnull Inventory inventory,
+            @Nonnull CurrencyAccessContext payerContext,
             @Nonnull String currencyId,
             long amount) {
         if (!supportsCurrencyStorage(bankAccount)) {
@@ -549,7 +548,7 @@ public class BankManager {
         }
 
         CurrencyAccessContext playerAccess = playerScope == CurrencyScope.Character
-                ? CurrencyAccessContext.fromInventory(inventory)
+                ? payerContext
                 : CurrencyAccessContext.empty();
         long playerBalance = getCurrencyManager().getBalance(playerScope, playerOwnerId, currencyId, playerAccess);
         if (playerBalance + amount > definition.getMaxBalance()) {
@@ -645,13 +644,12 @@ public class BankManager {
             @Nonnull BankTypeDefinition.BankCostDefinition cost,
             @Nonnull String bankOwnerId,
             @Nonnull UUID payerId,
-            @Nonnull Inventory payerInventory) {
+            @Nonnull CurrencyAccessContext payerContext) {
         if (cost.isFree()) {
             return BankActionResult.success("No cost.");
         }
 
-        CurrencyAccessContext accessContext = CurrencyAccessContext.fromInventory(payerInventory);
-        if (!canAffordCost(definition, cost, bankOwnerId, payerId, accessContext, payerInventory)) {
+        if (!canAffordCost(definition, cost, bankOwnerId, payerId, payerContext)) {
             return BankActionResult.failure("Insufficient bank cost: " + describeCost(cost));
         }
 
@@ -662,14 +660,14 @@ public class BankManager {
                     costScope,
                     currencyOwnerId,
                     new CurrencyAmountDefinition(cost.getCurrencyId(), cost.getAmount()),
-                    accessContext);
+                    payerContext);
             if (!result.isSuccess()) {
                 return BankActionResult.failure("Insufficient bank cost: " + describeCost(cost));
             }
         }
 
         if (cost.hasItemCost()) {
-            removeTaggedItems(payerInventory, cost.getItemTag(), cost.getItemCount());
+            removeTaggedItems(payerContext, cost.getItemTag(), cost.getItemCount());
         }
 
         return BankActionResult.success("Paid bank cost.");
@@ -679,8 +677,7 @@ public class BankManager {
             @Nonnull BankTypeDefinition.BankCostDefinition cost,
             @Nonnull String bankOwnerId,
             @Nonnull UUID payerId,
-            @Nonnull CurrencyAccessContext accessContext,
-            @Nonnull Inventory payerInventory) {
+            @Nonnull CurrencyAccessContext accessContext) {
         if (cost.hasCurrencyCost()) {
             CurrencyScope costScope = resolveCurrencyScope(definition.getScope(), cost);
             String currencyOwnerId = resolveCurrencyOwnerId(costScope, bankOwnerId, payerId);
@@ -697,7 +694,7 @@ public class BankManager {
             }
         }
 
-        return !cost.hasItemCost() || countTaggedItems(payerInventory, cost.getItemTag()) >= cost.getItemCount();
+        return !cost.hasItemCost() || countTaggedItems(accessContext, cost.getItemTag()) >= cost.getItemCount();
     }
 
     @Nonnull
@@ -765,12 +762,12 @@ public class BankManager {
         if (!cost.getNote().isBlank()) {
             parts.add(cost.getNote());
         }
-        return parts.isEmpty() ? "Free" : String.join(" • ", parts);
+        return parts.isEmpty() ? "Free" : String.join(" â€¢ ", parts);
     }
 
-    private int countTaggedItems(@Nonnull Inventory inventory, @Nonnull String itemTag) {
+    private int countTaggedItems(@Nonnull CurrencyAccessContext payerContext, @Nonnull String itemTag) {
         int total = 0;
-        for (ItemContainer container : getInventoryContainers(inventory)) {
+        for (ItemContainer container : payerContext.getItemContainers()) {
             if (container == null) {
                 continue;
             }
@@ -787,9 +784,9 @@ public class BankManager {
         return total;
     }
 
-    private void removeTaggedItems(@Nonnull Inventory inventory, @Nonnull String itemTag, int amount) {
+    private void removeTaggedItems(@Nonnull CurrencyAccessContext payerContext, @Nonnull String itemTag, int amount) {
         int remaining = amount;
-        for (ItemContainer container : getInventoryContainers(inventory)) {
+        for (ItemContainer container : payerContext.getItemContainers()) {
             if (container == null) {
                 continue;
             }
@@ -825,11 +822,6 @@ public class BankManager {
                 && item.getData() != null
                 && item.getData().getExpandedTagIndexes() != null
                 && item.getData().getExpandedTagIndexes().contains(tagIndex);
-    }
-
-    @Nonnull
-    private List<ItemContainer> getInventoryContainers(@Nonnull Inventory inventory) {
-        return List.of(inventory.getStorage(), inventory.getHotbar(), inventory.getBackpack());
     }
 
     @Nonnull

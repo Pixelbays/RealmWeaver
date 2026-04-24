@@ -12,6 +12,12 @@ import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 
 public final class ResourceBarsHudModule implements PlayerHudModule {
 
+    private static final String SELECTOR_RESOURCE_HOST = "#ResourceBars";
+    public static final int RESOURCE_ROOT_TOP = 10;
+    public static final int RESOURCE_ROOT_LEFT = 750;
+    public static final int RESOURCE_ROOT_WIDTH = ProgressionHudModule.BAR_WIDTH;
+    public static final int RESOURCE_ROOT_BOTTOM = 150;
+
     public static final int RESOURCE_BAR_HEIGHT = 12;
     public static final int RESOURCE_BAR_GAP = 4;
     public static final int RESOURCE_CHARGE_GAP = 3;
@@ -62,7 +68,7 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
             lastStates = new int[0];
 
             UICommandBuilder cmd = new UICommandBuilder();
-            cmd.clear("#ResourceBars");
+            cmd.clear(SELECTOR_RESOURCE_HOST);
             hud.getProgressionModule().syncRootHeight(cmd);
             hud.applyModuleUpdate(cmd);
             return;
@@ -136,13 +142,20 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
     }
 
     void appendDebugUi(@Nonnull StringBuilder ui) {
-        ui.append("Group #ResourceBars {\n");
-        ui.append("  LayoutMode: Bottom;\n");
-        ui.append("  Anchor: (Top: 10, Left: 750, Width: 100, Bottom: 150);\n");
+        ui.append("Group #ResourceBarsRoot {\n");
+        ui.append("  Anchor: (Top: ").append(RESOURCE_ROOT_TOP)
+                .append(", Left: ").append(RESOURCE_ROOT_LEFT)
+                .append(", Width: ").append(RESOURCE_ROOT_WIDTH)
+                .append(", Bottom: ").append(RESOURCE_ROOT_BOTTOM)
+                .append(");\n\n");
+        ui.append("  Group #ResourceBars {\n");
+        ui.append("    LayoutMode: Bottom;\n");
+        ui.append("    Anchor: (Full: 0);\n");
         if (!lastLayout.isEmpty()) {
             ui.append('\n');
-            HudModuleSupport.appendIndentedBlock(ui, buildResourceBarsMarkup(lastLayout), 2);
+            HudModuleSupport.appendIndentedBlock(ui, buildResourceBarsMarkup(lastLayout), 4);
         }
+        ui.append("  }\n");
         ui.append("}\n\n");
     }
 
@@ -187,12 +200,12 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
     }
 
     private static void rebuildResourceBars(@Nonnull UICommandBuilder cmd, @Nonnull List<ResourceBarData> bars) {
-        cmd.clear("#ResourceBars");
+        cmd.clear(SELECTOR_RESOURCE_HOST);
 
         for (int i = 0; i < bars.size(); i++) {
             StringBuilder ui = new StringBuilder(1024);
             appendResourceBarMarkup(ui, i, bars.get(i));
-            cmd.appendInline("#ResourceBars", ui.toString());
+            cmd.appendInline(SELECTOR_RESOURCE_HOST, ui.toString());
         }
     }
 
@@ -240,7 +253,7 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
             int filledCharges = clampChargeCount(bar.currentCharges, bar.maxCharges);
             ui.append("    LayoutMode: Left;\n\n");
             for (int chargeIndex = 0; chargeIndex < safeMaxCharges; chargeIndex++) {
-                ui.append("    Group #ResChargeSlot").append(index).append('_').append(chargeIndex).append(" {\n");
+                ui.append("    Group #").append(resourceChargeSlotId(index, chargeIndex)).append(" {\n");
                 ui.append("      Anchor: (Width: ").append(chargeWidth)
                         .append(", Height: ").append(RESOURCE_BAR_HEIGHT);
                 if (chargeIndex < safeMaxCharges - 1) {
@@ -255,7 +268,7 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
                     ui.append("\n");
                 }
 
-                ui.append("      Group #ResChargeFill").append(index).append('_').append(chargeIndex).append(" {\n");
+                ui.append("      Group #").append(resourceChargeFillId(index, chargeIndex)).append(" {\n");
                 if (useChargeAsset) {
                     ui.append("        Background: (TexturePath: \"")
                             .append(HudModuleSupport.escapeUiString(bar.assetPath))
@@ -309,8 +322,23 @@ public final class ResourceBarsHudModule implements PlayerHudModule {
             fillAnchor.setTop(Value.of(0));
             fillAnchor.setWidth(Value.of(chargeIndex < safeFilledCharges ? chargeWidth : 0));
             fillAnchor.setHeight(Value.of(RESOURCE_BAR_HEIGHT));
-            cmd.setObject("#ResChargeFill" + resourceIndex + "_" + chargeIndex + ".Anchor", fillAnchor);
+            cmd.setObject(resourceChargeFillSelector(resourceIndex, chargeIndex), fillAnchor);
         }
+    }
+
+    @Nonnull
+    private static String resourceChargeSlotId(int resourceIndex, int chargeIndex) {
+        return "ResChargeSlot" + resourceIndex + "C" + chargeIndex;
+    }
+
+    @Nonnull
+    private static String resourceChargeFillId(int resourceIndex, int chargeIndex) {
+        return "ResChargeFill" + resourceIndex + "C" + chargeIndex;
+    }
+
+    @Nonnull
+    private static String resourceChargeFillSelector(int resourceIndex, int chargeIndex) {
+        return "#" + resourceChargeFillId(resourceIndex, chargeIndex) + ".Anchor";
     }
 
     private static int computeChargeSegmentWidth(int maxCharges, boolean useChargeAsset) {

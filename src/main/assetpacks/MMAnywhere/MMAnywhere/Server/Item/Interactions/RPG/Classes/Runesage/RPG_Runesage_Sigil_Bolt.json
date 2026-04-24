@@ -1,0 +1,132 @@
+{
+  "Type": "Simple",
+  "RunTime": 0.2,
+  "Effects": {
+    "ItemAnimationId": "CastLeftCharged",
+    "WorldSoundEventId": "SFX_Skeleton_Mage_Spellbook_Impact",
+    "LocalSoundEventId": "SFX_Skeleton_Mage_Spellbook_Impact"
+  },
+  "Next": {
+    "Type": "Selector",
+    "Selector": {
+      "Id": "Raycast",
+      "Offset": {
+        "Y": 1.6
+      },
+      "Distance": 10,
+      "IgnoreFluids": true,
+      "IgnoreEmptyCollisionMaterial": true
+    },
+    "HitEntityRules": [
+      {
+        "Matchers": [
+          {
+            "Type": "Player"
+          }
+        ],
+        "Next": {
+          "Interactions": [
+            {
+              "Type": "ChangeStat",
+              "Entity": "Target",
+              "StatModifiers": {
+                "Health": 10
+              }
+            },
+            {
+              "Type": "ApplyEffect",
+              "EffectId": "Runesage_Warded",
+              "Entity": "Target"
+            },
+            {
+              "Type": "ChangeStat",
+              "Entity": "User",
+              "StatModifiers": {
+                "Sigils": 1
+              }
+            }
+          ]
+        }
+      },
+      {
+        "Matchers": [
+          {
+            "Type": "Vulnerable"
+          },
+          {
+            "Type": "Player",
+            "Invert": true
+          }
+        ],
+        "Next": {
+          "Interactions": [
+            {
+              "Type": "EffectCondition",
+              "Entity": "Target",
+              "EntityEffectIds": [
+                "Runesage_Marked"
+              ],
+              "Match": "All",
+              "Next": {
+                "Type": "Serial",
+                "Interactions": [
+                  {
+                    "Type": "ClearEntityEffect",
+                    "Entity": "Target",
+                    "EntityEffectId": "Runesage_Marked"
+                  },
+                  {
+                    "Parent": "DamageEntityParent",
+                    "DamageCalculator": {
+                      "BaseDamage": {
+                        "Lightning": 14
+                      }
+                    }
+                  },
+                  {
+                    "Type": "ApplyEffect",
+                    "EffectId": "Runesage_Fractured",
+                    "Entity": "Target"
+                  },
+                  {
+                    "Type": "ChangeStat",
+                    "Entity": "User",
+                    "StatModifiers": {
+                      "Sigils": 1
+                    }
+                  }
+                ]
+              },
+              "Failed": {
+                "Type": "Serial",
+                "Interactions": [
+                  {
+                    "Parent": "DamageEntityParent",
+                    "DamageCalculator": {
+                      "BaseDamage": {
+                        "Lightning": 10
+                      }
+                    }
+                  },
+                  {
+                    "Type": "ApplyEffect",
+                    "EffectId": "Runesage_Marked",
+                    "Entity": "Target"
+                  },
+                  {
+                    "Type": "ChangeStat",
+                    "Entity": "User",
+                    "StatModifiers": {
+                      "Sigils": 1
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "FailOn": "Entity"
+  }
+}

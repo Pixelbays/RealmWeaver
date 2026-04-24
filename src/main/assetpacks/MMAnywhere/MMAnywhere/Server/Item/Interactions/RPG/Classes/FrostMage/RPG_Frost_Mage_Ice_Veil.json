@@ -1,0 +1,34 @@
+{
+  "Type": "Serial",
+  "Interactions": [
+    {
+      "Type": "Simple",
+      "RunTime": 0.1,
+      "Effects": {
+        "ItemAnimationId": "CastLeftCharged",
+        "WorldSoundEventId": "SFX_Divine_Respawn",
+        "LocalSoundEventId": "SFX_Divine_Respawn",
+        "Particles": [
+          {
+            "SystemId": "Dust_Sparkles_Fine",
+            "TargetEntityPart": "Entity",
+            "Scale": 0.6
+          }
+        ]
+      }
+    },
+    {
+      "Type": "ChangeStat",
+      "Entity": "User",
+      "StatModifiers": {
+        "Health": 18,
+        "FrostRunes": 1
+      }
+    },
+    {
+      "Type": "ApplyEffect",
+      "EffectId": "FrostMage_IceVeil",
+      "Entity": "User"
+    }
+  ]
+}

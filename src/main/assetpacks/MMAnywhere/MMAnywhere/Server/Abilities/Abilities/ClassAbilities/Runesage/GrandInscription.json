@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage",
+    "Passive"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.grand_inscription.name",
+    "Description": "mma.rpg.abilities.grand_inscription.description"
+  },
+  "AbilityType": "Passive",
+  "Parent": "PassiveBase",
+  "GlobalCooldown": 0.0,
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Grand_Inscription"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "While at full Sigils, become grandly inscribed and gain a strong support-caster buff.",
+  "Icon": "Icons/ItemsGenerated/Weapon_Spellbook_Grimoire_Purple.png"
+}

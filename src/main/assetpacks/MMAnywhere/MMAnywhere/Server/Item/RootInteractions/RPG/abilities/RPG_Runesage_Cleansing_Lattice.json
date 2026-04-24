@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Cleansing_Lattice"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Cleansing_Lattice",
+    "Cooldown": 16.0
+  }
+}

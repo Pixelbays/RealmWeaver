@@ -1,0 +1,121 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Sigils": 1
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": -1,
+          "Health": 14
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_Sanctuary",
+        "Entity": "User"
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_PulseWard",
+        "Entity": "User"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 5.5,
+          "Offset": {
+            "Z": -2.0
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 16
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Sanctuary",
+                  "Entity": "Target"
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_PulseWard",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "Failed": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Health": 10
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_Sanctuary",
+        "Entity": "User"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 4.5,
+          "Offset": {
+            "Z": -2.0
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 12
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Sanctuary",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Frost_Mage_Frost_Nova"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Frost_Mage_Frost_Nova",
+    "Cooldown": 8.0
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "Categories": [
+    "FrostMage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.glacial_lance.name",
+    "Description": "mma.rpg.abilities.glacial_lance.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {
+    "FrostRunes": 1
+  },
+  "Interactions": {
+    "Primary": "RPG_Frost_Mage_Glacial_Lance"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Spend 1 Frost Rune to skewer a chilled foe and freeze it in place.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Battleaxe",
+  "Icon": "Icons/ItemsGenerated/Ingredient_Life_Essence_Rice.png"
+}

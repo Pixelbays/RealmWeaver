@@ -11,10 +11,7 @@
   "GlobalCooldown": 12.0,
   "Parent": "GlobalBase",
   "GlobalCooldownCategories": [],
-  "PrerequisiteAbilities": [],
   "StatRequirements": {},
-  "HasRanks": false,
-  "MaxRank": 1,
   "Interactions": {
     "Primary": "RPG_Divine_Shield"
   },

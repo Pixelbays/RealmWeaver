@@ -1,0 +1,73 @@
+{
+  "destinationAssetPackRoot": "C:\\Users\\Heru\\Documents\\Projects\\hytale\\Mods\\RPG MOD\\src\\main\\assetpacks\\MMAnywhere\\MMAnywhere",
+  "sourceDropsRoot": "C:\\Users\\Heru\\Documents\\Projects\\hytale\\Mods\\z-HytaleServers\\assets\\Server\\Drops\\NPCs",
+  "expRules": [
+    {
+      "folder": "Beast",
+      "expMin": 40,
+      "expMax": 80
+    },
+    {
+      "folder": "Flying_Beast",
+      "expMin": 50,
+      "expMax": 90
+    },
+    {
+      "folder": "Swimming_Beast",
+      "expMin": 45,
+      "expMax": 85
+    },
+    {
+      "folder": "Intelligent",
+      "expMin": 70,
+      "expMax": 130
+    },
+    {
+      "folder": "Elemental",
+      "expMin": 85,
+      "expMax": 150
+    },
+    {
+      "folder": "Undead",
+      "expMin": 80,
+      "expMax": 140
+    },
+    {
+      "folder": "Void",
+      "expMin": 100,
+      "expMax": 180
+    },
+    {
+      "folder": "Boss",
+      "expMin": 250,
+      "expMax": 450
+    }
+  ],
+  "excludeFolders": [
+    "Critter",
+    "Flying_Critter",
+    "Swimming_Critter",
+    "Wildlife",
+    "Flying_Wildlife",
+    "Swimming_Wildlife",
+    "Livestock",
+    "Inventory",
+    "Loadouts"
+  ],
+  "excludeKeywords": [
+    "chicken",
+    "chick",
+    "piglet",
+    "lamb",
+    "calf",
+    "cub",
+    "civilian",
+    "merchant",
+    "fisherman",
+    "sapling",
+    "seedling",
+    "sproutling"
+  ],
+  "systemId": "combat",
+  "removeStaleOverrides": true
+}

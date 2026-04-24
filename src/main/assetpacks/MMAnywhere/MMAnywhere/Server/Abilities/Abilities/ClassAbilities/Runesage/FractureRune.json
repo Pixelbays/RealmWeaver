@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.fracture_rune.name",
+    "Description": "mma.rpg.abilities.fracture_rune.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Fracture_Rune"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Destabilize enemies inside a rune circle, dealing light lightning damage and fracturing them.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Rock_Crystal_Purple.png"
+}

@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.sanctuary_glyph.name",
+    "Description": "mma.rpg.abilities.sanctuary_glyph.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Sanctuary_Glyph"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Project a sanctuary circle that heals and fortifies allies. Spend 1 Sigil to deepen its protection.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Weapon_Spellbook_Grimoire_Brown.png"
+}

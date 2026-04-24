@@ -1,0 +1,36 @@
+{
+  "DisplayName": "Base Class Level",
+  "Description": "Base template for MMA class progression. ",
+  "MaxLevel": 30,
+  "StartingLevel": 1,
+  "Prerequisites": {},
+  "DefaultRewards": {
+    "LevelUpEffects": {
+      "SoundId": "Level_Up_Wildsar",
+      "ParticleEffect": "Temp_Level_Up",
+      "Notification": {
+        "PrimaryMessage": "LEVEL UP! YOU BAD ASS",
+        "SecondaryMessage": "Character level {level}",
+        "IconItemId": "Item_Book"
+      },
+      "EventTitle": {
+        "PrimaryMessage": "LEVEL UP! YOU BAD ASS",
+        "SecondaryMessage": "Character level {level}",
+        "Major": true
+      },
+      "ChatMessage": "You did it! {system} is now Level! {level}",
+      "KillFeedPopup": "You did it! {system} is now Level! {level}"
+    },
+    "StatPoints": 0,
+    "SkillPoints": 1
+  },
+  "LevelRewards": {},
+  "StatGrowth": {
+    "FlatGrowth": {},
+    "MilestoneGrowth": {}
+  },
+  "Enabled": true,
+  "Visible": false,
+  "Icon": "Icons/Items/EditorTools/Entity.png",
+  "ExpCurveRef": "Base_Exp_Curve"
+}

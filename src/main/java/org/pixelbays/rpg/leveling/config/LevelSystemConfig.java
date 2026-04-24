@@ -16,6 +16,7 @@ import com.hypixel.hytale.assetstore.codec.AssetBuilderCodec;
 import com.hypixel.hytale.codec.codecs.map.MapCodec;
 import com.hypixel.hytale.codec.schema.metadata.ui.UIEditor;
 import com.hypixel.hytale.codec.schema.metadata.ui.UIRebuildCaches;
+import com.hypixel.hytale.codec.function.FunctionCodec;
 import com.hypixel.hytale.server.core.asset.common.CommonAssetValidator;
 
 /**
@@ -25,6 +26,12 @@ import com.hypixel.hytale.server.core.asset.common.CommonAssetValidator;
 @SuppressWarnings({ "deprecation", "ToArrayCallWithZeroLengthArrayArgument", "StringOperationCanBeSimplified" })
 public class LevelSystemConfig implements
         JsonAssetWithMap<String, DefaultAssetMap<String, LevelSystemConfig>> {
+
+    private static final FunctionCodec<Map<String, Float>, Map<Integer, Float>> INT_FLOAT_MAP_CODEC =
+        new FunctionCodec<>(
+            new MapCodec<>(Codec.FLOAT, HashMap::new),
+            LevelSystemConfig::toIntKeyFloatMap,
+            LevelSystemConfig::toStringKeyFloatMap);
 
     public static final AssetBuilderCodec<String, LevelSystemConfig> CODEC = AssetBuilderCodec
             .builder(
@@ -60,6 +67,19 @@ public class LevelSystemConfig implements
                     (i, parent) -> i.ExpCurveRef = parent.ExpCurveRef)
             .addValidator(ExpCurveDefinition.VALIDATOR_CACHE.getValidator())
             .add()
+                .appendInherited(new KeyedCodec<>("ExpCurveType", Codec.STRING, false, true),
+                    (i, s) -> i.ExpCurveType = s, i -> i.ExpCurveType,
+                    (i, parent) -> i.ExpCurveType = parent.ExpCurveType)
+                .add()
+                .appendInherited(new KeyedCodec<>("ExpCurve", ExpCurveDefinition.CHILD_ASSET_CODEC, false, true),
+                    (i, s) -> i.ExpCurveRef = s, i -> i.ExpCurveRef,
+                    (i, parent) -> i.ExpCurveRef = parent.ExpCurveRef)
+                .addValidator(ExpCurveDefinition.VALIDATOR_CACHE.getValidator())
+                .add()
+                .appendInherited(new KeyedCodec<>("ExpTable", INT_FLOAT_MAP_CODEC, false, true),
+                    (i, s) -> i.ExpTable = s, i -> i.ExpTable,
+                    (i, parent) -> i.ExpTable = parent.ExpTable)
+                .add()
             .appendInherited(
                     new KeyedCodec<>("Prerequisites", new MapCodec<>(Codec.INTEGER, HashMap::new), false, true),
                     (i, s) -> i.Prerequisites = s, i -> i.Prerequisites,
@@ -223,10 +243,16 @@ public class LevelSystemConfig implements
 
     public void setExpCurveRef(String expCurveRef) {
         this.ExpCurveRef = expCurveRef;
+        this.ExpCurve = null;
     }
 
     public String getExpCurveType() {
-        return ExpCurveType;
+        if (ExpCurveType != null && !ExpCurveType.isBlank()) {
+            return ExpCurveType;
+        }
+
+        ExpCurveDefinition resolvedCurve = getExpCurve();
+        return resolvedCurve == null ? null : resolvedCurve.getType();
     }
 
     public void setExpCurveType(String expCurveType) {
@@ -234,15 +260,46 @@ public class LevelSystemConfig implements
     }
 
     public ExpCurveDefinition getExpCurve() {
+        if (ExpCurve != null) {
+            if (ExpCurveRef == null || ExpCurveRef.isBlank() || ExpCurve.getId().equals(ExpCurveRef)) {
+                return ExpCurve;
+            }
+        }
+
+        if (ExpCurveRef == null || ExpCurveRef.isBlank()) {
+            return ExpCurve;
+        }
+
+        DefaultAssetMap<String, ExpCurveDefinition> assetMap = ExpCurveDefinition.getAssetMap();
+        if (assetMap == null) {
+            return ExpCurve;
+        }
+
+        ExpCurveDefinition resolvedCurve = assetMap.getAsset(ExpCurveRef);
+        if (resolvedCurve != null) {
+            ExpCurve = resolvedCurve;
+            if (ExpCurveType == null || ExpCurveType.isBlank()) {
+                ExpCurveType = resolvedCurve.getType();
+            }
+        }
+
         return ExpCurve;
     }
 
     public void setExpCurve(ExpCurveDefinition expCurve) {
         this.ExpCurve = expCurve;
+        this.ExpCurveRef = expCurve == null ? this.ExpCurveRef : expCurve.getId();
+        if (expCurve != null && (this.ExpCurveType == null || this.ExpCurveType.isBlank())) {
+            this.ExpCurveType = expCurve.getType();
+        }
     }
 
     public Map<Integer, Float> getExpTable() {
         return ExpTable;
+    }
+
+    public void setExpTable(Map<Integer, Float> expTable) {
+        this.ExpTable = expTable;
     }
 
     public Map<String, Integer> getPrerequisites() {
@@ -326,11 +383,65 @@ public class LevelSystemConfig implements
      * Calculate experience required for a specific level
      */
     public float calculateExpForLevel(int level) {
-        if (level < 1)
+        if (level < 1) {
             return 0;
+        }
+
+        if (ExpTable != null) {
+            Float configuredValue = ExpTable.get(level);
+            if (configuredValue != null) {
+                return Math.max(0f, configuredValue);
+            }
+        }
+
+        ExpCurveDefinition resolvedCurve = getExpCurve();
+        if (resolvedCurve != null) {
+            return Math.max(0f, resolvedCurve.calculate(level));
+        }
 
         // Fallback to simple linear
         return 100 * level;
+    }
+
+    private static Map<Integer, Float> toIntKeyFloatMap(Map<String, Float> map) {
+        Map<Integer, Float> converted = new HashMap<>();
+        if (map == null) {
+            return converted;
+        }
+
+        for (Map.Entry<String, Float> entry : map.entrySet()) {
+            Integer key = parseIntKey(entry.getKey());
+            if (key != null) {
+                converted.put(key, entry.getValue());
+            }
+        }
+
+        return converted;
+    }
+
+    private static Map<String, Float> toStringKeyFloatMap(Map<Integer, Float> map) {
+        Map<String, Float> converted = new HashMap<>();
+        if (map == null) {
+            return converted;
+        }
+
+        for (Map.Entry<Integer, Float> entry : map.entrySet()) {
+            converted.put(String.valueOf(entry.getKey()), entry.getValue());
+        }
+
+        return converted;
+    }
+
+    private static Integer parseIntKey(String key) {
+        if (key == null) {
+            return null;
+        }
+
+        try {
+            return Integer.valueOf(key);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
 }

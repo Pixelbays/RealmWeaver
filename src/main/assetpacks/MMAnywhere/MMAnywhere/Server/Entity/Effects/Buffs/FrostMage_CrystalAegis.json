@@ -1,0 +1,21 @@
+{
+  "Duration": 6.0,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": false,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#71d9ff",
+    "EntityTopTint": "#ffffff",
+    "ModelVFXId": "Stoneskin",
+    "Particles": [
+      {
+        "SystemId": "Blue_Beam"
+      },
+      {
+        "SystemId": "Ash"
+      }
+    ],
+    "KnockbackMultiplier": 0.25,
+    "WorldSoundEventId": "SFX_Divine_Respawn",
+    "LocalSoundEventId": "SFX_Divine_Respawn"
+  }
+}

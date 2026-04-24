@@ -1,0 +1,117 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Sigils": 1
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": -1,
+          "Health": 10
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_RenewalGrace",
+        "Entity": "User"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 5.0,
+          "Offset": {
+            "Z": -2.5
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 14
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_RenewalGrace",
+                  "Entity": "Target"
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Warded",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "Failed": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": 1,
+          "Health": 8
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_RenewalGrace",
+        "Entity": "User"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 4.0,
+          "Offset": {
+            "Z": -2.5
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 10
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_RenewalGrace",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -23,7 +23,7 @@ import com.hypixel.hytale.component.query.Query;
 import com.hypixel.hytale.component.system.EntityEventSystem;
 import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.InventoryChangeEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
@@ -135,23 +135,33 @@ public class EquipmentRestrictions {
 			return;
 		}
 
-		Inventory inventory = player.getInventory();
-		if (container == null || inventory == null) {
+		var armorComp = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+		var hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+		var utilityComp = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+		var toolComp = store.getComponent(ref, InventoryComponent.Tool.getComponentType());
+		var storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+		var backpackComp = store.getComponent(ref, InventoryComponent.Backpack.getComponentType());
+
+		if (container == null) {
 			return;
 		}
 
-		if (container == inventory.getArmor()) {
-			enforceContainer(ref, store, inventory, container, restrictionsList, true);
-		} else if (container == inventory.getHotbar()
-				|| container == inventory.getUtility()
-				|| container == inventory.getTools()) {
-			enforceContainer(ref, store, inventory, container, restrictionsList, false);
+		ItemContainer storageContainer = storageComp != null ? storageComp.getInventory() : null;
+		ItemContainer backpackContainer = backpackComp != null ? backpackComp.getInventory() : null;
+
+		if (container == (armorComp != null ? armorComp.getInventory() : null)) {
+			enforceContainer(ref, store, storageContainer, backpackContainer, container, restrictionsList, true);
+		} else if (container == (hotbarComp != null ? hotbarComp.getInventory() : null)
+				|| container == (utilityComp != null ? utilityComp.getInventory() : null)
+				|| container == (toolComp != null ? toolComp.getInventory() : null)) {
+			enforceContainer(ref, store, storageContainer, backpackContainer, container, restrictionsList, false);
 		}
 	}
 
 	private void enforceContainer(@Nonnull Ref<EntityStore> ref,
 			@Nonnull Store<EntityStore> store,
-			@Nonnull Inventory inventory,
+			@Nullable ItemContainer storageContainer,
+			@Nullable ItemContainer backpackContainer,
 			@Nonnull ItemContainer container,
 			@Nonnull List<RestrictionEntry> restrictionsList,
 			boolean armorContainer) {
@@ -168,7 +178,7 @@ public class EquipmentRestrictions {
 			if (!meetsItemClassRequirement(ref, store, itemStack)) {
 				suppressEvents.set(true);
 				try {
-					moveRestrictedItem(inventory, container, slot);
+					moveRestrictedItem(storageContainer, backpackContainer, container, slot);
 				} finally {
 					suppressEvents.set(false);
 				}
@@ -183,7 +193,7 @@ public class EquipmentRestrictions {
 			if (effectiveMode == RestrictMode.Hard) {
 				suppressEvents.set(true);
 				try {
-					boolean moved = moveRestrictedItem(inventory, container, slot);
+					boolean moved = moveRestrictedItem(storageContainer, backpackContainer, container, slot);
 					if (!moved) {
 						RpgLogging.debugDeveloper(
 							"[EquipmentRestrictions] Failed to move restricted item %s from slot %s",
@@ -228,9 +238,12 @@ public class EquipmentRestrictions {
 		return result;
 	}
 
-	private boolean moveRestrictedItem(@Nonnull Inventory inventory, @Nonnull ItemContainer source, short slot) {
+	private boolean moveRestrictedItem(@Nullable ItemContainer storage,
+			@Nullable ItemContainer backpack,
+			@Nonnull ItemContainer source,
+			short slot) {
 		ListTransaction<MoveTransaction<ItemStackTransaction>> transaction =
-			source.moveItemStackFromSlot(slot, inventory.getStorage(), inventory.getBackpack());
+			source.moveItemStackFromSlot(slot, storage, backpack);
 		return transaction != null && transaction.succeeded();
 	}
 

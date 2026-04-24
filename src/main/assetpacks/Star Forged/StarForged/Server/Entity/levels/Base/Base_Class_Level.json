@@ -7,7 +7,20 @@
   "Prerequisites": {},
   "DefaultRewards": {
     "LevelUpEffects": {
-      "SoundId": "SFX_Item_Repair"
+      "SoundId": "Level_Up_Wildsar",
+      "ParticleEffect": "Temp_Level_Up",
+      "Notification": {
+        "PrimaryMessage": "LEVEL UP! YOU BAD ASS",
+        "SecondaryMessage": "Character level {level}",
+        "IconItemId": "Item_Book"
+      },
+      "EventTitle": {
+        "PrimaryMessage": "LEVEL UP! YOU BAD ASS",
+        "SecondaryMessage": "Character level {level}",
+        "Major": true
+      },
+      "ChatMessage": "You did it! {system} is now Level! {level}",
+      "KillFeedPopup": "You did it! {system} is now Level! {level}"
     },
     "StatPoints": 0,
     "SkillPoints": 0

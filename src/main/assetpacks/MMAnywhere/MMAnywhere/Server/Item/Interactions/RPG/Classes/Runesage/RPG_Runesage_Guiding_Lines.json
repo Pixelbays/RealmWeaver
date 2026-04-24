@@ -1,0 +1,25 @@
+{
+  "Type": "Selector",
+  "Selector": {
+    "Id": "AOECircle",
+    "Range": 5.0
+  },
+  "HitEntityRules": [
+    {
+      "Matchers": [
+        {
+          "Type": "Player"
+        }
+      ],
+      "Next": {
+        "Interactions": [
+          {
+            "Type": "ApplyEffect",
+            "EffectId": "Runesage_GuidingLines",
+            "Entity": "Target"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Vanguard"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.breaker_slam.name",
+    "Description": "mma.rpg.abilities.breaker_slam.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_Breaker_Slam"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Spend 1 Guard to slam in front of you. Exposed foes take heavier damage and are staggered.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace",
+  "Icon": "Icons/ItemsGenerated/Weapon_Mace_Thorium.png"
+}

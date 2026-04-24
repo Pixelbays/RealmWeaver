@@ -38,8 +38,9 @@ public final class HotbarHudModule implements PlayerHudModule {
     private final PlayerHud hud;
 
     private String lastSignature = "";
+    private String lastCooldownSignature = "";
     private List<SlotViewData> lastUsableSlots = Collections.emptyList();
-    private List<SlotViewData> lastSpellSlots = Collections.emptyList();
+    private List<SpellSlotViewData> lastSpellSlots = Collections.emptyList();
 
     HotbarHudModule(@Nonnull PlayerHud hud) {
         this.hud = hud;
@@ -50,34 +51,48 @@ public final class HotbarHudModule implements PlayerHudModule {
         rebuild(cmd, lastUsableSlots, lastSpellSlots);
     }
 
-    public void prime(@Nonnull List<SlotViewData> usableSlots, @Nonnull List<SlotViewData> spellSlots) {
+    public void prime(@Nonnull List<SlotViewData> usableSlots, @Nonnull List<SpellSlotViewData> spellSlots) {
         lastUsableSlots = List.copyOf(usableSlots);
         lastSpellSlots = List.copyOf(spellSlots);
         lastSignature = buildSignature(lastUsableSlots, lastSpellSlots);
+        lastCooldownSignature = buildCooldownSignature(lastSpellSlots);
     }
 
-    public void update(@Nonnull List<SlotViewData> usableSlots, @Nonnull List<SlotViewData> spellSlots) {
+    public void update(@Nonnull List<SlotViewData> usableSlots, @Nonnull List<SpellSlotViewData> spellSlots) {
         String signature = buildSignature(usableSlots, spellSlots);
-        if (signature.equals(lastSignature)) {
+        if (!signature.equals(lastSignature)) {
+            // Structure changed — full rebuild with cooldown included
+            lastSignature = signature;
+            lastCooldownSignature = buildCooldownSignature(spellSlots);
+            lastUsableSlots = List.copyOf(usableSlots);
+            lastSpellSlots = List.copyOf(spellSlots);
+
+            UICommandBuilder cmd = new UICommandBuilder();
+            rebuild(cmd, lastUsableSlots, lastSpellSlots);
+            hud.applyModuleUpdate(cmd);
             return;
         }
 
-        lastSignature = signature;
-        lastUsableSlots = List.copyOf(usableSlots);
-        lastSpellSlots = List.copyOf(spellSlots);
+        // Check for cooldown-only change (lightweight update — no clear/appendInline)
+        String cooldownSignature = buildCooldownSignature(spellSlots);
+        if (!cooldownSignature.equals(lastCooldownSignature)) {
+            lastCooldownSignature = cooldownSignature;
+            lastSpellSlots = List.copyOf(spellSlots);
 
-        UICommandBuilder cmd = new UICommandBuilder();
-        rebuild(cmd, lastUsableSlots, lastSpellSlots);
-        hud.applyModuleUpdate(cmd);
+            UICommandBuilder cmd = new UICommandBuilder();
+            applySpellIcons(cmd, lastSpellSlots);
+            hud.applyModuleUpdate(cmd);
+        }
     }
 
     private void rebuild(
             @Nonnull UICommandBuilder cmd,
             @Nonnull List<SlotViewData> usableSlots,
-            @Nonnull List<SlotViewData> spellSlots) {
+            @Nonnull List<SpellSlotViewData> spellSlots) {
         cmd.clear(SELECTOR_USABLE_HOST);
         cmd.clear(SELECTOR_SPELL_HOST);
         cmd.setObject(SELECTOR_USABLE_HOST + ".Anchor", createUsableHostAnchor(usableSlots.size()));
+        cmd.setObject(SELECTOR_SPELL_HOST + ".Anchor", createSpellHostAnchor(spellSlots.size()));
 
         if (!usableSlots.isEmpty()) {
             cmd.appendInline(SELECTOR_USABLE_HOST, buildMarkup(usableSlots, false));
@@ -85,8 +100,8 @@ public final class HotbarHudModule implements PlayerHudModule {
         }
 
         if (!spellSlots.isEmpty()) {
-            cmd.appendInline(SELECTOR_SPELL_HOST, buildMarkup(spellSlots, true));
-            applySlots(cmd, spellSlots, true);
+            cmd.appendInline(SELECTOR_SPELL_HOST, buildSpellMarkup(spellSlots));
+            applySpellIcons(cmd, spellSlots);
         }
     }
 
@@ -203,17 +218,108 @@ public final class HotbarHudModule implements PlayerHudModule {
     @Nonnull
     private static String buildSignature(
             @Nonnull List<SlotViewData> usableSlots,
-            @Nonnull List<SlotViewData> spellSlots) {
+            @Nonnull List<SpellSlotViewData> spellSlots) {
         StringBuilder sig = new StringBuilder((usableSlots.size() + spellSlots.size()) * 40 + 8);
         sig.append("U:");
         for (SlotViewData slot : usableSlots) {
-            sig.append(slot.signatureToken).append(';');
+            sig.append(slot.signatureToken).append(':').append(slot.keyLabel).append(';');
         }
         sig.append("|S:");
-        for (SlotViewData slot : spellSlots) {
-            sig.append(slot.signatureToken).append(';');
+        for (SpellSlotViewData slot : spellSlots) {
+            sig.append(slot.signatureToken).append(':').append(slot.keyLabel).append(';');
         }
         return sig.toString();
+    }
+
+    @Nonnull
+    private static String buildCooldownSignature(@Nonnull List<SpellSlotViewData> spellSlots) {
+        if (spellSlots.isEmpty()) {
+            return "";
+        }
+        StringBuilder sig = new StringBuilder(spellSlots.size() * 8);
+        for (SpellSlotViewData slot : spellSlots) {
+            sig.append(slot.cooldownText).append(';');
+        }
+        return sig.toString();
+    }
+
+    @Nonnull
+    private static String buildSpellMarkup(@Nonnull List<SpellSlotViewData> slots) {
+        StringBuilder ui = new StringBuilder(Math.max(512, slots.size() * 380));
+        for (int i = 0; i < slots.size(); i++) {
+            appendSpellSlotMarkup(ui, i, slots.get(i));
+        }
+        return ui.toString();
+    }
+
+    private static void appendSpellSlotMarkup(
+            @Nonnull StringBuilder ui,
+            int index,
+            @Nonnull SpellSlotViewData slot) {
+        String frameBackground = slot.active ? "#162033(0.90)" : "#101723(0.74)";
+        String frameOutline = slot.active ? "#E4B45A(0.98)" : "#526884(0.80)";
+        String chipBackground = slot.active ? "#243047(0.96)" : "#111927(0.86)";
+        String chipText = slot.active ? "#F4C96B" : "#B4C0D0";
+
+        ui.append("Group #SpellSlot").append(index).append(" {\n")
+                .append("  Anchor: (Width: ").append(SPELL_SLOT_WIDTH).append(", Height: ").append(SPELL_SLOT_HEIGHT).append(");\n")
+                .append("\n")
+                .append("  Group {\n")
+                .append("    Anchor: (Left: 7, Top: 0, Width: 78, Height: 78);\n")
+                .append("    Background: PatchStyle(Color: ").append(frameBackground).append(");\n")
+                .append("    OutlineColor: ").append(frameOutline).append(";\n")
+                .append("    OutlineSize: ").append(slot.active ? "2" : "1").append(";\n")
+                .append("\n")
+                .append("    AssetImage #SpellIcon").append(index).append(" {\n")
+                .append("      Anchor: (Left: 2, Top: 2, Width: 74, Height: 74);\n")
+                .append("    }\n")
+                .append("\n")
+                .append("    Label #SpellCooldown").append(index).append(" {\n")
+                .append("      Anchor: (Left: 2, Top: 2, Width: 74, Height: 74);\n")
+                .append("      Background: PatchStyle(Color: #000000(0.52));\n")
+                .append("      Style: (Alignment: Center, FontSize: 22, RenderBold: true, TextColor: #FFFFFF, OutlineColor: #000000(0.70));\n")
+                .append("      Padding: (Horizontal: 0, Vertical: 0);\n")
+                .append("      Text: \"\";\n")
+                .append("    }\n")
+                .append("  }\n")
+                .append("\n")
+                .append("  Label #SpellKey").append(index).append(" {\n")
+                .append("    Text: \"").append(HudModuleSupport.escapeUiString(slot.keyLabel)).append("\";\n")
+                .append("    Background: PatchStyle(Color: ").append(chipBackground).append(");\n")
+                .append("    Style: (Alignment: Center, FontSize: 11, RenderBold: true, TextColor: ")
+                .append(chipText).append(", OutlineColor: #000000(0.25));\n")
+                .append("    Padding: (Horizontal: 0, Vertical: 0);\n")
+                .append("    Anchor: (Left: 11, Top: 4, Width: ").append(KEYCAP_WIDTH).append(", Height: ").append(KEYCAP_HEIGHT).append(");\n")
+                .append("  }\n")
+                .append("}\n");
+    }
+
+    private static void applySpellIcons(
+            @Nonnull UICommandBuilder cmd,
+            @Nonnull List<SpellSlotViewData> slots) {
+        for (int i = 0; i < slots.size(); i++) {
+            SpellSlotViewData slot = slots.get(i);
+            String iconPath = slot.iconPath;
+            if (iconPath.isEmpty()) {
+                cmd.set("#SpellIcon" + i + ".Visible", false);
+            } else {
+                cmd.set("#SpellIcon" + i + ".Visible", true);
+                cmd.set("#SpellIcon" + i + ".AssetPath", iconPath);
+            }
+            String cooldownText = slot.cooldownText;
+            if (cooldownText.isEmpty()) {
+                cmd.set("#SpellCooldown" + i + ".Visible", false);
+            } else {
+                cmd.set("#SpellCooldown" + i + ".Text", cooldownText);
+                cmd.set("#SpellCooldown" + i + ".Visible", true);
+            }
+        }
+    }
+
+    /** Clears the cached signatures so the next update() call does a full comparison and rebuild. */
+    void invalidateSignature() {
+        lastSignature = "";
+        lastCooldownSignature = "";
     }
 
     @Nonnull
@@ -229,6 +335,18 @@ public final class HotbarHudModule implements PlayerHudModule {
         anchor.setTop(Value.of(0));
         anchor.setWidth(Value.of(totalWidth));
         anchor.setHeight(Value.of(USABLE_SLOT_HEIGHT));
+        return anchor;
+    }
+
+    @Nonnull
+    private static Anchor createSpellHostAnchor(int slotCount) {
+        int totalWidth = slotCount * SPELL_SLOT_WIDTH;
+
+        Anchor anchor = new Anchor();
+        anchor.setTop(Value.of(0));
+        anchor.setRight(Value.of(10));
+        anchor.setWidth(Value.of(totalWidth));
+        anchor.setHeight(Value.of(SPELL_SLOT_HEIGHT));
         return anchor;
     }
 
@@ -260,7 +378,7 @@ public final class HotbarHudModule implements PlayerHudModule {
                 .append(SPELL_SLOT_HEIGHT).append(");\n");
         if (!lastSpellSlots.isEmpty()) {
             ui.append('\n');
-            HudModuleSupport.appendIndentedBlock(ui, buildMarkup(lastSpellSlots, true), 4);
+            HudModuleSupport.appendIndentedBlock(ui, buildSpellMarkup(lastSpellSlots), 4);
         }
         ui.append("  }\n");
         ui.append("}\n\n");
@@ -284,6 +402,31 @@ public final class HotbarHudModule implements PlayerHudModule {
             this.keyLabel = keyLabel;
             this.active = active;
             this.signatureToken = signatureToken;
+        }
+    }
+
+    static final class SpellSlotViewData {
+        @Nonnull
+        final String iconPath;
+        @Nonnull
+        final String keyLabel;
+        @Nonnull
+        final String signatureToken;
+        final boolean active;
+        @Nonnull
+        final String cooldownText;
+
+        SpellSlotViewData(
+                @Nonnull String iconPath,
+                @Nonnull String keyLabel,
+                boolean active,
+                @Nonnull String signatureToken,
+                @Nonnull String cooldownText) {
+            this.iconPath = iconPath;
+            this.keyLabel = keyLabel;
+            this.active = active;
+            this.signatureToken = signatureToken;
+            this.cooldownText = cooldownText;
         }
     }
 }

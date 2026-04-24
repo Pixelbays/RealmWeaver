@@ -17,6 +17,7 @@ import org.pixelbays.rpg.ability.binding.AbilityBindingService.BindingTarget;
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.component.ClassAbilityComponent;
 import org.pixelbays.rpg.ability.config.ClassAbilityDefinition;
+import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
 import org.pixelbays.rpg.classes.component.ClassComponent;
 import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.race.component.RaceComponent;
@@ -190,7 +191,8 @@ public class SpellbookPage extends CustomUIPage {
             @Nullable Message statusMessage) {
         SpellbookView view = buildView(store, ref);
 
-        commandBuilder.set("#ModeLabel.Text", resolveModeLabel(view.availableTargets()));
+        commandBuilder.set("#ModeLabel.Text",
+                resolveModeLabel(bindingService.getControlType(ref, store), view.availableTargets()));
         if (statusMessage != null) {
             commandBuilder.setObject("#StatusLabel.Text", toLocalizableString(statusMessage));
         } else if (view.tabs().isEmpty()) {
@@ -346,8 +348,8 @@ public class SpellbookPage extends CustomUIPage {
         return new SpellbookView(
                 tabs,
                 activeTab,
-                bindingService.getAllowedTargets(),
-            unlockedAbilityIds,
+                bindingService.getAllowedTargets(ref, store),
+                unlockedAbilityIds,
                 bindingComponent,
                 selectedAbility,
                 selectedAbilityId);
@@ -383,6 +385,7 @@ public class SpellbookPage extends CustomUIPage {
             String label = tab.id().equals(activeTabId) ? "> " + tab.label() : tab.label();
             commandBuilder.set(selector + ".Text", label);
             commandBuilder.setObject(selector + ".Anchor", createHorizontalAnchor(150, 36, 6));
+            commandBuilder.set(selector + ".Visible", true);
             index++;
         }
     }
@@ -421,6 +424,7 @@ public class SpellbookPage extends CustomUIPage {
             String selector = abilityRowSelector(index);
             commandBuilder.set(selector + ".Text", label);
             commandBuilder.setObject(selector + ".Anchor", createVerticalAnchor(36, 6));
+            commandBuilder.set(selector + ".Visible", true);
             index++;
         }
     }
@@ -503,6 +507,7 @@ public class SpellbookPage extends CustomUIPage {
                             .param("target", targetName),
                     (selectedBoundToTarget ? "Clear " : "Bind ") + targetName));
             commandBuilder.setObject(selector + ".Anchor", createVerticalAnchor(36, 6));
+            commandBuilder.set(selector + ".Visible", true);
             index++;
         }
     }
@@ -562,10 +567,11 @@ public class SpellbookPage extends CustomUIPage {
     }
 
     @Nonnull
-    private String resolveModeLabel(@Nonnull List<BindingTarget> availableTargets) {
+    private String resolveModeLabel(@Nonnull AbilityControlType controlType,
+            @Nonnull List<BindingTarget> availableTargets) {
         String modeName = AbilityBindingService.resolveMessageText(
-                bindingService.getControlTypeMessage(bindingService.getControlType()),
-                bindingService.getControlType().name());
+                bindingService.getControlTypeMessage(controlType),
+                controlType.name());
         String header = AbilityBindingService.resolveMessageText(
                 Message.translation("pixelbays.rpg.spellbook.ui.mode")
                         .param("mode", modeName),
@@ -650,6 +656,7 @@ public class SpellbookPage extends CustomUIPage {
             String selector = tabSelector(index);
             commandBuilder.set(selector + ".Text", "");
             commandBuilder.setObject(selector + ".Anchor", createHorizontalAnchor(0, 0, 0));
+            commandBuilder.set(selector + ".Visible", false);
         }
     }
 
@@ -658,6 +665,7 @@ public class SpellbookPage extends CustomUIPage {
             String selector = abilityRowSelector(index);
             commandBuilder.set(selector + ".Text", "");
             commandBuilder.setObject(selector + ".Anchor", createVerticalAnchor(0, 0));
+            commandBuilder.set(selector + ".Visible", false);
         }
     }
 
@@ -666,6 +674,7 @@ public class SpellbookPage extends CustomUIPage {
             String selector = bindButtonSelector(index);
             commandBuilder.set(selector + ".Text", "");
             commandBuilder.setObject(selector + ".Anchor", createVerticalAnchor(0, 0));
+            commandBuilder.set(selector + ".Visible", false);
         }
     }
 

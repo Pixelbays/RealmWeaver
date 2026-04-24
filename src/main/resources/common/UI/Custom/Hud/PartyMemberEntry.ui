@@ -1,0 +1,190 @@
+$C = "../Common.ui";
+
+Group {
+  Anchor: (Width: 248, Height: 124, Bottom: 6);
+  Padding: (Full: 6);
+  Background: PatchStyle(Color: #000000(0.32));
+  OutlineColor: #2F4156(0.85);
+  OutlineSize: 1;
+
+  Group #MemberAccent {
+    Anchor: (Left: 0, Top: 4, Width: 8, Height: 8);
+    Background: #8E98A6;
+  }
+
+  Label #MemberName {
+    Text: "";
+    Anchor: (Left: 14, Top: 0, Width: 122, Height: 16);
+    Style: (...$C.@DefaultLabelStyle, FontSize: 12, RenderBold: true);
+  }
+
+  Label #MemberClass {
+    Text: "";
+    Anchor: (Left: 144, Top: 0, Width: 92, Height: 16);
+    Style: (...$C.@DefaultLabelStyle, FontSize: 10, RenderBold: true);
+  }
+
+  Group #Effect0 {
+    Visible: false;
+    Anchor: (Left: 14, Top: 18, Width: 14, Height: 14);
+    Background: PatchStyle(Color: #183A26(0.78));
+    OutlineColor: #6ED88A(0.9);
+    OutlineSize: 1;
+
+    Group #Effect0Icon {
+      Anchor: (Full: 1);
+      Background: PatchStyle(Color: #ffffff(0));
+    }
+  }
+
+  Group #Effect1 {
+    Visible: false;
+    Anchor: (Left: 32, Top: 18, Width: 14, Height: 14);
+    Background: PatchStyle(Color: #183A26(0.78));
+    OutlineColor: #6ED88A(0.9);
+    OutlineSize: 1;
+
+    Group #Effect1Icon {
+      Anchor: (Full: 1);
+      Background: PatchStyle(Color: #ffffff(0));
+    }
+  }
+
+  Group #Effect2 {
+    Visible: false;
+    Anchor: (Left: 50, Top: 18, Width: 14, Height: 14);
+    Background: PatchStyle(Color: #183A26(0.78));
+    OutlineColor: #6ED88A(0.9);
+    OutlineSize: 1;
+
+    Group #Effect2Icon {
+      Anchor: (Full: 1);
+      Background: PatchStyle(Color: #ffffff(0));
+    }
+  }
+
+  Group #Effect3 {
+    Visible: false;
+    Anchor: (Left: 68, Top: 18, Width: 14, Height: 14);
+    Background: PatchStyle(Color: #183A26(0.78));
+    OutlineColor: #6ED88A(0.9);
+    OutlineSize: 1;
+
+    Group #Effect3Icon {
+      Anchor: (Full: 1);
+      Background: PatchStyle(Color: #ffffff(0));
+    }
+  }
+
+  Group #Effect4 {
+    Visible: false;
+    Anchor: (Left: 86, Top: 18, Width: 14, Height: 14);
+    Background: PatchStyle(Color: #183A26(0.78));
+    OutlineColor: #6ED88A(0.9);
+    OutlineSize: 1;
+
+    Group #Effect4Icon {
+      Anchor: (Full: 1);
+      Background: PatchStyle(Color: #ffffff(0));
+    }
+  }
+
+  Group #Effect5 {
+    Visible: false;
+    Anchor: (Left: 104, Top: 18, Width: 14, Height: 14);
+    Background: PatchStyle(Color: #183A26(0.78));
+    OutlineColor: #6ED88A(0.9);
+    OutlineSize: 1;
+
+    Group #Effect5Icon {
+      Anchor: (Full: 1);
+      Background: PatchStyle(Color: #ffffff(0));
+    }
+  }
+
+  Group #Bar0 {
+    Anchor: (Top: 38, Width: 236, Height: 22);
+
+    Label #Bar0Label {
+      Text: "";
+      Anchor: (Left: 0, Top: 0, Width: 40, Height: 10);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true);
+    }
+
+    Label #Bar0Value {
+      Text: "";
+      Anchor: (Left: 152, Top: 0, Width: 84, Height: 10);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true);
+    }
+
+    Group #Bar0Track {
+      Anchor: (Left: 36, Top: 12, Width: 116, Height: 10);
+      Background: PatchStyle(Color: #000000(0.52));
+      OutlineColor: #000000(0.65);
+      OutlineSize: 1;
+
+      Group #Bar0Fill {
+        Anchor: (Left: 0, Top: 0, Width: 0, Height: 10);
+        Background: #4FD36F;
+      }
+    }
+  }
+
+  Group #Bar1 {
+    Visible: false;
+    Anchor: (Top: 64, Width: 236, Height: 22);
+
+    Label #Bar1Label {
+      Text: "";
+      Anchor: (Left: 0, Top: 0, Width: 40, Height: 10);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true);
+    }
+
+    Label #Bar1Value {
+      Text: "";
+      Anchor: (Left: 152, Top: 0, Width: 84, Height: 10);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true);
+    }
+
+    Group #Bar1Track {
+      Anchor: (Left: 36, Top: 12, Width: 116, Height: 10);
+      Background: PatchStyle(Color: #000000(0.52));
+      OutlineColor: #000000(0.65);
+      OutlineSize: 1;
+
+      Group #Bar1Fill {
+        Anchor: (Left: 0, Top: 0, Width: 0, Height: 10);
+        Background: #4FD36F;
+      }
+    }
+  }
+
+  Group #Bar2 {
+    Visible: false;
+    Anchor: (Top: 90, Width: 236, Height: 22);
+
+    Label #Bar2Label {
+      Text: "";
+      Anchor: (Left: 0, Top: 0, Width: 40 , Height: 10);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true);
+    }
+
+    Label #Bar2Value {
+      Text: "";
+      Anchor: (Left: 152, Top: 0, Width: 84, Height: 10);
+      Style: (...$C.@DefaultLabelStyle, FontSize: 9, RenderBold: true);
+    }
+
+    Group #Bar2Track {
+      Anchor: (Left: 36, Top: 12, Width: 116, Height: 10);
+      Background: PatchStyle(Color: #000000(0.52));
+      OutlineColor: #000000(0.65);
+      OutlineSize: 1;
+
+      Group #Bar2Fill {
+        Anchor: (Left: 0, Top: 0, Width: 0, Height: 10);
+        Background: #4FD36F;
+      }
+    }
+  }
+}

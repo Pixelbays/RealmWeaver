@@ -1,0 +1,19 @@
+{
+  "DisplayName": "Base Currency",
+  "Description": "Shared defaults for Star Forged wallet currencies.",
+  "Enabled": true,
+  "VisibleInUi": true,
+  "SortOrder": 0,
+  "AuctionHouseAllowed": false,
+  "StorageMode": "NumericWallet",
+  "AllowedScopes": [
+    "Character",
+    "Account",
+    "Guild"
+  ],
+  "StartingBalance": 0,
+  "MinBalance": 0,
+  "MaxBalance": 999999999,
+  "AllowNegative": false,
+  "Conversions": []
+}

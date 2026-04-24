@@ -19,9 +19,9 @@ public final class BuildFlags {
 
     public static final boolean CLASS_MODULE         = true;
 
-    public static final boolean CHARACTER_MODULE     = true;
+    public static final boolean CHARACTER_MODULE     = false;
 
-    public static final boolean ACHIEVEMENT_MODULE   = true;
+    public static final boolean ACHIEVEMENT_MODULE   = false;
 
     public static final boolean TALENT_MODULE        = true;
 
@@ -43,15 +43,15 @@ public final class BuildFlags {
 
     public static final boolean CAMERA_MODULE        = false;
 
-    public static final boolean BANK_MODULE          = true;
+    public static final boolean BANK_MODULE          = false;
 
     public static final boolean CURRENCY_MODULE      = true;
 
-    public static final boolean AUCTION_HOUSE_MODULE = true;
+    public static final boolean AUCTION_HOUSE_MODULE = false;
 
-    public static final boolean MAIL_MODULE          = true;
+    public static final boolean MAIL_MODULE          = false;
 
-    public static final boolean WORLD_MODULE         = true;
+    public static final boolean WORLD_MODULE         = false;
 
     public static final boolean LOCKPICKING_MODULE   = true;
 

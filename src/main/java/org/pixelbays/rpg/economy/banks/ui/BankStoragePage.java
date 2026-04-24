@@ -12,6 +12,7 @@ import org.pixelbays.rpg.economy.banks.BankActionResult;
 import org.pixelbays.rpg.economy.banks.BankManager;
 import org.pixelbays.rpg.economy.banks.command.BankCommandUtil;
 import org.pixelbays.rpg.economy.banks.config.BankTypeDefinition;
+import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
 import org.pixelbays.rpg.economy.currency.config.CurrencyTypeDefinition;
 
 import com.hypixel.hytale.component.Ref;
@@ -23,7 +24,7 @@ import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.CustomUIPage;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.inventory.container.SimpleItemContainer;
@@ -86,8 +87,8 @@ public class BankStoragePage extends CustomUIPage {
         }
 
         ensureBankContainer(bankAccount);
-        appendView(commandBuilder, bankAccount, player.getInventory(), null);
-        registerInventoryListeners(player.getInventory());
+        appendView(commandBuilder, bankAccount, ref, store, null);
+        registerInventoryListeners(ref, store);
     }
 
     @Override
@@ -174,12 +175,13 @@ public class BankStoragePage extends CustomUIPage {
         }
 
         boolean singleItem = mouseButton != null && mouseButton == 1;
-        Inventory inventory = player.getInventory();
+        InventoryComponent.Storage storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
 
         switch (grid) {
-            case "Bank" -> moveFromBank((short) slotIndex, singleItem, inventory);
-            case "PlayerStorage" -> moveToBank(inventory.getStorage(), (short) slotIndex, singleItem);
-            case "PlayerHotbar" -> moveToBank(inventory.getHotbar(), (short) slotIndex, singleItem);
+            case "Bank" -> moveFromBank((short) slotIndex, singleItem, ref, store);
+            case "PlayerStorage" -> moveToBank(storageComp != null ? storageComp.getInventory() : null, (short) slotIndex, singleItem);
+            case "PlayerHotbar" -> moveToBank(hotbarComp != null ? hotbarComp.getInventory() : null, (short) slotIndex, singleItem);
             default -> {
                 return;
             }
@@ -197,7 +199,7 @@ public class BankStoragePage extends CustomUIPage {
         }
 
         BankTypeDefinition.BankTabDefinition nextLockedTab = bankManager.getNextLockedTab(bankAccount);
-        BankActionResult result = bankManager.unlockNextTab(bankAccount, playerRef.getUuid(), player.getInventory());
+        BankActionResult result = bankManager.unlockNextTab(bankAccount, playerRef.getUuid(), CurrencyAccessContext.fromRef(store, ref));
         if (result.isSuccess() && nextLockedTab != null) {
             currentTabId = nextLockedTab.getId();
             ensureBankContainer(bankAccount);
@@ -223,22 +225,29 @@ public class BankStoragePage extends CustomUIPage {
         }
 
         BankActionResult result = "DepositCurrency".equals(action)
-                ? bankManager.depositCurrency(bankAccount, playerRef.getUuid(), player.getInventory(), currencyId.trim(), amount)
-                : bankManager.withdrawCurrency(bankAccount, playerRef.getUuid(), player.getInventory(), currencyId.trim(), amount);
+                ? bankManager.depositCurrency(bankAccount, playerRef.getUuid(), CurrencyAccessContext.fromRef(store, ref), currencyId.trim(), amount)
+                : bankManager.withdrawCurrency(bankAccount, playerRef.getUuid(), CurrencyAccessContext.fromRef(store, ref), currencyId.trim(), amount);
         sendFullUpdate(player, bankAccount, BankCommandUtil.managerResultMessage(result.getMessage()));
     }
 
-    private void moveFromBank(short slotIndex, boolean singleItem, @Nonnull Inventory inventory) {
+    private void moveFromBank(short slotIndex, boolean singleItem,
+            @Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store) {
         if (bankContainer == null || slotIndex < 0 || slotIndex >= bankContainer.getCapacity()) {
             return;
         }
 
+        InventoryComponent.Storage storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        InventoryComponent.Backpack backpackComp = store.getComponent(ref, InventoryComponent.Backpack.getComponentType());
+        ItemContainer storage = storageComp != null ? storageComp.getInventory() : null;
+        ItemContainer hotbar = hotbarComp != null ? hotbarComp.getInventory() : null;
+        ItemContainer backpack = backpackComp != null ? backpackComp.getInventory() : null;
+
         if (singleItem) {
-            bankContainer.moveItemStackFromSlot(slotIndex, 1, false, true,
-                    inventory.getStorage(), inventory.getHotbar(), inventory.getBackpack());
+            bankContainer.moveItemStackFromSlot(slotIndex, 1, false, true, storage, hotbar, backpack);
         } else {
-            bankContainer.moveItemStackFromSlot(slotIndex, false, true,
-                    inventory.getStorage(), inventory.getHotbar(), inventory.getBackpack());
+            bankContainer.moveItemStackFromSlot(slotIndex, false, true, storage, hotbar, backpack);
         }
     }
 
@@ -271,13 +280,19 @@ public class BankStoragePage extends CustomUIPage {
         registerBankListener();
     }
 
-    private void registerInventoryListeners(@Nonnull Inventory inventory) {
+    private void registerInventoryListeners(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store) {
         if (containerRegistrations.size() > 1) {
             return;
         }
 
-        containerRegistrations.add(inventory.getStorage().registerChangeEvent(event -> sendGridUpdate()));
-        containerRegistrations.add(inventory.getHotbar().registerChangeEvent(event -> sendGridUpdate()));
+        InventoryComponent.Storage storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        InventoryComponent.Hotbar hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        if (storageComp != null) {
+            containerRegistrations.add(storageComp.getInventory().registerChangeEvent(event -> sendGridUpdate()));
+        }
+        if (hotbarComp != null) {
+            containerRegistrations.add(hotbarComp.getInventory().registerChangeEvent(event -> sendGridUpdate()));
+        }
     }
 
     private void registerBankListener() {
@@ -338,7 +353,9 @@ public class BankStoragePage extends CustomUIPage {
             @Nonnull BankAccount bankAccount,
             @Nullable Message statusMessage) {
         UICommandBuilder commandBuilder = new UICommandBuilder();
-        appendView(commandBuilder, bankAccount, player.getInventory(), statusMessage);
+        Ref<EntityStore> ref = playerRef.getReference();
+        Store<EntityStore> store = ref != null ? ref.getStore() : null;
+        appendView(commandBuilder, bankAccount, ref, store, statusMessage);
         UIEventBuilder eventBuilder = new UIEventBuilder();
         bindEvents(eventBuilder);
         player.getPageManager().updateCustomPage(
@@ -353,7 +370,8 @@ public class BankStoragePage extends CustomUIPage {
 
     private void appendView(@Nonnull UICommandBuilder commandBuilder,
             @Nonnull BankAccount bankAccount,
-            @Nonnull Inventory inventory,
+            @Nullable Ref<EntityStore> ref,
+            @Nullable Store<EntityStore> store,
             @Nullable Message statusMessage) {
         BankTypeDefinition definition = bankManager.getDefinition(bankAccount);
         if (definition == null || currentTabId == null) {
@@ -378,15 +396,22 @@ public class BankStoragePage extends CustomUIPage {
 
         populateTabButtons(commandBuilder, bankAccount, currentTabId);
         populateUnlockControls(commandBuilder, bankAccount);
-        populateCurrencyControls(commandBuilder, bankAccount, inventory);
+        populateCurrencyControls(commandBuilder, bankAccount, ref, store);
         populateGrid(commandBuilder, BANK_GRID_SELECTOR, bankContainer);
-        populateGrid(commandBuilder, PLAYER_STORAGE_SELECTOR, inventory.getStorage());
-        populateGrid(commandBuilder, PLAYER_HOTBAR_SELECTOR, inventory.getHotbar());
+
+        InventoryComponent.Storage storageComp = (ref != null && store != null)
+                ? store.getComponent(ref, InventoryComponent.Storage.getComponentType()) : null;
+        InventoryComponent.Hotbar hotbarComp = (ref != null && store != null)
+                ? store.getComponent(ref, InventoryComponent.Hotbar.getComponentType()) : null;
+        populateGrid(commandBuilder, PLAYER_STORAGE_SELECTOR, storageComp != null ? storageComp.getInventory() : null);
+        populateGrid(commandBuilder, PLAYER_HOTBAR_SELECTOR, hotbarComp != null ? hotbarComp.getInventory() : null);
     }
 
+        @SuppressWarnings("removal")
         private void populateCurrencyControls(@Nonnull UICommandBuilder commandBuilder,
             @Nonnull BankAccount bankAccount,
-            @Nonnull Inventory inventory) {
+            @Nullable Ref<EntityStore> ref,
+            @Nullable Store<EntityStore> store) {
         if (!bankManager.supportsCurrencyStorage(bankAccount)) {
             commandBuilder.set(CURRENCY_SUMMARY_LABEL + ".Text",
                 translateRaw("pixelbays.rpg.bank.storage.currency.unavailable"));
@@ -403,13 +428,16 @@ public class BankStoragePage extends CustomUIPage {
                 translateRaw("pixelbays.rpg.bank.storage.currency.none"));
         } else {
             StringBuilder builder = new StringBuilder();
+            CurrencyAccessContext playerAccess = (ref != null && store != null)
+                    ? CurrencyAccessContext.fromRef(store, ref)
+                    : CurrencyAccessContext.empty();
             for (CurrencyTypeDefinition definition : supported) {
             if (builder.length() > 0) {
                 builder.append('\n');
             }
 
             long stored = bankManager.getStoredCurrencyBalance(bankAccount, definition.getId());
-            long carried = bankManager.getSourceCurrencyBalance(bankAccount, playerRef.getUuid(), inventory, definition.getId());
+            long carried = bankManager.getSourceCurrencyBalance(bankAccount, playerRef.getUuid(), playerAccess, definition.getId());
             builder.append(definition.getDisplayName())
                 .append(": bank=")
                 .append(stored)

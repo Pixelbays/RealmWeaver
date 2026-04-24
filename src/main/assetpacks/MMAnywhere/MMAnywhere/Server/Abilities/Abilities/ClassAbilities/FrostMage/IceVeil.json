@@ -1,0 +1,21 @@
+{
+  "Categories": [
+    "FrostMage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.ice_veil.name",
+    "Description": "mma.rpg.abilities.ice_veil.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Frost_Mage_Ice_Veil"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Restore health, shroud yourself in rime, and gain 1 Frost Rune.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff"
+}

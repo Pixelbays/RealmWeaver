@@ -33,7 +33,7 @@ import com.hypixel.hytale.server.core.asset.type.item.config.Item;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.event.events.player.PlayerDisconnectEvent;
 import com.hypixel.hytale.server.core.event.events.player.PlayerReadyEvent;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.InventoryChangeEvent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
@@ -113,7 +113,7 @@ public class RandomizedEquipmentManager {
 
 		Store<EntityStore> store = ref.getStore();
 		initializeInventory(player, ref, store);
-		recalculateEquipmentBonuses(ref, store, player.getInventory());
+		recalculateEquipmentBonuses(ref, store);
 	}
 
 	private void onPlayerDisconnect(@Nonnull PlayerDisconnectEvent event) {
@@ -142,7 +142,7 @@ public class RandomizedEquipmentManager {
 			return;
 		}
 
-		recalculateEquipmentBonuses(ref, store, player.getInventory());
+		recalculateEquipmentBonuses(ref, store);
 	}
 
 	private void onInventoryChange(@Nonnull Player player,
@@ -158,7 +158,7 @@ public class RandomizedEquipmentManager {
 			}
 		}
 
-		recalculateEquipmentBonuses(ref, store, player.getInventory());
+		recalculateEquipmentBonuses(ref, store);
 	}
 
 	private void initializeInventory(@Nonnull Player player,
@@ -166,13 +166,18 @@ public class RandomizedEquipmentManager {
 			@Nonnull Store<EntityStore> store) {
 		suppressEvents.set(true);
 		try {
-			Inventory inventory = player.getInventory();
-			initializeContainer(player, ref, store, inventory.getArmor());
-			initializeContainer(player, ref, store, inventory.getHotbar());
-			initializeContainer(player, ref, store, inventory.getUtility());
-			initializeContainer(player, ref, store, inventory.getTools());
-			initializeContainer(player, ref, store, inventory.getStorage());
-			initializeContainer(player, ref, store, inventory.getBackpack());
+			var armorComp = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+			var hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+			var utilityComp = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+			var toolComp = store.getComponent(ref, InventoryComponent.Tool.getComponentType());
+			var storageComp = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+			var backpackComp = store.getComponent(ref, InventoryComponent.Backpack.getComponentType());
+			initializeContainer(player, ref, store, armorComp != null ? armorComp.getInventory() : null);
+			initializeContainer(player, ref, store, hotbarComp != null ? hotbarComp.getInventory() : null);
+			initializeContainer(player, ref, store, utilityComp != null ? utilityComp.getInventory() : null);
+			initializeContainer(player, ref, store, toolComp != null ? toolComp.getInventory() : null);
+			initializeContainer(player, ref, store, storageComp != null ? storageComp.getInventory() : null);
+			initializeContainer(player, ref, store, backpackComp != null ? backpackComp.getInventory() : null);
 		} finally {
 			suppressEvents.set(false);
 		}
@@ -319,17 +324,20 @@ public class RandomizedEquipmentManager {
 	}
 
 	private void recalculateEquipmentBonuses(@Nonnull Ref<EntityStore> ref,
-			@Nonnull Store<EntityStore> store,
-			@Nonnull Inventory inventory) {
+			@Nonnull Store<EntityStore> store) {
 		ItemModSettings settings = getItemSettings();
 		AppliedEquipmentModifiers newModifiers = new AppliedEquipmentModifiers();
 
 		if (settings.isEnabled()) {
 			int playerLevel = resolvePlayerLevel(ref, store);
-			accumulateContainer(newModifiers, inventory.getArmor(), ref, store, playerLevel, settings);
-			accumulateContainer(newModifiers, inventory.getHotbar(), ref, store, playerLevel, settings);
-			accumulateContainer(newModifiers, inventory.getUtility(), ref, store, playerLevel, settings);
-			accumulateContainer(newModifiers, inventory.getTools(), ref, store, playerLevel, settings);
+			var armorComp = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+			var hotbarComp = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+			var utilityComp = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+			var toolComp = store.getComponent(ref, InventoryComponent.Tool.getComponentType());
+			accumulateContainer(newModifiers, armorComp != null ? armorComp.getInventory() : null, ref, store, playerLevel, settings);
+			accumulateContainer(newModifiers, hotbarComp != null ? hotbarComp.getInventory() : null, ref, store, playerLevel, settings);
+			accumulateContainer(newModifiers, utilityComp != null ? utilityComp.getInventory() : null, ref, store, playerLevel, settings);
+			accumulateContainer(newModifiers, toolComp != null ? toolComp.getInventory() : null, ref, store, playerLevel, settings);
 		}
 
 		AppliedEquipmentModifiers oldModifiers = equipmentModifiersCache.get(ref);

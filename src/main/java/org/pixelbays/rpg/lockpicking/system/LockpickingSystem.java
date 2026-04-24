@@ -44,7 +44,7 @@ import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.InteractionManager;
 import com.hypixel.hytale.server.core.entity.UUIDComponent;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
@@ -188,7 +188,7 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
         if (lockpickTag != null && !lockpickTag.isEmpty()) {
             int tagIndex = AssetRegistry.getTagIndex(lockpickTag);
             if (tagIndex != Integer.MIN_VALUE) {
-                session.setLockpickCount(countLockpicksInInventory(player.getInventory(), tagIndex));
+                session.setLockpickCount(countLockpicksInInventory(ref, store, tagIndex));
             }
         }
 
@@ -235,7 +235,7 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
                         ComponentType<EntityStore, Player> playerType = resolvePlayerType();
                         Player player = playerType != null ? store.getComponent(ref, playerType) : null;
                         if (player != null && tagIdx != Integer.MIN_VALUE) {
-                            removeLockpickFromInventory(player.getInventory(), tagIdx);
+                            removeLockpickFromInventory(ref, store, tagIdx);
                             session.setLockpickCount(Math.max(0, session.getLockpickCount() - 1));
                         }
                     }
@@ -735,13 +735,18 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
         player.sendMessage(message);
     }
 
-    private static int countLockpicksInInventory(@Nonnull Inventory inventory, int tagIndex) {
+    private static int countLockpicksInInventory(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, int tagIndex) {
         int count = 0;
-        count += countTaggedInContainer(inventory.getHotbar(), tagIndex);
-        count += countTaggedInContainer(inventory.getStorage(), tagIndex);
-        count += countTaggedInContainer(inventory.getUtility(), tagIndex);
-        count += countTaggedInContainer(inventory.getArmor(), tagIndex);
-        count += countTaggedInContainer(inventory.getBackpack(), tagIndex);
+        var hotbar = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        if (hotbar != null) count += countTaggedInContainer(hotbar.getInventory(), tagIndex);
+        var storage = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        if (storage != null) count += countTaggedInContainer(storage.getInventory(), tagIndex);
+        var utility = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+        if (utility != null) count += countTaggedInContainer(utility.getInventory(), tagIndex);
+        var armor = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+        if (armor != null) count += countTaggedInContainer(armor.getInventory(), tagIndex);
+        var backpack = store.getComponent(ref, InventoryComponent.Backpack.getComponentType());
+        if (backpack != null) count += countTaggedInContainer(backpack.getInventory(), tagIndex);
         return count;
     }
 
@@ -763,12 +768,17 @@ public class LockpickingSystem extends EntityTickingSystem<EntityStore> {
         return count;
     }
 
-    private static void removeLockpickFromInventory(@Nonnull Inventory inventory, int tagIndex) {
-        if (removeTaggedFromContainer(inventory.getHotbar(), tagIndex)) return;
-        if (removeTaggedFromContainer(inventory.getStorage(), tagIndex)) return;
-        if (removeTaggedFromContainer(inventory.getUtility(), tagIndex)) return;
-        if (removeTaggedFromContainer(inventory.getArmor(), tagIndex)) return;
-        removeTaggedFromContainer(inventory.getBackpack(), tagIndex);
+    private static void removeLockpickFromInventory(@Nonnull Ref<EntityStore> ref, @Nonnull Store<EntityStore> store, int tagIndex) {
+        var hotbar = store.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        if (hotbar != null && removeTaggedFromContainer(hotbar.getInventory(), tagIndex)) return;
+        var storage = store.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        if (storage != null && removeTaggedFromContainer(storage.getInventory(), tagIndex)) return;
+        var utility = store.getComponent(ref, InventoryComponent.Utility.getComponentType());
+        if (utility != null && removeTaggedFromContainer(utility.getInventory(), tagIndex)) return;
+        var armor = store.getComponent(ref, InventoryComponent.Armor.getComponentType());
+        if (armor != null && removeTaggedFromContainer(armor.getInventory(), tagIndex)) return;
+        var backpack = store.getComponent(ref, InventoryComponent.Backpack.getComponentType());
+        if (backpack != null) removeTaggedFromContainer(backpack.getInventory(), tagIndex);
     }
 
     private static boolean removeTaggedFromContainer(@Nullable ItemContainer container, int tagIndex) {

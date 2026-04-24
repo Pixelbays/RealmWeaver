@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Frost_Mage_Crystal_Aegis"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Frost_Mage_Crystal_Aegis",
+    "Cooldown": 18.0
+  }
+}

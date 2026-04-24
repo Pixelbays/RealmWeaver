@@ -51,6 +51,7 @@ import org.pixelbays.rpg.leveling.config.LevelSystemConfig;
 import org.pixelbays.rpg.race.component.RaceComponent;
 import org.pixelbays.rpg.race.config.RaceDefinition;
 import org.pixelbays.rpg.race.system.RaceManagementSystem;
+import org.pixelbays.rpg.world.InstanceWorldLifecycle;
 
 import com.hypixel.hytale.builtin.instances.InstancesPlugin;
 import com.hypixel.hytale.component.Ref;
@@ -102,13 +103,17 @@ public final class CharacterManager {
     private static final String BASE_CHARACTER_LEVEL = "Base_Character_Level";
     private static final float CHARACTER_PREVIEW_DEFAULT_YAW = 0.0F;
     private static final float CHARACTER_PREVIEW_ROTATION_STEP = (float) Math.toRadians(22.5D);
+    private static final long INITIAL_CHARACTER_SELECT_OPEN_DELAY_MS = 1500L;
 
     private final CharacterPersistence persistence = new CharacterPersistence();
     private final CharacterAppearanceService appearanceService = new CharacterAppearanceService();
     private final AbilityBindingService abilityBindingService = new AbilityBindingService();
     private final Map<UUID, CharacterRosterData> rostersByAccountId = new ConcurrentHashMap<>();
     private final Map<UUID, String> activeCharacterIds = new ConcurrentHashMap<>();
+    private final Map<UUID, String> activePrimaryClassIds = new ConcurrentHashMap<>();
     private final Map<UUID, Boolean> pendingUiTransitionSuppressions = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> pendingCharacterSelectOpenAtByPlayerId = new ConcurrentHashMap<>();
+    private final Map<UUID, ScheduledFuture<?>> pendingCharacterSelectOpenTasks = new ConcurrentHashMap<>();
     private final Map<UUID, ScheduledFuture<?>> pendingLogoutTasks = new ConcurrentHashMap<>();
     private final ScheduledExecutorService logoutScheduler = Executors.newSingleThreadScheduledExecutor(new LogoutThreadFactory());
     private volatile boolean persistenceLoaded;
@@ -119,7 +124,11 @@ public final class CharacterManager {
     public void clear() {
         rostersByAccountId.clear();
         activeCharacterIds.clear();
+        activePrimaryClassIds.clear();
         pendingUiTransitionSuppressions.clear();
+        pendingCharacterSelectOpenAtByPlayerId.clear();
+        pendingCharacterSelectOpenTasks.values().forEach(task -> task.cancel(false));
+        pendingCharacterSelectOpenTasks.clear();
         persistenceLoaded = false;
         pendingLogoutTasks.values().forEach(task -> task.cancel(false));
         pendingLogoutTasks.clear();
@@ -204,6 +213,7 @@ public final class CharacterManager {
         }
 
         activeCharacterIds.remove(playerRef.getUuid());
+        activePrimaryClassIds.remove(playerRef.getUuid());
         enterCharacterSelect(ref, store, playerRef);
     }
 
@@ -213,6 +223,7 @@ public final class CharacterManager {
         }
         PlayerRef playerRef = event.getPlayerRef();
         cancelPendingLogout(playerRef.getUuid());
+        cancelPendingCharacterSelectOpen(playerRef.getUuid());
 
         Ref<EntityStore> ref = playerRef.getReference();
         if (ref != null && ref.isValid()) {
@@ -223,11 +234,13 @@ public final class CharacterManager {
                     saveActiveCharacter(playerRef.getUuid(), ref, store);
                 }
                 activeCharacterIds.remove(playerRef.getUuid());
+                activePrimaryClassIds.remove(playerRef.getUuid());
             });
             return;
         }
 
         activeCharacterIds.remove(playerRef.getUuid());
+        activePrimaryClassIds.remove(playerRef.getUuid());
     }
 
     public void enterCharacterSelect(@Nonnull Ref<EntityStore> ref,
@@ -238,6 +251,7 @@ public final class CharacterManager {
         }
         cancelPendingLogout(playerRef.getUuid());
         activeCharacterIds.remove(playerRef.getUuid());
+        activePrimaryClassIds.remove(playerRef.getUuid());
         World world = store.getExternalData().getWorld();
         world.execute(() -> {
             if (!ref.isValid()) {
@@ -245,6 +259,7 @@ public final class CharacterManager {
             }
             if (!isLobbyWorld(world)) {
                 moveToLobby(ref, store, playerRef);
+                    return;
             }
             openCharacterSelectPage(ref, store, playerRef);
         });
@@ -478,6 +493,7 @@ public final class CharacterManager {
         saveActiveCharacter(playerRef.getUuid(), ref, store);
         applyProfileToPlayer(target, ref, store);
         activeCharacterIds.put(playerRef.getUuid(), target.getCharacterId());
+        activePrimaryClassIds.put(playerRef.getUuid(), resolvePrimaryKnownClassId(target));
         if (Realmweavers.get().getAchievementSystem() != null) {
             Realmweavers.get().getAchievementSystem().synchronizeEntityAchievements(ref, store);
         }
@@ -595,8 +611,66 @@ public final class CharacterManager {
         }
 
         captureIntoProfile(active, ref, store);
+        activePrimaryClassIds.put(accountId, active.getPrimaryClassId());
         active.setLastPlayedEpochMs(System.currentTimeMillis());
         persistRoster(roster);
+    }
+
+    public void handleActiveClassChanged(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull String newClassId) {
+        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return;
+        }
+
+        UUID accountId = playerRef.getUuid();
+        activePrimaryClassIds.put(accountId, newClassId == null ? "" : newClassId);
+
+        CharacterProfileData activeProfile = getLoadedActiveProfile(accountId, playerRef.getUsername());
+        if (activeProfile == null) {
+            return;
+        }
+
+        activeProfile.setPrimaryClassId(newClassId);
+        ClassComponent classProgression = activeProfile.getClassProgression();
+        if (classProgression != null && newClassId != null && !newClassId.isBlank()) {
+            classProgression.prioritizeClass(newClassId);
+        }
+    }
+
+    @Nonnull
+    public String resolveActivePrimaryClassId(@Nonnull UUID accountId, @Nullable String username) {
+        String cachedClassId = activePrimaryClassIds.get(accountId);
+        if (cachedClassId != null && !cachedClassId.isBlank()) {
+            return cachedClassId;
+        }
+
+        CharacterRosterData roster = rostersByAccountId.get(accountId);
+        if (roster == null) {
+            return "";
+        }
+
+        String activeCharacterId = activeCharacterIds.getOrDefault(accountId, roster.getSelectedCharacterId());
+        if (activeCharacterId == null || activeCharacterId.isBlank()) {
+            return "";
+        }
+
+        CharacterProfileData activeProfile = roster.getProfile(activeCharacterId);
+        if (activeProfile == null) {
+            return "";
+        }
+
+        String resolvedClassId = resolvePrimaryKnownClassId(activeProfile);
+        if (!resolvedClassId.isBlank()) {
+            activePrimaryClassIds.put(accountId, resolvedClassId);
+        }
+        return resolvedClassId;
+    }
+
+    @Nonnull
+    public String resolveActivePrimaryClassId(@Nonnull PlayerRef playerRef) {
+        return resolveActivePrimaryClassId(playerRef.getUuid(), playerRef.getUsername());
     }
 
     public void sanitizeAbilityBindingsForCurrentConfig() {
@@ -623,7 +697,9 @@ public final class CharacterManager {
                     continue;
                 }
 
-                if (abilityBindingService.sanitizeInvalidBindings(profile.getAbilityBindings()).changed()) {
+                if (abilityBindingService
+                    .sanitizeInvalidBindingsForClass(profile.getAbilityBindings(), resolvePrimaryKnownClassId(profile))
+                        .changed()) {
                     changed = true;
                 }
             }
@@ -793,6 +869,7 @@ public final class CharacterManager {
 
     @Nonnull
     public String resolveAccountUsername(@Nonnull UUID accountId) {
+        ensurePersistenceLoaded();
         CharacterRosterData roster = rostersByAccountId.get(accountId);
         return roster == null ? "" : roster.getAccountUsername();
     }
@@ -1230,10 +1307,11 @@ public final class CharacterManager {
         profile.setClassProgression(classComponent == null ? new ClassComponent() : (ClassComponent) classComponent.clone());
         profile.setRaceProgression(raceComponent == null ? new RaceComponent() : (RaceComponent) raceComponent.clone());
         profile.setClassAbilities(classAbilities == null ? new ClassAbilityComponent() : classAbilities.clone());
+        String primaryClassId = resolvePrimaryKnownClassId(profile.getClassProgression());
         AbilityBindingComponent capturedBindings = abilityBindings == null
             ? new AbilityBindingComponent()
             : (AbilityBindingComponent) abilityBindings.clone();
-        abilityBindingService.sanitizeInvalidBindings(capturedBindings);
+        abilityBindingService.sanitizeInvalidBindingsForClass(capturedBindings, primaryClassId);
         profile.setAbilityBindings(capturedBindings);
         profile.setAchievementProgress(achievementProgress == null ? new AchievementComponent() : (AchievementComponent) achievementProgress.clone());
         profile.setStatSnapshot(statMap == null ? new EntityStatMap() : statMap.clone());
@@ -1246,7 +1324,7 @@ public final class CharacterManager {
             profile.setActiveToolsSlot(player.getInventory().getActiveToolsSlot());
         }
         profile.setRaceId(profile.getRaceProgression().getRaceId());
-        profile.setPrimaryClassId(resolvePrimaryKnownClassId(profile.getClassProgression()));
+        profile.setPrimaryClassId(primaryClassId);
         profile.setAppearance(appearanceService.fromPlayerSkin(
                 playerSkinComponent == null ? null : playerSkinComponent.getPlayerSkin(),
                 profile.getRaceId()));
@@ -1259,8 +1337,9 @@ public final class CharacterManager {
         store.putComponent(ref, ClassComponent.getComponentType(), (ClassComponent) profile.getClassProgression().clone());
         store.putComponent(ref, RaceComponent.getComponentType(), (RaceComponent) profile.getRaceProgression().clone());
         store.putComponent(ref, ClassAbilityComponent.getComponentType(), profile.getClassAbilities().clone());
+        String primaryClassId = resolvePrimaryKnownClassId(profile);
         AbilityBindingComponent appliedBindings = (AbilityBindingComponent) profile.getAbilityBindings().clone();
-        abilityBindingService.sanitizeInvalidBindings(appliedBindings);
+        abilityBindingService.sanitizeInvalidBindingsForClass(appliedBindings, primaryClassId);
         store.putComponent(ref, AbilityBindingComponent.getComponentType(), appliedBindings);
         store.putComponent(ref, AchievementComponent.getComponentType(), (AchievementComponent) profile.getAchievementProgress().clone());
         store.putComponent(ref, EntityStatMap.getComponentType(), profile.getStatSnapshot().clone());
@@ -1671,7 +1750,8 @@ public final class CharacterManager {
             return;
         }
 
-        AbilityBindingService.BindingSanitizationResult result = abilityBindingService.sanitizeInvalidBindings(bindingComponent);
+        AbilityBindingService.BindingSanitizationResult result = abilityBindingService
+            .sanitizeInvalidBindings(bindingComponent, ref, store);
         if (!result.changed()) {
             return;
         }
@@ -1905,7 +1985,12 @@ public final class CharacterManager {
         World currentWorld = store.getExternalData().getWorld();
 
         Transform returnPoint = resolveCurrentTransform(store, ref, playerRef.getUuid(), currentWorld);
+        pendingCharacterSelectOpenAtByPlayerId.put(
+            playerRef.getUuid(),
+            System.currentTimeMillis() + INITIAL_CHARACTER_SELECT_OPEN_DELAY_MS);
+        cancelPendingCharacterSelectOpenTask(playerRef.getUuid());
         CompletableFuture<World> lobbyWorldFuture = InstancesPlugin.get().spawnInstance(lobbyInstanceTemplateId, currentWorld, returnPoint);
+        lobbyWorldFuture.thenAccept(InstanceWorldLifecycle::configureEphemeralInstance);
         InstancesPlugin.teleportPlayerToLoadingInstance(ref, store, lobbyWorldFuture, null);
         playerRef.getPacketHandler().writeNoCache(new SetServerCamera(ClientCameraView.Custom, false, null));
     }
@@ -1936,6 +2021,28 @@ public final class CharacterManager {
         Player player = store.getComponent(ref, Player.getComponentType());
         if (player == null) {
             return;
+        }
+
+        UUID playerId = playerRef.getUuid();
+        if (playerId != null) {
+            long now = System.currentTimeMillis();
+            if (player.isWaitingForClientReady()) {
+                pendingCharacterSelectOpenAtByPlayerId.remove(playerId);
+                cancelPendingCharacterSelectOpenTask(playerId);
+                return;
+            }
+
+            Long openReadyAt = pendingCharacterSelectOpenAtByPlayerId.get(playerId);
+            if (openReadyAt == null) {
+                scheduleCharacterSelectOpen(ref, store, playerRef, now, now + INITIAL_CHARACTER_SELECT_OPEN_DELAY_MS);
+                return;
+            }
+            if (now < openReadyAt) {
+                scheduleCharacterSelectOpen(ref, store, playerRef, now, openReadyAt);
+                return;
+            }
+            pendingCharacterSelectOpenAtByPlayerId.remove(playerId);
+            cancelPendingCharacterSelectOpenTask(playerId);
         }
 
         CharacterProfileData previewProfile = getActiveProfile(playerRef.getUuid(), playerRef.getUsername());
@@ -1974,6 +2081,59 @@ public final class CharacterManager {
             suppressNextCharacterUiReopen(playerRef);
             openCharacterSelectPage(ref, store, playerRef);
         });
+    }
+
+    private void scheduleCharacterSelectOpen(@Nonnull Ref<EntityStore> ref,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull PlayerRef playerRef,
+            long now,
+            long openReadyAt) {
+        UUID playerId = playerRef.getUuid();
+        if (playerId == null) {
+            return;
+        }
+
+        long targetOpenAt = Math.max(now, openReadyAt);
+        pendingCharacterSelectOpenAtByPlayerId.put(playerId, targetOpenAt);
+
+        ScheduledFuture<?> existingTask = pendingCharacterSelectOpenTasks.get(playerId);
+        if (existingTask != null && !existingTask.isDone()) {
+            return;
+        }
+
+        long delayMs = Math.max(1L, targetOpenAt - now);
+        World world = store.getExternalData().getWorld();
+        ScheduledFuture<?> scheduled = logoutScheduler.schedule(() -> world.execute(() -> {
+            pendingCharacterSelectOpenTasks.remove(playerId);
+            if (!ref.isValid() || !requiresCharacterUiLock(playerRef)) {
+                pendingCharacterSelectOpenAtByPlayerId.remove(playerId);
+                return;
+            }
+
+            Store<EntityStore> latestStore = ref.getStore();
+            if (latestStore == null) {
+                pendingCharacterSelectOpenAtByPlayerId.remove(playerId);
+                return;
+            }
+
+            openCharacterSelectPage(ref, latestStore, playerRef);
+        }), delayMs, TimeUnit.MILLISECONDS);
+        pendingCharacterSelectOpenTasks.put(playerId, scheduled);
+    }
+
+    private void cancelPendingCharacterSelectOpen(@Nullable UUID playerId) {
+        if (playerId == null) {
+            return;
+        }
+        pendingCharacterSelectOpenAtByPlayerId.remove(playerId);
+        cancelPendingCharacterSelectOpenTask(playerId);
+    }
+
+    private void cancelPendingCharacterSelectOpenTask(@Nonnull UUID playerId) {
+        ScheduledFuture<?> task = pendingCharacterSelectOpenTasks.remove(playerId);
+        if (task != null) {
+            task.cancel(false);
+        }
     }
 
     public void openDeletedCharacterRecoveryPage(@Nonnull Ref<EntityStore> ref,
@@ -2292,17 +2452,17 @@ public final class CharacterManager {
         persistence.saveRoster(roster);
     }
 
+    @Nonnull
+    private String resolvePlayerUsername(@Nonnull Store<EntityStore> store, @Nonnull Ref<EntityStore> ref) {
+        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
+        return playerRef == null ? "" : playerRef.getUsername();
+    }
+
     private enum TokenMutationType {
         Add,
         Remove,
         Set,
         Spend
-    }
-
-    @Nonnull
-    private String resolvePlayerUsername(@Nonnull Store<EntityStore> store, @Nonnull Ref<EntityStore> ref) {
-        PlayerRef playerRef = store.getComponent(ref, PlayerRef.getComponentType());
-        return playerRef == null ? "" : playerRef.getUsername();
     }
 
     @Nonnull

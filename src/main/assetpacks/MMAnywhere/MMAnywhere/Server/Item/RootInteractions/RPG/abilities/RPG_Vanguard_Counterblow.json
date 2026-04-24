@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Counterblow"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Counterblow",
+    "Cooldown": 9.0
+  }
+}

@@ -42,11 +42,13 @@ public class AbilitySlotsInputHandler {
      */
     public boolean handlePacket(@Nonnull PlayerRef playerRef, @Nonnull SyncInteractionChains syncPacket) {
         for (SyncInteractionChain chain : syncPacket.updates) {
-            // Check for Ability1, Ability2, or Ability3
-            if ((chain.interactionType == InteractionType.Ability1 ||
-                    chain.interactionType == InteractionType.Ability2 ||
-                    chain.interactionType == InteractionType.Ability3) &&
-                    chain.initial) {
+            int slotNumber = resolveAbilitySlotNumber(chain.interactionType);
+            if (slotNumber > 0 && chain.initial) {
+                RpgLogging.debugDeveloper(
+                        "[AbilitySlotsInput] press player=%s slot=%d interaction=%s",
+                        playerRef.getUsername(),
+                        slotNumber,
+                        chain.interactionType);
 
                 handleAbilitySlot(playerRef, chain.interactionType);
                 return true; // Block the packet - we're handling it
@@ -75,13 +77,7 @@ public class AbilitySlotsInputHandler {
                 return;
             }
 
-            // Get ability slot number (1, 2, or 3)
-            int slotNumber = switch (abilityType) {
-                case Ability1 -> 1;
-                case Ability2 -> 2;
-                case Ability3 -> 3;
-                default -> 0;
-            };
+            int slotNumber = resolveAbilitySlotNumber(abilityType);
 
             // Look up ability binding for this ability slot
             AbilityBindingComponent bindingComp = store.getComponent(entityRef,
@@ -119,22 +115,26 @@ public class AbilitySlotsInputHandler {
             if (abilitySystem == null) {
                 return;
             }
-            ClassAbilitySystem.TriggerResult result = abilitySystem.triggerAbility(entityRef, store, resolvedAbilityId, abilityType);
+            ClassAbilitySystem.TriggerResult result = abilitySystem.triggerAbility(entityRef, store, resolvedAbilityId,
+                    abilityType);
             if (result.isFailure()) {
                 String errorMsg = result.getErrorMessage();
-                if (errorMsg != null && !errorMsg.isEmpty()) {
+                if (!result.shouldSuppressPlayerErrorMessage() && errorMsg != null && !errorMsg.isEmpty()) {
                     playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.error")
                             .param("error", errorMsg));
                 }
                 return;
             }
 
-            // Debug logging
-            RpgLogging.debugDeveloper(
-                    "Ability slot trigger: player=%s, slot=%d, ability=%s",
-                    playerRef.getUsername(),
-                    slotNumber,
-                    resolvedAbilityId);
         });
+    }
+
+    private int resolveAbilitySlotNumber(@Nonnull InteractionType abilityType) {
+        return switch (abilityType) {
+            case Ability1 -> 1;
+            case Ability2 -> 2;
+            case Ability3 -> 3;
+            default -> 0;
+        };
     }
 }

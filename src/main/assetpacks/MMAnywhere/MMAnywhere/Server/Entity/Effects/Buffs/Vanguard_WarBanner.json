@@ -1,0 +1,13 @@
+{
+  "Duration": 6.0,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": false,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#d1a956",
+    "EntityTopTint": "#fff1c7"
+  },
+  "StatModifiers": {
+    "Mastery": 6,
+    "Haste": 4
+  }
+}

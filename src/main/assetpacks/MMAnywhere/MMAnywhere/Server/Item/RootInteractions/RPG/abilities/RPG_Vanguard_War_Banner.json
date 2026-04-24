@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_War_Banner"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_War_Banner",
+    "Cooldown": 18.0
+  }
+}

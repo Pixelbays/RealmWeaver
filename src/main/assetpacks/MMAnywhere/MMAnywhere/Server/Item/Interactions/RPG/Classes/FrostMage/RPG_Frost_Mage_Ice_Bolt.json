@@ -1,0 +1,25 @@
+{
+  "Type": "Simple",
+  "RunTime": 0.2,
+  "Effects": {
+    "ItemAnimationId": "CastLeftCharged",
+    "WorldSoundEventId": "SFX_Staff_Ice_Shoot",
+    "LocalSoundEventId": "SFX_Staff_Ice_Shoot"
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "FrostRunes": 1
+        }
+      },
+      {
+        "Type": "LaunchProjectile",
+        "ProjectileId": "Ice_Bolt"
+      }
+    ]
+  }
+}

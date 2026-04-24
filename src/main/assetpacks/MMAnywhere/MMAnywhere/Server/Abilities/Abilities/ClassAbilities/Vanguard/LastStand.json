@@ -1,0 +1,22 @@
+{
+  "Parent": "PassiveBase",
+  "Categories": [
+    "Vanguard",
+    "Passive"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.last_stand.name",
+    "Description": "mma.rpg.abilities.last_stand.description"
+  },
+  "AbilityType": "Passive",
+  "GlobalCooldown": 0.0,
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_Last_Stand"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "While below 35% health, gain a large burst of Mastery, Versatility, and Speed.",
+  "Icon": "Icons/ItemsGenerated/Weapon_Shield_Onyxium.png"
+}

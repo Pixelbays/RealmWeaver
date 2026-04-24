@@ -6,8 +6,12 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.hypixel.hytale.component.ComponentAccessor;
+import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
+import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
 public class CurrencyAccessContext {
 
@@ -23,6 +27,19 @@ public class CurrencyAccessContext {
     }
 
     @Nonnull
+    public static CurrencyAccessContext fromRef(@Nonnull ComponentAccessor<EntityStore> accessor, @Nonnull Ref<EntityStore> ref) {
+        List<ItemContainer> containers = new ArrayList<>();
+        InventoryComponent.Storage storageComp = accessor.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        InventoryComponent.Hotbar hotbarComp = accessor.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        InventoryComponent.Backpack backpackComp = accessor.getComponent(ref, InventoryComponent.Backpack.getComponentType());
+        if (storageComp != null) containers.add(storageComp.getInventory());
+        if (hotbarComp != null) containers.add(hotbarComp.getInventory());
+        if (backpackComp != null) containers.add(backpackComp.getInventory());
+        return new CurrencyAccessContext(containers);
+    }
+
+    @Nonnull
+    @SuppressWarnings("removal")
     public static CurrencyAccessContext fromInventory(@Nonnull Inventory inventory) {
         List<ItemContainer> containers = new ArrayList<>();
         containers.add(inventory.getStorage());

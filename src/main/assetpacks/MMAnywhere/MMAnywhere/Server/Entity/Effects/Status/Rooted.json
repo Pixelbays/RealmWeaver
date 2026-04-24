@@ -1,0 +1,17 @@
+{
+  "Duration": 10,
+  "RemovalBehavior": "Duration",
+  "ApplicationEffects": {
+    "MovementEffects": {
+      "DisableAll": true,
+      "DisableForward": true,
+      "DisableBackward": true,
+      "DisableLeft": true,
+      "DisableRight": true,
+      "DisableJump": true,
+      "DisableSprint": true,
+      "DisableCrouch": true
+    }
+  },
+  "Debuff": true
+}

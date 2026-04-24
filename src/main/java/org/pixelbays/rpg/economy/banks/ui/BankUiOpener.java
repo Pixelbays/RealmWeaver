@@ -15,6 +15,7 @@ import org.pixelbays.rpg.economy.banks.BankTypeRegistry;
 import org.pixelbays.rpg.economy.banks.command.BankCommandUtil;
 import org.pixelbays.rpg.economy.banks.config.BankScope;
 import org.pixelbays.rpg.economy.banks.config.BankTypeDefinition;
+import org.pixelbays.rpg.economy.currency.CurrencyAccessContext;
 import org.pixelbays.rpg.guild.Guild;
 import org.pixelbays.rpg.guild.GuildManager;
 
@@ -95,7 +96,7 @@ public final class BankUiOpener {
         }
 
         BankManager bankManager = Realmweavers.get().getBankManager();
-        BankActionResult result = bankManager.getOrCreateBank(definition, ownerId, playerRef.getUuid(), player.getInventory());
+        BankActionResult result = bankManager.getOrCreateBank(definition, ownerId, playerRef.getUuid(), CurrencyAccessContext.fromRef(store, ref));
         if (!result.isSuccess() || result.getBankAccount() == null) {
             player.sendMessage(BankCommandUtil.managerResultMessage(result.getMessage()));
             return false;

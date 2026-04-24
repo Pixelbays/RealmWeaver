@@ -697,7 +697,7 @@ public class XpBarHud extends CustomUIHud {
                 int chargeWidth = computeChargeSegmentWidth(safeMaxCharges, useChargeAsset);
                 ui.append("    LayoutMode: Left;\n\n");
                 for (int chargeIndex = 0; chargeIndex < safeMaxCharges; chargeIndex++) {
-                    ui.append("    Group #ResChargeSlot").append(i).append('_').append(chargeIndex).append(" {\n");
+                    ui.append("    Group #").append(resourceChargeSlotId(i, chargeIndex)).append(" {\n");
                     ui.append("      Anchor: (Width: ").append(chargeWidth)
                             .append(", Height: ").append(RESOURCE_BAR_HEIGHT);
                     if (chargeIndex < safeMaxCharges - 1) {
@@ -712,7 +712,7 @@ public class XpBarHud extends CustomUIHud {
                         ui.append("\n");
                     }
 
-                    ui.append("      Group #ResChargeFill").append(i).append('_').append(chargeIndex).append(" {\n");
+                    ui.append("      Group #").append(resourceChargeFillId(i, chargeIndex)).append(" {\n");
                     if (useChargeAsset) {
                         ui.append("        Background: (TexturePath: \"")
                                 .append(escapeUiString(bar.assetPath))
@@ -791,18 +791,18 @@ public class XpBarHud extends CustomUIHud {
 
             for (int barIndex = 0; barIndex < member.bars.size(); barIndex++) {
                 PartyStatBarData bar = member.bars.get(barIndex);
-                String labelId = "PartyBarLabel" + memberIndex + "_" + barIndex;
-                String valueId = "PartyBarValue" + memberIndex + "_" + barIndex;
-                String trackId = "PartyBarTrack" + memberIndex + "_" + barIndex;
-                String fillId = "PartyBarFill" + memberIndex + "_" + barIndex;
+                String labelId = partyBarNodeId("PartyBarLabel", memberIndex, barIndex);
+                String valueId = partyBarNodeId("PartyBarValue", memberIndex, barIndex);
+                String trackId = partyBarNodeId("PartyBarTrack", memberIndex, barIndex);
+                String fillId = partyBarNodeId("PartyBarFill", memberIndex, barIndex);
 
-                ui.append("  Group #PartyBarBlock").append(memberIndex).append("_").append(barIndex).append(" {\n");
+                ui.append("  Group #").append(partyBarNodeId("PartyBarBlock", memberIndex, barIndex)).append(" {\n");
                 ui.append("    LayoutMode: Top;\n");
                 ui.append("    Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ")
                         .append(PARTY_BAR_LABEL_HEIGHT + PARTY_BAR_LABEL_GAP + PARTY_BAR_TRACK_HEIGHT)
                         .append(", Bottom: ").append(PARTY_BAR_GAP).append(");\n\n");
 
-                ui.append("    Group #PartyBarHeader").append(memberIndex).append("_").append(barIndex).append(" {\n");
+                ui.append("    Group #").append(partyBarNodeId("PartyBarHeader", memberIndex, barIndex)).append(" {\n");
                 ui.append("      LayoutMode: Left;\n");
                 ui.append("      Anchor: (Width: ").append(PARTY_ENTRY_INNER_WIDTH).append(", Height: ").append(PARTY_BAR_LABEL_HEIGHT)
                         .append(", Bottom: ").append(PARTY_BAR_LABEL_GAP).append(");\n\n");
@@ -880,7 +880,17 @@ public class XpBarHud extends CustomUIHud {
 
     @Nonnull
     private static String resourceChargeFillSelector(int resourceIndex, int chargeIndex) {
-        return "#ResChargeFill" + resourceIndex + "_" + chargeIndex + ".Anchor";
+        return "#" + resourceChargeFillId(resourceIndex, chargeIndex) + ".Anchor";
+    }
+
+    @Nonnull
+    private static String resourceChargeSlotId(int resourceIndex, int chargeIndex) {
+        return "ResChargeSlot" + resourceIndex + "C" + chargeIndex;
+    }
+
+    @Nonnull
+    private static String resourceChargeFillId(int resourceIndex, int chargeIndex) {
+        return "ResChargeFill" + resourceIndex + "C" + chargeIndex;
     }
 
     private static int computeChargeSegmentWidth(int maxCharges, boolean useChargeAsset) {
@@ -916,12 +926,17 @@ public class XpBarHud extends CustomUIHud {
 
     @Nonnull
     private static String partyBarFillSelector(int memberIndex, int barIndex) {
-        return "#PartyBarFill" + memberIndex + "_" + barIndex + ".Anchor";
+        return "#" + partyBarNodeId("PartyBarFill", memberIndex, barIndex) + ".Anchor";
     }
 
     @Nonnull
     private static String partyBarValueSelector(int memberIndex, int barIndex) {
-        return "#PartyBarValue" + memberIndex + "_" + barIndex + ".Text";
+        return "#" + partyBarNodeId("PartyBarValue", memberIndex, barIndex) + ".Text";
+    }
+
+    @Nonnull
+    private static String partyBarNodeId(@Nonnull String prefix, int memberIndex, int barIndex) {
+        return prefix + memberIndex + "B" + barIndex;
     }
 
     private static int computePartyEntryHeight(int barCount) {

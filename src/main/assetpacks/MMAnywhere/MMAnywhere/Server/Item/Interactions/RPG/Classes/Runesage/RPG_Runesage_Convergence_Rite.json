@@ -1,0 +1,177 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Sigils": 2
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": -2,
+          "Health": 16
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_Sanctuary",
+        "Entity": "User"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 6.0,
+          "Offset": {
+            "Z": -1.5
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 18
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Sanctuary",
+                  "Entity": "Target"
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_PulseWard",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          },
+          {
+            "Matchers": [
+              {
+                "Type": "Vulnerable"
+              },
+              {
+                "Type": "Player",
+                "Invert": true
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Parent": "DamageEntityParent",
+                  "DamageCalculator": {
+                    "BaseDamage": {
+                      "Lightning": 12
+                    }
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Bound",
+                  "Entity": "Target"
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Fractured",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "Failed": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Health": 10
+        }
+      },
+      {
+        "Type": "ApplyEffect",
+        "EffectId": "Runesage_Warded",
+        "Entity": "User"
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 5.0,
+          "Offset": {
+            "Z": -1.5
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Player"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "ChangeStat",
+                  "Entity": "Target",
+                  "StatModifiers": {
+                    "Health": 14
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Warded",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          },
+          {
+            "Matchers": [
+              {
+                "Type": "Vulnerable"
+              },
+              {
+                "Type": "Player",
+                "Invert": true
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Parent": "DamageEntityParent",
+                  "DamageCalculator": {
+                    "BaseDamage": {
+                      "Lightning": 8
+                    }
+                  }
+                },
+                {
+                  "Type": "ApplyEffect",
+                  "EffectId": "Runesage_Weakened",
+                  "Entity": "Target"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

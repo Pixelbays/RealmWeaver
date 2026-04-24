@@ -33,6 +33,7 @@ import com.hypixel.hytale.protocol.InteractionCooldown;
 import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.protocol.RootInteractionSettings;
 import com.hypixel.hytale.protocol.SoundCategory;
+import com.hypixel.hytale.protocol.ValueType;
 import com.hypixel.hytale.protocol.packets.entities.SpawnModelParticles;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.HytaleServer;
@@ -42,12 +43,17 @@ import com.hypixel.hytale.server.core.entity.InteractionManager;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.modules.entity.EntityModule;
 import com.hypixel.hytale.server.core.modules.entity.component.TransformComponent;
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
+import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
+import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
 import com.hypixel.hytale.server.core.modules.entity.tracker.NetworkId;
 import com.hypixel.hytale.server.core.modules.interaction.InteractionModule;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.UnarmedInteractions;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.Interaction;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.InteractionTypeUtils;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.config.RootInteraction;
+import com.hypixel.hytale.server.core.modules.interaction.interaction.config.none.StatsConditionBaseInteraction;
 import com.hypixel.hytale.server.core.asset.type.model.config.ModelParticle;
 import com.hypixel.hytale.server.core.asset.type.soundevent.config.SoundEvent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
@@ -55,7 +61,7 @@ import com.hypixel.hytale.server.core.universe.world.SoundUtil;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 
-import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 
 /**
  * System that manages class abilities - registration, lookup, and
@@ -71,6 +77,14 @@ public class ClassAbilitySystem {
         "cooldownHandler");
     private static final Field COOLDOWN_REMAINING_FIELD = resolveField(CooldownHandler.Cooldown.class,
         "remainingCooldown");
+    private static final Field STATS_CONDITION_RAW_COSTS_FIELD = resolveField(StatsConditionBaseInteraction.class,
+        "rawCosts");
+    private static final Field STATS_CONDITION_LESS_THAN_FIELD = resolveField(StatsConditionBaseInteraction.class,
+        "lessThan");
+    private static final Field STATS_CONDITION_LENIENT_FIELD = resolveField(StatsConditionBaseInteraction.class,
+        "lenient");
+    private static final Field STATS_CONDITION_VALUE_TYPE_FIELD = resolveField(StatsConditionBaseInteraction.class,
+        "valueType");
 
     private final GlobalCoolDown globalCoolDown = new GlobalCoolDown();
     private final Map<ParticleEffectKey, ScheduledParticleEffect> activeParticleEffects = new ConcurrentHashMap<>();
@@ -171,11 +185,20 @@ public class ClassAbilitySystem {
             return fail(entityRef, abilityId, "Interaction manager not available");
         }
 
+        RequirementCheckResult requirementCheck = checkAbilityRequirements(entityRef, store, abilityDef, root);
+        if (!requirementCheck.allowed()) {
+            if (requirementCheck.shouldNotifyPlayer()) {
+                sendInsufficientRequirementsMessage(entityRef, store, abilityDef);
+            }
+            return fail(entityRef, abilityId, requirementCheck.reason(), requirementCheck.shouldNotifyPlayer());
+        }
+
         CooldownCheckResult interactionCooldown = checkInteractionCooldown(entityRef, store, manager, interactionType, root);
         if (!interactionCooldown.ready()) {
             sendInteractionCooldownMessage(entityRef, store, abilityDef, interactionCooldown.remainingSeconds());
             return fail(entityRef, abilityId,
-                    "Interaction cooldown active (" + formatCooldownSeconds(interactionCooldown.remainingSeconds()) + "s)");
+                    "Interaction cooldown active (" + formatCooldownSeconds(interactionCooldown.remainingSeconds()) + "s)",
+                    true);
         }
 
         GlobalCoolDown.GcdResult gcdResult = globalCoolDown.tryConsume(entityRef, store, abilityDef);
@@ -570,8 +593,140 @@ public class ClassAbilitySystem {
 
     private TriggerResult fail(@Nonnull Ref<EntityStore> entityRef, @Nonnull String abilityId,
             @Nonnull String reason) {
+        return fail(entityRef, abilityId, reason, false);
+    }
+
+    private TriggerResult fail(@Nonnull Ref<EntityStore> entityRef, @Nonnull String abilityId,
+            @Nonnull String reason,
+            boolean suppressPlayerErrorMessage) {
         AbilityTriggerFailedEvent.dispatch(entityRef, abilityId, reason);
-        return TriggerResult.failure(reason);
+        return TriggerResult.failure(reason, suppressPlayerErrorMessage);
+    }
+
+    @Nonnull
+    private RequirementCheckResult checkAbilityRequirements(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ClassAbilityDefinition abilityDef,
+            @Nonnull RootInteraction root) {
+        List<AbilityStatRequirement> requirements = resolveAbilityRequirements(abilityDef, root);
+        if (requirements.isEmpty()) {
+            return RequirementCheckResult.allowedResult();
+        }
+
+        EntityStatMap statMap = store.getComponent(entityRef, EntityStatMap.getComponentType());
+        if (statMap == null) {
+            return RequirementCheckResult.blocked(
+                    "No EntityStatMap available for ability requirements",
+                    false);
+        }
+
+        for (AbilityStatRequirement requirement : requirements) {
+            int statIndex = EntityStatType.getAssetMap().getIndex(requirement.statId());
+            if (statIndex == Integer.MIN_VALUE) {
+                return RequirementCheckResult.blocked(
+                        "Unknown ability requirement stat: " + requirement.statId(),
+                        false);
+            }
+
+            EntityStatValue statValue = statMap.get(statIndex);
+            if (statValue == null) {
+                return RequirementCheckResult.blocked(
+                        "Missing stat value for ability requirement: " + requirement.statId(),
+                        false);
+            }
+
+            float currentValue = requirement.valueType() == ValueType.Absolute
+                    ? statValue.get()
+                    : statValue.asPercentage() * 100.0f;
+            if (currentValue < requirement.requiredValue()
+                    && !(requirement.lenient() && currentValue > 0.0f && statValue.getMin() < 0.0f)) {
+                return RequirementCheckResult.blocked(
+                        "Insufficient resource requirement: " + requirement.statId(),
+                        true);
+            }
+        }
+
+        return RequirementCheckResult.allowedResult();
+    }
+
+    @Nonnull
+    private List<AbilityStatRequirement> resolveAbilityRequirements(
+            @Nonnull ClassAbilityDefinition abilityDef,
+            @Nonnull RootInteraction root) {
+        List<AbilityStatRequirement> requirements = new ArrayList<>();
+        Map<String, Integer> statRequirements = abilityDef.getStatRequirements();
+        if (statRequirements != null && !statRequirements.isEmpty()) {
+            for (Map.Entry<String, Integer> entry : statRequirements.entrySet()) {
+                if (entry.getValue() == null || entry.getValue() <= 0) {
+                    continue;
+                }
+
+                requirements.add(new AbilityStatRequirement(
+                        entry.getKey(),
+                        entry.getValue(),
+                        false,
+                        ValueType.Absolute));
+            }
+            return requirements;
+        }
+
+        return resolveRootStatsConditionRequirements(root);
+    }
+
+    @Nonnull
+    private List<AbilityStatRequirement> resolveRootStatsConditionRequirements(@Nonnull RootInteraction root) {
+        String[] interactionIds = root.getInteractionIds();
+        if (interactionIds.length == 0) {
+            return List.of();
+        }
+
+        Interaction firstInteraction = Interaction.getAssetMap().getAsset(interactionIds[0]);
+        if (!(firstInteraction instanceof StatsConditionBaseInteraction statsCondition)) {
+            return List.of();
+        }
+
+        if (readBooleanField(STATS_CONDITION_LESS_THAN_FIELD, statsCondition, false)) {
+            return List.of();
+        }
+
+        @SuppressWarnings("unchecked")
+        Object2FloatMap<String> rawCosts =
+                (Object2FloatMap<String>) readFieldValue(STATS_CONDITION_RAW_COSTS_FIELD, statsCondition);
+        if (rawCosts == null || rawCosts.isEmpty()) {
+            return List.of();
+        }
+
+        ValueType valueType = (ValueType) readFieldValue(STATS_CONDITION_VALUE_TYPE_FIELD, statsCondition);
+        boolean lenient = readBooleanField(STATS_CONDITION_LENIENT_FIELD, statsCondition, false);
+
+        List<AbilityStatRequirement> requirements = new ArrayList<>();
+        for (Object2FloatMap.Entry<String> entry : rawCosts.object2FloatEntrySet()) {
+            if (entry.getFloatValue() <= 0.0f) {
+                continue;
+            }
+
+            requirements.add(new AbilityStatRequirement(
+                    entry.getKey(),
+                    entry.getFloatValue(),
+                    lenient,
+                    valueType == null ? ValueType.Absolute : valueType));
+        }
+
+        return requirements;
+    }
+
+    private void sendInsufficientRequirementsMessage(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull ClassAbilityDefinition abilityDef) {
+        PlayerRef playerRef = store.getComponent(entityRef, PlayerRef.getComponentType());
+        if (playerRef == null) {
+            return;
+        }
+
+        playerRef.sendMessage(Message.translation("pixelbays.rpg.ability.error.requirements")
+                .param("ability", Message.translation(abilityDef.getTranslationKey())));
     }
 
     @Nonnull
@@ -687,8 +842,53 @@ public class ClassAbilitySystem {
             .param("time", formatCooldownSeconds(remainingSeconds)));
     }
 
+    /**
+     * Returns the remaining cooldown in seconds for the given ability on the given entity.
+     * Returns 0 if the ability is not on cooldown, not found, or has no interaction chain.
+     */
+    public float getAbilityCooldownRemaining(
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull String abilityId) {
+        ClassAbilityDefinition abilityDef = getAbilityDefinition(abilityId);
+        if (abilityDef == null) {
+            return 0f;
+        }
+        String chainId = abilityDef.getInteractionChainId();
+        if (chainId == null || chainId.isBlank()) {
+            return 0f;
+        }
+        RootInteraction root = RootInteraction.getAssetMap().getAsset(chainId);
+        if (root == null) {
+            return 0f;
+        }
+        InteractionManager manager = store.getComponent(entityRef,
+                InteractionModule.get().getInteractionManagerComponent());
+        if (manager == null) {
+            return 0f;
+        }
+        CooldownHandler cooldownHandler = getCooldownHandler(manager);
+        if (cooldownHandler == null) {
+            return 0f;
+        }
+        ResolvedCooldown resolved = resolveInteractionCooldown(entityRef, store, InteractionType.Primary, root);
+        if (resolved.cooldownTime() <= 0f) {
+            return 0f;
+        }
+        CooldownHandler.Cooldown cooldown = cooldownHandler.getCooldown(
+                resolved.cooldownId(),
+                resolved.cooldownTime(),
+                resolved.chargeTimes(),
+                root.resetCooldownOnStart(),
+                resolved.interruptRecharge());
+        if (cooldown == null || !cooldown.hasCooldown(false)) {
+            return 0f;
+        }
+        return Math.max(0f, getRemainingCooldownSeconds(cooldown));
+    }
+
     @Nonnull
-    private String formatCooldownSeconds(float remainingSeconds) {
+    public String formatCooldownSeconds(float remainingSeconds) {
         if (remainingSeconds >= 10.0f) {
             return Integer.toString((int) Math.ceil(remainingSeconds));
         }
@@ -712,6 +912,31 @@ public class ClassAbilitySystem {
         }
     }
 
+    @Nullable
+    private static Object readFieldValue(@Nullable Field field, @Nonnull Object owner) {
+        if (field == null) {
+            return null;
+        }
+
+        try {
+            return field.get(owner);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+    }
+
+    private static boolean readBooleanField(@Nullable Field field, @Nonnull Object owner, boolean fallback) {
+        if (field == null) {
+            return fallback;
+        }
+
+        try {
+            return field.getBoolean(owner);
+        } catch (IllegalAccessException e) {
+            return fallback;
+        }
+    }
+
     /**
      * Result of an ability trigger attempt.
      * Contains success status, error messages, and ability information.
@@ -721,13 +946,16 @@ public class ClassAbilitySystem {
         private final String errorMessage;
         private final ClassAbilityDefinition abilityDefinition;
         private final String interactionChainId;
+        private final boolean suppressPlayerErrorMessage;
 
         private TriggerResult(boolean success, String errorMessage,
-                ClassAbilityDefinition abilityDefinition, String interactionChainId) {
+                ClassAbilityDefinition abilityDefinition, String interactionChainId,
+                boolean suppressPlayerErrorMessage) {
             this.success = success;
             this.errorMessage = errorMessage;
             this.abilityDefinition = abilityDefinition;
             this.interactionChainId = interactionChainId;
+            this.suppressPlayerErrorMessage = suppressPlayerErrorMessage;
         }
 
         /**
@@ -735,14 +963,18 @@ public class ClassAbilitySystem {
          */
         public static TriggerResult success(@Nonnull ClassAbilityDefinition abilityDefinition,
                 @Nonnull String interactionChainId) {
-            return new TriggerResult(true, null, abilityDefinition, interactionChainId);
+            return new TriggerResult(true, null, abilityDefinition, interactionChainId, false);
         }
 
         /**
          * Create a failed trigger result
          */
         public static TriggerResult failure(@Nonnull String errorMessage) {
-            return new TriggerResult(false, errorMessage, null, null);
+            return failure(errorMessage, false);
+        }
+
+        public static TriggerResult failure(@Nonnull String errorMessage, boolean suppressPlayerErrorMessage) {
+            return new TriggerResult(false, errorMessage, null, null, suppressPlayerErrorMessage);
         }
 
         /**
@@ -765,6 +997,10 @@ public class ClassAbilitySystem {
         @Nullable
         public String getErrorMessage() {
             return errorMessage;
+        }
+
+        public boolean shouldSuppressPlayerErrorMessage() {
+            return suppressPlayerErrorMessage;
         }
 
         /**
@@ -792,6 +1028,75 @@ public class ClassAbilitySystem {
                 return abilityDefinition.getDisplayName();
             }
             return errorMessage != null ? errorMessage : "Unknown";
+        }
+    }
+
+    private static final class AbilityStatRequirement {
+        private final String statId;
+        private final float requiredValue;
+        private final boolean lenient;
+        private final ValueType valueType;
+
+        private AbilityStatRequirement(
+                @Nonnull String statId,
+                float requiredValue,
+                boolean lenient,
+                @Nonnull ValueType valueType) {
+            this.statId = statId;
+            this.requiredValue = requiredValue;
+            this.lenient = lenient;
+            this.valueType = valueType;
+        }
+
+        @Nonnull
+        private String statId() {
+            return statId;
+        }
+
+        private float requiredValue() {
+            return requiredValue;
+        }
+
+        private boolean lenient() {
+            return lenient;
+        }
+
+        @Nonnull
+        private ValueType valueType() {
+            return valueType;
+        }
+    }
+
+    private static final class RequirementCheckResult {
+        private final boolean allowed;
+        private final String reason;
+        private final boolean shouldNotifyPlayer;
+
+        private RequirementCheckResult(boolean allowed, @Nonnull String reason, boolean shouldNotifyPlayer) {
+            this.allowed = allowed;
+            this.reason = reason;
+            this.shouldNotifyPlayer = shouldNotifyPlayer;
+        }
+
+        private static RequirementCheckResult allowedResult() {
+            return new RequirementCheckResult(true, "", false);
+        }
+
+        private static RequirementCheckResult blocked(@Nonnull String reason, boolean shouldNotifyPlayer) {
+            return new RequirementCheckResult(false, reason, shouldNotifyPlayer);
+        }
+
+        private boolean allowed() {
+            return allowed;
+        }
+
+        @Nonnull
+        private String reason() {
+            return reason;
+        }
+
+        private boolean shouldNotifyPlayer() {
+            return shouldNotifyPlayer;
         }
     }
 

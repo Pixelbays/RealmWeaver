@@ -1,0 +1,15 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Guard": 1
+  },
+  "Failed": {
+    "Type": "Simple",
+    "RunTime": 0.0
+  },
+  "Next": {
+    "Type": "ApplyEffect",
+    "EffectId": "Vanguard_CrushingTempo",
+    "Entity": "User"
+  }
+}

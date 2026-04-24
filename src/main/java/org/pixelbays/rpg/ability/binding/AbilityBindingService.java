@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 
 import org.pixelbays.rpg.ability.component.AbilityBindingComponent;
 import org.pixelbays.rpg.ability.config.settings.AbilityModSettings.AbilityControlType;
+import org.pixelbays.rpg.classes.component.ClassComponent;
+import org.pixelbays.rpg.classes.config.ClassDefinition;
 import org.pixelbays.rpg.global.config.RpgModConfig;
 import org.pixelbays.rpg.race.component.RaceComponent;
 
@@ -44,13 +46,21 @@ public class AbilityBindingService {
     }
 
     @Nonnull
+    public AbilityControlType getControlType(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        return getControlType(entityRef, store, DEFAULT_CONFIG_ID);
+    }
+
+    @Nonnull
+    public AbilityControlType getControlType(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull String configId) {
+        return resolveControlType(resolveActiveClassId(entityRef, store), configId);
+    }
+
+    @Nonnull
     public AbilityControlType getControlType(@Nonnull String configId) {
-        RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
-        if (config == null) {
-            return AbilityControlType.Hotbar;
-        }
-        AbilityControlType controlType = config.getAbilityControlType();
-        return controlType != null ? controlType : AbilityControlType.Hotbar;
+        return resolveControlType(null, configId);
     }
 
     @Nonnull
@@ -59,11 +69,26 @@ public class AbilityBindingService {
     }
 
     @Nonnull
+    public List<BindingTarget> getAllowedTargets(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        return getAllowedTargets(entityRef, store, DEFAULT_CONFIG_ID);
+    }
+
+    @Nonnull
+    public List<BindingTarget> getAllowedTargets(@Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull String configId) {
+        return buildAllowedTargets(resolveConfig(configId), getControlType(entityRef, store, configId));
+    }
+
+    @Nonnull
     public List<BindingTarget> getAllowedTargets(@Nonnull String configId) {
-        RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
-        AbilityControlType controlType = config != null && config.getAbilityControlType() != null
-            ? config.getAbilityControlType()
-            : AbilityControlType.Hotbar;
+        return buildAllowedTargets(resolveConfig(configId), getControlType(configId));
+    }
+
+    @Nonnull
+    private List<BindingTarget> buildAllowedTargets(@Nullable RpgModConfig config,
+            @Nonnull AbilityControlType controlType) {
         List<BindingTarget> targets = new ArrayList<>();
 
         switch (controlType) {
@@ -183,15 +208,41 @@ public class AbilityBindingService {
 
     @Nonnull
     public BindingSanitizationResult sanitizeInvalidBindings(@Nullable AbilityBindingComponent bindingComponent,
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store) {
+        return sanitizeInvalidBindings(bindingComponent, entityRef, store, DEFAULT_CONFIG_ID);
+    }
+
+    @Nonnull
+    public BindingSanitizationResult sanitizeInvalidBindings(@Nullable AbilityBindingComponent bindingComponent,
+            @Nonnull Ref<EntityStore> entityRef,
+            @Nonnull Store<EntityStore> store,
+            @Nonnull String configId) {
+        return sanitizeInvalidBindings(bindingComponent, resolveActiveClassId(entityRef, store), configId);
+    }
+
+    @Nonnull
+    public BindingSanitizationResult sanitizeInvalidBindingsForClass(@Nullable AbilityBindingComponent bindingComponent,
+            @Nullable String activeClassId) {
+        return sanitizeInvalidBindings(bindingComponent, activeClassId, DEFAULT_CONFIG_ID);
+    }
+
+    @Nonnull
+    public BindingSanitizationResult sanitizeInvalidBindings(@Nullable AbilityBindingComponent bindingComponent,
+            @Nonnull String configId) {
+        return sanitizeInvalidBindings(bindingComponent, null, configId);
+    }
+
+    @Nonnull
+    public BindingSanitizationResult sanitizeInvalidBindings(@Nullable AbilityBindingComponent bindingComponent,
+            @Nullable String activeClassId,
             @Nonnull String configId) {
         if (bindingComponent == null) {
             return BindingSanitizationResult.none();
         }
 
-        RpgModConfig config = RpgModConfig.getAssetMap().getAsset(configId);
-        AbilityControlType controlType = config != null && config.getAbilityControlType() != null
-                ? config.getAbilityControlType()
-                : AbilityControlType.Hotbar;
+        RpgModConfig config = resolveConfig(configId);
+        AbilityControlType controlType = resolveControlType(activeClassId, configId);
         List<Integer> clearedHotbarSlots = new ArrayList<>();
         boolean changed = false;
 
@@ -213,6 +264,7 @@ public class AbilityBindingService {
                 changed |= clearAllWeaponBindings(bindingComponent);
             }
             case AbilitySlots123 -> {
+                changed |= migrateLegacyHotbarBindingsToAbilitySlots(bindingComponent, config);
                 changed |= clearAllHotbarBindings(bindingComponent, clearedHotbarSlots);
                 changed |= clearInvalidAbilitySlotBindings(bindingComponent);
                 changed |= clearAllWeaponBindings(bindingComponent);
@@ -406,6 +458,120 @@ public class AbilityBindingService {
             }
         }
         return changed;
+    }
+
+    @Nonnull
+    private AbilityControlType resolveControlType(@Nullable String activeClassId, @Nonnull String configId) {
+        if (activeClassId != null && !activeClassId.isBlank()) {
+            ClassDefinition classDefinition = ClassDefinition.getAssetMap().getAsset(activeClassId);
+            if (classDefinition != null) {
+                return classDefinition.getEffectiveAbilityControlType(configId);
+            }
+        }
+
+        RpgModConfig config = resolveConfig(configId);
+        if (config == null) {
+            return AbilityControlType.Hotbar;
+        }
+
+        AbilityControlType controlType = config.getAbilityControlType();
+        return controlType != null ? controlType : AbilityControlType.Hotbar;
+    }
+
+    @Nullable
+    private RpgModConfig resolveConfig(@Nonnull String configId) {
+        return RpgModConfig.getAssetMap().getAsset(configId);
+    }
+
+    @Nonnull
+    private String resolveActiveClassId(@Nonnull Ref<EntityStore> entityRef, @Nonnull Store<EntityStore> store) {
+        ClassComponent classComponent = store.getComponent(entityRef, ClassComponent.getComponentType());
+        if (classComponent == null) {
+            return "";
+        }
+
+        String primaryClassId = classComponent.getPrimaryClassId();
+        if (isKnownClassId(primaryClassId)) {
+            return primaryClassId;
+        }
+
+        for (String classId : classComponent.getLearnedClassIds()) {
+            if (isKnownClassId(classId)) {
+                return classId;
+            }
+        }
+
+        return "";
+    }
+
+    private boolean isKnownClassId(@Nullable String classId) {
+        return classId != null
+                && !classId.isBlank()
+                && ClassDefinition.getAssetMap().getAsset(classId) != null;
+    }
+
+    private boolean migrateLegacyHotbarBindingsToAbilitySlots(@Nonnull AbilityBindingComponent bindingComponent,
+            @Nullable RpgModConfig config) {
+        if (!bindingComponent.getAbilitySlotBindings().isEmpty() || bindingComponent.getHotbarBindings().isEmpty()) {
+            return false;
+        }
+
+        List<Integer> orderedHotbarSlots = resolveLegacyHotbarBindingOrder(bindingComponent, config);
+        boolean changed = false;
+        int abilitySlot = 1;
+        for (Integer hotbarSlot : orderedHotbarSlots) {
+            if (hotbarSlot == null || abilitySlot > 3) {
+                break;
+            }
+
+            String abilityId = bindingComponent.getHotbarBinding(hotbarSlot);
+            if (abilityId == null || abilityId.isBlank()) {
+                continue;
+            }
+
+            bindingComponent.setAbilitySlotBinding(abilitySlot, abilityId);
+            abilitySlot++;
+            changed = true;
+        }
+        return changed;
+    }
+
+    @Nonnull
+    private List<Integer> resolveLegacyHotbarBindingOrder(@Nonnull AbilityBindingComponent bindingComponent,
+            @Nullable RpgModConfig config) {
+        LinkedHashSet<Integer> orderedSlots = new LinkedHashSet<>();
+        int[] configuredSlots = config != null ? config.getHotbarAbilitySlots() : null;
+        if (configuredSlots != null) {
+            for (int configuredSlot : configuredSlots) {
+                if (configuredSlot < 1 || configuredSlot > 9) {
+                    continue;
+                }
+
+                addLegacyHotbarSlotCandidate(orderedSlots, bindingComponent, configuredSlot);
+                addLegacyHotbarSlotCandidate(orderedSlots, bindingComponent, configuredSlot - 1);
+            }
+        }
+
+        List<Integer> fallbackSlots = new ArrayList<>(bindingComponent.getHotbarBindings().keySet());
+        fallbackSlots.sort(Integer::compareTo);
+        for (Integer hotbarSlot : fallbackSlots) {
+            if (hotbarSlot != null) {
+                orderedSlots.add(hotbarSlot);
+            }
+        }
+
+        return new ArrayList<>(orderedSlots);
+    }
+
+    private void addLegacyHotbarSlotCandidate(@Nonnull LinkedHashSet<Integer> orderedSlots,
+            @Nonnull AbilityBindingComponent bindingComponent,
+            int hotbarSlot) {
+        if (hotbarSlot < 0 || hotbarSlot > 9) {
+            return;
+        }
+        if (bindingComponent.getHotbarBindings().containsKey(hotbarSlot)) {
+            orderedSlots.add(hotbarSlot);
+        }
     }
 
     private boolean clearAllHotbarBindings(@Nonnull AbilityBindingComponent bindingComponent,

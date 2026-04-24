@@ -9,32 +9,32 @@ Group #DiceOverlaySmallHost {
   LayoutMode: Top;
 }
 
-Group #PartyRoot {
-  Anchor: (Top: 36, Left: 20, Width: 248, Height: 0);
+Group #PartyMembers {
+  LayoutMode: Bottom;
+  Anchor: (Top: 360, Left: 20, Width: 248, Height: 0);
+}
 
-  Group #PartyMembers {
-    LayoutMode: Top;
-    Anchor: (Width: 248, Height: 0);
+Group #ResourceBarsRoot {
+  Anchor: (Top: 10, Left: 750, Width: 296, Bottom: 150);
+
+  Group #ResourceBars {
+    LayoutMode: Bottom;
+    Anchor: (Full: 0);
   }
 }
 
-Group #ResourceBars {
-  LayoutMode: Bottom;
-  Anchor: (Top: 10, Left: 750, Width: 100, Bottom: 150);
-}
-
 Group #HotbarUsableRoot {
-  Anchor: (Left: 0, Right: 0, Bottom: 12, Height: 108);
+  Anchor: (Left: 0, Right: 0, Bottom: 10, Height: 100);
   LayoutMode: CenterMiddle;
 
   Group #HotbarUsableHost {
     LayoutMode: Left;
-    Anchor: (Width: 0, Height: 108);
+    Anchor: (Width: 0, Height: 100);
   }
 }
 
 Group #HotbarSpellRoot {
-  Anchor: (Right: 24, Bottom: 18, Width: 320, Height: 116);
+  Anchor: (Right: 24, Bottom: 10, Width: 320, Height: 116);
   LayoutMode: Right;
 
   Group #HotbarSpellHost {

@@ -1,0 +1,17 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Health": 60
+  },
+  "LessThan": true,
+  "ValueType": "Percent",
+  "Failed": {
+    "Type": "Simple",
+    "RunTime": 0.0
+  },
+  "Next": {
+    "Type": "ApplyEffect",
+    "EffectId": "Vanguard_Steadfast",
+    "Entity": "User"
+  }
+}

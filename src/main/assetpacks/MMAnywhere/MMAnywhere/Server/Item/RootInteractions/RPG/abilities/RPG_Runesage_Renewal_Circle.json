@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Renewal_Circle"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Renewal_Circle",
+    "Cooldown": 10.0
+  }
+}

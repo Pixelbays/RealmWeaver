@@ -9,7 +9,7 @@ Realmweaver is a data-driven MMO/RPG framework mod for Hytale. It combines chara
 
 This mod is currently in alpha and will remain so until version 0.1.0 is released.
 
-A large portion of the core features are already implemented, but there are still additional systems planned and plenty of bugs to fix before reaching a full release. Progress is steady, and version 1.0 is closer than ever.
+A large portion of the core features are already implemented or are in progress, but there are still additional systems planned and plenty of bugs to fix before reaching a full release. Progress is steady, and version 1.0 is closer than ever.
 
 If you encounter any bugs or have feature requests, please submit them. Feedback is greatly appreciated and helps shape the direction of the project.
 
@@ -21,8 +21,8 @@ Realmweaver is not a single mechanic. It is a modular RPG stack built around Hyt
 
 Current implemented or active feature areas include:
 
-- character roster and character select flow
-- race definitions and race-based stat or ability hooks
+- character roster and character select flow (disabled on public builds for now)
+- race definitions and race-based stat or ability hooks (proper cosmetic changes coming soon)
 - reusable leveling systems and progression tracks
 - classes, class switching, class prerequisites, and talent trees
 - data-driven abilities with hotbar bindings, global cooldowns, and interaction chains
@@ -67,7 +67,7 @@ Because the systems are asset-driven, Realmweaver is suited to both handcrafted 
 
 ## Asset pack ecosystem
 
-Realmweaver Core is an framework, itself adds nothing without a assetpack, which is all built by you! (or the example packs)
+Realmweaver Core is an framework, itself adds nothing without a assetpack, which is all built by you! (or the example packs, or others!)
 
 Recommended naming format:
 
@@ -77,8 +77,8 @@ This makes it clear that Realmweaver is the systems backbone, while each asset p
 
 Example starter packs:
 
-- **Realmweaver: MMAnywhere** — a basic framework example for a traditional MMO-style realm
-- **Realmweaver: Space Forged** — a space-themed variant showing how the same framework can support a very different world fantasy
+- **Realmweaver MMAnywhere** — a basic framework example for a traditional MMO-style realm
+- **Realmweaver Space Forged** — a space-themed variant showing how the same framework can support a very different world fantasy
 
 This gives Realmweaver room to grow as both a single mod and a broader family of assetpacks for the core framework.
 
@@ -97,24 +97,8 @@ Parties, guilds, routed chat, and shared-service systems help turn a collection 
 Currencies, banks, auction house flow, and mail provide the service layer needed for a deeper server economy.
 
 ### Content authoring flexibility
-Much of the gameplay surface is built around JSON assets and reusable interaction chains, so designers can author new content with less Java.
+Much of the gameplay surface is built around the hytale assets editor and reusable interaction chains, so designers can author new content with less Java.
 
-### Asset pack scalability
-The same framework can support multiple branded content packs, making it practical to launch one foundation and then ship very different realm experiences on top of it.
-
-## Project architecture
-
-The composition root is
-[src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java). 
-
-It registers:
-
-- asset stores
-- ECS components
-- gameplay systems
-- managers and commands
-- packet filters and custom interactions
-- HUD and UI wiring
 
 ## Current maturity snapshot
 
@@ -129,20 +113,20 @@ Broadly mature systems:
 
 
 Functional but still evolving:
+- Races (Cosmetics WIP)
 - parties
 - guilds
 - currencies
+- inventory overrides for class restricted items
+- randomized equipment
+- character creation and selection (heavy WIP)
+
+Planned or earlier-stage areas:
+- NPC using abilities
+- NPC RPG hooks
 - banks
 - mail
 - auction house
-- NPC RPG hooks
-- inventory overrides
-- randomized equipment
-- NPC using abilities
-- more presentation polish for character creation and selection
-
-Planned or earlier-stage areas:
-
 - professions and gathering loops
 - instance and encounter framework
 - broader camera or movement tooling
@@ -150,8 +134,24 @@ Planned or earlier-stage areas:
 
 A better road map comming soon
 
+# Helping out!
+Feel free to build, help, and submit issues!
 
 ## Build and run
+
+## Project architecture
+
+The composition root is
+[src/main/java/org/pixelbays/plugin/ExamplePlugin.java](src/main/java/org/pixelbays/plugin/ExamplePlugin.java). 
+
+It registers:
+
+- asset stores
+- ECS components
+- gameplay systems
+- managers and commands
+- packet filters and custom interactions
+- HUD and UI wiring
 
 ### Requirements
 
@@ -176,14 +176,10 @@ The Gradle setup resolves `HytaleServer.jar` from the local Hytale installation 
 
 ## Learn more
 
-Start with these pages:
+Start with the wiki: 
+proper guides coming soon
 
-- [wiki/Home.md](wiki/Home.md)
-- [wiki/Systems-Overview.md](wiki/Systems-Overview.md)
-- [wiki/Progression-and-Character-Systems.md](wiki/Progression-and-Character-Systems.md)
-- [wiki/Social-and-Economy-Systems.md](wiki/Social-and-Economy-Systems.md)
-- [wiki/UI-Input-and-Content-Pipeline.md](wiki/UI-Input-and-Content-Pipeline.md)
-- [docs/Realmweaver-Marketing-Guide.md](docs/Realmweaver-Marketing-Guide.md)
+- [wiki/Home.md](https://github.com/Pixelbays/RealmWeaver/wiki)
 
 ## Positioning summary
 

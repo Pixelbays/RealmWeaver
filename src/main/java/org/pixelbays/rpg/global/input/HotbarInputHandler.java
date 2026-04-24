@@ -17,7 +17,7 @@ import com.hypixel.hytale.protocol.packets.interaction.SyncInteractionChains;
 import com.hypixel.hytale.protocol.packets.inventory.SetActiveSlot;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
@@ -104,9 +104,13 @@ public class HotbarInputHandler {
                 return;
             }
             // Fix client desync: force client back to original slot
-            playerComponent.getInventory().setActiveHotbarSlot(entityRef, (byte) originalSlot, store);
+            InventoryComponent.Hotbar hotbarComp = store.getComponent(entityRef, InventoryComponent.Hotbar.getComponentType());
+            if (hotbarComp != null) {
+                hotbarComp.setActiveSlot((byte) originalSlot);
+                hotbarComp.markDirty();
+            }
             SetActiveSlot setActiveSlotPacket = new SetActiveSlot(
-                Inventory.HOTBAR_SECTION_ID,  // -1 indicates the hotbar
+                InventoryComponent.HOTBAR_SECTION_ID,  // -1 indicates the hotbar
                 originalSlot
             );
             playerRef.getPacketHandler().write(setActiveSlotPacket);
@@ -147,7 +151,7 @@ public class HotbarInputHandler {
 
             if (result.isFailure()) {
                 String errorMsg = result.getErrorMessage();
-                if (errorMsg != null) {
+                if (!result.shouldSuppressPlayerErrorMessage() && errorMsg != null) {
                     playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.error")
                             .param("error", errorMsg));
                 }

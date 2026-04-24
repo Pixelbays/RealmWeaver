@@ -1,0 +1,31 @@
+{
+  "InitialValue": 0,
+  "Min": 0,
+  "Max": 100,
+  "Shared": false,
+  "ResetType": "InitialValue",
+  "MaxValueEffects": {
+    "TriggerAtZero": false,
+    "Particles": [
+      {
+        "SystemId": "Fire_Blue",
+        "Color": "#282cc1",
+        "TargetEntityPart": "PrimaryItem"
+      }
+    ]
+  },
+  "Regenerating": [
+    {
+      "Interval": 1,
+      "RegenType": "Additive",
+      "Amount": 0,
+      "Conditions": [
+        {
+          "Id": "Alive",
+          "Inverse": false
+        }
+      ],
+      "ClampAtZero": false
+    }
+  ]
+}

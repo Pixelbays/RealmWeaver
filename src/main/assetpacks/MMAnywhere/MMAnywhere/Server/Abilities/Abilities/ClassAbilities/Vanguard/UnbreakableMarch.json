@@ -1,0 +1,23 @@
+{
+  "Categories": [
+    "Vanguard",
+    "Mobility"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.unbreakable_march.name",
+    "Description": "mma.rpg.abilities.unbreakable_march.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_Unbreakable_March"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Spend 2 Guard to heal and march forward with heavy protection and speed.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace",
+  "Icon": "Icons/ItemsGenerated/Weapon_Shield_Orbis_Knight.png"
+}

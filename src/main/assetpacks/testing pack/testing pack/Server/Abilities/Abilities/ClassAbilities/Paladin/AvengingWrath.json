@@ -11,12 +11,7 @@
   "GlobalCooldown": 20.0,
   "Parent": "GlobalBase",
   "GlobalCooldownCategories": [],
-  "PrerequisiteAbilities": [
-    "paladin_holy_strike"
-  ],
   "StatRequirements": {},
-  "HasRanks": false,
-  "MaxRank": 1,
   "Interactions": {
     "Primary": "RPG_Avenging_Wrath"
   },

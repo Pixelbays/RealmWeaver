@@ -230,6 +230,7 @@ public class WorldTravelManager {
 		CompletableFuture<World> worldFuture = shardMode
 				? InstancesPlugin.get().spawnInstance(templateId, route.getEffectiveShardKey(), initiatorWorld, initialReturnPoint)
 				: InstancesPlugin.get().spawnInstance(templateId, initiatorWorld, initialReturnPoint);
+		worldFuture.thenAccept(InstanceWorldLifecycle::configureEphemeralInstance);
 
 		for (PlayerRef target : targets) {
 			Ref<EntityStore> targetRef = target.getReference();

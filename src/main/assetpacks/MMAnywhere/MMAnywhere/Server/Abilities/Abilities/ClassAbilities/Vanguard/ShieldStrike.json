@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Vanguard"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.shield_strike.name",
+    "Description": "mma.rpg.abilities.shield_strike.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_Shield_Strike"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Crash into a nearby enemy, apply Off-Balance, and gain 1 Guard.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace",
+  "Icon": "Icons/ItemsGenerated/Weapon_Shield_Iron.png"
+}

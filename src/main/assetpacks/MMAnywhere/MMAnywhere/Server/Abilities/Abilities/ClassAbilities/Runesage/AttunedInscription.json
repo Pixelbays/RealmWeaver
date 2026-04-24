@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage",
+    "Passive"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.attuned_inscription.name",
+    "Description": "mma.rpg.abilities.attuned_inscription.description"
+  },
+  "AbilityType": "Passive",
+  "Parent": "PassiveBase",
+  "GlobalCooldown": 0.0,
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Attuned_Inscription"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "While at 2 or more Sigils, gain Haste and Mastery.",
+  "Icon": "Icons/ItemsGenerated/Prototype_Tool_Book_Mana.png"
+}

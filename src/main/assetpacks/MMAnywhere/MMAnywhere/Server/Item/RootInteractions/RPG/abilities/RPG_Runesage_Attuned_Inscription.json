@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Attuned_Inscription"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Attuned_Inscription",
+    "Cooldown": 0
+  }
+}

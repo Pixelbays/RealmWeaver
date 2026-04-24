@@ -1,15 +1,20 @@
 {
   "Tags": {},
   "AccountUsername": "Heru",
-  "SelectedCharacterId": "15cdb512-2152-4eb9-9631-696b4cd460fc",
+  "SelectedCharacterId": "19cc0fc3-832e-4264-8311-aae4849e2b67",
   "AccountAchievementProgress": {
     "UnlockedAchievements": {},
     "ProgressTracking": {},
     "TotalAchievementPoints": 0,
-    "DisplayedTitle": ""
+    "DisplayedTitle": "",
+    "DisplayedTitlePrefix": "",
+    "DisplayedTitleSuffix": ""
   },
   "RecoveryHistoryEpochMs": [],
-  "AccountTokens": {},
+  "AccountTokens": {
+    "ExtraCharacterSlot": 0
+  },
+  "UnlockedExtraCharacterSlots": 0,
   "Profiles": [
     {
       "CharacterId": "15cdb512-2152-4eb9-9631-696b4cd460fc",
@@ -17,9 +22,10 @@
       "RaceId": "",
       "PrimaryClassId": "EchoWarden",
       "CreatedAtEpochMs": 1774500068616,
-      "LastPlayedEpochMs": 1774831331451,
+      "LastPlayedEpochMs": 1776082599014,
       "SoftDeleted": false,
       "DeletedAtEpochMs": 0,
+      "Hardcore": false,
       "LevelProgression": {
         "LevelSystems": {
           "FluxHunter": {
@@ -78,17 +84,19 @@
         "ToggleStates": {}
       },
       "AbilityBindings": {
-        "HotbarBindings": {
-          "7": "EchoPulse"
-        },
+        "HotbarBindings": {},
         "WeaponBindings": {},
-        "AbilitySlotBindings": {}
+        "AbilitySlotBindings": {
+          "1": "EchoPulse"
+        }
       },
       "AchievementProgress": {
         "UnlockedAchievements": {},
         "ProgressTracking": {},
         "TotalAchievementPoints": 0,
-        "DisplayedTitle": ""
+        "DisplayedTitle": "",
+        "DisplayedTitlePrefix": "",
+        "DisplayedTitleSuffix": ""
       },
       "StatSnapshot": {
         "Version": 5,
@@ -150,13 +158,13 @@
       "SavedWorldName": "default",
       "SavedTransform": {
         "Position": {
-          "X": -6.241698741912842,
-          "Y": 66.76557922363281,
-          "Z": -16.420846939086914
+          "X": -18.79762077331543,
+          "Y": 46.0,
+          "Z": -19.50566291809082
         },
         "Rotation": {
           "Pitch": 0.0,
-          "Yaw": 0.6108695864677429,
+          "Yaw": 0.36709386110305786,
           "Roll": 0.0
         }
       },
@@ -400,21 +408,22 @@
       }
     },
     {
-      "CharacterId": "ff9552a6-118b-45a8-abd7-785632f940e6",
-      "CharacterName": "tester",
+      "CharacterId": "19cc0fc3-832e-4264-8311-aae4849e2b67",
+      "CharacterName": "teteagea",
       "RaceId": "BaseRace",
       "PrimaryClassId": "Vanguard",
-      "CreatedAtEpochMs": 1774502408912,
-      "LastPlayedEpochMs": 1774502408912,
-      "SoftDeleted": true,
-      "DeletedAtEpochMs": 1774578002602,
+      "CreatedAtEpochMs": 1776634056529,
+      "LastPlayedEpochMs": 1776634056566,
+      "SoftDeleted": false,
+      "DeletedAtEpochMs": 0,
+      "Hardcore": false,
       "LevelProgression": {
         "LevelSystems": {
           "Base_Character_Level": {
             "SystemId": "Base_Character_Level",
             "CurrentLevel": 1,
             "CurrentExp": 0.0,
-            "ExpToNextLevel": 200.0,
+            "ExpToNextLevel": 100.0,
             "TotalLevelsGained": 0,
             "LastGrowthAppliedLevel": 0,
             "AvailableStatPoints": 0,
@@ -437,7 +446,7 @@
         "LearnedClasses": {
           "Vanguard": {
             "ClassId": "Vanguard",
-            "LearnedTime": 1774502408914,
+            "LearnedTime": 1776634056530,
             "AllocatedNodes": {},
             "SpentTalentPoints": 0
           }
@@ -450,10 +459,10 @@
       },
       "ClassAbilities": {
         "UnlockedAbilities": {
-          "StarCharge": {
-            "AbilityId": "StarCharge",
+          "ShieldStrike": {
+            "AbilityId": "ShieldStrike",
             "ClassId": "Vanguard",
-            "UnlockedTime": 1774502408914,
+            "UnlockedTime": 1776634056530,
             "Rank": 1
           }
         },
@@ -468,509 +477,13 @@
         "UnlockedAchievements": {},
         "ProgressTracking": {},
         "TotalAchievementPoints": 0,
-        "DisplayedTitle": ""
+        "DisplayedTitle": "",
+        "DisplayedTitlePrefix": "",
+        "DisplayedTitleSuffix": ""
       },
       "StatSnapshot": {
         "Version": 5,
-        "Stats": {
-          "Oxygen": {
-            "Id": "Oxygen",
-            "Value": 100.0
-          },
-          "Mana": {
-            "Id": "Mana",
-            "Value": 0.0
-          },
-          "Health": {
-            "Id": "Health",
-            "Value": 100.0
-          },
-          "GlidingActive": {
-            "Id": "GlidingActive",
-            "Value": 0.0
-          },
-          "Immunity": {
-            "Id": "Immunity",
-            "Value": 0.0
-          },
-          "SignatureCharges": {
-            "Id": "SignatureCharges",
-            "Value": 0.0
-          },
-          "Stamina": {
-            "Id": "Stamina",
-            "Value": 10.0
-          },
-          "Ammo": {
-            "Id": "Ammo",
-            "Value": 0.0
-          },
-          "Unknown": {
-            "Id": "Unknown",
-            "Value": 0.0
-          },
-          "SignatureEnergy": {
-            "Id": "SignatureEnergy",
-            "Value": 0.0
-          },
-          "DeployablePreview": {
-            "Id": "DeployablePreview",
-            "Value": 0.0
-          },
-          "StaminaRegenDelay": {
-            "Id": "StaminaRegenDelay",
-            "Value": 0.0
-          },
-          "MagicCharges": {
-            "Id": "MagicCharges",
-            "Value": 0.0
-          }
-        }
-      },
-      "SavedWorldName": "",
-      "SavedTransform": {
-        "Position": {
-          "X": 0.0,
-          "Y": 0.0,
-          "Z": 0.0
-        },
-        "Rotation": {
-          "Pitch": 0.0,
-          "Yaw": 0.0,
-          "Roll": 0.0
-        }
-      },
-      "InventorySnapshot": {
-        "Version": 4,
-        "Storage": {
-          "Id": "Simple",
-          "Capacity": 36,
-          "Items": {}
-        },
-        "Armor": {
-          "Id": "Simple",
-          "Capacity": 4,
-          "Items": {}
-        },
-        "HotBar": {
-          "Id": "Simple",
-          "Capacity": 9,
-          "Items": {}
-        },
-        "Utility": {
-          "Id": "Simple",
-          "Capacity": 4,
-          "Items": {}
-        },
-        "Backpack": {
-          "Id": "Empty"
-        },
-        "ActiveHotbarSlot": 0,
-        "Tool": {
-          "Id": "Simple",
-          "Capacity": 23,
-          "Items": {}
-        },
-        "ActiveToolsSlot": -1,
-        "ActiveUtilitySlot": -1
-      },
-      "ActiveHotbarSlot": 0,
-      "ActiveUtilitySlot": -1,
-      "ActiveToolsSlot": -1,
-      "Appearance": {
-        "BodyCharacteristic": "",
-        "Underwear": "",
-        "Face": "",
-        "Eyes": "",
-        "Ears": "",
-        "Mouth": "",
-        "FacialHair": "",
-        "Haircut": "",
-        "Eyebrows": "",
-        "Pants": "ApprenticePants.Black",
-        "Overpants": "",
-        "Undertop": "Bannerlord_Chainmail.Blued",
-        "Overtop": "AlpineExplorerJumper.Navy",
-        "Shoes": "Icecream_Shoes.Strawberry",
-        "HeadAccessory": "AcornHairclip.Acorn",
-        "FaceAccessory": "",
-        "EarAccessory": "",
-        "SkinFeature": "",
-        "Gloves": "",
-        "Cape": ""
-      }
-    },
-    {
-      "CharacterId": "310fc30b-928f-4dca-98e3-a67cabf6936b",
-      "CharacterName": "afef",
-      "RaceId": "Echobound",
-      "PrimaryClassId": "FluxHunter",
-      "CreatedAtEpochMs": 1774503328753,
-      "LastPlayedEpochMs": 1774576947187,
-      "SoftDeleted": false,
-      "DeletedAtEpochMs": 0,
-      "LevelProgression": {
-        "LevelSystems": {
-          "FluxHunter": {
-            "SystemId": "FluxHunter",
-            "CurrentLevel": 1,
-            "CurrentExp": 0.0,
-            "ExpToNextLevel": 200.0,
-            "TotalLevelsGained": 0,
-            "LastGrowthAppliedLevel": 0,
-            "AvailableStatPoints": 0,
-            "AvailableSkillPoints": 0
-          },
-          "Base_Character_Level": {
-            "SystemId": "Base_Character_Level",
-            "CurrentLevel": 1,
-            "CurrentExp": 0.0,
-            "ExpToNextLevel": 200.0,
-            "TotalLevelsGained": 0,
-            "LastGrowthAppliedLevel": 0,
-            "AvailableStatPoints": 0,
-            "AvailableSkillPoints": 0
-          }
-        },
-        "LastLogoutEpochMs": 0
-      },
-      "ClassProgression": {
-        "LearnedClasses": {
-          "FluxHunter": {
-            "ClassId": "FluxHunter",
-            "LearnedTime": 1774503328753,
-            "AllocatedNodes": {},
-            "SpentTalentPoints": 0
-          }
-        }
-      },
-      "RaceProgression": {
-        "RaceId": "Echobound",
-        "ParentRaces": [],
-        "UnlockedRaceAbilities": []
-      },
-      "ClassAbilities": {
-        "UnlockedAbilities": {
-          "Shattershot": {
-            "AbilityId": "Shattershot",
-            "ClassId": "FluxHunter",
-            "UnlockedTime": 1774503328753,
-            "Rank": 1
-          }
-        },
-        "ToggleStates": {}
-      },
-      "AbilityBindings": {
-        "HotbarBindings": {},
-        "WeaponBindings": {},
-        "AbilitySlotBindings": {}
-      },
-      "AchievementProgress": {
-        "UnlockedAchievements": {},
-        "ProgressTracking": {},
-        "TotalAchievementPoints": 0,
-        "DisplayedTitle": ""
-      },
-      "StatSnapshot": {
-        "Version": 5,
-        "Stats": {
-          "Oxygen": {
-            "Id": "Oxygen",
-            "Value": 100.0
-          },
-          "Mana": {
-            "Id": "Mana",
-            "Value": 0.0
-          },
-          "Health": {
-            "Id": "Health",
-            "Value": 100.0
-          },
-          "GlidingActive": {
-            "Id": "GlidingActive",
-            "Value": 0.0
-          },
-          "Immunity": {
-            "Id": "Immunity",
-            "Value": 0.0
-          },
-          "SignatureCharges": {
-            "Id": "SignatureCharges",
-            "Value": 0.0
-          },
-          "Stamina": {
-            "Id": "Stamina",
-            "Value": 10.0
-          },
-          "Ammo": {
-            "Id": "Ammo",
-            "Value": 0.0
-          },
-          "Unknown": {
-            "Id": "Unknown",
-            "Value": 0.0
-          },
-          "SignatureEnergy": {
-            "Id": "SignatureEnergy",
-            "Value": 0.0
-          },
-          "DeployablePreview": {
-            "Id": "DeployablePreview",
-            "Value": 0.0
-          },
-          "StaminaRegenDelay": {
-            "Id": "StaminaRegenDelay",
-            "Value": 0.0
-          },
-          "MagicCharges": {
-            "Id": "MagicCharges",
-            "Value": 0.0
-          }
-        }
-      },
-      "SavedWorldName": "instance-Default_Void-f2143eed-ad69-408b-82a4-ec3c4753166a",
-      "SavedTransform": {
-        "Position": {
-          "X": 0.5,
-          "Y": 80.0,
-          "Z": 0.5
-        },
-        "Rotation": {
-          "Pitch": 0.0,
-          "Yaw": 3.1415927410125732,
-          "Roll": 0.0
-        }
-      },
-      "InventorySnapshot": {
-        "Version": 4,
-        "Storage": {
-          "Id": "Simple",
-          "Capacity": 36,
-          "Items": {}
-        },
-        "Armor": {
-          "Id": "Simple",
-          "Capacity": 4,
-          "Items": {}
-        },
-        "HotBar": {
-          "Id": "Simple",
-          "Capacity": 9,
-          "Items": {}
-        },
-        "Utility": {
-          "Id": "Simple",
-          "Capacity": 4,
-          "Items": {}
-        },
-        "Backpack": {
-          "Id": "Empty"
-        },
-        "ActiveHotbarSlot": 0,
-        "Tool": {
-          "Id": "Simple",
-          "Capacity": 23,
-          "Items": {
-            "0": {
-              "Id": "EditorTool_Paint",
-              "Quantity": 1,
-              "Durability": 0.0,
-              "MaxDurability": 0.0,
-              "OverrideDroppedItemAnimation": false
-            },
-            "2": {
-              "Id": "EditorTool_Selection",
-              "Quantity": 1,
-              "Durability": 0.0,
-              "MaxDurability": 0.0,
-              "OverrideDroppedItemAnimation": false
-            },
-            "4": {
-              "Id": "EditorTool_Line",
-              "Quantity": 1,
-              "Durability": 0.0,
-              "MaxDurability": 0.0,
-              "OverrideDroppedItemAnimation": false
-            },
-            "1": {
-              "Id": "EditorTool_Sculpt",
-              "Quantity": 1,
-              "Durability": 0.0,
-              "MaxDurability": 0.0,
-              "OverrideDroppedItemAnimation": false
-            },
-            "3": {
-              "Id": "EditorTool_Paste",
-              "Quantity": 1,
-              "Durability": 0.0,
-              "MaxDurability": 0.0,
-              "OverrideDroppedItemAnimation": false
-            },
-            "5": {
-              "Id": "EditorTool_Layers",
-              "Quantity": 1,
-              "Durability": 0.0,
-              "MaxDurability": 0.0,
-              "OverrideDroppedItemAnimation": false
-            }
-          }
-        },
-        "ActiveToolsSlot": -1,
-        "ActiveUtilitySlot": -1
-      },
-      "ActiveHotbarSlot": 0,
-      "ActiveUtilitySlot": -1,
-      "ActiveToolsSlot": -1,
-      "Appearance": {
-        "BodyCharacteristic": "",
-        "Underwear": "",
-        "Face": "",
-        "Eyes": "",
-        "Ears": "",
-        "Mouth": "",
-        "FacialHair": "",
-        "Haircut": "",
-        "Eyebrows": "",
-        "Pants": "ApprenticePants.Black",
-        "Overpants": "",
-        "Undertop": "Bannerlord_Chainmail.Blued",
-        "Overtop": "AlpineExplorerJumper.Navy",
-        "Shoes": "BasicBoots.Black",
-        "HeadAccessory": "AcornHairclip.Acorn",
-        "FaceAccessory": "",
-        "EarAccessory": "",
-        "SkinFeature": "",
-        "Gloves": "",
-        "Cape": ""
-      }
-    },
-    {
-      "CharacterId": "b49f9d49-0cad-4b27-9b9f-983abf4d6be3",
-      "CharacterName": "Name",
-      "RaceId": "Riftwalker",
-      "PrimaryClassId": "Vanguard",
-      "CreatedAtEpochMs": 1774584301213,
-      "LastPlayedEpochMs": 1774584301219,
-      "SoftDeleted": false,
-      "DeletedAtEpochMs": 0,
-      "LevelProgression": {
-        "LevelSystems": {
-          "Base_Character_Level": {
-            "SystemId": "Base_Character_Level",
-            "CurrentLevel": 1,
-            "CurrentExp": 0.0,
-            "ExpToNextLevel": 200.0,
-            "TotalLevelsGained": 0,
-            "LastGrowthAppliedLevel": 0,
-            "AvailableStatPoints": 0,
-            "AvailableSkillPoints": 0
-          },
-          "Vanguard": {
-            "SystemId": "Vanguard",
-            "CurrentLevel": 1,
-            "CurrentExp": 0.0,
-            "ExpToNextLevel": 200.0,
-            "TotalLevelsGained": 0,
-            "LastGrowthAppliedLevel": 0,
-            "AvailableStatPoints": 0,
-            "AvailableSkillPoints": 0
-          }
-        },
-        "LastLogoutEpochMs": 0
-      },
-      "ClassProgression": {
-        "LearnedClasses": {
-          "Vanguard": {
-            "ClassId": "Vanguard",
-            "LearnedTime": 1774584301216,
-            "AllocatedNodes": {},
-            "SpentTalentPoints": 0
-          }
-        }
-      },
-      "RaceProgression": {
-        "RaceId": "Riftwalker",
-        "ParentRaces": [],
-        "UnlockedRaceAbilities": []
-      },
-      "ClassAbilities": {
-        "UnlockedAbilities": {
-          "StarCharge": {
-            "AbilityId": "StarCharge",
-            "ClassId": "Vanguard",
-            "UnlockedTime": 1774584301216,
-            "Rank": 1
-          }
-        },
-        "ToggleStates": {}
-      },
-      "AbilityBindings": {
-        "HotbarBindings": {},
-        "WeaponBindings": {},
-        "AbilitySlotBindings": {}
-      },
-      "AchievementProgress": {
-        "UnlockedAchievements": {},
-        "ProgressTracking": {},
-        "TotalAchievementPoints": 0,
-        "DisplayedTitle": ""
-      },
-      "StatSnapshot": {
-        "Version": 5,
-        "Stats": {
-          "Oxygen": {
-            "Id": "Oxygen",
-            "Value": 100.0
-          },
-          "Mana": {
-            "Id": "Mana",
-            "Value": 0.0
-          },
-          "Health": {
-            "Id": "Health",
-            "Value": 100.0
-          },
-          "GlidingActive": {
-            "Id": "GlidingActive",
-            "Value": 0.0
-          },
-          "Immunity": {
-            "Id": "Immunity",
-            "Value": 0.0
-          },
-          "SignatureCharges": {
-            "Id": "SignatureCharges",
-            "Value": 0.0
-          },
-          "Stamina": {
-            "Id": "Stamina",
-            "Value": 10.0
-          },
-          "Ammo": {
-            "Id": "Ammo",
-            "Value": 0.0
-          },
-          "Unknown": {
-            "Id": "Unknown",
-            "Value": 0.0
-          },
-          "SignatureEnergy": {
-            "Id": "SignatureEnergy",
-            "Value": 0.0
-          },
-          "DeployablePreview": {
-            "Id": "DeployablePreview",
-            "Value": 0.0
-          },
-          "StaminaRegenDelay": {
-            "Id": "StaminaRegenDelay",
-            "Value": 0.0
-          },
-          "MagicCharges": {
-            "Id": "MagicCharges",
-            "Value": 0.0
-          }
-        }
+        "Stats": {}
       },
       "SavedWorldName": "",
       "SavedTransform": {
@@ -995,20 +508,20 @@
       "ActiveUtilitySlot": -1,
       "ActiveToolsSlot": -1,
       "Appearance": {
-        "BodyCharacteristic": "",
-        "Underwear": "",
-        "Face": "",
-        "Eyes": "",
-        "Ears": "",
-        "Mouth": "",
+        "BodyCharacteristic": "Muscular.09",
+        "Underwear": "Bandeau.Grey",
+        "Face": "Face_Neutral.01",
+        "Eyes": "Cat_Eyes.Green",
+        "Ears": "Default.01",
+        "Mouth": "Mouth_Default.01",
         "FacialHair": "",
-        "Haircut": "",
-        "Eyebrows": "",
-        "Pants": "ApprenticePants.Black",
+        "Haircut": "Afro.Black",
+        "Eyebrows": "SmallRound.Turquoise",
+        "Pants": "Villager_Bermuda.Yellow",
         "Overpants": "",
-        "Undertop": "Bannerlord_Chainmail.Copper",
-        "Overtop": "Shark_Tooth_Necklace.White",
-        "Shoes": "",
+        "Undertop": "Mercenary_Top.Blue",
+        "Overtop": "Tunic_Long.Green",
+        "Shoes": "Voidbearer_Boots.Brown",
         "HeadAccessory": "AcornHairclip.Acorn",
         "FaceAccessory": "",
         "EarAccessory": "",

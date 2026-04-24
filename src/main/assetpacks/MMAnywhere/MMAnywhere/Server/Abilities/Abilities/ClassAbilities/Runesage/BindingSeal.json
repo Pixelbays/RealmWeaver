@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.binding_seal.name",
+    "Description": "mma.rpg.abilities.binding_seal.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Binding_Seal"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Etch a weakening seal in front of you. Spend 1 Sigil to bind enemies more severely.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Bench_Arcane.png"
+}

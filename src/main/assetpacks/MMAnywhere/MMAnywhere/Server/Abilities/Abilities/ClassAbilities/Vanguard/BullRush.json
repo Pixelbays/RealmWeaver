@@ -1,0 +1,23 @@
+{
+  "Categories": [
+    "Vanguard",
+    "Mobility"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.bull_rush.name",
+    "Description": "mma.rpg.abilities.bull_rush.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_Bull_Rush"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Charge forward, batter the first foe in front of you, apply Off-Balance, and gain 1 Guard.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Mace",
+  "Icon": "Icons/ItemsGenerated/Weapon_Mace_Iron.png"
+}

@@ -1,0 +1,16 @@
+{
+  "Duration": 5.0,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": true,
+  "ApplicationEffects": {
+    "EntityBottomTint": "#8bdfff",
+    "EntityTopTint": "#e7fbff",
+    "ScreenEffect": "ScreenEffects/Snow.png",
+    "Particles": [
+      {
+        "SystemId": "Effect_Snow"
+      }
+    ],
+    "HorizontalSpeedMultiplier": 0.7
+  }
+}

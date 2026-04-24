@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Sigil_Bolt"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Sigil_Bolt",
+    "Cooldown": 3.0
+  }
+}

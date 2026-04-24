@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Bull_Rush_Dash"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Bull_Rush",
+    "Cooldown": 10.0
+  }
+}

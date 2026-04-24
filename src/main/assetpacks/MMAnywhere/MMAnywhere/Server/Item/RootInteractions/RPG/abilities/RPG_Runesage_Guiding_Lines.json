@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Guiding_Lines"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Guiding_Lines",
+    "Cooldown": 0
+  }
+}

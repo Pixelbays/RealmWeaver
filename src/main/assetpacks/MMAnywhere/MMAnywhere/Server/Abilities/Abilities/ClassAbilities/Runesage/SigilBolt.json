@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "Runesage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.sigil_bolt.name",
+    "Description": "mma.rpg.abilities.sigil_bolt.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Runesage_Sigil_Bolt"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Fire a rune bolt at allies or enemies, restoring or marking on hit and building 1 Sigil.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Staff",
+  "Icon": "Icons/ItemsGenerated/Weapon_Wand_Wood.png"
+}

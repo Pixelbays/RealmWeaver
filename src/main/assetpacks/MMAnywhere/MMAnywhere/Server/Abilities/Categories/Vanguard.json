@@ -1,0 +1,7 @@
+{
+  "Id": "Vanguard",
+  "Name": "Vanguard",
+  "Icon": "Icons/ItemCategories/Items-Shields.png",
+  "InfoDisplayMode": "Tooltip",
+  "Order": 5
+}

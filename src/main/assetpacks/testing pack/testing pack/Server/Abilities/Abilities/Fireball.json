@@ -10,10 +10,7 @@
   "GlobalCooldown": 2.5,
   "GlobalCooldownCategories": [],
   "Parent": "GlobalBase",
-  "PrerequisiteAbilities": [],
   "StatRequirements": {},
-  "HasRanks": false,
-  "MaxRank": 1,
   "Interactions": {
     "Primary": "RPG_Fireball"
   },

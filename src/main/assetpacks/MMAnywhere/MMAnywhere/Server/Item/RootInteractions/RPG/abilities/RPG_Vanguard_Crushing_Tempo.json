@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Crushing_Tempo"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Crushing_Tempo",
+    "Cooldown": 0
+  }
+}

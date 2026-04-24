@@ -1,0 +1,11 @@
+{
+  "Parent": "Base_Class_Level",
+  "DisplayName": "Vanguard Class",
+  "Description": "Vanguard class specialization level progression",
+  "Enabled": true,
+  "Visible": true,
+  "IconId": "rpg:icon_vanguard",
+  "ExpCurveRef": "Base_Exp_Curve",
+  "MaxLevel": 0,
+  "StartingLevel": 1
+}

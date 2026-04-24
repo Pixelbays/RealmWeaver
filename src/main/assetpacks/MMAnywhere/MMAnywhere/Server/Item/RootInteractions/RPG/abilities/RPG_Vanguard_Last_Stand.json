@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Last_Stand"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Last_Stand",
+    "Cooldown": 0
+  }
+}

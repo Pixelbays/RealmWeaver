@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Bastion_Stance"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Bastion_Stance",
+    "Cooldown": 16.0
+  }
+}

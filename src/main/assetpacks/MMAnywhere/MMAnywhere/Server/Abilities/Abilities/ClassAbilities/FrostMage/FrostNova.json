@@ -1,0 +1,22 @@
+{
+  "Categories": [
+    "FrostMage"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.frost_nova.name",
+    "Description": "mma.rpg.abilities.frost_nova.description"
+  },
+  "AbilityType": "Active",
+  "Parent": "GlobalBase",
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Frost_Mage_Frost_Nova"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "Burst freezing magic around yourself, rooting and chilling nearby enemies.",
+  "UsePlayerAnimations": true,
+  "PlayerAnimationsId": "Skeleton_Spellbook",
+  "Icon": "Icons/ItemsGenerated/WinterHoliday_Snowflake.png"
+}

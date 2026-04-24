@@ -223,6 +223,10 @@ public class PartyPage extends CustomUIPage {
 
         StringBuilder rosterBuilder = new StringBuilder();
         for (PartyUiSnapshot.MemberView member : snapshot.getMembers()) {
+            if (playerRef.getUuid().equals(member.getMemberId())) {
+                continue;
+            }
+
             if (rosterBuilder.length() > 0) {
                 rosterBuilder.append("\n");
             }

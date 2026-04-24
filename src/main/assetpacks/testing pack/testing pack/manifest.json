@@ -17,6 +17,5 @@
         
     },
     "DisabledByDefault": false,
-    "Main": "org.pixelbays.plugin.ExamplePlugin",
     "IncludesAssetPack": true
 }

@@ -1,0 +1,8 @@
+{
+  "Duration": 0.35,
+  "OverlapBehavior": "Overwrite",
+  "Debuff": false,
+  "StatModifiers": {
+    "Versatility": 8
+  }
+}

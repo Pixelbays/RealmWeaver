@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Fracture_Rune"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Fracture_Rune",
+    "Cooldown": 14.0
+  }
+}

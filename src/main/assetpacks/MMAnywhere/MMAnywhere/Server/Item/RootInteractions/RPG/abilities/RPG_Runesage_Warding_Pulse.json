@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Warding_Pulse"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Warding_Pulse",
+    "Cooldown": 14.0
+  }
+}

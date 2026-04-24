@@ -19,6 +19,9 @@ import org.pixelbays.rpg.party.PartyRole;
 
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
+import com.hypixel.hytale.server.core.asset.type.entityeffect.config.EntityEffect;
+import com.hypixel.hytale.server.core.entity.effect.ActiveEntityEffect;
+import com.hypixel.hytale.server.core.entity.effect.EffectControllerComponent;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatMap;
 import com.hypixel.hytale.server.core.modules.entitystats.EntityStatValue;
 import com.hypixel.hytale.server.core.modules.entitystats.asset.EntityStatType;
@@ -59,6 +62,10 @@ public final class PartyMembersHudServiceModule implements PlayerHudServiceModul
                 continue;
             }
 
+            if (viewerRef.getUuid().equals(member.getEntityId())) {
+                continue;
+            }
+
             PlayerRef memberRef = Universe.get().getPlayer(member.getEntityId());
             if (memberRef == null || !memberRef.isValid()) {
                 continue;
@@ -79,6 +86,8 @@ public final class PartyMembersHudServiceModule implements PlayerHudServiceModul
             if (statMap == null) {
                 continue;
             }
+
+            EffectControllerComponent effectController = memberStore.getComponent(memberEntity, EffectControllerComponent.getComponentType());
 
             ClassComponent classComponent = memberStore.getComponent(memberEntity, ClassComponent.getComponentType());
             String activeClassId = PlayerHudServiceSupport.getClassManagementSystem().getPrimaryKnownClassId(classComponent);
@@ -123,15 +132,53 @@ public final class PartyMembersHudServiceModule implements PlayerHudServiceModul
                 continue;
             }
 
+            List<PartyMembersHudModule.PartyEffectHudData> effects = resolveActiveEffects(effectController);
+
             result.add(new PartyMembersHudModule.PartyMemberHudData(
                     member.getEntityId().toString(),
                     memberRef.getUsername(),
                     classLabel,
                     resolveRoleAccent(member.getRole()),
+                    effects,
                     bars));
         }
 
         return result;
+    }
+
+    @Nonnull
+    private static List<PartyMembersHudModule.PartyEffectHudData> resolveActiveEffects(@Nullable EffectControllerComponent effectController) {
+        if (effectController == null || effectController.getActiveEffects().isEmpty()) {
+            return List.of();
+        }
+
+        List<PartyMembersHudModule.PartyEffectHudData> effects = new ArrayList<>(effectController.getActiveEffects().size());
+        for (ActiveEntityEffect activeEffect : effectController.getActiveEffects().values()) {
+            if (activeEffect == null) {
+                continue;
+            }
+
+            EntityEffect effectAsset = EntityEffect.getAssetMap().getAsset(activeEffect.getEntityEffectIndex());
+            if (effectAsset == null) {
+                continue;
+            }
+
+            String effectId = effectAsset.getId();
+            if (effectId == null || effectId.isBlank()) {
+                continue;
+            }
+
+            String iconPath = effectAsset.getStatusEffectIcon();
+            effects.add(new PartyMembersHudModule.PartyEffectHudData(
+                    effectId,
+                    iconPath == null ? "" : iconPath,
+                    effectAsset.isDebuff() || activeEffect.isDebuff()));
+        }
+
+        effects.sort(Comparator
+                .comparingInt((PartyMembersHudModule.PartyEffectHudData effect) -> effect.debuff ? 0 : 1)
+                .thenComparing(effect -> effect.effectKey));
+        return effects;
     }
 
     private static void appendPartyStatBar(

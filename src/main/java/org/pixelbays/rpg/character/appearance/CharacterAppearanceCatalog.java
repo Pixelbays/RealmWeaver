@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 
 import com.hypixel.hytale.server.core.cosmetics.CosmeticRegistry;
 import com.hypixel.hytale.server.core.cosmetics.CosmeticsModule;
+import com.hypixel.hytale.server.core.cosmetics.PlayerSkinGradientSet;
 import com.hypixel.hytale.server.core.cosmetics.PlayerSkinPart;
 import com.hypixel.hytale.server.core.cosmetics.PlayerSkinPartTexture;
 import com.hypixel.hytale.server.core.modules.i18n.I18nModule;
@@ -81,7 +82,7 @@ public final class CharacterAppearanceCatalog {
             if (part.getVariants() != null && !part.getVariants().isEmpty()) {
                 for (Map.Entry<String, PlayerSkinPart.Variant> variantEntry : part.getVariants().entrySet()) {
                     PlayerSkinPart.Variant variant = variantEntry.getValue();
-                    if (variant == null || variant.getTextures() == null || variant.getTextures().isEmpty()) {
+                    if (variant == null) {
                         continue;
                     }
 
@@ -91,34 +92,62 @@ public final class CharacterAppearanceCatalog {
                         variants.putIfAbsent(variantId, new VariantChoice(variantId, variantLabel));
                     }
 
-                    for (Map.Entry<String, PlayerSkinPartTexture> textureEntry : variant.getTextures().entrySet()) {
+                    if (variant.getTextures() != null && !variant.getTextures().isEmpty()) {
+                        for (Map.Entry<String, PlayerSkinPartTexture> textureEntry : variant.getTextures().entrySet()) {
+                            String textureId = textureEntry.getKey();
+                            String textureLabel = resolveChoiceLabel(textureId);
+                            PlayerSkinPartTexture texture = textureEntry.getValue();
+                            String texturePath = resolveUiTexturePath(texture);
+                            colors.putIfAbsent(textureId,
+                                new TextureChoice(textureId, textureLabel, texturePath, resolveBaseColors(texture)));
+                            selections.add(new SelectionOption(
+                                    textureId,
+                                    textureLabel,
+                                    variantId,
+                                    variantLabel,
+                                    texturePath,
+                                    buildOptionId(part.getId(), textureId, variantId)));
+                        }
+                    }
+
+                    appendGradientSelections(
+                            registry,
+                            part.getId(),
+                            variantId,
+                            variantLabel,
+                            variant.getGreyscaleTexture(),
+                            part.getGradientSet(),
+                            colors,
+                            selections);
+                }
+            } else {
+                if (part.getTextures() != null) {
+                    for (Map.Entry<String, PlayerSkinPartTexture> textureEntry : part.getTextures().entrySet()) {
                         String textureId = textureEntry.getKey();
                         String textureLabel = resolveChoiceLabel(textureId);
-                        String texturePath = textureEntry.getValue() == null ? "" : safeString(textureEntry.getValue().getTexture());
-                        colors.putIfAbsent(textureId, new TextureChoice(textureId, textureLabel));
+                        PlayerSkinPartTexture texture = textureEntry.getValue();
+                        String texturePath = resolveUiTexturePath(texture);
+                        colors.putIfAbsent(textureId,
+                            new TextureChoice(textureId, textureLabel, texturePath, resolveBaseColors(texture)));
                         selections.add(new SelectionOption(
                                 textureId,
                                 textureLabel,
-                                variantId,
-                                variantLabel,
+                                "",
+                                "",
                                 texturePath,
-                                buildOptionId(part.getId(), textureId, variantId)));
+                                buildOptionId(part.getId(), textureId, "")));
                     }
                 }
-            } else if (part.getTextures() != null) {
-                for (Map.Entry<String, PlayerSkinPartTexture> textureEntry : part.getTextures().entrySet()) {
-                    String textureId = textureEntry.getKey();
-                    String textureLabel = resolveChoiceLabel(textureId);
-                    String texturePath = textureEntry.getValue() == null ? "" : safeString(textureEntry.getValue().getTexture());
-                    colors.putIfAbsent(textureId, new TextureChoice(textureId, textureLabel));
-                    selections.add(new SelectionOption(
-                            textureId,
-                            textureLabel,
-                            "",
-                            "",
-                            texturePath,
-                            buildOptionId(part.getId(), textureId, "")));
-                }
+
+                appendGradientSelections(
+                        registry,
+                        part.getId(),
+                        "",
+                        "",
+                        part.getGreyscaleTexture(),
+                        part.getGradientSet(),
+                        colors,
+                        selections);
             }
 
             if (selections.isEmpty()) {
@@ -234,6 +263,90 @@ public final class CharacterAppearanceCatalog {
     }
 
     @Nonnull
+    private static String resolveUiTexturePath(@Nullable PlayerSkinPartTexture texture) {
+        String texturePath = texture == null ? "" : safeString(texture.getTexture()).trim();
+        return resolveUiTexturePath(texturePath);
+    }
+
+    @Nonnull
+    private static String resolveUiTexturePath(@Nullable String texturePath) {
+        texturePath = safeString(texturePath).trim();
+        if (texturePath.isBlank()) {
+            return "";
+        }
+        if (texturePath.startsWith("Common/")) {
+            return texturePath.substring("Common/".length());
+        }
+        return texturePath;
+    }
+
+    @Nonnull
+    private static List<String> resolveBaseColors(@Nullable PlayerSkinPartTexture texture) {
+        if (texture == null || texture.getBaseColor() == null || texture.getBaseColor().length == 0) {
+            return List.of();
+        }
+
+        List<String> colors = Arrays.stream(texture.getBaseColor())
+                .filter(baseColor -> baseColor != null && !baseColor.isBlank())
+                .map(String::trim)
+                .toList();
+        return colors.isEmpty() ? List.of() : List.copyOf(colors);
+    }
+
+    private static void appendGradientSelections(
+            @Nonnull CosmeticRegistry registry,
+            @Nonnull String assetId,
+            @Nullable String variantId,
+            @Nullable String variantLabel,
+            @Nullable String greyscaleTexturePath,
+            @Nullable String gradientSetId,
+            @Nonnull LinkedHashMap<String, TextureChoice> colors,
+            @Nonnull List<SelectionOption> selections) {
+        String texturePath = resolveUiTexturePath(greyscaleTexturePath);
+        if (texturePath.isBlank() || gradientSetId == null || gradientSetId.isBlank()) {
+            return;
+        }
+
+        PlayerSkinGradientSet gradientSet = registry.getGradientSets().get(gradientSetId);
+        if (gradientSet == null || gradientSet.getGradients() == null || gradientSet.getGradients().isEmpty()) {
+            return;
+        }
+
+        String safeVariantId = safeString(variantId);
+        String safeVariantLabel = safeString(variantLabel);
+        for (Map.Entry<String, PlayerSkinPartTexture> gradientEntry : gradientSet.getGradients().entrySet()) {
+            String textureId = gradientEntry.getKey();
+            String optionId = buildOptionId(assetId, textureId, safeVariantId);
+            if (containsSelectionOption(selections, optionId)) {
+                continue;
+            }
+
+            String textureLabel = resolveChoiceLabel(textureId);
+            PlayerSkinPartTexture gradientTexture = gradientEntry.getValue();
+            colors.putIfAbsent(textureId,
+                new TextureChoice(textureId, textureLabel, texturePath, resolveBaseColors(gradientTexture)));
+            selections.add(new SelectionOption(
+                    textureId,
+                    textureLabel,
+                    safeVariantId,
+                    safeVariantLabel,
+                    texturePath,
+                    optionId));
+        }
+    }
+
+    private static boolean containsSelectionOption(
+            @Nonnull List<SelectionOption> selections,
+            @Nonnull String optionId) {
+        for (SelectionOption selection : selections) {
+            if (selection.optionId().equalsIgnoreCase(optionId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Nonnull
     private static String humanizeToken(@Nonnull String value) {
         String normalized = value
                 .replaceAll("([a-z])([A-Z])", "$1 $2")
@@ -280,7 +393,11 @@ public final class CharacterAppearanceCatalog {
             @Nonnull List<String> tags) {
     }
 
-    public record TextureChoice(@Nonnull String id, @Nonnull String label) {
+        public record TextureChoice(
+            @Nonnull String id,
+            @Nonnull String label,
+            @Nonnull String texturePath,
+            @Nonnull List<String> swatchColors) {
     }
 
     public record VariantChoice(@Nonnull String id, @Nonnull String label) {
@@ -360,6 +477,12 @@ public final class CharacterAppearanceCatalog {
             }
 
             return defaultOptionId;
+        }
+
+        @Nonnull
+        public SelectionOption resolveSelection(@Nullable String preferredColorId, @Nullable String preferredVariantId) {
+            SelectionOption selection = findSelection(preferredColorId, preferredVariantId);
+            return selection != null ? selection : selections.getFirst();
         }
 
         @Nullable

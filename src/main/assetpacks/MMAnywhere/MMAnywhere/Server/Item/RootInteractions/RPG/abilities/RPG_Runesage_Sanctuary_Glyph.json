@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Runesage_Sanctuary_Glyph"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Runesage_Sanctuary_Glyph",
+    "Cooldown": 18.0
+  }
+}

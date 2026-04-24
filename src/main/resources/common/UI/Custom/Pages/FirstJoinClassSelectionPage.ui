@@ -1,0 +1,118 @@
+$C = "../Common.ui";
+
+$C.@PageOverlay {}
+
+Group #LayoutRoot {
+  Anchor: (Full: 0);
+
+  Label #TitleLabel {
+    Text: %pixelbays.rpg.class.onboarding.title;
+    Style: (...$C.@DefaultLabelStyle, FontSize: 18, RenderBold: true, HorizontalAlignment: Center);
+    Anchor: (Height: 28, Top: 26, Left: 0, Right: 0);
+  }
+
+  Label #SubtitleLabel {
+    Text: %pixelbays.rpg.class.onboarding.subtitle;
+    Style: (...$C.@DefaultLabelStyle, FontSize: 12, HorizontalAlignment: Center);
+    Anchor: (Height: 20, Top: 56, Left: 0, Right: 0);
+  }
+
+  Label #StatusLabel {
+    Text: "";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 13, RenderBold: true, HorizontalAlignment: Center, TextColor: #ff6666);
+    Anchor: (Height: 22, Top: 82, Left: 0, Right: 0);
+  }
+
+  Group #ClassPanel {
+    LayoutMode: Top;
+    Anchor: (Width: 360, Left: 76, Top: 124, Bottom: 56);
+    Padding: (Full: 12);
+    Background: PatchStyle(Color: #132033(0.94));
+    OutlineColor: #4f7097ff;
+    OutlineSize: 1;
+
+    Label {
+      Text: %pixelbays.rpg.class.onboarding.listHeading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+      Anchor: (Bottom: 6);
+    }
+
+    Label {
+      Text: %pixelbays.rpg.class.onboarding.listSubheading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Bottom: 12);
+    }
+
+    Group #ClassList {
+      LayoutMode: TopScrolling;
+      ScrollbarStyle: $C.@DefaultScrollbarStyle;
+      Anchor: (Bottom: 8);
+      FlexWeight: 1;
+      Padding: (Right: 4);
+    }
+  }
+
+  Group #DetailsPanel {
+    LayoutMode: Top;
+    Anchor: (Left: 468, Right: 76, Top: 124, Bottom: 56);
+    Padding: (Full: 12);
+    Background: PatchStyle(Color: #132033(0.94));
+    OutlineColor: #4f7097ff;
+    OutlineSize: 1;
+
+    Label {
+      Text: %pixelbays.rpg.class.onboarding.detailsHeading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 16, RenderBold: true);
+      Anchor: (Bottom: 6);
+    }
+
+    Label {
+      Text: %pixelbays.rpg.class.onboarding.detailsSubheading;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Bottom: 14);
+    }
+
+    Label #HeroNameLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 24, RenderBold: true);
+      Anchor: (Bottom: 6);
+    }
+
+    Label #HeroMetaLabel {
+      Text: "";
+      Style: (...$C.@DefaultLabelStyle, FontSize: 13);
+      Anchor: (Bottom: 12);
+    }
+
+    Label #DetailsLabel {
+      Text: %pixelbays.rpg.class.onboarding.noDescription;
+      Style: (...$C.@DefaultLabelStyle, FontSize: 12);
+      Anchor: (Bottom: 12);
+      FlexWeight: 1;
+    }
+
+    Group {
+      Visible: false;
+      Anchor: (Height: 0);
+
+      $C.@TextField #SelectedClassIdField {
+        @Anchor = (Width: 1, Height: 1);
+      }
+    }
+
+    Group {
+      LayoutMode: Left;
+      Anchor: (Height: 44);
+
+      Group { FlexWeight: 1; }
+
+      TextButton #ConfirmButton {
+        Text: %pixelbays.rpg.class.onboarding.confirmButton;
+        Style: $C.@DefaultTextButtonStyle;
+        Anchor: (Width: 220, Height: 44);
+      }
+
+      Group { FlexWeight: 1; }
+    }
+  }
+}

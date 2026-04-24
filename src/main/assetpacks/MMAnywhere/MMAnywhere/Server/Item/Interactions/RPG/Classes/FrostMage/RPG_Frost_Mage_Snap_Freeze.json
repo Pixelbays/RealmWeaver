@@ -1,0 +1,121 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "FrostRunes": 1
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "FrostRunes": -1
+        }
+      },
+      {
+        "Type": "Simple",
+        "RunTime": 0.15,
+        "Effects": {
+          "ItemAnimationId": "CastLeftCharged",
+          "WorldSoundEventId": "SFX_Staff_Ice_Shoot",
+          "LocalSoundEventId": "SFX_Staff_Ice_Shoot"
+        }
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "Raycast",
+          "Offset": {
+            "Y": 1.6
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Vulnerable"
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "EffectCondition",
+                  "Entity": "Target",
+                  "EntityEffectIds": [
+                    "FrostMage_Chilled"
+                  ],
+                  "Match": "All",
+                  "Next": {
+                    "Type": "Serial",
+                    "Interactions": [
+                      {
+                        "Type": "ClearEntityEffect",
+                        "Entity": "Target",
+                        "EntityEffectId": "FrostMage_Chilled"
+                      },
+                      {
+                        "Parent": "DamageEntityParent",
+                        "DamageCalculator": {
+                          "BaseDamage": {
+                            "Ice": 12
+                          }
+                        },
+                        "DamageEffects": {
+                          "WorldParticles": [
+                            {
+                              "SystemId": "Impact_Ice",
+                              "Scale": 1
+                            }
+                          ],
+                          "WorldSoundEventId": "SFX_Ice_Break"
+                        }
+                      },
+                      {
+                        "Type": "ApplyEffect",
+                        "EffectId": "FrostMage_Frozen",
+                        "Entity": "Target"
+                      }
+                    ]
+                  },
+                  "Failed": {
+                    "Type": "Serial",
+                    "Interactions": [
+                      {
+                        "Parent": "DamageEntityParent",
+                        "DamageCalculator": {
+                          "BaseDamage": {
+                            "Ice": 8
+                          }
+                        },
+                        "DamageEffects": {
+                          "WorldParticles": [
+                            {
+                              "SystemId": "Impact_Ice",
+                              "Scale": 1
+                            }
+                          ],
+                          "WorldSoundEventId": "SFX_Ice_Break"
+                        }
+                      },
+                      {
+                        "Type": "ApplyEffect",
+                        "EffectId": "FrostMage_Rooted",
+                        "Entity": "Target"
+                      },
+                      {
+                        "Type": "ApplyEffect",
+                        "EffectId": "FrostMage_Chilled",
+                        "Entity": "Target"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

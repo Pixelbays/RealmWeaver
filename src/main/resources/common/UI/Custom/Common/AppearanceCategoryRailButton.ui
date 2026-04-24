@@ -1,38 +1,72 @@
 $C = "../Common.ui";
 
 Group {
-  Anchor: (Height: 58, Bottom: 8);
-  Background: PatchStyle(Color: #18283d);
-  OutlineColor: #345171ff;
-  OutlineSize: 1;
+  Anchor: (Width: 52, Height: 58, Bottom: 6);
+  Background: (TexturePath: "AvatarEditor/CategoryIconBackground.png");
 
   Group #SelectedBar {
     Visible: false;
-    Anchor: (Width: 4, Left: 0, Top: 0, Bottom: 0);
-    Background: PatchStyle(Color: #f0c46c);
+    Anchor: (Width: 9, Height: 18, Right: -2, Top: 20);
+    Background: (TexturePath: "AvatarEditor/SelectedCategoryArrow.png");
   }
 
   TextButton #Button {
     Anchor: (Full: 0);
-    Padding: (Left: 8, Right: 8, Top: 6, Bottom: 6);
-    Style: (Hovered: (Background: #233956), Pressed: (Background: #2a4467));
+    Padding: (Full: 0);
+    Style: (Hovered: (Background: #2f3a4f(0.18)), Pressed: (Background: #2f3a4f(0.32)));
   }
 
-  Group {
-    LayoutMode: Top;
-    Anchor: (Full: 0);
-    Padding: (Left: 10, Right: 8, Top: 7, Bottom: 7);
+  Group #BodyCharacteristicIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/BodyCharacteristic.png"); }
+  Group #BodyCharacteristicSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/BodyCharacteristicSelected.png"); }
+  Group #UnderwearIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Underwear.png"); }
+  Group #UnderwearSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/UnderwearSelected.png"); }
+  Group #FaceIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Face.png"); }
+  Group #FaceSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/FaceSelected.png"); }
+  Group #EyesIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Eyes.png"); }
+  Group #EyesSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/EyesSelected.png"); }
+  Group #EarsIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Ears.png"); }
+  Group #EarsSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/EarsSelected.png"); }
+  Group #MouthIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Mouth.png"); }
+  Group #MouthSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/MouthSelected.png"); }
+  Group #FacialHairIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/FacialHair.png"); }
+  Group #FacialHairSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/FacialHairSelected.png"); }
+  Group #HaircutIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Haircut.png"); }
+  Group #HaircutSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/HaircutSelected.png"); }
+  Group #EyebrowsIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Eyebrows.png"); }
+  Group #EyebrowsSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/EyebrowsSelected.png"); }
+  Group #PantsIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Pants.png"); }
+  Group #PantsSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/PantsSelected.png"); }
+  Group #OverpantsIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Overpants.png"); }
+  Group #OverpantsSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/OverpantsSelected.png"); }
+  Group #UndertopIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Undertop.png"); }
+  Group #UndertopSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/UndertopSelected.png"); }
+  Group #OvertopIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Overtop.png"); }
+  Group #OvertopSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/OvertopSelected.png"); }
+  Group #ShoesIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Shoes.png"); }
+  Group #ShoesSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/ShoesSelected.png"); }
+  Group #HeadAccessoryIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/HeadAccessory.png"); }
+  Group #HeadAccessorySelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/HeadAccessorySelected.png"); }
+  Group #FaceAccessoryIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/FaceAccessory.png"); }
+  Group #FaceAccessorySelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/FaceAccessorySelected.png"); }
+  Group #EarAccessoryIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/EarAccessory.png"); }
+  Group #EarAccessorySelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/EarAccessorySelected.png"); }
+  Group #VariousIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Various.png"); }
+  Group #VariousSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/VariousSelected.png"); }
+  Group #GlovesIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Gloves.png"); }
+  Group #GlovesSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/GlovesSelected.png"); }
+  Group #CapeIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/Cape.png"); }
+  Group #CapeSelectedIcon { Visible: false; Anchor: (Width: 22, Height: 22, Left: 15, Top: 8); Background: (TexturePath: "AvatarEditor/CategoryIcons/CapeSelected.png"); }
 
-    Label #GlyphLabel {
-      Text: "";
-      Style: (...$C.@DefaultLabelStyle, FontSize: 15, RenderBold: true, HorizontalAlignment: Center);
-      Anchor: (Height: 18, Bottom: 3);
-    }
+  Label #GlyphLabel {
+    Visible: false;
+    Text: "";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 15, RenderBold: true, HorizontalAlignment: Center);
+    Anchor: (Height: 18, Bottom: 3);
+  }
 
-    Label #TitleLabel {
-      Text: "";
-      Style: (...$C.@DefaultLabelStyle, FontSize: 10, HorizontalAlignment: Center);
-      Anchor: (Height: 14);
-    }
+  Label #TitleLabel {
+    Text: "";
+    Style: (...$C.@DefaultLabelStyle, FontSize: 8, RenderUppercase: true, HorizontalAlignment: Center, TextColor: #8ba0b6);
+    Anchor: (Height: 12, Left: 2, Right: 2, Bottom: 5);
   }
 }

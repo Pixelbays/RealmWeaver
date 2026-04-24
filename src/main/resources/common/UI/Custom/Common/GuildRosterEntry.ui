@@ -41,8 +41,13 @@ Group {
       Anchor: (Height: 16, Bottom: 2);
     }
 
-    $C.@TextField #MemberIdField {
-      @Anchor = (Width: 1, Height: 1);
+    Group {
+      Visible: false;
+      Anchor: (Height: 0);
+
+      $C.@TextField #MemberIdField {
+        @Anchor = (Width: 1, Height: 1);
+      }
     }
   }
 }

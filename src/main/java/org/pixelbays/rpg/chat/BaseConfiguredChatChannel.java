@@ -46,9 +46,22 @@ public abstract class BaseConfiguredChatChannel implements ChatChannel {
 
     @Nonnull
     protected Message createBaseMessage(@Nonnull PlayerRef sender, @Nonnull String message) {
+        return createBaseMessage(resolveDisplayName(sender), message);
+    }
+
+    @Nonnull
+    protected Message createBaseMessage(@Nonnull String displayName, @Nonnull String message) {
         return Message.translation(formatTranslationKey)
                 .param("channel", id)
-                .param("username", resolveDisplayName(sender))
+                .param("username", displayName)
+                .param("message", message);
+    }
+
+    @Nonnull
+    protected Message createBaseMessage(@Nonnull Message displayName, @Nonnull String message) {
+        return Message.translation(formatTranslationKey)
+                .param("channel", id)
+                .param("username", displayName)
                 .param("message", message);
     }
 

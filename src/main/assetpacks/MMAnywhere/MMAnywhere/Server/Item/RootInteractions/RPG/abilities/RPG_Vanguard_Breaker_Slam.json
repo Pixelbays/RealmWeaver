@@ -1,0 +1,9 @@
+{
+  "Interactions": [
+    "RPG_Vanguard_Breaker_Slam"
+  ],
+  "Cooldown": {
+    "Id": "RPG_Vanguard_Breaker_Slam",
+    "Cooldown": 12.0
+  }
+}

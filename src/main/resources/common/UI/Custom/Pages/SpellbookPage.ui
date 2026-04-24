@@ -4,18 +4,21 @@ $C = "../Common.ui";
   Text: "";
   Style: $C.@DefaultTextButtonStyle;
   Anchor: (Width: 0, Height: 0, Right: 0);
+  Visible: false;
 };
 
 @SpellbookAbilityRow = TextButton {
   Text: "";
   Style: $C.@DefaultTextButtonStyle;
   Anchor: (Height: 0, Bottom: 0);
+  Visible: false;
 };
 
 @SpellbookBindButton = TextButton {
   Text: "";
   Style: $C.@DefaultTextButtonStyle;
   Anchor: (Height: 0, Bottom: 0);
+  Visible: false;
 };
 
 $C.@PageOverlay {}

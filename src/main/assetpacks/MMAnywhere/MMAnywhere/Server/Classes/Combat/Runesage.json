@@ -1,0 +1,209 @@
+{
+  "DisplayName": "Runesage",
+  "Description": "Battlefield support casters who weave sigils, wards, and suppressive circles to keep allies stable and enemies weakened.",
+  "Icon": "Icons/ItemsGenerated/Weapon_Spellbook_Grimoire_Purple.png",
+  "Enabled": true,
+  "Visible": true,
+  "Roles": [
+    "healer",
+    "dps"
+  ],
+  "UsesCharacterLevel": false,
+  "IsStartingClass": true,
+  "AbilityControlTypeOverride": "AbilitySlots123",
+  "LevelSystemId": "Runesage",
+  "AbilityUnlocks": [
+    {
+      "AbilityId": "SigilBolt",
+      "UnlockLevel": 1
+    },
+    {
+      "AbilityId": "RenewalCircle",
+      "UnlockLevel": 2
+    },
+    {
+      "AbilityId": "BindingSeal",
+      "UnlockLevel": 4
+    },
+    {
+      "AbilityId": "WardingPulse",
+      "UnlockLevel": 6
+    }
+  ],
+  "TalentTrees": [
+    {
+      "TreeId": "inscription",
+      "DisplayName": "Inscription",
+      "Description": "Shape supportive circles, weakening sigils, and grand rites into a full battlefield control caster.",
+      "Roles": [
+        "healer",
+        "dps"
+      ],
+      "MaxPoints": 10,
+      "Nodes": [
+        {
+          "NodeId": "lingering_script",
+          "DisplayName": "Lingering Script",
+          "Description": "Increase Haste by 4 and Versatility by 2.",
+          "MaxRank": 1,
+          "RequiredLevel": 3,
+          "PositionX": 0,
+          "PositionY": 0,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Haste": 4,
+              "Versatility": 2
+            }
+          }
+        },
+        {
+          "NodeId": "attuned_inscription",
+          "DisplayName": "Attuned Inscription",
+          "Description": "Unlocks the Attuned Inscription passive ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 5,
+          "RequiredNodes": [
+            "lingering_script"
+          ],
+          "PositionX": -1,
+          "PositionY": 1,
+          "GrantsAbilityId": "AttunedInscription"
+        },
+        {
+          "NodeId": "sanctuary_glyph",
+          "DisplayName": "Sanctuary Glyph",
+          "Description": "Unlocks the Sanctuary Glyph ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 7,
+          "RequiredNodes": [
+            "lingering_script"
+          ],
+          "PositionX": 1,
+          "PositionY": 1,
+          "GrantsAbilityId": "SanctuaryGlyph"
+        },
+        {
+          "NodeId": "echoing_marks",
+          "DisplayName": "Echoing Marks",
+          "Description": "Increase Mastery by 5 and Haste by 3.",
+          "MaxRank": 1,
+          "RequiredLevel": 9,
+          "RequiredNodes": [
+            "attuned_inscription",
+            "sanctuary_glyph"
+          ],
+          "PositionX": 0,
+          "PositionY": 2,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Mastery": 5,
+              "Haste": 3
+            }
+          }
+        },
+        {
+          "NodeId": "fracture_rune",
+          "DisplayName": "Fracture Rune",
+          "Description": "Unlocks the Fracture Rune ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 11,
+          "RequiredNodes": [
+            "echoing_marks"
+          ],
+          "PositionX": -1,
+          "PositionY": 3,
+          "GrantsAbilityId": "FractureRune"
+        },
+        {
+          "NodeId": "runic_shelter",
+          "DisplayName": "Runic Shelter",
+          "Description": "Increase Health by 60 and Versatility by 4.",
+          "MaxRank": 1,
+          "RequiredLevel": 13,
+          "RequiredNodes": [
+            "echoing_marks"
+          ],
+          "PositionX": 1,
+          "PositionY": 3,
+          "StatModifiers": {
+            "AdditiveModifiers": {
+              "Health": 60,
+              "Versatility": 4
+            }
+          }
+        },
+        {
+          "NodeId": "cleansing_lattice",
+          "DisplayName": "Cleansing Lattice",
+          "Description": "Unlocks the Cleansing Lattice ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 15,
+          "RequiredNodes": [
+            "fracture_rune"
+          ],
+          "PositionX": -1,
+          "PositionY": 4,
+          "GrantsAbilityId": "CleansingLattice"
+        },
+        {
+          "NodeId": "guiding_lines",
+          "DisplayName": "Guiding Lines",
+          "Description": "Unlocks the Guiding Lines passive ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 17,
+          "RequiredNodes": [
+            "runic_shelter"
+          ],
+          "PositionX": 1,
+          "PositionY": 4,
+          "GrantsAbilityId": "GuidingLines"
+        },
+        {
+          "NodeId": "convergence_rite",
+          "DisplayName": "Convergence Rite",
+          "Description": "Unlocks the Convergence Rite ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 19,
+          "RequiredNodes": [
+            "cleansing_lattice",
+            "guiding_lines"
+          ],
+          "PositionX": 0,
+          "PositionY": 5,
+          "GrantsAbilityId": "ConvergenceRite"
+        },
+        {
+          "NodeId": "grand_inscription",
+          "DisplayName": "Grand Inscription",
+          "Description": "Unlocks the Grand Inscription passive ability.",
+          "MaxRank": 1,
+          "RequiredLevel": 20,
+          "RequiredNodes": [
+            "convergence_rite"
+          ],
+          "PositionX": 0,
+          "PositionY": 6,
+          "GrantsAbilityId": "GrandInscription"
+        }
+      ]
+    }
+  ],
+  "ClassColorPrimary": "#7ad7c3",
+  "ClassColorAlt": "#effff9",
+  "ResourceStats": [
+    {
+      "StatId": "Sigils",
+      "Color": "#7ad7c3",
+      "Priority": 1
+    }
+  ],
+  "ResourceDisplays": [
+    {
+      "StatId": "Sigils",
+      "Label": "Sigils",
+      "DisplayMode": "Charges",
+      "MaxCharges": 3,
+      "FillColor": "#7ad7c3"
+    }
+  ]
+}

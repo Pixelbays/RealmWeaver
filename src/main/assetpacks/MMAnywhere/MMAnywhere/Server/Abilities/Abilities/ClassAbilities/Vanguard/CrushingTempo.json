@@ -1,0 +1,22 @@
+{
+  "Parent": "PassiveBase",
+  "Categories": [
+    "Vanguard",
+    "Passive"
+  ],
+  "TranslationProperties": {
+    "Name": "mma.rpg.abilities.crushing_tempo.name",
+    "Description": "mma.rpg.abilities.crushing_tempo.description"
+  },
+  "AbilityType": "Passive",
+  "GlobalCooldown": 0.0,
+  "GlobalCooldownCategories": [],
+  "StatRequirements": {},
+  "Interactions": {
+    "Primary": "RPG_Vanguard_Crushing_Tempo"
+  },
+  "InteractionVars": {},
+  "Enabled": true,
+  "Tooltip": "While you have at least 1 Guard, gain Haste and Critical Strike.",
+  "Icon": "Icons/ItemsGenerated/Weapon_Mace_Copper.png"
+}

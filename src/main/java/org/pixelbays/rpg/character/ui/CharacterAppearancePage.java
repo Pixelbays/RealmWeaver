@@ -2,6 +2,7 @@ package org.pixelbays.rpg.character.ui;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +15,8 @@ import org.pixelbays.rpg.character.CharacterManager;
 import org.pixelbays.rpg.character.appearance.CharacterAppearanceCatalog;
 import org.pixelbays.rpg.character.appearance.CharacterAppearanceCatalog.Category;
 import org.pixelbays.rpg.character.appearance.CharacterAppearanceCatalog.Cosmetic;
-import org.pixelbays.rpg.character.appearance.CharacterAppearanceCatalog.Option;
 import org.pixelbays.rpg.character.appearance.CharacterAppearanceCatalog.ParsedSelection;
+import org.pixelbays.rpg.character.appearance.CharacterAppearanceCatalog.SelectionOption;
 import org.pixelbays.rpg.character.appearance.CharacterAppearanceData;
 import org.pixelbays.rpg.character.config.CharacterProfileData;
 import org.pixelbays.rpg.character.config.settings.CharacterModSettings.BarberPricingMode;
@@ -34,10 +35,12 @@ import com.hypixel.hytale.protocol.PlayerSkin;
 import com.hypixel.hytale.protocol.packets.interface_.CustomPageLifetime;
 import com.hypixel.hytale.protocol.packets.interface_.CustomUIEventBindingType;
 import com.hypixel.hytale.protocol.packets.interface_.Page;
+import com.hypixel.hytale.server.core.asset.common.CommonAssetRegistry;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.pages.InteractiveCustomUIPage;
 import com.hypixel.hytale.server.core.modules.entity.player.PlayerSkinComponent;
-import com.hypixel.hytale.server.core.ui.LocalizableString;
+import com.hypixel.hytale.server.core.ui.PatchStyle;
+import com.hypixel.hytale.server.core.ui.Value;
 import com.hypixel.hytale.server.core.ui.builder.EventData;
 import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.ui.builder.UIEventBuilder;
@@ -76,6 +79,12 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
     private static final String CREATE_CONFIRM_MESSAGE = "#CreateConfirmMessage";
     private static final String CREATE_CONFIRM_ACCEPT_BUTTON = "#CreateConfirmAcceptButton";
     private static final String CREATE_CONFIRM_CANCEL_BUTTON = "#CreateConfirmCancelButton";
+    private static final String GENERATED_COSMETIC_PREVIEW_ROOT = "Icons/ItemsGenerated/CosmeticsGenerated/";
+    private static final String GENERATED_COSMETIC_PREVIEW_RESOURCE_ROOT = "common/";
+    private static final int COSMETIC_TILES_PER_ROW = 5;
+    private static final int COLOR_SWATCHES_PER_ROW = 13;
+    private static final int CHOICE_CHIPS_PER_ROW = 5;
+    private static final String SWATCH_FALLBACK_COLOR = "#9ba9ba";
 
     private final CharacterManager characterManager;
     private final Mode mode;
@@ -94,6 +103,7 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
     private String selectedCosmeticAssetId = "";
     private String selectedColorId = "";
     private String selectedVariantId = "";
+    private final Map<String, Boolean> generatedCosmeticPreviewAvailability = new HashMap<>();
     private CharacterAppearanceData draftAppearance = new CharacterAppearanceData();
     private CharacterAppearanceData persistedAppearance = new CharacterAppearanceData();
     private PlayerSkin restoreSkin = new PlayerSkin();
@@ -443,7 +453,7 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
         commandBuilder.set(NAME_FIELD + ".Value", draftName);
         commandBuilder.set(SEARCH_FIELD + ".Value", searchQuery);
         commandBuilder.set(STATUS_LABEL + ".Text", statusText);
-        commandBuilder.set(CATEGORY_HEADING + ".Text", humanizeCategory(selectedCategory));
+        commandBuilder.set(CATEGORY_HEADING + ".Text", buildCategoryHeading(selectedCategory));
         commandBuilder.set(SUMMARY_LABEL + ".Text", buildSummary(raceSummary, classSummary));
         commandBuilder.set(COST_LABEL + ".Text", buildCostLabel());
         commandBuilder.set(CREATE_CONFIRM_OVERLAY + ".Visible", confirmDialogOpen);
@@ -465,9 +475,7 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
             Category category = CharacterAppearanceCatalog.getOrderedCategories().get(index);
             String selector = CATEGORY_RAIL + "[" + index + "]";
             commandBuilder.append(CATEGORY_RAIL, "Common/AppearanceCategoryRailButton.ui");
-            commandBuilder.set(selector + " #GlyphLabel.Text", railGlyph(category));
-            commandBuilder.set(selector + " #TitleLabel.Text", railLabel(category));
-            commandBuilder.set(selector + " #SelectedBar.Visible", category == selectedCategory);
+            configureCategoryRailButton(commandBuilder, selector, category, category == selectedCategory);
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                     selector + " #Button",
                     new EventData().append("Type", "SelectCategory").append("CategoryId", category.fieldName()),
@@ -495,7 +503,7 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
             commandBuilder.set(selector + " #SubtitleLabel.Text", "Clear this slot");
             commandBuilder.set(selector + " #SelectedBadge.Visible", selected);
             commandBuilder.set(selector + " #PreviewFrame.Visible", true);
-            commandBuilder.set(selector + " #PreviewLabel.Text", "NO");
+                setTilePreview(commandBuilder, selector, "", "NO");
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                     selector + " #Button",
                     new EventData().append("Type", "ClearOption"),
@@ -508,7 +516,7 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
             commandBuilder.set(selector + " #SubtitleLabel.Text", "Try a different search");
             commandBuilder.set(selector + " #SelectedBadge.Visible", false);
             commandBuilder.set(selector + " #PreviewFrame.Visible", true);
-            commandBuilder.set(selector + " #PreviewLabel.Text", "--");
+            setTilePreview(commandBuilder, selector, "", "--");
             return;
         }
 
@@ -519,7 +527,10 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
             commandBuilder.set(selector + " #SubtitleLabel.Text", buildCosmeticSubtitle(cosmetic));
             commandBuilder.set(selector + " #SelectedBadge.Visible", selected);
             commandBuilder.set(selector + " #PreviewFrame.Visible", true);
-            commandBuilder.set(selector + " #PreviewLabel.Text", buildCosmeticPreviewToken(cosmetic));
+                setTilePreview(commandBuilder,
+                    selector,
+                    resolveCosmeticPreviewTexturePath(cosmetic),
+                    buildCosmeticPreviewToken(cosmetic));
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                     selector + " #Button",
                     new EventData().append("Type", "SelectCosmetic").append("CosmeticId", cosmetic.assetId()),
@@ -529,8 +540,8 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
 
     @Nonnull
     private String appendTile(@Nonnull UICommandBuilder commandBuilder, int itemIndex) {
-        int row = itemIndex / 3;
-        int column = itemIndex % 3;
+        int row = itemIndex / COSMETIC_TILES_PER_ROW;
+        int column = itemIndex % COSMETIC_TILES_PER_ROW;
         String rowSelector = COSMETIC_GRID + "[" + row + "]";
         if (column == 0) {
             commandBuilder.append(COSMETIC_GRID, "Common/AppearanceTileRow.ui");
@@ -551,9 +562,8 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
 
         for (int index = 0; index < selectedCosmetic.colors().size(); index++) {
             CharacterAppearanceCatalog.TextureChoice color = selectedCosmetic.colors().get(index);
-            String selector = appendChoiceChip(commandBuilder, COLOR_LIST, index);
-            commandBuilder.set(selector + " #Label.Text", color.label());
-            commandBuilder.set(selector + " #SelectedBadge.Visible", color.id().equalsIgnoreCase(selectedColorId));
+            String selector = appendColorSwatch(commandBuilder, index);
+            populateColorSwatch(commandBuilder, selector, color);
             eventBuilder.addEventBinding(CustomUIEventBindingType.Activating,
                     selector + " #Button",
                     new EventData().append("Type", "SelectColor").append("ColorId", color.id()),
@@ -587,14 +597,156 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
     private String appendChoiceChip(@Nonnull UICommandBuilder commandBuilder,
             @Nonnull String listSelector,
             int itemIndex) {
-        int row = itemIndex / 3;
-        int column = itemIndex % 3;
+        int row = itemIndex / CHOICE_CHIPS_PER_ROW;
+        int column = itemIndex % CHOICE_CHIPS_PER_ROW;
         String rowSelector = listSelector + "[" + row + "]";
         if (column == 0) {
             commandBuilder.append(listSelector, "Common/AppearanceChoiceRow.ui");
         }
         commandBuilder.append(rowSelector + " #Cells", "Common/AppearanceChoiceChip.ui");
         return rowSelector + " #Cells[" + column + "]";
+    }
+
+    @Nonnull
+    private String appendColorSwatch(@Nonnull UICommandBuilder commandBuilder, int itemIndex) {
+        int row = itemIndex / COLOR_SWATCHES_PER_ROW;
+        int column = itemIndex % COLOR_SWATCHES_PER_ROW;
+        String rowSelector = COLOR_LIST + "[" + row + "]";
+        if (column == 0) {
+            commandBuilder.append(COLOR_LIST, "Common/AppearanceColorRow.ui");
+        }
+        commandBuilder.append(rowSelector + " #Cells", "Common/AppearanceColorSwatch.ui");
+        return rowSelector + " #Cells[" + column + "]";
+    }
+
+    private void populateColorSwatch(@Nonnull UICommandBuilder commandBuilder,
+            @Nonnull String selector,
+            @Nonnull CharacterAppearanceCatalog.TextureChoice color) {
+        commandBuilder.set(selector + " #SelectedHighlight.Visible", color.id().equalsIgnoreCase(selectedColorId));
+        commandBuilder.set(selector + " #Button.TooltipText", color.label());
+
+        List<String> swatchColors = color.swatchColors();
+        if (!swatchColors.isEmpty()) {
+            for (int index = 0; index < swatchColors.size(); index++) {
+                commandBuilder.append(selector + " #SwatchFill", "Common/AppearanceColorSegment.ui");
+                commandBuilder.setObject(selector + " #SwatchFill[" + index + "].Background",
+                        createColorPatchStyle(swatchColors.get(index)));
+            }
+            return;
+        }
+
+        commandBuilder.append(selector + " #SwatchFill", "Common/AppearanceColorSegment.ui");
+        commandBuilder.setObject(selector + " #SwatchFill[0].Background", createColorPatchStyle(SWATCH_FALLBACK_COLOR));
+    }
+
+    private void setTilePreview(@Nonnull UICommandBuilder commandBuilder,
+            @Nonnull String selector,
+            @Nullable String texturePath,
+            @Nonnull String fallbackText) {
+        boolean hasTexture = texturePath != null && !texturePath.isBlank();
+        commandBuilder.set(selector + " #PreviewTexture.Visible", hasTexture);
+        commandBuilder.set(selector + " #PreviewImage.Visible", hasTexture);
+        commandBuilder.set(selector + " #PreviewLabel.Visible", !hasTexture);
+        commandBuilder.set(selector + " #PreviewLabel.Text", hasTexture ? "" : fallbackText);
+        if (hasTexture) {
+            commandBuilder.set(selector + " #PreviewImage.AssetPath", texturePath);
+        } else {
+            commandBuilder.setNull(selector + " #PreviewImage.AssetPath");
+        }
+    }
+
+    @Nonnull
+    private String resolveCosmeticPreviewTexturePath(@Nonnull Cosmetic cosmetic) {
+        String preferredColorId = cosmetic.assetId().equalsIgnoreCase(selectedCosmeticAssetId)
+                ? selectedColorId
+                : cosmetic.defaultColorId();
+        String preferredVariantId = cosmetic.assetId().equalsIgnoreCase(selectedCosmeticAssetId)
+                ? selectedVariantId
+                : cosmetic.defaultVariantId();
+        SelectionOption selection = cosmetic.resolveSelection(preferredColorId, preferredVariantId);
+        String generatedTexturePath = resolveGeneratedCosmeticPreviewPath(cosmetic, selection);
+        if (!generatedTexturePath.isBlank()) {
+            return generatedTexturePath;
+        }
+        if (!selection.texturePath().isBlank()) {
+            return selection.texturePath();
+        }
+        for (SelectionOption fallbackSelection : cosmetic.selections()) {
+            generatedTexturePath = resolveGeneratedCosmeticPreviewPath(cosmetic, fallbackSelection);
+            if (!generatedTexturePath.isBlank()) {
+                return generatedTexturePath;
+            }
+            if (!fallbackSelection.texturePath().isBlank()) {
+                return fallbackSelection.texturePath();
+            }
+        }
+        return "";
+    }
+
+    @Nonnull
+    private String resolveGeneratedCosmeticPreviewPath(
+            @Nonnull Cosmetic cosmetic,
+            @Nonnull SelectionOption selection) {
+        String optionId = CharacterAppearanceCatalog.buildOptionId(
+                cosmetic.assetId(),
+                selection.textureId(),
+                selection.variantId());
+        String assetPath = GENERATED_COSMETIC_PREVIEW_ROOT
+                + CharacterAppearanceCatalog.normalizeKey(cosmetic.category().fieldName())
+                + "/"
+                + sanitizeGeneratedCosmeticPreviewToken(optionId)
+                + ".png";
+        boolean exists = Boolean.TRUE.equals(generatedCosmeticPreviewAvailability.get(assetPath));
+        if (!exists) {
+            exists = generatedCosmeticPreviewExists(assetPath);
+            if (exists) {
+                generatedCosmeticPreviewAvailability.put(assetPath, Boolean.TRUE);
+            }
+        }
+        return exists ? assetPath : "";
+    }
+
+    private boolean generatedCosmeticPreviewExists(@Nonnull String assetPath) {
+        String normalizedAssetPath = assetPath.replace('\\', '/');
+        if (CommonAssetRegistry.getByName(normalizedAssetPath) != null) {
+            return true;
+        }
+        return CharacterAppearancePage.class.getClassLoader()
+                .getResource(GENERATED_COSMETIC_PREVIEW_RESOURCE_ROOT + normalizedAssetPath) != null;
+    }
+
+    @Nonnull
+    private String sanitizeGeneratedCosmeticPreviewToken(@Nonnull String optionId) {
+        return optionId.replaceAll("[^A-Za-z0-9._-]", "_");
+    }
+
+    @Nonnull
+    private PatchStyle createColorPatchStyle(@Nonnull String color) {
+        return new PatchStyle().setColor(Value.of(normalizeUiColor(color)));
+    }
+
+    @Nonnull
+    private String normalizeUiColor(@Nonnull String color) {
+        String normalized = color.trim();
+        if (normalized.isEmpty()) {
+            return SWATCH_FALLBACK_COLOR;
+        }
+        return normalized.startsWith("#") ? normalized : "#" + normalized;
+    }
+
+    private void configureCategoryRailButton(@Nonnull UICommandBuilder commandBuilder,
+            @Nonnull String selector,
+            @Nonnull Category category,
+            boolean selected) {
+        commandBuilder.set(selector + " #GlyphLabel.Text", railGlyph(category));
+        commandBuilder.set(selector + " #TitleLabel.Text", railLabel(category));
+        commandBuilder.set(selector + " #SelectedBar.Visible", selected);
+
+        String iconKey = railIconKey(category);
+        if (!iconKey.isBlank()) {
+            commandBuilder.set(selector + " #" + iconKey + "Icon.Visible", !selected);
+            commandBuilder.set(selector + " #" + iconKey + "SelectedIcon.Visible", selected);
+        }
     }
 
     private void bindStaticEvents(@Nonnull UIEventBuilder eventBuilder) {
@@ -1010,15 +1162,58 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
     }
 
     @Nonnull
-    private String humanizeCategory(@Nonnull Category category) {
+    private String buildCategoryHeading(@Nonnull Category category) {
+        return categorySectionHeading(category) + " > " + categoryDetailHeading(category);
+    }
+
+    @Nonnull
+    private String categorySectionHeading(@Nonnull Category category) {
         return switch (category) {
-            case BODY_CHARACTERISTIC -> "Body";
+            case BODY_CHARACTERISTIC, UNDERWEAR -> "BODY";
+            case FACE, EYES, EARS, MOUTH, FACIAL_HAIR, HAIRCUT, EYEBROWS,
+                    HEAD_ACCESSORY, FACE_ACCESSORY, EAR_ACCESSORY, SKIN_FEATURE -> "HEAD";
+            case UNDERTOP, OVERTOP, GLOVES -> "TORSO";
+            case PANTS, OVERPANTS, SHOES -> "LEGS";
+            case CAPE -> "CAPES";
+        };
+    }
+
+    @Nonnull
+    private String categoryDetailHeading(@Nonnull Category category) {
+        return switch (category) {
+            case BODY_CHARACTERISTIC -> "BODY TYPE";
+            case UNDERWEAR -> "UNDERWEAR";
+            case FACE -> "FACE";
+            case EYES -> "EYES";
+            case EARS -> "EARS";
+            case MOUTH -> "MOUTH";
+            case FACIAL_HAIR -> "FACIAL HAIR";
+            case HAIRCUT -> "HAIRCUT";
+            case EYEBROWS -> "EYEBROWS";
+            case PANTS -> "PANTS";
+            case OVERPANTS -> "OVERPANTS";
+            case UNDERTOP -> "UNDERTOP";
+            case OVERTOP -> "OVERTOP";
+            case SHOES -> "SHOES";
+            case HEAD_ACCESSORY -> "HEAD ACCESSORY";
+            case FACE_ACCESSORY -> "FACE ACCESSORY";
+            case EAR_ACCESSORY -> "EAR ACCESSORY";
+            case SKIN_FEATURE -> "SKIN FEATURE";
+            case GLOVES -> "GLOVES";
+            case CAPE -> "CAPE";
+        };
+    }
+
+    @Nonnull
+    private String railIconKey(@Nonnull Category category) {
+        return switch (category) {
+            case BODY_CHARACTERISTIC -> "BodyCharacteristic";
             case UNDERWEAR -> "Underwear";
             case FACE -> "Face";
             case EYES -> "Eyes";
             case EARS -> "Ears";
             case MOUTH -> "Mouth";
-            case FACIAL_HAIR -> "Facial Hair";
+            case FACIAL_HAIR -> "FacialHair";
             case HAIRCUT -> "Haircut";
             case EYEBROWS -> "Eyebrows";
             case PANTS -> "Pants";
@@ -1026,10 +1221,10 @@ public class CharacterAppearancePage extends InteractiveCustomUIPage<CharacterAp
             case UNDERTOP -> "Undertop";
             case OVERTOP -> "Overtop";
             case SHOES -> "Shoes";
-            case HEAD_ACCESSORY -> "Head Accessory";
-            case FACE_ACCESSORY -> "Face Accessory";
-            case EAR_ACCESSORY -> "Ear Accessory";
-            case SKIN_FEATURE -> "Skin Feature";
+            case HEAD_ACCESSORY -> "HeadAccessory";
+            case FACE_ACCESSORY -> "FaceAccessory";
+            case EAR_ACCESSORY -> "EarAccessory";
+            case SKIN_FEATURE -> "Various";
             case GLOVES -> "Gloves";
             case CAPE -> "Cape";
         };

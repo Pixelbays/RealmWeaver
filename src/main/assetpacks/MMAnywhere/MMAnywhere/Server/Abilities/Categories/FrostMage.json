@@ -1,0 +1,7 @@
+{
+  "Id": "FrostMage",
+  "Name": "Frost Mage",
+  "Icon": "Icons/ItemCategories/Items-Weapons.png",
+  "InfoDisplayMode": "Tooltip",
+  "Order": 4
+}

@@ -47,37 +47,13 @@ public class WeaponsInputHandler {
                     chain.interactionType == InteractionType.Secondary) &&
                     chain.initial) {
 
-                // Check if player has a weapon equipped
-                if (hasWeaponEquipped(playerRef)) {
-                    handleWeaponAbility(playerRef, chain.interactionType);
-                    // Don't block - let the weapon attack through for now
-                    // Later can add option to block based on ability config
-                }
+                handleWeaponAbility(playerRef, chain.interactionType);
+                // Don't block - let the weapon attack through for now
+                // Later can add option to block based on ability config
             }
         }
 
         return false; // Don't block weapon attacks
-    }
-
-    /**
-     * Check if player has a weapon equipped in main hand.
-     * TODO: Implement weapon type checking (staff, sword, axe, etc.)
-     */
-    private boolean hasWeaponEquipped(@Nonnull PlayerRef playerRef) {
-        Ref<EntityStore> entityRef = playerRef.getReference();
-        if (!entityRef.isValid()) {
-            return false;
-        }
-
-        Store<EntityStore> store = entityRef.getStore();
-        Player playerComponent = store.getComponent(entityRef, Player.getComponentType());
-        if (playerComponent == null) {
-            return false;
-        }
-
-        // TODO: Check inventory for weapon in active hotbar slot
-        // For now, assume true to allow testing
-        return true;
     }
 
     /**
@@ -123,7 +99,7 @@ public class WeaponsInputHandler {
             ClassAbilitySystem.TriggerResult result = abilitySystem.triggerAbility(entityRef, store, resolvedAbilityId, interactionType);
             if (result.isFailure()) {
                 String errorMessage = result.getErrorMessage();
-                if (errorMessage != null && !errorMessage.isEmpty()) {
+                if (!result.shouldSuppressPlayerErrorMessage() && errorMessage != null && !errorMessage.isEmpty()) {
                     playerComponent.sendMessage(Message.translation("pixelbays.rpg.ability.trigger.error")
                             .param("error", errorMessage));
                 }

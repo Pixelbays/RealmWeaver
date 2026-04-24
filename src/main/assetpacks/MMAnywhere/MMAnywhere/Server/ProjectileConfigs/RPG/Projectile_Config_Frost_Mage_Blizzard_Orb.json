@@ -1,0 +1,124 @@
+{
+  "Model": "Ice_Ball",
+  "LaunchForce": 38,
+  "Physics": {
+    "Type": "Standard",
+    "Gravity": 3.0,
+    "TerminalVelocityAir": 50,
+    "TerminalVelocityWater": 15,
+    "RotationMode": "VelocityDamped",
+    "Bounciness": 0.0,
+    "SticksVertically": true
+  },
+  "LaunchWorldSoundEventId": "SFX_Staff_Ice_Shoot",
+  "Interactions": {
+    "ProjectileHit": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
+      "Interactions": [
+        {
+          "Type": "EffectCondition",
+          "Entity": "Target",
+          "EntityEffectIds": [
+            "FrostMage_Chilled"
+          ],
+          "Match": "All",
+          "Next": {
+            "Type": "Serial",
+            "Interactions": [
+              {
+                "Type": "ClearEntityEffect",
+                "Entity": "Target",
+                "EntityEffectId": "FrostMage_Chilled"
+              },
+              {
+                "Parent": "DamageEntityParent",
+                "DamageCalculator": {
+                  "BaseDamage": {
+                    "Ice": 24
+                  }
+                },
+                "DamageEffects": {
+                  "WorldParticles": [
+                    {
+                      "SystemId": "Impact_Ice"
+                    },
+                    {
+                      "SystemId": "IceBall_Explosion"
+                    }
+                  ],
+                  "WorldSoundEventId": "SFX_Ice_Ball_Death"
+                }
+              },
+              {
+                "Type": "ApplyEffect",
+                "EffectId": "FrostMage_Frozen",
+                "Entity": "Target"
+              }
+            ]
+          },
+          "Failed": {
+            "Type": "Serial",
+            "Interactions": [
+              {
+                "Parent": "DamageEntityParent",
+                "DamageCalculator": {
+                  "BaseDamage": {
+                    "Ice": 18
+                  }
+                },
+                "DamageEffects": {
+                  "WorldParticles": [
+                    {
+                      "SystemId": "Impact_Ice"
+                    },
+                    {
+                      "SystemId": "IceBall_Explosion"
+                    }
+                  ],
+                  "WorldSoundEventId": "SFX_Ice_Ball_Death"
+                }
+              },
+              {
+                "Type": "ApplyEffect",
+                "EffectId": "FrostMage_Chilled",
+                "Entity": "Target"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    },
+    "ProjectileMiss": {
+      "Cooldown": {
+        "Cooldown": 0
+      },
+      "Interactions": [
+        {
+          "Type": "Simple",
+          "RunTime": 0,
+          "Effects": {
+            "WorldSoundEventId": "SFX_Ice_Ball_Death",
+            "WorldParticles": [
+              {
+                "SystemId": "Impact_Ice"
+              },
+              {
+                "SystemId": "IceBall_Explosion"
+              }
+            ]
+          }
+        },
+        {
+          "Type": "RemoveEntity",
+          "Entity": "User"
+        }
+      ]
+    }
+  }
+}

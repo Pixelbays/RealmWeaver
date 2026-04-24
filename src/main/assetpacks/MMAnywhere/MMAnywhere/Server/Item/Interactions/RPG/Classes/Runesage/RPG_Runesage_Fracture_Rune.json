@@ -1,0 +1,180 @@
+{
+  "Type": "StatsCondition",
+  "Costs": {
+    "Sigils": 1
+  },
+  "Next": {
+    "Type": "Serial",
+    "Interactions": [
+      {
+        "Type": "ChangeStat",
+        "Entity": "User",
+        "StatModifiers": {
+          "Sigils": -1
+        }
+      },
+      {
+        "Type": "Selector",
+        "Selector": {
+          "Id": "AOECircle",
+          "Range": 5.0,
+          "Offset": {
+            "Z": -2.5
+          }
+        },
+        "HitEntityRules": [
+          {
+            "Matchers": [
+              {
+                "Type": "Vulnerable"
+              },
+              {
+                "Type": "Player",
+                "Invert": true
+              }
+            ],
+            "Next": {
+              "Interactions": [
+                {
+                  "Type": "EffectCondition",
+                  "Entity": "Target",
+                  "EntityEffectIds": [
+                    "Runesage_Marked"
+                  ],
+                  "Match": "All",
+                  "Next": {
+                    "Type": "Serial",
+                    "Interactions": [
+                      {
+                        "Type": "ClearEntityEffect",
+                        "Entity": "Target",
+                        "EntityEffectId": "Runesage_Marked"
+                      },
+                      {
+                        "Parent": "DamageEntityParent",
+                        "DamageCalculator": {
+                          "BaseDamage": {
+                            "Lightning": 14
+                          }
+                        }
+                      },
+                      {
+                        "Type": "ApplyEffect",
+                        "EffectId": "Runesage_Bound",
+                        "Entity": "Target"
+                      },
+                      {
+                        "Type": "ApplyEffect",
+                        "EffectId": "Runesage_Fractured",
+                        "Entity": "Target"
+                      }
+                    ]
+                  },
+                  "Failed": {
+                    "Type": "Serial",
+                    "Interactions": [
+                      {
+                        "Parent": "DamageEntityParent",
+                        "DamageCalculator": {
+                          "BaseDamage": {
+                            "Lightning": 12
+                          }
+                        }
+                      },
+                      {
+                        "Type": "ApplyEffect",
+                        "EffectId": "Runesage_Fractured",
+                        "Entity": "Target"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "Failed": {
+    "Type": "Selector",
+    "Selector": {
+      "Id": "AOECircle",
+      "Range": 4.5,
+      "Offset": {
+        "Z": -2.5
+      }
+    },
+    "HitEntityRules": [
+      {
+        "Matchers": [
+          {
+            "Type": "Vulnerable"
+          },
+          {
+            "Type": "Player",
+            "Invert": true
+          }
+        ],
+        "Next": {
+          "Interactions": [
+            {
+              "Type": "EffectCondition",
+              "Entity": "Target",
+              "EntityEffectIds": [
+                "Runesage_Marked"
+              ],
+              "Match": "All",
+              "Next": {
+                "Type": "Serial",
+                "Interactions": [
+                  {
+                    "Type": "ClearEntityEffect",
+                    "Entity": "Target",
+                    "EntityEffectId": "Runesage_Marked"
+                  },
+                  {
+                    "Parent": "DamageEntityParent",
+                    "DamageCalculator": {
+                      "BaseDamage": {
+                        "Lightning": 12
+                      }
+                    }
+                  },
+                  {
+                    "Type": "ApplyEffect",
+                    "EffectId": "Runesage_Fractured",
+                    "Entity": "Target"
+                  }
+                ]
+              },
+              "Failed": {
+                "Type": "Serial",
+                "Interactions": [
+                  {
+                    "Parent": "DamageEntityParent",
+                    "DamageCalculator": {
+                      "BaseDamage": {
+                        "Lightning": 8
+                      }
+                    }
+                  },
+                  {
+                    "Type": "ApplyEffect",
+                    "EffectId": "Runesage_Marked",
+                    "Entity": "Target"
+                  },
+                  {
+                    "Type": "ApplyEffect",
+                    "EffectId": "Runesage_Fractured",
+                    "Entity": "Target"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

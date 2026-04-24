@@ -28,7 +28,7 @@ import com.hypixel.hytale.protocol.InteractionType;
 import com.hypixel.hytale.server.core.Message;
 import com.hypixel.hytale.server.core.entity.InteractionContext;
 import com.hypixel.hytale.server.core.entity.entities.Player;
-import com.hypixel.hytale.server.core.inventory.Inventory;
+import com.hypixel.hytale.server.core.inventory.InventoryComponent;
 import com.hypixel.hytale.server.core.inventory.ItemStack;
 import com.hypixel.hytale.server.core.inventory.container.ItemContainer;
 import com.hypixel.hytale.server.core.modules.interaction.interaction.CooldownHandler;
@@ -128,9 +128,10 @@ public class LockpickInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        if (hasKey(player.getInventory())) {
+        List<ItemContainer> containers = buildContainerList(commandBuffer, entityRef);
+        if (hasKey(containers)) {
             if (consumeKey) {
-                consumeKey(player.getInventory());
+                consumeKey(containers);
             }
 
             LockpickingSystem.get().registerTemporaryUnlock(entityRef.getStore(), difficultyTierId, context.getTargetBlock());
@@ -158,7 +159,7 @@ public class LockpickInteraction extends SimpleInstantInteraction {
             return;
         }
 
-        if (!hasLockpickWithTag(player.getInventory(), tagIndex)) {
+        if (!hasLockpickWithTag(containers, tagIndex)) {
             RpgLogging.debug("LockpickInteraction: no lockpicks found for tag '%s'", lockpickTag);
             triggerFailure(context);
             player.sendMessage(Message.translation("pixelbays.rpg.lockpicking.noLockpicks"));
@@ -255,24 +256,40 @@ public class LockpickInteraction extends SimpleInstantInteraction {
         return names.isEmpty() ? "" : String.join(", ", names);
     }
 
-    private boolean hasKey(@Nonnull Inventory inventory) {
+    private static List<ItemContainer> buildContainerList(@Nonnull CommandBuffer<EntityStore> commandBuffer,
+            @Nonnull Ref<EntityStore> ref) {
+        List<ItemContainer> containers = new ArrayList<>();
+        var hotbar = commandBuffer.getComponent(ref, InventoryComponent.Hotbar.getComponentType());
+        if (hotbar != null) containers.add(hotbar.getInventory());
+        var storage = commandBuffer.getComponent(ref, InventoryComponent.Storage.getComponentType());
+        if (storage != null) containers.add(storage.getInventory());
+        var utility = commandBuffer.getComponent(ref, InventoryComponent.Utility.getComponentType());
+        if (utility != null) containers.add(utility.getInventory());
+        var armor = commandBuffer.getComponent(ref, InventoryComponent.Armor.getComponentType());
+        if (armor != null) containers.add(armor.getInventory());
+        var backpack = commandBuffer.getComponent(ref, InventoryComponent.Backpack.getComponentType());
+        if (backpack != null) containers.add(backpack.getInventory());
+        return containers;
+    }
+
+    private boolean hasKey(@Nonnull List<ItemContainer> containers) {
         if (keyItemId == null || keyItemId.isEmpty()) {
             return false;
         }
 
-        return hasItemId(inventory, keyItemId);
+        return hasItemId(containers, keyItemId);
     }
 
-    private void consumeKey(@Nonnull Inventory inventory) {
+    private void consumeKey(@Nonnull List<ItemContainer> containers) {
         if (keyItemId == null || keyItemId.isEmpty()) {
             return;
         }
 
-        removeSingleItem(inventory, keyItemId);
+        removeSingleItem(containers, keyItemId);
     }
 
-    private boolean hasLockpickWithTag(@Nonnull Inventory inventory, int tagIndex) {
-        return hasItemWithTag(inventory, tagIndex);
+    private boolean hasLockpickWithTag(@Nonnull List<ItemContainer> containers, int tagIndex) {
+        return hasItemWithTag(containers, tagIndex);
     }
 
     private void triggerSuccess(@Nonnull InteractionContext context) {
@@ -307,20 +324,22 @@ public class LockpickInteraction extends SimpleInstantInteraction {
         context.execute(root);
     }
 
-    private boolean hasItemId(@Nonnull Inventory inventory, @Nonnull String itemId) {
-        return findItemInContainer(inventory.getHotbar(), itemId)
-                || findItemInContainer(inventory.getStorage(), itemId)
-                || findItemInContainer(inventory.getUtility(), itemId)
-                || findItemInContainer(inventory.getArmor(), itemId)
-                || findItemInContainer(inventory.getBackpack(), itemId);
+    private boolean hasItemId(@Nonnull List<ItemContainer> containers, @Nonnull String itemId) {
+        for (ItemContainer container : containers) {
+            if (findItemInContainer(container, itemId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private boolean hasItemWithTag(@Nonnull Inventory inventory, int tagIndex) {
-        return findTaggedItem(inventory.getHotbar(), tagIndex)
-                || findTaggedItem(inventory.getStorage(), tagIndex)
-                || findTaggedItem(inventory.getUtility(), tagIndex)
-                || findTaggedItem(inventory.getArmor(), tagIndex)
-                || findTaggedItem(inventory.getBackpack(), tagIndex);
+    private boolean hasItemWithTag(@Nonnull List<ItemContainer> containers, int tagIndex) {
+        for (ItemContainer container : containers) {
+            if (findTaggedItem(container, tagIndex)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean findItemInContainer(@Nullable ItemContainer container, @Nonnull String itemId) {
@@ -363,20 +382,12 @@ public class LockpickInteraction extends SimpleInstantInteraction {
         return false;
     }
 
-    private void removeSingleItem(@Nonnull Inventory inventory, @Nonnull String itemId) {
-        if (removeSingleItemFromContainer(inventory.getHotbar(), itemId)) {
-            return;
+    private void removeSingleItem(@Nonnull List<ItemContainer> containers, @Nonnull String itemId) {
+        for (ItemContainer container : containers) {
+            if (removeSingleItemFromContainer(container, itemId)) {
+                return;
+            }
         }
-        if (removeSingleItemFromContainer(inventory.getStorage(), itemId)) {
-            return;
-        }
-        if (removeSingleItemFromContainer(inventory.getUtility(), itemId)) {
-            return;
-        }
-        if (removeSingleItemFromContainer(inventory.getArmor(), itemId)) {
-            return;
-        }
-        removeSingleItemFromContainer(inventory.getBackpack(), itemId);
     }
 
     private boolean removeSingleItemFromContainer(@Nullable ItemContainer container, @Nonnull String itemId) {

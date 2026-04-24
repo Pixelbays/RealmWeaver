@@ -1,0 +1,11 @@
+{
+  "Parent": "Base_Class_Level",
+  "DisplayName": "Frost Mage Class",
+  "Description": "Frost Mage class specialization level progression",
+  "Enabled": true,
+  "Visible": true,
+  "IconId": "rpg:icon_frostmage",
+  "ExpCurveRef": "Base_Exp_Curve",
+  "MaxLevel": 0,
+  "StartingLevel": 1
+}
